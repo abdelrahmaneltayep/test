@@ -31,7 +31,7 @@ const PLAN_CONTENT: Record<string, PlanContent> = {
   },
 }
 
-export function HardBlockModal({ currentPlan, currentCount, planLimit, targetPlan, isOpen, onClose, onUpgradeClick }: Props) {
+export function HardBlockModal({ currentPlan, currentCount, planLimit, isOpen, onClose, onUpgradeClick }: Props) {
   if (!isOpen) return null
   const content = PLAN_CONTENT[currentPlan]
 
