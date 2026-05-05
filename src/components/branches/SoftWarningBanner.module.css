@@ -1,0 +1,83 @@
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #fffbeb;
+  border: 1px solid #f59e0b;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  direction: inherit;
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex: 1;
+}
+
+.icon {
+  font-size: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.message {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #92400e;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.upgradeBtn {
+  background: #d69e2e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.upgradeBtn:hover {
+  background: #b7791f;
+}
+
+.dismissBtn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: #92400e;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.15s;
+}
+
+.dismissBtn:hover {
+  background: #fef3c7;
+}
+
+@media (max-width: 480px) {
+  .banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

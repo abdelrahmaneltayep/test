@@ -1,0 +1,92 @@
+.counter {
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  min-width: 220px;
+  max-width: 100%;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pctLabel {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+.track {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+.unlimitedLabel {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* Color states */
+.green {
+  border-color: #c6f6d5;
+  background: #f0fff4;
+}
+.green .label { color: #276749; }
+.green .fill { background: #38a169; }
+
+.amber {
+  border-color: #fefcbf;
+  background: #fffff0;
+}
+.amber .label { color: #744210; }
+.amber .fill { background: #d69e2e; }
+
+.red {
+  border-color: #fed7d7;
+  background: #fff5f5;
+}
+.red .label { color: #9b2c2c; }
+.red .fill { background: #e53e3e; }
+
+.teal {
+  border-color: #b2f5ea;
+  background: #e6fffa;
+}
+.teal .unlimitedLabel { color: #234e52; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+.pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@media (max-width: 375px) {
+  .counter {
+    min-width: 0;
+    width: 100%;
+  }
+  .labelRow {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+}
