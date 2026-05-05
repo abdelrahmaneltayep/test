@@ -1,6 +1,4 @@
-import { useEffect, useRef } from 'react'
 import { type PlanTier } from '@/config/planLimits'
-import { track } from '@/utils/analytics'
 import styles from './SoftWarningBanner.module.css'
 
 interface Props {
@@ -8,18 +6,16 @@ interface Props {
   currentCount: number
   planLimit: number
   targetPlan: PlanTier
-  onDismiss: () => void
+  dismissible?: boolean
+  onDismiss?: () => void
   onUpgradeClick: () => void
 }
 
-const MESSAGES: Record<string, string> = {
-  basic: (count: number, limit: number) =>
-    `أضفت ${count} من أصل ${limit} فروع — قرّب تكمل! الباقة بلس تعطيك حتى 10 فروع.`,
-  plus: (count: number, limit: number) =>
-    `أضفت ${count} من أصل ${limit} فروع — وسّع نطاقك مع باقة برو (20 فرع).`,
-  pro: (count: number, limit: number) =>
-    `أضفت ${count} من أصل ${limit} فرع — الباقة اسبيشل تعطيك فروع غير محدودة.`,
-} as unknown as Record<string, (count: number, limit: number) => string>
+const MESSAGES: Record<string, (count: number, limit: number) => string> = {
+  basic: (c, l) => `أضفت ${c} من أصل ${l} فروع — قرّب تكمل! الباقة بلس تعطيك حتى 10 فروع.`,
+  plus:  (c, l) => `أضفت ${c} من أصل ${l} فروع — وسّع نطاقك مع باقة برو (20 فرع).`,
+  pro:   (c, l) => `أضفت ${c} من أصل ${l} فرع — الباقة اسبيشل تعطيك فروع غير محدودة.`,
+}
 
 const CTA_LABELS: Record<string, string> = {
   plus: 'ترقية إلى بلس',
@@ -28,35 +24,10 @@ const CTA_LABELS: Record<string, string> = {
 }
 
 export function SoftWarningBanner({
-  currentPlan,
-  currentCount,
-  planLimit,
-  targetPlan,
-  onDismiss,
-  onUpgradeClick,
+  currentPlan, currentCount, planLimit, targetPlan,
+  dismissible = true, onDismiss, onUpgradeClick,
 }: Props) {
-  const shownAt = useRef<number>(Date.now())
-
-  useEffect(() => {
-    shownAt.current = Date.now()
-    track('branch_limit_banner_shown', {
-      plan_tier: currentPlan,
-      current_count: currentCount,
-      max_count: planLimit,
-      solution_type: '1',
-    })
-  }, [currentPlan, currentCount, planLimit])
-
-  const getMessage = (MESSAGES as unknown as Record<string, (c: number, l: number) => string>)[currentPlan]
-  const message = getMessage ? getMessage(currentCount, planLimit) : ''
-
-  function handleDismiss() {
-    track('branch_limit_banner_dismissed', {
-      plan_tier: currentPlan,
-      time_on_screen_ms: Date.now() - shownAt.current,
-    })
-    onDismiss()
-  }
+  const message = MESSAGES[currentPlan]?.(currentCount, planLimit) ?? ''
 
   return (
     <div className={styles.banner} role="alert" aria-live="polite">
@@ -68,9 +39,11 @@ export function SoftWarningBanner({
         <button className={styles.upgradeBtn} onClick={onUpgradeClick} type="button">
           {CTA_LABELS[targetPlan] ?? 'ترقية الباقة'}
         </button>
-        <button className={styles.dismissBtn} onClick={handleDismiss} type="button" aria-label="إغلاق">
-          ×
-        </button>
+        {dismissible && onDismiss && (
+          <button className={styles.dismissBtn} onClick={onDismiss} type="button" aria-label="إغلاق">
+            ×
+          </button>
+        )}
       </div>
     </div>
   )
