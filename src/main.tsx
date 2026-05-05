@@ -49,14 +49,13 @@ function Demo() {
   function apply(newPlan: PlanTier, newScenario: Scenario) {
     setPlan(newPlan)
     setScenario(newScenario)
-    setKey((k) => k + 1) // remount page to reset state
+    setKey((k) => k + 1)
   }
 
   const initialCount = getInitialCount(plan, scenario)
 
   return (
     <div dir="rtl" style={{ minHeight: '100vh', background: '#f0f4f8' }}>
-      {/* Control panel */}
       <div className="demo-panel">
         <div className="demo-panel-inner">
           <span className="demo-label">🎛 لوحة التحكم</span>
@@ -97,7 +96,6 @@ function Demo() {
         </div>
       </div>
 
-      {/* Page under test */}
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '24px 16px' }}>
         <BranchesPage
           key={key}

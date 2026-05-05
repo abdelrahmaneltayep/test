@@ -1,6 +1,5 @@
 import '@testing-library/jest-dom'
 
-// Provide stub implementations for localStorage / sessionStorage in jsdom
 class LocalStorageStub {
   private store: Record<string, string> = {}
   getItem = (k: string) => this.store[k] ?? null

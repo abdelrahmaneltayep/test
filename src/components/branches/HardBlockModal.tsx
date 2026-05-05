@@ -37,7 +37,6 @@ export function HardBlockModal({ currentPlan, currentCount, planLimit, targetPla
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="hbm-title">
-      {/* Background click intentionally does NOT close — per spec */}
       <div className={styles.modal}>
         <div className={styles.header}>
           <div className={styles.limitBadge}>{currentCount} / {planLimit} فرع</div>

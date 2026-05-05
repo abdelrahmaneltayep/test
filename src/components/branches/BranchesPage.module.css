@@ -5,10 +5,7 @@
   font-family: 'Tajawal', 'Segoe UI', sans-serif;
 }
 
-/* Header */
-.header {
-  margin-bottom: 20px;
-}
+.header { margin-bottom: 20px; }
 
 .headerTop {
   display: flex;
@@ -19,19 +16,9 @@
   margin-bottom: 12px;
 }
 
-.title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a202c;
-  margin: 0;
-}
+.title { font-size: 22px; font-weight: 700; color: #1a202c; margin: 0; }
 
-.headerActions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
+.headerActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
 .addBtn {
   background: #1a3c5e;
@@ -45,66 +32,24 @@
   transition: background 0.15s;
 }
 
-.addBtn:hover:not(:disabled) {
-  background: #153150;
-}
+.addBtn:hover:not(:disabled) { background: #153150; }
+.addBtn:disabled { cursor: not-allowed; }
 
-.addBtn:disabled {
-  cursor: not-allowed;
-}
-
-.addBtnSecondary {
+.deleteBtn {
   background: #fff;
-  color: #1a3c5e;
-  border: 1.5px solid #1a3c5e;
+  color: #718096;
+  border: 1.5px solid #e2e8f0;
   border-radius: 8px;
-  padding: 10px 18px;
+  padding: 10px 16px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
 }
 
-.addBtnSecondary:hover:not(:disabled) {
-  background: #ebf4ff;
-}
+.deleteBtn:hover:not(:disabled) { background: #f7fafc; border-color: #cbd5e0; }
+.deleteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-.addBtnSecondary:disabled {
-  cursor: not-allowed;
-}
-
-/* Hard-limit persistent banner (non-dismissible) */
-.hardLimitBanner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 20px;
-  background: #fff5f5;
-  border: 1px solid #fc8181;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  color: #9b2c2c;
-}
-
-.hardLimitCta {
-  background: #e53e3e;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.hardLimitCta:hover {
-  background: #c53030;
-}
-
-/* Table card */
 .tableCard {
   background: #fff;
   border-radius: 14px;
@@ -112,10 +57,7 @@
   overflow: hidden;
 }
 
-.searchRow {
-  padding: 14px 20px;
-  border-bottom: 1px solid #e2e8f0;
-}
+.searchRow { padding: 14px 20px; border-bottom: 1px solid #e2e8f0; }
 
 .searchInput {
   width: 100%;
@@ -132,11 +74,7 @@
   box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
 .table th {
   text-align: right;
@@ -154,71 +92,35 @@
   vertical-align: middle;
 }
 
-.table tr:last-child td {
-  border-bottom: none;
-}
+.table tr:last-child td { border-bottom: none; }
 
-.branchName {
-  display: block;
-  font-weight: 600;
-  color: #2b6cb0;
-}
-
-.branchType {
-  display: block;
-  font-size: 12px;
-  color: #718096;
-  margin-top: 2px;
-}
+.branchName { display: block; font-weight: 600; color: #2b6cb0; }
+.branchType { display: block; font-size: 12px; color: #718096; margin-top: 2px; }
 
 .statusOpen {
-  background: #c6f6d5;
-  color: #276749;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-block;
+  background: #c6f6d5; color: #276749;
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; display: inline-block;
 }
 
 .statusClosed {
-  background: #fed7d7;
-  color: #9b2c2c;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-block;
+  background: #fed7d7; color: #9b2c2c;
+  border-radius: 20px; padding: 4px 12px;
+  font-size: 12px; font-weight: 600; display: inline-block;
 }
 
 .actionBtn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-  padding: 4px 6px;
-  border-radius: 4px;
+  background: transparent; border: none;
+  cursor: pointer; font-size: 16px;
+  padding: 4px 6px; border-radius: 4px;
   transition: background 0.15s;
 }
 
-.actionBtn:hover {
-  background: #f0f4f8;
-}
+.actionBtn:hover { background: #f0f4f8; }
 
-.emptyRow {
-  text-align: center;
-  color: #a0aec0;
-  padding: 40px !important;
-}
+.emptyRow { text-align: center; color: #a0aec0; padding: 40px !important; }
 
 @media (max-width: 768px) {
-  .table {
-    display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .headerTop {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  .table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .headerTop { flex-direction: column; align-items: flex-start; }
 }

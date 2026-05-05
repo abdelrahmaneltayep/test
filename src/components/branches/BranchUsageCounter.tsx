@@ -48,16 +48,11 @@ export function BranchUsageCounter({ currentPlan, currentCount, planLimit, onToa
       ) : (
         <>
           <div className={styles.labelRow}>
-            <span className={styles.label}>
-              {currentCount} / {planLimit} فروع نشطة
-            </span>
+            <span className={styles.label}>{currentCount} / {planLimit} فروع نشطة</span>
             <span className={styles.pctLabel}>{Math.round(pct * 100)}%</span>
           </div>
           <div className={styles.track} role="progressbar" aria-valuenow={currentCount} aria-valuemin={0} aria-valuemax={planLimit!}>
-            <div
-              className={`${styles.fill} ${colorState === 'amber' ? styles.pulse : ''}`}
-              style={{ width: `${pct * 100}%` }}
-            />
+            <div className={`${styles.fill} ${colorState === 'amber' ? styles.pulse : ''}`} style={{ width: `${pct * 100}%` }} />
           </div>
         </>
       )}

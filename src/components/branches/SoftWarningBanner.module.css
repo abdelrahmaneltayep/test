@@ -51,9 +51,7 @@
   transition: background 0.15s;
 }
 
-.upgradeBtn:hover {
-  background: #b7791f;
-}
+.upgradeBtn:hover { background: #b7791f; }
 
 .dismissBtn {
   background: transparent;
@@ -67,17 +65,9 @@
   transition: background 0.15s;
 }
 
-.dismissBtn:hover {
-  background: #fef3c7;
-}
+.dismissBtn:hover { background: #fef3c7; }
 
 @media (max-width: 480px) {
-  .banner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .actions {
-    width: 100%;
-    justify-content: space-between;
-  }
+  .banner { flex-direction: column; align-items: flex-start; }
+  .actions { width: 100%; justify-content: space-between; }
 }

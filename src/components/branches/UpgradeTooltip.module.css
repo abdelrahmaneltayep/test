@@ -1,12 +1,8 @@
-.wrapper {
-  position: relative;
-  display: inline-block;
-}
+.wrapper { position: relative; display: inline-block; }
 
 .tooltip {
   position: absolute;
   bottom: calc(100% + 10px);
-  /* RTL: align to end (right in RTL, left in LTR) */
   inset-inline-end: 0;
   background: #1a202c;
   color: #fff;
@@ -27,12 +23,7 @@
   border-top-color: #1a202c;
 }
 
-.text {
-  margin: 0 0 8px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: #e2e8f0;
-}
+.text { margin: 0 0 8px; font-size: 13px; line-height: 1.6; color: #e2e8f0; }
 
 .link {
   background: transparent;
@@ -46,16 +37,13 @@
   direction: inherit;
 }
 
-.link:hover {
-  color: #63b3ed;
-}
+.link:hover { color: #63b3ed; }
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile: full-width tooltip, positioned below button */
 @media (max-width: 480px) {
   .tooltip {
     bottom: auto;

@@ -34,7 +34,7 @@ export function BranchesPage({ plan, initialBranches }: Props) {
   )
 
   function handleAdd() {
-    if (!handleAddClick()) return // opens modal
+    if (!handleAddClick()) return
     onBranchAdded()
     setToast('تمّت إضافة الفرع بنجاح')
   }
@@ -47,11 +47,9 @@ export function BranchesPage({ plan, initialBranches }: Props) {
 
   return (
     <div className={styles.page}>
-      {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <h1 className={styles.title}>الفروع والمستودعات</h1>
-          {/* Solution 3 — Persistent Usage Counter */}
           <BranchUsageCounter
             currentPlan={plan}
             currentCount={currentCount}
@@ -61,7 +59,6 @@ export function BranchesPage({ plan, initialBranches }: Props) {
         </div>
 
         <div className={styles.headerActions}>
-          {/* Solution 4 — Upgrade Tooltip wraps Add buttons */}
           {plan !== 'special' && planLimit !== null ? (
             <>
               <UpgradeTooltip
@@ -79,7 +76,7 @@ export function BranchesPage({ plan, initialBranches }: Props) {
               </UpgradeTooltip>
               <button
                 className={styles.deleteBtn} onClick={onBranchDeleted} type="button"
-                disabled={currentCount === 0} title="حذف آخر فرع (للعرض التجريبي)"
+                disabled={currentCount === 0}
               >
                 − حذف
               </button>
@@ -93,7 +90,6 @@ export function BranchesPage({ plan, initialBranches }: Props) {
         </div>
       </div>
 
-      {/* Solution 1 — Soft Warning Banner */}
       {showBanner && plan !== 'special' && planLimit !== null && !isAtHardLimit && (
         <SoftWarningBanner
           currentPlan={plan} currentCount={currentCount} planLimit={planLimit}
@@ -102,7 +98,6 @@ export function BranchesPage({ plan, initialBranches }: Props) {
         />
       )}
 
-      {/* Hard-limit persistent banner (non-dismissible, Solution 5 Step 4) */}
       {showBanner && plan !== 'special' && planLimit !== null && isAtHardLimit && (
         <SoftWarningBanner
           currentPlan={plan} currentCount={currentCount} planLimit={planLimit}
@@ -111,7 +106,6 @@ export function BranchesPage({ plan, initialBranches }: Props) {
         />
       )}
 
-      {/* Branch Table */}
       <div className={styles.tableCard}>
         <div className={styles.searchRow}>
           <input
@@ -152,7 +146,6 @@ export function BranchesPage({ plan, initialBranches }: Props) {
         </table>
       </div>
 
-      {/* Solution 2 — Hard-Block Modal */}
       {plan !== 'special' && planLimit !== null && (
         <HardBlockModal
           currentPlan={plan} currentCount={currentCount} planLimit={planLimit}

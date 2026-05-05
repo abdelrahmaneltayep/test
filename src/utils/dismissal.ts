@@ -1,5 +1,5 @@
 const BANNER_DISMISSAL_KEY = 'branch_limit_banner_dismissed_at'
-const DISMISSAL_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 days
+const DISMISSAL_TTL_MS = 7 * 24 * 60 * 60 * 1000
 
 export function getBannerDismissedAt(): number | null {
   try {
@@ -13,9 +13,7 @@ export function getBannerDismissedAt(): number | null {
 export function setBannerDismissed() {
   try {
     localStorage.setItem(BANNER_DISMISSAL_KEY, Date.now().toString())
-  } catch {
-    // storage unavailable
-  }
+  } catch {}
 }
 
 export function isBannerDismissalActive(): boolean {
@@ -27,9 +25,7 @@ export function isBannerDismissalActive(): boolean {
 export function clearBannerDismissal() {
   try {
     localStorage.removeItem(BANNER_DISMISSAL_KEY)
-  } catch {
-    // storage unavailable
-  }
+  } catch {}
 }
 
 const TOAST_SHOWN_KEY = 'branch_limit_100pct_toast_shown'
@@ -45,7 +41,5 @@ export function hasAtLimitToastBeenShown(): boolean {
 export function markAtLimitToastShown() {
   try {
     sessionStorage.setItem(TOAST_SHOWN_KEY, '1')
-  } catch {
-    // storage unavailable
-  }
+  } catch {}
 }

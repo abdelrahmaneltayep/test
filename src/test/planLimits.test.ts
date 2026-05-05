@@ -24,9 +24,9 @@ describe('PLAN_UPGRADE_PATH', () => {
 
 describe('isAtSoftWarning', () => {
   it('true at exactly 80%', () => {
-    expect(isAtSoftWarning('basic', 4)).toBe(true)   // 4/5
-    expect(isAtSoftWarning('plus',  8)).toBe(true)   // 8/10
-    expect(isAtSoftWarning('pro',  16)).toBe(true)   // 16/20
+    expect(isAtSoftWarning('basic', 4)).toBe(true)
+    expect(isAtSoftWarning('plus',  8)).toBe(true)
+    expect(isAtSoftWarning('pro',  16)).toBe(true)
   })
   it('false below 80%', () => {
     expect(isAtSoftWarning('basic', 3)).toBe(false)

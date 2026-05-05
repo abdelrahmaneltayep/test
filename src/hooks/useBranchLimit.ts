@@ -13,7 +13,6 @@ export function useBranchLimit(plan: PlanTier, initialCount: number) {
   const usagePct = getUsagePct(plan, currentCount)
   const nextPlan = getNextPlan(plan)
 
-  // Banner shows in warning zone (unless dismissed) OR always at hard limit
   const showBanner = plan !== 'special' && (atSoftWarning || atHardLimit) && (!dismissed || atHardLimit)
 
   const dismissBanner = useCallback(() => {

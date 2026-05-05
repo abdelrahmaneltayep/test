@@ -4,7 +4,7 @@ export const PLAN_BRANCH_LIMITS: Record<PlanTier, number | null> = {
   basic: 5,
   plus: 10,
   pro: 20,
-  special: null, // null = unlimited
+  special: null,
 }
 
 export const PLAN_UPGRADE_PATH: Record<PlanTier, PlanTier> = {
