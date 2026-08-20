@@ -1,7 +1,8 @@
 /**
- * Bundles the SPR/RFQ prototype into one self-contained HTML file, matching the
- * offline-preview convention already used by prototype.html. No external requests:
- * CSS and JS are inlined, so the file opens straight from disk.
+ * Bundles the SPR/RFQ prototype into one HTML file, matching the offline-preview
+ * convention already used by prototype.html. All CSS and JS are inlined, so the file
+ * opens straight from disk; the single remaining external reference is the Google Fonts
+ * stylesheet, which degrades to the declared fallback stack when there is no network.
  */
 import { build } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -37,10 +38,12 @@ let html = readFileSync(path.join(out, 'rfq.html'), 'utf8')
 // substitution patterns and splice `</body>` into the middle of the JavaScript.
 html = html
   .replace(/<script[^>]*src="[^"]*"[^>]*><\/script>/g, '')
-  .replace(/<link[^>]*rel="stylesheet"[^>]*>/g, '')
+  // Strip only the bundler's own stylesheet link — the Google Fonts link stays, so the
+  // page uses the real typefaces online and falls back to the system stack offline.
+  .replace(/<link[^>]*rel="stylesheet"[^>]*href="[^"]*assets\/[^"]*"[^>]*>/g, '')
   .replace('</head>', () => `<style>${css}</style>\n  </head>`)
   .replace('</body>', () => `<script type="module">${js}</script>\n  </body>`)
 
 writeFileSync('rfq-prototype.html', html)
 rmSync(out, { recursive: true, force: true })
-console.log(`rfq-prototype.html — ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB, no external requests`)
+console.log(`rfq-prototype.html — ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB · CSS and JS inlined; the only external request is the Google Fonts stylesheet, which falls back to the system stack offline`)

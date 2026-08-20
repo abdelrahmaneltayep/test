@@ -17,6 +17,7 @@ import { STATE_META } from '../domain/states'
 import type { InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } from '../domain/types'
 import { useRfq } from '../store'
 import { CheckBadge, Countdown, Empty, Field, Modal, Money, StatusPill } from './ui'
+import { DashboardChrome, type NavGroup } from './Chrome'
 
 const MAX_INFO_REQUESTS = guardrailValue('maxInfoRequests')
 const DEFAULT_VALIDITY = guardrailValue('offerValidityDays')
@@ -29,7 +30,7 @@ const BAND_KEY: Record<MarginBand, string> = {
 }
 
 export function SellerDashboard() {
-  const { state, dispatch, lang } = useRfq()
+  const { state, dispatch, lang, setLang } = useRfq()
   const [tab, setTab] = useState<'special' | 'rfq' | 'sent'>('special')
   const [openRef, setOpenRef] = useState<string | null>(null)
 
@@ -51,9 +52,28 @@ export function SellerDashboard() {
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
+  const groups: NavGroup[] = [
+    { label: t(lang, 'navOverview'), items: [{ key: 'dashboard', icon: '▦', label: t(lang, 'navDashboard') }] },
+    { label: t(lang, 'navComms'), items: [
+      { key: 'messages', icon: '💬', label: t(lang, 'navMessagesCenter') },
+      { key: 'buyers', icon: '👥', label: t(lang, 'navBuyerList') },
+    ] },
+    { label: t(lang, 'navSelling'), items: [
+      { key: 'rfqs', icon: '📄', label: t(lang, 'navRfqs') },
+      { key: 'special', icon: '🏷', label: t(lang, 'navSpecialPrice') },
+      { key: 'quotations', icon: '🧾', label: t(lang, 'navQuotations') },
+      { key: 'pricelists', icon: '📋', label: t(lang, 'navPriceLists') },
+    ] },
+  ]
+
   return (
-    <div className="hb-shell">
-      <h1 className="hb-h1">{t(lang, 'sellerQueue')}</h1>
+    <DashboardChrome
+      lang={lang} setLang={setLang} viewer="seller"
+      groups={groups} active="special" onNavigate={() => {}}
+      title={t(lang, 'sellerQueue')}
+      subtitle={t(lang, 'sellerSubtitle')}
+      breadcrumb={t(lang, 'navSpecialPrice')}
+    >
 
       {/* EC-21 — a misconfigured floor raises an operations alert rather than firing. */}
       {state.opsAlerts.length > 0 && (
@@ -84,9 +104,9 @@ export function SellerDashboard() {
                   <th>{t(lang, 'buyer')}</th>
                   <th>{t(lang, 'lines')}</th>
                   <th>{t(lang, 'askedVsList')}</th>
-                  <th>{t(lang, 'marginAfterAsk')}</th>
+                  <th>{t(lang, 'marginAfterAsk')}<span className="hb-sortarrow" aria-hidden="true">⇅</span></th>
                   <th>{t(lang, 'proof')}</th>
-                  <th>{t(lang, 'slaRemaining')}</th>
+                  <th>{t(lang, 'slaRemaining')}<span className="hb-sortarrow" aria-hidden="true">⇅</span></th>
                   <th>{t(lang, 'roundsUsed')}</th>
                   <th>{t(lang, 'status')}</th>
                 </tr>
@@ -104,7 +124,7 @@ export function SellerDashboard() {
                     >
                       <td>
                         <strong>{r.buyerName}</strong>
-                        <div className="hb-hint hb-num">{r.ref}</div>
+                        <div className="hb-ref" style={{ fontSize: 12 }}>{r.ref}</div>
                       </td>
                       <td className="hb-num">
                         {r.lines.length}
@@ -154,7 +174,7 @@ export function SellerDashboard() {
       </div>
 
       {open && <RespondPanel request={open} onClose={() => setOpenRef(null)} />}
-    </div>
+    </DashboardChrome>
   )
 }
 

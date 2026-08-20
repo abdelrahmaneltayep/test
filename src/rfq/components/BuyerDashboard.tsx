@@ -16,11 +16,12 @@ import { toBuyerView } from '../domain/serialize'
 import type { NegotiationRequest, RequestLine } from '../domain/types'
 import { askedTotalOf, listTotalOf, offeredTotalOf, useRfq } from '../store'
 import { Countdown, Empty, Modal, Money, StatusPill } from './ui'
+import { DashboardChrome, type NavGroup } from './Chrome'
 
 const MAX_ROUNDS = guardrailValue('maxRounds')
 
 export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
-  const { state, lang } = useRfq()
+  const { state, lang, setLang } = useRfq()
   const [openRef, setOpenRef] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [query, setQuery] = useState('')
@@ -47,26 +48,43 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
-  return (
-    <div className="hb-shell">
-      <h1 className="hb-h1">{t(lang, 'myRequests')}</h1>
+  // The live product files this under Purchasing, beside RFQs and Quotations.
+  const groups: NavGroup[] = [
+    { label: t(lang, 'navOverview'), items: [{ key: 'dashboard', icon: '▦', label: t(lang, 'navDashboard') }] },
+    { label: t(lang, 'navComms'), items: [
+      { key: 'messages', icon: '💬', label: t(lang, 'navMessagesCenter') },
+      { key: 'vendors', icon: '👥', label: t(lang, 'navVendorList') },
+    ] },
+    { label: t(lang, 'navPurchasing'), items: [
+      { key: 'orders', icon: '🛒', label: t(lang, 'navPurchaseOrders') },
+      { key: 'rfqs', icon: '📄', label: t(lang, 'navRfqs') },
+      { key: 'special', icon: '🏷', label: t(lang, 'navSpecialPrice') },
+      { key: 'quotations', icon: '🧾', label: t(lang, 'navQuotations') },
+    ] },
+  ]
 
+  return (
+    <DashboardChrome
+      lang={lang} setLang={setLang} viewer="buyer"
+      groups={groups} active="special" onNavigate={() => {}}
+      title={t(lang, 'myRequests')}
+      subtitle={t(lang, 'buyerSubtitle')}
+      breadcrumb={t(lang, 'navSpecialPrice')}
+    >
       <div className="hb-card">
-        <div className="hb-card-head">
-          <div className="hb-row">
+        <div className="hb-filterbar">
             {/* AC-8.3 — filter by status, search by reference and product name. */}
-            <select className="hb-select" style={{ width: 'auto' }} value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="all">{t(lang, 'allStatuses')}</option>
-              {Object.entries(STATE_META)
-                .filter(([s, m]) => m.buyerLabel !== null && s !== 'draft')
-                .map(([s, m]) => <option key={s} value={s}>{m.buyerLabel?.[lang]}</option>)}
-            </select>
-            <input
-              className="hb-input" style={{ width: 'auto', minWidth: 200 }}
-              placeholder={t(lang, 'searchPlaceholder')} value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
+          <select className="hb-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option value="all">{t(lang, 'allStatuses')}</option>
+            {Object.entries(STATE_META)
+              .filter(([s, m]) => m.buyerLabel !== null && s !== 'draft')
+              .map(([s, m]) => <option key={s} value={s}>{m.buyerLabel?.[lang]}</option>)}
+          </select>
+          <input
+            className="hb-input"
+            placeholder={t(lang, 'searchPlaceholder')} value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
 
         {visible.length === 0 ? (
@@ -98,7 +116,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                       className={`hb-clickable${needsMe ? ' hb-row-action' : ''}`}
                       onClick={() => setOpenRef(r.ref)}
                     >
-                      <td className="hb-num"><strong>{r.ref}</strong></td>
+                      <td><span className="hb-ref">{r.ref}</span></td>
                       <td>{r.sellerName}</td>
                       <td className="hb-num">{r.lines.length}</td>
                       <td><StatusPill state={r.state} viewer="buyer" lang={lang} /></td>
@@ -114,7 +132,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
       </div>
 
       {open && <Comparison request={open} onClose={() => setOpenRef(null)} />}
-    </div>
+    </DashboardChrome>
   )
 }
 

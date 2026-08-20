@@ -103,12 +103,14 @@ export function Field({ label, hint, error, warning, children }: {
   )
 }
 
+/** The live product's empty state: an orange outline icon above an orange subject line. */
 export function Empty({ title, body, action }: { title: string; body: string; action?: ReactNode }) {
   return (
     <div className="hb-empty">
+      <div className="hb-empty-icon" aria-hidden="true">🗂</div>
       <h3>{title}</h3>
       <p className="hb-sub">{body}</p>
-      {action && <div style={{ marginTop: 14 }}>{action}</div>}
+      {action && <div style={{ marginTop: 16 }}>{action}</div>}
     </div>
   )
 }

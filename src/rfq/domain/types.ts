@@ -44,6 +44,9 @@ export interface Product {
   sku: string
   name: { en: string; ar: string }
   brand: string
+  category: { en: string; ar: string }
+  /** Stands in for the catalogue image the live product renders here. */
+  emoji: string
   packSize: string
   unitOfMeasure: { en: string; ar: string }
   unitsPerCase: number

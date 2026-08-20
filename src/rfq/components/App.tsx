@@ -11,6 +11,7 @@ import { useMemo, useReducer, useState } from 'react'
 import { GUARDRAILS } from '../domain/guardrails'
 import { initialState, reducer, RfqContext } from '../store'
 import { BuyerDashboard } from './BuyerDashboard'
+import { MarketplaceChrome } from './Chrome'
 import { BuyerMarketplace } from './BuyerMarketplace'
 import { SellerDashboard } from './SellerDashboard'
 
@@ -109,11 +110,15 @@ export function App() {
           </div>
         </div>
 
-        {surface === 'marketplace' && <BuyerMarketplace onGoToRequests={() => setSurface('buyer')} />}
+        {surface === 'marketplace' && (
+          <MarketplaceChrome lang={lang} setLang={setLang} cartCount={state.draft?.lines.length ?? 0}>
+            <BuyerMarketplace onGoToRequests={() => setSurface('buyer')} />
+          </MarketplaceChrome>
+        )}
         {surface === 'buyer' && <BuyerDashboard onBrowse={() => setSurface('marketplace')} />}
         {surface === 'seller' && <SellerDashboard />}
 
-        <div className="hb-shell" style={{ paddingTop: 0 }}>
+        <div className="hb-shell" style={{ paddingTop: 0, paddingBottom: 28 }}>
           <p className="hb-hint">
             {lang === 'ar'
               ? 'نموذج أولي — البيانات في الذاكرة فقط. راجع مستند المتطلبات:'

@@ -21,14 +21,16 @@ npm run build:single   # rebuilds rfq-prototype.html, a single self-contained fi
 ```
 
 `rfq-prototype.html` is a committed, dependency-free build for offline review — open it
-straight from disk and it runs, with no network requests of any kind.
+straight from disk and it runs. CSS and JS are inlined; the only external reference is the
+Google Fonts stylesheet, and the page falls back to the system stack without a network.
 
 ## Special Price Request & RFQ
 
 Three surfaces, switchable from the demo bar at the top:
 
-- **Buyer · Marketplace** — the entry point on the product card, and the four-step request
-  builder (quantity → route → route form → review).
+- **Buyer · Marketplace** — the product grid and the product details page, each carrying
+  the negotiation entry point, plus the four-step request builder (quantity → route →
+  route form → review).
 - **Buyer · Dashboard** — the request list and the three-column original / asked / offered
   comparison, with accept, counter, decline and withdraw.
 - **Seller · Dashboard** — the triage queue showing margin after the ask, and the
@@ -38,6 +40,19 @@ The demo bar also flips language and direction (English / Arabic RTL), turns Pha
 off, changes the auto-accept rule and the seller's permissions, and moves the simulated
 **server clock** so SLA countdowns, offer expiry and the expiry sweep can be watched
 happening.
+
+### Visual design
+
+The interface follows the live HIGHBASE product: the navy / blue / orange palette sampled
+from it, the white marketplace navbar, the navy dashboard sidebar with its Purchasing →
+RFQs grouping, and the same table, card, pill and button treatments. Typography is Inter
+for UI, Jost for the wordmark and Cairo for Arabic.
+
+On the product details page the negotiation action sits in the CTA row beside Add to Cart —
+a blue outline button against the filled one — so a buyer weighing the price can challenge
+it without hunting (AC-1.1). The card and the detail page share the same eligibility rules:
+no entry point at all where the product is not negotiable, a deep link where an open
+request already covers the SKU, and none where an agreed price is already in force.
 
 ### How the code maps to the PRD
 
