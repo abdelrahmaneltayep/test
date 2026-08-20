@@ -1,0 +1,188 @@
+/*
+ * HIGHBASE — Special Price Request & RFQ prototype.
+ *
+ * Written with logical properties throughout (inset-inline, margin-inline, text-align:
+ * start) so the Arabic RTL pass in FR-11.2 is a direction flip rather than a second
+ * stylesheet. Every status carries text as well as colour (FR-11.5). Layout is operable
+ * at 360 px (FR-11.4).
+ */
+
+:root {
+  --hb-ink: #0f172a;
+  --hb-ink-2: #475569;
+  --hb-ink-3: #94a3b8;
+  --hb-line: #e2e8f0;
+  --hb-bg: #f1f5f9;
+  --hb-surface: #ffffff;
+  --hb-brand: #0f5c5c;
+  --hb-brand-dark: #0a4444;
+  --hb-brand-soft: #e6f2f2;
+  --hb-good: #15803d;
+  --hb-good-soft: #dcfce7;
+  --hb-warn: #b45309;
+  --hb-warn-soft: #fef3c7;
+  --hb-bad: #b91c1c;
+  --hb-bad-soft: #fee2e2;
+  --hb-info: #1d4ed8;
+  --hb-info-soft: #dbeafe;
+  --hb-radius: 12px;
+  --hb-shadow: 0 1px 2px rgba(15, 23, 42, .06), 0 8px 24px rgba(15, 23, 42, .06);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--hb-bg);
+  color: var(--hb-ink);
+  font-family: 'Segoe UI', system-ui, -apple-system, 'Noto Sans Arabic', sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.hb-app { min-height: 100vh; }
+.hb-shell { max-width: 1180px; margin: 0 auto; padding: 20px 16px 64px; }
+
+/* ── Demo panel ───────────────────────────────────────────────────────────── */
+.hb-demo { position: sticky; top: 0; z-index: 400; background: #0b1220; color: #e2e8f0; box-shadow: 0 2px 12px rgba(0,0,0,.35); }
+.hb-demo-inner { max-width: 1180px; margin: 0 auto; padding: 10px 16px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.hb-demo-label { font-size: 12px; font-weight: 700; color: #7dd3fc; white-space: nowrap; }
+.hb-demo-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.hb-demo-group > span { font-size: 11px; color: #94a3b8; white-space: nowrap; }
+.hb-demo-btn { background: #1e293b; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px; padding: 5px 11px; font-size: 12px; cursor: pointer; font-family: inherit; }
+.hb-demo-btn:hover { background: #334155; }
+.hb-demo-btn[aria-pressed="true"] { background: #0284c7; border-color: #38bdf8; color: #fff; font-weight: 700; }
+.hb-demo-clock { font-size: 11px; color: #86efac; margin-inline-start: auto; white-space: nowrap; }
+
+/* ── Structure ────────────────────────────────────────────────────────────── */
+.hb-card { background: var(--hb-surface); border: 1px solid var(--hb-line); border-radius: var(--hb-radius); box-shadow: var(--hb-shadow); }
+.hb-card + .hb-card { margin-top: 16px; }
+.hb-card-head { padding: 16px 18px; border-bottom: 1px solid var(--hb-line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.hb-card-body { padding: 18px; }
+.hb-h1 { font-size: 20px; font-weight: 700; margin: 0 0 4px; }
+.hb-h2 { font-size: 16px; font-weight: 700; margin: 0; }
+.hb-h3 { font-size: 13px; font-weight: 700; margin: 0 0 8px; text-transform: uppercase; letter-spacing: .04em; color: var(--hb-ink-2); }
+.hb-sub { color: var(--hb-ink-2); font-size: 13px; margin: 0; }
+.hb-muted { color: var(--hb-ink-3); }
+.hb-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.hb-spread { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.hb-stack { display: flex; flex-direction: column; gap: 12px; }
+.hb-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+
+/* ── Buttons — FR-11.6: one primary per surface, destructive never primary ── */
+.hb-btn { font-family: inherit; font-size: 14px; font-weight: 600; border-radius: 9px; padding: 10px 16px; cursor: pointer; border: 1px solid transparent; background: transparent; color: var(--hb-ink); transition: background .12s, border-color .12s; }
+.hb-btn:focus-visible { outline: 3px solid #38bdf8; outline-offset: 2px; }
+.hb-btn--primary { background: var(--hb-brand); color: #fff; }
+.hb-btn--primary:hover:not(:disabled) { background: var(--hb-brand-dark); }
+.hb-btn--secondary { background: #fff; border-color: var(--hb-line); color: var(--hb-ink); }
+.hb-btn--secondary:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
+.hb-btn--quiet { color: var(--hb-ink-2); padding-inline: 8px; }
+.hb-btn--quiet:hover:not(:disabled) { background: #f1f5f9; }
+/* Destructive is quiet by construction — never given the primary fill. */
+.hb-btn--danger { color: var(--hb-bad); border-color: transparent; background: transparent; }
+.hb-btn--danger:hover:not(:disabled) { background: var(--hb-bad-soft); }
+.hb-btn--sm { font-size: 12.5px; padding: 6px 11px; }
+.hb-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Forms ────────────────────────────────────────────────────────────────── */
+.hb-field { display: block; margin-bottom: 14px; }
+.hb-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; }
+.hb-input, .hb-select, .hb-textarea { width: 100%; font-family: inherit; font-size: 14px; padding: 10px 12px; border: 1px solid var(--hb-line); border-radius: 9px; background: #fff; color: var(--hb-ink); }
+.hb-input:focus, .hb-select:focus, .hb-textarea:focus { outline: none; border-color: var(--hb-brand); box-shadow: 0 0 0 3px rgba(15, 92, 92, .15); }
+.hb-textarea { min-height: 76px; resize: vertical; }
+.hb-hint { font-size: 12px; color: var(--hb-ink-2); margin-top: 4px; }
+/* E-1 — a blocking error names the constraint and the value that breached it. */
+.hb-error { font-size: 12.5px; color: var(--hb-bad); margin-top: 5px; font-weight: 600; }
+.hb-warning { font-size: 12.5px; color: var(--hb-warn); margin-top: 5px; }
+
+/* ── Choice cards (US-3 route selection) ──────────────────────────────────── */
+.hb-choice { display: block; width: 100%; text-align: start; background: #fff; border: 2px solid var(--hb-line); border-radius: var(--hb-radius); padding: 16px; cursor: pointer; font-family: inherit; }
+.hb-choice:hover { border-color: #cbd5e1; }
+.hb-choice[aria-pressed="true"] { border-color: var(--hb-brand); background: var(--hb-brand-soft); }
+.hb-choice-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.hb-choice-body { font-size: 13px; color: var(--hb-ink-2); }
+
+/* ── Pills and badges — colour is never the only signal (FR-11.5) ─────────── */
+.hb-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.hb-pill--neutral { background: #f1f5f9; color: var(--hb-ink-2); }
+.hb-pill--info { background: var(--hb-info-soft); color: var(--hb-info); }
+.hb-pill--good { background: var(--hb-good-soft); color: var(--hb-good); }
+.hb-pill--warn { background: var(--hb-warn-soft); color: var(--hb-warn); }
+.hb-pill--bad { background: var(--hb-bad-soft); color: var(--hb-bad); }
+.hb-pill--action { background: #fff7ed; color: #9a3412; box-shadow: inset 0 0 0 1.5px #fdba74; }
+
+/* ── Tables ───────────────────────────────────────────────────────────────── */
+.hb-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.hb-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.hb-table th { text-align: start; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: var(--hb-ink-2); padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid var(--hb-line); white-space: nowrap; }
+.hb-table td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+.hb-table tr:last-child td { border-bottom: none; }
+.hb-table tbody tr.hb-row-action { background: #fffbeb; }
+.hb-table tbody tr.hb-clickable { cursor: pointer; }
+.hb-table tbody tr.hb-clickable:hover { background: #f8fafc; }
+.hb-table tfoot td { padding: 12px; font-weight: 700; background: #f8fafc; border-top: 2px solid var(--hb-line); }
+.hb-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hb-strike { text-decoration: line-through; color: var(--hb-ink-3); }
+
+/* ── Tabs ─────────────────────────────────────────────────────────────────── */
+.hb-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--hb-line); flex-wrap: wrap; }
+.hb-tab { font-family: inherit; font-size: 14px; font-weight: 600; background: none; border: none; border-bottom: 3px solid transparent; padding: 10px 14px; cursor: pointer; color: var(--hb-ink-2); }
+.hb-tab[aria-selected="true"] { color: var(--hb-brand); border-bottom-color: var(--hb-brand); }
+
+/* ── Product cards (US-1) ─────────────────────────────────────────────────── */
+.hb-product { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+.hb-product-name { font-weight: 700; font-size: 14.5px; }
+.hb-price { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hb-tier-ladder { font-size: 12.5px; background: #f8fafc; border: 1px solid var(--hb-line); border-radius: 9px; padding: 8px 10px; }
+.hb-tier-ladder div + div { margin-top: 3px; }
+
+/* ── Modal / step flow ────────────────────────────────────────────────────── */
+.hb-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); display: flex; align-items: flex-start; justify-content: center; padding: 24px 12px; z-index: 900; overflow-y: auto; }
+.hb-modal { background: #fff; border-radius: 16px; width: 100%; max-width: 620px; box-shadow: 0 24px 64px rgba(0,0,0,.3); }
+.hb-modal--wide { max-width: 900px; }
+.hb-modal-head { padding: 16px 20px; border-bottom: 1px solid var(--hb-line); display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.hb-modal-body { padding: 20px; }
+.hb-modal-foot { padding: 14px 20px; border-top: 1px solid var(--hb-line); display: flex; gap: 10px; align-items: center; }
+/* FR-11.6 — the primary action sits on the trailing edge. */
+.hb-modal-foot .hb-primary-slot { margin-inline-start: auto; }
+.hb-steps { display: flex; gap: 6px; font-size: 12px; color: var(--hb-ink-2); align-items: center; }
+.hb-step-dot { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; background: #e2e8f0; color: var(--hb-ink-2); }
+.hb-step-dot--on { background: var(--hb-brand); color: #fff; }
+
+/* ── Proof panel (US-16) ──────────────────────────────────────────────────── */
+.hb-proof { border: 1px solid var(--hb-line); border-radius: var(--hb-radius); overflow: hidden; }
+.hb-proof-viewer { background: #0f172a; color: #cbd5e1; min-height: 150px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12.5px; padding: 20px; }
+.hb-proof-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; font-size: 13px; }
+.hb-proof-grid > div { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; }
+.hb-proof-grid > div:nth-child(odd) { border-inline-end: 1px solid #f1f5f9; }
+.hb-check { display: flex; gap: 8px; align-items: flex-start; padding: 9px 12px; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+
+/* ── Comparison columns (US-9) ────────────────────────────────────────────── */
+.hb-compare-head { background: #f8fafc; }
+.hb-col-asked { background: #fafafa; }
+.hb-col-offered { background: var(--hb-brand-soft); }
+
+/* ── Misc ─────────────────────────────────────────────────────────────────── */
+.hb-empty { text-align: center; padding: 44px 20px; color: var(--hb-ink-2); }
+.hb-empty h3 { margin: 0 0 6px; color: var(--hb-ink); }
+.hb-banner { border-radius: var(--hb-radius); padding: 12px 14px; font-size: 13.5px; display: flex; gap: 10px; align-items: flex-start; }
+.hb-banner--action { background: #fff7ed; border: 1px solid #fdba74; color: #7c2d12; }
+.hb-banner--info { background: var(--hb-info-soft); border: 1px solid #bfdbfe; color: #1e3a8a; }
+.hb-banner--good { background: var(--hb-good-soft); border: 1px solid #86efac; color: #14532d; }
+.hb-banner--bad { background: var(--hb-bad-soft); border: 1px solid #fca5a5; color: #7f1d1d; }
+.hb-sticky-draft { position: fixed; inset-block-end: 16px; inset-inline-end: 16px; z-index: 500; }
+.hb-log { font-size: 12.5px; }
+.hb-log li { margin-bottom: 9px; list-style: none; }
+.hb-log ul { padding: 0; margin: 0; }
+.hb-log time { color: var(--hb-ink-3); font-variant-numeric: tabular-nums; display: block; font-size: 11.5px; }
+
+@media (max-width: 640px) {
+  .hb-shell { padding: 14px 10px 60px; }
+  .hb-card-body, .hb-modal-body { padding: 14px; }
+  .hb-proof-grid { grid-template-columns: 1fr; }
+  .hb-modal-foot { flex-wrap: wrap; }
+  .hb-modal-foot .hb-primary-slot { margin-inline-start: 0; width: 100%; }
+  .hb-modal-foot .hb-primary-slot .hb-btn { width: 100%; }
+}
+
+.hb-banner--warn { background: var(--hb-warn-soft); border: 1px solid #fcd34d; color: var(--hb-warn); }

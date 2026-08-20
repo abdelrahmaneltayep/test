@@ -7,6 +7,15 @@ export default defineConfig({
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
   },
+  build: {
+    rollupOptions: {
+      input: {
+        // The existing Salla prototype and the HIGHBASE SPR/RFQ prototype build side by side.
+        main: path.resolve(__dirname, 'index.html'),
+        rfq: path.resolve(__dirname, 'rfq.html'),
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',
