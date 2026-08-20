@@ -64,9 +64,6 @@ export const STRINGS: Dict = {
   linkRequired: { en: 'You are not linked to this supplier yet — we will request the link first.', ar: 'لست مرتبطاً بهذا المورّد بعد — سنطلب الارتباط أولاً.' },
 
   // ── Step 1, quantity (US-2) ───────────────────────────────────────────────
-  step: { en: 'Step', ar: 'خطوة' },
-  of: { en: 'of', ar: 'من' },
-  quantityStepTitle: { en: 'How many do you need?', ar: 'ما الكمية التي تحتاجها؟' },
   quantityLabel: { en: 'Quantity (cases)', ar: 'الكمية (كراتين)' },
   equalsUnits: { en: 'equals {units} {uom}', ar: 'تعادل {units} {uom}' },
   tierAvailableTitle: { en: 'A published price already covers this quantity', ar: 'يوجد سعر معلن يغطي هذه الكمية بالفعل' },
@@ -76,7 +73,7 @@ export const STRINGS: Dict = {
   back: { en: 'Back', ar: 'رجوع' },
 
   // ── Step 2, route (US-3) ──────────────────────────────────────────────────
-  routeStepTitle: { en: 'What would you like to do?', ar: 'ماذا تريد أن تفعل؟' },
+  routeStepTitle: { en: 'What would you like to ask for?', ar: 'ما الذي تريد طلبه؟' },
   case1Title: { en: 'I have a price to match', ar: 'لديّ سعر أريد مطابقته' },
   case1Body: { en: 'State your target price and attach the invoice or quote that shows it.', ar: 'حدّد السعر المستهدف وأرفق الفاتورة أو عرض السعر الذي يثبته.' },
   case2Title: { en: 'Ask the seller to quote', ar: 'اطلب من البائع تسعير الكمية' },
@@ -105,7 +102,7 @@ export const STRINGS: Dict = {
   // ── Step 4, review (US-6, US-7) ───────────────────────────────────────────
   addAnotherItem: { en: 'Add another item', ar: 'أضف صنفاً آخر' },
   itemsInRequest: { en: '{n} items in this request', ar: '{n} أصناف في هذا الطلب' },
-  reviewTitle: { en: 'Review your request', ar: 'راجع طلبك' },
+  itemInRequest: { en: '1 item in this request', ar: 'صنف واحد في هذا الطلب' },
   product: { en: 'Product', ar: 'الصنف' },
   quantity: { en: 'Quantity', ar: 'الكمية' },
   listPrice: { en: 'List price', ar: 'السعر المعلن' },
@@ -120,6 +117,8 @@ export const STRINGS: Dict = {
   removeLine: { en: 'Remove', ar: 'حذف' },
   editLine: { en: 'Edit', ar: 'تعديل' },
   emptyRequestBlocked: { en: 'Add at least one item before sending.', ar: 'أضف صنفاً واحداً على الأقل قبل الإرسال.' },
+  completeFormFirst: { en: 'Complete the highlighted fields to send.', ar: 'أكمل الحقول المحددة للإرسال.' },
+  routeRequired: { en: 'Choose one of the two options.', ar: 'اختر أحد الخيارين.' },
   submittedTitle: { en: 'Request sent', ar: 'تم إرسال الطلب' },
   slaPromise: { en: 'Most suppliers reply within 24 hours.', ar: 'يرد معظم المورّدين خلال ٢٤ ساعة.' },
   goToMyRequests: { en: 'Go to my requests', ar: 'الذهاب إلى طلباتي' },

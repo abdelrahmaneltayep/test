@@ -158,7 +158,8 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
             type="button" className="hb-btn hb-btn--primary"
             onClick={() => setActive(PRODUCTS.find((p) => p.sku === draftLines[0].sku) ?? PRODUCTS[0])}
           >
-            {t(lang, 'itemsInRequest', { n: draftLines.length })} <span aria-hidden="true">→</span>
+            {t(lang, draftLines.length === 1 ? 'itemInRequest' : 'itemsInRequest', { n: draftLines.length })}{' '}
+            <span aria-hidden="true">→</span>
           </button>
         </div>
       )}

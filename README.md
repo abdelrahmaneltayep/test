@@ -29,8 +29,8 @@ Google Fonts stylesheet, and the page falls back to the system stack without a n
 Three surfaces, switchable from the demo bar at the top:
 
 - **Buyer · Marketplace** — the product grid and the product details page, each carrying
-  the negotiation entry point, plus the four-step request builder (quantity → route →
-  route form → review).
+  the negotiation entry point, plus the request form: quantity, the explicit route choice,
+  and that route's fields on one screen, with the lines already added summarised beneath.
 - **Buyer · Dashboard** — the request list and the three-column original / asked / offered
   comparison, with accept, counter, decline and withdraw.
 - **Seller · Dashboard** — the triage queue showing margin after the ask, and the

@@ -1,10 +1,18 @@
 /**
- * Buyer request creation — US-2 … US-7.
+ * Buyer request creation — US-2 … US-6.
  *
- * The four steps are quantity → route → route form → review, in that order and for the
- * reason US-2 gives: the seller should be answering "is this cheaper at my volume?",
- * which means the volume comes first. Route selection is explicit (FR-2.2); it is never
- * inferred from whether a file is attached (AC-3.5).
+ * One form, not a wizard. The order of the fields still carries the reasoning US-2 gives —
+ * quantity first, so the seller is answering "is this cheaper at my volume?", then the
+ * explicit route choice (FR-2.2, never inferred from whether a file is attached, AC-3.5),
+ * then the fields that route needs — but the buyer sees all of it at once and sends from
+ * the same screen.
+ *
+ * Divergence from the PRD, deliberate: US-7 specifies a separate review step. The
+ * information that step existed to give — what is in the request and what it totals — is
+ * kept here as a summary inside the form, so a multi-line request is still legible before
+ * it is sent. AC-7.1/7.2 hold; AC-7.3 (one primary action) and AC-7.4 (an empty request
+ * cannot be sent) hold. AC-7.5 and AC-7.6 are unaffected. What no longer exists is the
+ * discrete step, so US-7 should be rewritten against this before it is used as a test.
  */
 
 import { useMemo, useState } from 'react'
@@ -19,8 +27,6 @@ import { CheckBadge, Field, Modal, Money } from './ui'
 
 /** FR-2.1 — the seller's configured negotiation minimum, per line. */
 export const NEGOTIATION_MIN_QTY = 10
-
-type Step = 'quantity' | 'route' | 'form' | 'review'
 
 interface Props {
   product: Product
@@ -39,12 +45,11 @@ function applicableTier(product: Product, qty: number) {
 
 /** Stand-in for the FR-7.10 extraction adapter. A real provider sits behind this shape. */
 function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean): Proof {
-  const hash = `sha256-${file.name}-${file.size}`
   return {
     fileName: file.name,
     mimeType: file.type || 'application/octet-stream',
     sizeBytes: file.size,
-    hash,
+    hash: `sha256-${file.name}-${file.size}`,
     typed,
     // FR-7.2 — the provider returns its own reading. It is stored alongside the typed
     // values, never on top of them (FR-7.5). The legal-entity suffix here is deliberate:
@@ -63,11 +68,11 @@ function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean
 
 export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, onSubmitted }: Props) {
   const { state, dispatch, lang } = useRfq()
-  const [step, setStep] = useState<Step>('quantity')
 
-  // AC-3.4 — route-specific data survives a Back, for the life of the session.
   const [qtyText, setQtyText] = useState('')
-  const [route, setRoute] = useState<'case_1' | 'case_2' | null>(null)
+  // AC-3.3 — where Phase 2 is off there is only one route, so it is the route. The
+  // chooser is not rendered at all rather than shown with one disabled card.
+  const [route, setRoute] = useState<'case_1' | 'case_2' | null>(state.phase2Enabled ? null : 'case_2')
   const [targetText, setTargetText] = useState('')
   const [supplier, setSupplier] = useState('')
   const [theirSku, setTheirSku] = useState('')
@@ -87,15 +92,15 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
 
   // ── AC-2.5 / AC-2.3 — quantity validation names the constraint and the value ──
   const qtyError =
-    qtyText === '' ? null
+    qtyText === '' ? (showErrors ? t(lang, 'quantityInvalid') : null)
       : !/^\d+$/.test(qtyText) || qty <= 0 ? t(lang, 'quantityInvalid')
         : qty < NEGOTIATION_MIN_QTY ? t(lang, 'minQuantityBlocked', { min: NEGOTIATION_MIN_QTY })
           : null
 
   // ── AC-4.6 / EC-7 — a target at or above list is blocked, with the list price named ──
   const targetError =
-    !showErrors || route !== 'case_1' ? null
-      : targetText === '' ? t(lang, 'priceRequired')
+    route !== 'case_1' ? null
+      : targetText === '' ? (showErrors ? t(lang, 'priceRequired') : null)
         : targetPrice === null ? t(lang, 'priceRequired')
           : targetPrice >= product.listPrice
             ? t(lang, 'targetAboveList', { list: formatMoney(product.listPrice, { withCurrency: true, lang }) })
@@ -103,11 +108,20 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
 
   // ── EC-8 — an implausibly low ask warns and flags, but never blocks ──
   const targetWarning =
-    route === 'case_1' && targetPrice !== null && targetPrice < product.listPrice * IMPLAUSIBLE_ASK_RATIO
+    route === 'case_1' && targetPrice !== null && targetPrice > 0 && targetPrice < product.listPrice * IMPLAUSIBLE_ASK_RATIO
       ? t(lang, 'targetImplausible') : null
 
   const supplierError = showErrors && route === 'case_1' && !supplier.trim() ? t(lang, 'supplierRequired') : null
   const proofFileError = showErrors && route === 'case_1' && !proof ? t(lang, 'fileRequired') : null
+  const routeError = showErrors && route === null ? t(lang, 'routeRequired') : null
+
+  /** Everything the current line needs before it can join the request. */
+  const lineComplete =
+    qtyText !== '' && qtyError === null && route !== null &&
+    (route === 'case_2' || (targetPrice !== null && targetError === null && supplier.trim() !== '' && proof !== null))
+
+  /** The form is untouched, so "Send" means "send what is already in the request". */
+  const lineUntouched = qtyText === '' && targetText === '' && supplier === '' && proof === null
 
   function handleFile(file: File | null) {
     setProofError(null)
@@ -132,7 +146,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
       currency: 'BHD',
     }
     // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
-    // request is flagged for manual review rather than blocked.
+    // request is marked for manual review rather than blocked.
     const built = simulateExtraction(file, typed, !state.phase2Enabled)
     built.checks = runAutoChecks(built, {
       now: state.now,
@@ -145,7 +159,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
     setConflictResolved(null)
   }
 
-  function commitLine(): DraftLine {
+  function currentLine(): DraftLine {
     return {
       sku: product.sku,
       route: route as 'case_1' | 'case_2',
@@ -157,26 +171,44 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
     }
   }
 
-  function addLineAndGo(next: 'review' | 'another') {
-    if (route === 'case_1') {
-      setShowErrors(true)
-      if (targetError || !supplier.trim() || !proof || targetPrice === null || targetPrice >= product.listPrice) return
-    }
+  function commitLine() {
     if (!state.draft) dispatch({ type: 'start_draft' })
-    dispatch({ type: 'add_line', line: commitLine() })
-    if (next === 'another') onAddAnother()
-    else setStep('review')
+    dispatch({ type: 'add_line', line: currentLine() })
   }
 
-  // ── Submitted confirmation (AC-7.5) ──────────────────────────────────────
+  function handleAddAnother() {
+    setShowErrors(true)
+    if (!lineComplete) return
+    commitLine()
+    onAddAnother()
+  }
+
+  function handleSend() {
+    setShowErrors(true)
+    // AC-7.4 — an empty request cannot be sent; it stays a draft.
+    if (!lineComplete && !(lineUntouched && draftLines.length > 0)) return
+
+    const draftId = state.draft?.id
+    // EC-2 / FR-2.9 — idempotent by draft identity: a repeat send of the same draft shows
+    // the reference it already produced instead of creating a second request. The new
+    // reference is derived the way the reducer derives it, from the same clock and
+    // sequence, so both agree without reading state that has not been committed yet.
+    const existing = draftId ? state.submittedDrafts[draftId] : undefined
+    const ref = existing ?? makeRef(state.now, state.seq)
+    if (lineComplete) commitLine()
+    dispatch({ type: 'submit_draft' })
+    setSubmittedRef(ref)
+  }
+
+  // ── Confirmation (AC-7.5) ────────────────────────────────────────────────
   if (submittedRef) {
     return (
       <Modal title={<h2 className="hb-h2">{t(lang, 'submittedTitle')}</h2>} onClose={onClose}>
-        <div className="hb-banner hb-banner--good" style={{ marginBottom: 14 }}>
+        <div className="hb-banner hb-banner--good" style={{ marginBottom: 16 }}>
           <div>
             <strong>{t(lang, 'slaPromise')}</strong>
             <div style={{ marginTop: 4 }}>
-              {t(lang, 'yourReference')}: <strong className="hb-num">{submittedRef}</strong>
+              {t(lang, 'yourReference')}: <strong className="hb-ref">{submittedRef}</strong>
             </div>
           </div>
         </div>
@@ -187,104 +219,83 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
     )
   }
 
-  const stepIndex = { quantity: 1, route: 2, form: 3, review: 4 }[step]
+  const blockedReason = !lineComplete && !(lineUntouched && draftLines.length > 0)
+    ? (draftLines.length === 0 && lineUntouched ? t(lang, 'emptyRequestBlocked') : t(lang, 'completeFormFirst'))
+    : null
 
   return (
     <Modal
-      wide={step === 'review'}
       title={
         <div>
-          <h2 className="hb-h2">{product.name[lang]}</h2>
-          <div className="hb-steps" style={{ marginTop: 6 }}>
-            {[1, 2, 3, 4].map((n) => (
-              <span key={n} className={`hb-step-dot${n <= stepIndex ? ' hb-step-dot--on' : ''}`}>{n}</span>
-            ))}
-            <span style={{ marginInlineStart: 6 }}>{t(lang, 'step')} {stepIndex} {t(lang, 'of')} 4</span>
-          </div>
+          <h2 className="hb-h2">{t(lang, 'requestSpecialPrice')}</h2>
+          <div className="hb-hint">{product.name[lang]} · {product.sku}</div>
         </div>
       }
       onClose={onClose}
-      footer={<FlowFooter
-        step={step} lang={lang} route={route}
-        qtyValid={qtyText !== '' && qtyError === null}
-        lineCount={draftLines.length}
-        onBack={() => setStep(step === 'review' ? 'form' : step === 'form' ? 'route' : 'quantity')}
-        onNext={() => {
-          if (step === 'quantity') setStep('route')
-          else if (step === 'route') setStep('form')
-          else if (step === 'form') addLineAndGo('review')
-        }}
-        onAddAnother={() => addLineAndGo('another')}
-        onSend={() => {
-          if (draftLines.length === 0) return
-          const draftId = state.draft?.id
-          // EC-2 / FR-2.9 — idempotent by draft identity: if this draft was already
-          // submitted, show the reference it produced rather than creating a second
-          // request. The new reference is derived the same way the reducer derives it,
-          // from the same clock and sequence, so both agree without reading back state
-          // that has not been committed yet.
-          const existing = draftId ? state.submittedDrafts[draftId] : undefined
-          const ref = existing ?? makeRef(state.now, state.seq)
-          dispatch({ type: 'submit_draft' })
-          setSubmittedRef(ref)
-        }}
-      />}
-    >
-      {step === 'quantity' && (
+      footer={
         <>
-          <h3 className="hb-h3">{t(lang, 'quantityStepTitle')}</h3>
-          <Field
-            label={t(lang, 'quantityLabel')}
-            hint={qty > 0 ? t(lang, 'equalsUnits', { units: qty * product.unitsPerCase, uom: product.unitOfMeasure[lang] }) : undefined}
-            error={qtyError}
-          >
-            <input
-              className="hb-input" inputMode="numeric" autoFocus
-              value={qtyText} onChange={(e) => setQtyText(e.target.value)}
-              placeholder={String(NEGOTIATION_MIN_QTY)}
-            />
-          </Field>
-
-          {/* AC-2.2 / FR-2.3 — tier pre-emption: the published price is offered before a
-              negotiation is built, with a one-tap path out of the flow. */}
-          {tier && tier.unitPrice < product.listPrice && (
-            <div className="hb-banner hb-banner--info">
-              <div>
-                <strong>{t(lang, 'tierAvailableTitle')}</strong>
-                <div style={{ marginTop: 4 }}>
-                  {t(lang, 'tierAvailableBody', {
-                    qty,
-                    price: formatMoney(tier.unitPrice, { withCurrency: true, lang }),
-                    list: formatMoney(product.listPrice, { withCurrency: true, lang }),
-                  })}
-                </div>
-                <button
-                  type="button" className="hb-btn hb-btn--secondary hb-btn--sm" style={{ marginTop: 8 }}
-                  onClick={() => onTierAccepted(tier.unitPrice)}
-                >
-                  {t(lang, 'useThisPrice')}
-                </button>
-              </div>
-            </div>
-          )}
+          <button type="button" className="hb-btn hb-btn--secondary" onClick={handleAddAnother}>
+            {t(lang, 'addAnotherItem')}
+          </button>
+          {/* AC-7.3 — exactly one primary action on this surface. */}
+          <span className="hb-primary-slot">
+            {/* E-2 — a blocked control states its reason, on hover and on focus. */}
+            {blockedReason && <span className="hb-hint">{blockedReason}</span>}
+            <button type="button" className="hb-btn hb-btn--primary" onClick={handleSend}>
+              {t(lang, 'sendRequest')}
+            </button>
+          </span>
         </>
+      }
+    >
+      {/* ── Quantity (US-2) ──────────────────────────────────────────────── */}
+      <Field
+        label={t(lang, 'quantityLabel')}
+        hint={qty > 0 ? t(lang, 'equalsUnits', { units: qty * product.unitsPerCase, uom: product.baseUnit[lang] }) : undefined}
+        error={qtyError}
+      >
+        <input
+          className="hb-input" inputMode="numeric" autoFocus
+          value={qtyText} onChange={(e) => setQtyText(e.target.value)}
+          placeholder={String(NEGOTIATION_MIN_QTY)}
+        />
+      </Field>
+
+      {/* AC-2.2 / FR-2.3 — tier pre-emption: the published price is offered before a
+          negotiation is built, with a one-tap path out of the flow. */}
+      {tier && tier.unitPrice < product.listPrice && (
+        <div className="hb-banner hb-banner--info" style={{ marginBottom: 16 }}>
+          <div>
+            <strong>{t(lang, 'tierAvailableTitle')}</strong>
+            <div style={{ marginTop: 4 }}>
+              {t(lang, 'tierAvailableBody', {
+                qty,
+                price: formatMoney(tier.unitPrice, { withCurrency: true, lang }),
+                list: formatMoney(product.listPrice, { withCurrency: true, lang }),
+              })}
+            </div>
+            <button
+              type="button" className="hb-btn hb-btn--outline hb-btn--sm" style={{ marginTop: 10 }}
+              onClick={() => onTierAccepted(tier.unitPrice)}
+            >
+              {t(lang, 'useThisPrice')}
+            </button>
+          </div>
+        </div>
       )}
 
-      {step === 'route' && (
-        <>
-          <h3 className="hb-h3">{t(lang, 'routeStepTitle')}</h3>
+      {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
+      {state.phase2Enabled && (
+        <div className="hb-field">
+          <span className="hb-label">{t(lang, 'routeStepTitle')}</span>
           <div className="hb-stack">
-            {/* AC-3.3 — where Phase 2 is off the Case 1 card is not rendered at all. A
-                disabled card is never shown in its place. */}
-            {state.phase2Enabled && (
-              <button
-                type="button" className="hb-choice" aria-pressed={route === 'case_1'}
-                onClick={() => setRoute('case_1')}
-              >
-                <div className="hb-choice-title">{t(lang, 'case1Title')}</div>
-                <div className="hb-choice-body">{t(lang, 'case1Body')}</div>
-              </button>
-            )}
+            <button
+              type="button" className="hb-choice" aria-pressed={route === 'case_1'}
+              onClick={() => setRoute('case_1')}
+            >
+              <div className="hb-choice-title">{t(lang, 'case1Title')}</div>
+              <div className="hb-choice-body">{t(lang, 'case1Body')}</div>
+            </button>
             <button
               type="button" className="hb-choice" aria-pressed={route === 'case_2'}
               onClick={() => setRoute('case_2')}
@@ -293,10 +304,12 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
               <div className="hb-choice-body">{t(lang, 'case2Body')}</div>
             </button>
           </div>
-        </>
+          {routeError && <div className="hb-error" role="alert">{routeError}</div>}
+        </div>
       )}
 
-      {step === 'form' && route === 'case_1' && (
+      {/* ── Case 1 (US-4) ────────────────────────────────────────────────── */}
+      {route === 'case_1' && (
         <>
           <Field
             label={t(lang, 'targetPrice')}
@@ -320,7 +333,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
           </Field>
 
           {/* FR-7.7 / EC-36 — the exclusions are stated before upload, not after rejection. */}
-          <details style={{ marginBottom: 12 }}>
+          <details style={{ marginBottom: 14 }}>
             <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>{t(lang, 'whatWeCannotMatch')}</summary>
             <ul className="hb-hint" style={{ marginTop: 6 }}>
               {PROOF_EXCLUSIONS[lang].map((x) => <li key={x}>{x}</li>)}
@@ -342,11 +355,9 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
         </>
       )}
 
-      {step === 'form' && route === 'case_2' && (
+      {/* ── Case 2 (US-5) ────────────────────────────────────────────────── */}
+      {route === 'case_2' && (
         <>
-          <div className="hb-banner hb-banner--info" style={{ marginBottom: 14 }}>
-            <div>{t(lang, 'quantity')}: <strong>{qty}</strong> · {product.unitOfMeasure[lang]}</div>
-          </div>
           <Field label={t(lang, 'frequency')}>
             {/* AC-5.2 — a controlled picker, never free text. */}
             <select className="hb-select" value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}>
@@ -364,8 +375,92 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
         </>
       )}
 
-      {step === 'review' && <ReviewTable lang={lang} />}
+      {/* ── What is already in the request (US-6, and what US-7 was for) ─── */}
+      {draftLines.length > 0 && <DraftSummary lang={lang} />}
     </Modal>
+  )
+}
+
+/**
+ * The lines already added, with the totals the review step used to show. Not a step —
+ * it sits at the foot of the same form, so a multi-line request stays legible without
+ * the buyer navigating anywhere (AC-7.1, AC-7.2).
+ */
+function DraftSummary({ lang }: { lang: Lang }) {
+  const { state, dispatch } = useRfq()
+  const lines = state.draft?.lines ?? []
+
+  const rows = lines.map((l) => {
+    const product = productBySku(l.sku)
+    return {
+      ...l,
+      name: product.name[lang],
+      listPrice: product.listPrice,
+      atList: product.listPrice * l.quantity,
+      atAsked: l.askedPrice === null ? null : l.askedPrice * l.quantity,
+    }
+  })
+  const askedRows = rows.filter((r) => r.atAsked !== null)
+  const totalAtAsked = askedRows.reduce((s, r) => s + (r.atAsked ?? 0), 0)
+  const comparableList = askedRows.reduce((s, r) => s + r.atList, 0)
+  const saving = comparableList - totalAtAsked
+  const savingPct = comparableList > 0 ? Math.round((saving / comparableList) * 1000) / 10 : 0
+  const hasQuoteLines = rows.some((r) => r.atAsked === null)
+
+  return (
+    <div className="hb-card" style={{ marginTop: 20 }}>
+      <div className="hb-card-head">
+        <h3 className="hb-h3" style={{ margin: 0 }}>
+          {t(lang, rows.length === 1 ? 'itemInRequest' : 'itemsInRequest', { n: rows.length })}
+        </h3>
+      </div>
+      <div className="hb-table-wrap">
+        <table className="hb-table">
+          <tbody>
+            {rows.map((r, i) => (
+              <tr key={`${r.sku}-${i}`}>
+                <td>
+                  {r.name}
+                  <div className="hb-hint">{t(lang, 'quantity')} {r.quantity}</div>
+                </td>
+                <td className="hb-num">
+                  {/* AC-9.2 — a quote line says so; it never shows an inferred price. */}
+                  {r.askedPrice === null
+                    ? <span className="hb-pill hb-pill--neutral">{t(lang, 'quoteRequested')}</span>
+                    : <Money value={r.atAsked} lang={lang} />}
+                </td>
+                <td style={{ width: 1 }}>
+                  <button
+                    type="button" className="hb-btn hb-btn--quiet hb-btn--sm"
+                    onClick={() => dispatch({ type: 'remove_line', index: i })}
+                  >
+                    {t(lang, 'removeLine')}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>{t(lang, 'requestTotal')}</td>
+              <td colSpan={2}>
+                <Money value={totalAtAsked} lang={lang} withCurrency />
+                {/* AC-7.2 — the asked total says what it excludes. */}
+                {hasQuoteLines && <div className="hb-hint">{t(lang, 'excludesQuoteLines')}</div>}
+              </td>
+            </tr>
+            {saving > 0 && (
+              <tr>
+                <td>{t(lang, 'estimatedSaving')}</td>
+                <td colSpan={2} style={{ color: 'var(--hb-good)' }}>
+                  <Money value={saving} lang={lang} withCurrency /> · {savingPct}%
+                </td>
+              </tr>
+            )}
+          </tfoot>
+        </table>
+      </div>
+    </div>
   )
 }
 
@@ -380,11 +475,7 @@ function ExtractionPanel({ proof, lang, typedSupplier, resolution, onResolve }: 
 }) {
   if (proof.extractionUnavailable) {
     // EC-27 / E-4 — a system failure says so, and is never phrased as user error.
-    return (
-      <div className="hb-banner hb-banner--warn">
-        <div>{t(lang, 'checksNotRun')}</div>
-      </div>
-    )
+    return <div className="hb-banner hb-banner--warn">{t(lang, 'checksNotRun')}</div>
   }
   const conflict = proof.extracted && typedSupplier.trim() && proof.extracted.supplier !== typedSupplier.trim()
   return (
@@ -400,15 +491,15 @@ function ExtractionPanel({ proof, lang, typedSupplier, resolution, onResolve }: 
         </div>
       </div>
       {conflict && (
-        <div style={{ padding: '10px 12px', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--hb-line-soft)' }}>
           <div className="hb-warning" style={{ marginTop: 0 }}>
             {t(lang, 'extractionConflict', { typed: typedSupplier, extracted: proof.extracted?.supplier ?? '' })}
           </div>
           <div className="hb-row" style={{ marginTop: 8 }}>
-            <button type="button" className={`hb-btn hb-btn--secondary hb-btn--sm${resolution === 'typed' ? ' hb-btn--primary' : ''}`} onClick={() => onResolve('typed')}>
+            <button type="button" className={`hb-btn hb-btn--sm ${resolution === 'typed' ? 'hb-btn--primary' : 'hb-btn--secondary'}`} onClick={() => onResolve('typed')}>
               {t(lang, 'keepTyped')}
             </button>
-            <button type="button" className={`hb-btn hb-btn--secondary hb-btn--sm${resolution === 'extracted' ? ' hb-btn--primary' : ''}`} onClick={() => onResolve('extracted')}>
+            <button type="button" className={`hb-btn hb-btn--sm ${resolution === 'extracted' ? 'hb-btn--primary' : 'hb-btn--secondary'}`} onClick={() => onResolve('extracted')}>
               {t(lang, 'useExtracted')}
             </button>
           </div>
@@ -425,150 +516,5 @@ function ExtractionPanel({ proof, lang, typedSupplier, resolution, onResolve }: 
         </div>
       ))}
     </div>
-  )
-}
-
-/** US-7 — original versus asked, per line and in total, before anything is sent. */
-function ReviewTable({ lang }: { lang: Lang }) {
-  const { state } = useRfq()
-  const lines = state.draft?.lines ?? []
-
-  const rows = lines.map((l) => {
-    const product = productBySku(l.sku)
-    return {
-      ...l,
-      name: product.name[lang],
-      listPrice: product.listPrice,
-      atList: product.listPrice * l.quantity,
-      atAsked: l.askedPrice === null ? null : l.askedPrice * l.quantity,
-    }
-  })
-  const totalAtList = rows.reduce((s, r) => s + r.atList, 0)
-  const totalAtAsked = rows.reduce((s, r) => s + (r.atAsked ?? 0), 0)
-  const askedRows = rows.filter((r) => r.atAsked !== null)
-  const comparableList = askedRows.reduce((s, r) => s + r.atList, 0)
-  const saving = comparableList - totalAtAsked
-  const savingPct = comparableList > 0 ? Math.round((saving / comparableList) * 1000) / 10 : 0
-  const hasQuoteLines = rows.some((r) => r.atAsked === null)
-
-  return (
-    <>
-      <h3 className="hb-h3">{t(lang, 'reviewTitle')}</h3>
-      {rows.length === 0 && <p className="hb-sub">{t(lang, 'emptyRequestBlocked')}</p>}
-      {rows.length > 0 && (
-        <div className="hb-table-wrap">
-          <table className="hb-table">
-            <thead>
-              <tr>
-                <th>{t(lang, 'product')}</th>
-                <th>{t(lang, 'quantity')}</th>
-                <th>{t(lang, 'listPrice')}</th>
-                <th>{t(lang, 'askedPrice')}</th>
-                <th>{t(lang, 'lineTotalAtList')}</th>
-                <th>{t(lang, 'lineTotalAtAsked')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={`${r.sku}-${i}`}>
-                  <td>{r.name}</td>
-                  <td className="hb-num">{r.quantity}</td>
-                  <td><Money value={r.listPrice} lang={lang} /></td>
-                  <td>
-                    {/* AC-9.2 — a Case 2 line says so; it never shows an inferred price. */}
-                    {r.askedPrice === null
-                      ? <span className="hb-pill hb-pill--neutral">{t(lang, 'quoteRequested')}</span>
-                      : <Money value={r.askedPrice} lang={lang} />}
-                  </td>
-                  <td><Money value={r.atList} lang={lang} /></td>
-                  <td><Money value={r.atAsked} lang={lang} /></td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={4}>{t(lang, 'requestTotal')}</td>
-                <td><Money value={totalAtList} lang={lang} withCurrency /></td>
-                <td>
-                  <Money value={totalAtAsked} lang={lang} withCurrency />
-                  {/* AC-7.2 — the asked total says what it excludes. */}
-                  {hasQuoteLines && <div className="hb-hint">{t(lang, 'excludesQuoteLines')}</div>}
-                </td>
-              </tr>
-              {saving > 0 && (
-                <tr>
-                  <td colSpan={4}>{t(lang, 'estimatedSaving')}</td>
-                  <td colSpan={2} style={{ color: 'var(--hb-good)' }}>
-                    <Money value={saving} lang={lang} withCurrency /> · {savingPct}%
-                  </td>
-                </tr>
-              )}
-            </tfoot>
-          </table>
-        </div>
-      )}
-    </>
-  )
-}
-
-function FlowFooter({ step, lang, route, qtyValid, lineCount, onBack, onNext, onAddAnother, onSend }: {
-  step: Step
-  lang: Lang
-  route: 'case_1' | 'case_2' | null
-  qtyValid: boolean
-  lineCount: number
-  onBack: () => void
-  onNext: () => void
-  onAddAnother: () => void
-  onSend: () => void
-}) {
-  // AC-3.2 — with no route selected, progression is blocked and nothing downstream renders.
-  const nextBlocked = step === 'quantity' ? !qtyValid : step === 'route' ? route === null : false
-  const nextReason = step === 'quantity'
-    ? (lang === 'ar' ? 'أدخل كمية صالحة أولاً' : 'Enter a valid quantity first')
-    : (lang === 'ar' ? 'اختر أحد الخيارين أولاً' : 'Choose one of the two options first')
-
-  if (step === 'review') {
-    return (
-      <>
-        <button type="button" className="hb-btn hb-btn--secondary" onClick={onBack}>{t(lang, 'back')}</button>
-        <button type="button" className="hb-btn hb-btn--secondary" onClick={onAddAnother}>{t(lang, 'addAnotherItem')}</button>
-        {/* AC-7.3 — exactly one primary action on this surface. */}
-        <span className="hb-primary-slot">
-          <button
-            type="button" className="hb-btn hb-btn--primary" onClick={onSend}
-            disabled={lineCount === 0}
-            title={lineCount === 0 ? t(lang, 'emptyRequestBlocked') : undefined}
-          >
-            {t(lang, 'sendRequest')}
-          </button>
-        </span>
-      </>
-    )
-  }
-
-  return (
-    <>
-      {step !== 'quantity' && (
-        <button type="button" className="hb-btn hb-btn--secondary" onClick={onBack}>{t(lang, 'back')}</button>
-      )}
-      <span className="hb-primary-slot">
-        {step === 'form' && (
-          <button type="button" className="hb-btn hb-btn--secondary" onClick={onAddAnother} style={{ marginInlineEnd: 8 }}>
-            {t(lang, 'addAnotherItem')}
-          </button>
-        )}
-        <button
-          type="button" className="hb-btn hb-btn--primary" onClick={onNext}
-          disabled={nextBlocked}
-          // E-2 — a disabled control states its reason, reachable on hover and focus.
-          title={nextBlocked ? nextReason : undefined}
-          aria-describedby={nextBlocked ? 'hb-next-reason' : undefined}
-        >
-          {t(lang, 'continue')}
-        </button>
-        {nextBlocked && <span id="hb-next-reason" className="hb-hint">{nextReason}</span>}
-      </span>
-    </>
   )
 }

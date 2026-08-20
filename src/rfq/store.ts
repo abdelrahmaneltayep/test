@@ -24,47 +24,47 @@ import type {
 export const PRODUCTS: Product[] = [
   {
     sku: 'HB-4471', name: { en: 'Almarai Fresh Milk 12×1L', ar: 'حليب المراعي الطازج ١٢×١ لتر' },
-    brand: 'Almarai', category: { en: 'Dairy', ar: 'الألبان' }, emoji: '🥛', packSize: '12x1L', unitOfMeasure: { en: 'case', ar: 'كرتون' }, unitsPerCase: 12,
+    brand: 'Almarai', category: { en: 'Dairy', ar: 'الألبان' }, emoji: '🥛', packSize: '12x1L', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'litres', ar: 'لتر' }, unitsPerCase: 12,
     listPrice: 10_250,
     tiers: [{ minQty: 50, unitPrice: 9_900 }, { minQty: 120, unitPrice: 9_600 }],
     cost: 7_400, floorPrice: 8_900, inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-2210', name: { en: 'Sunflower Cooking Oil 6×1.8L', ar: 'زيت دوار الشمس ٦×١٫٨ لتر' },
-    brand: 'Afia', category: { en: 'Cooking Oils', ar: 'زيوت الطهي' }, emoji: '🫒', packSize: '6x1.8L', unitOfMeasure: { en: 'case', ar: 'كرتون' }, unitsPerCase: 6,
+    brand: 'Afia', category: { en: 'Cooking Oils', ar: 'زيوت الطهي' }, emoji: '🫒', packSize: '6x1.8L', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'litres', ar: 'لتر' }, unitsPerCase: 6,
     listPrice: 14_800,
     tiers: [{ minQty: 40, unitPrice: 14_200 }],
     cost: 11_600, floorPrice: 13_000, inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-9032', name: { en: 'Basmati Rice 10kg', ar: 'أرز بسمتي ١٠ كجم' },
-    brand: 'Abu Kass', category: { en: 'Rice & Grains', ar: 'الأرز والحبوب' }, emoji: '🍚', packSize: '10kg', unitOfMeasure: { en: 'bag', ar: 'كيس' }, unitsPerCase: 1,
+    brand: 'Abu Kass', category: { en: 'Rice & Grains', ar: 'الأرز والحبوب' }, emoji: '🍚', packSize: '10kg', unitOfMeasure: { en: 'bag', ar: 'كيس' }, baseUnit: { en: 'bags', ar: 'كيس' }, unitsPerCase: 1,
     listPrice: 6_450, tiers: [],
     // EC-20 — no cost configured. The queue must render "—", not 0 %.
     cost: null, floorPrice: null, inStock: true, backorderable: false, excluded: false,
   },
   {
     sku: 'HB-7788', name: { en: 'Bottled Water 24×330ml', ar: 'مياه معبأة ٢٤×٣٣٠ مل' },
-    brand: 'Oasis', category: { en: 'Water & Beverages', ar: 'المياه والمشروبات' }, emoji: '💧', packSize: '24x330ml', unitOfMeasure: { en: 'case', ar: 'كرتون' }, unitsPerCase: 24,
+    brand: 'Oasis', category: { en: 'Water & Beverages', ar: 'المياه والمشروبات' }, emoji: '💧', packSize: '24x330ml', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'bottles', ar: 'زجاجة' }, unitsPerCase: 24,
     listPrice: 1_950, tiers: [{ minQty: 100, unitPrice: 1_800 }],
     cost: 1_500, floorPrice: 1_700, inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-5520', name: { en: 'Tomato Paste 24×400g', ar: 'معجون طماطم ٢٤×٤٠٠ جم' },
-    brand: 'Al Alali', category: { en: 'Canned & Preserved', ar: 'المعلبات' }, emoji: '🥫', packSize: '24x400g', unitOfMeasure: { en: 'case', ar: 'كرتون' }, unitsPerCase: 24,
+    brand: 'Al Alali', category: { en: 'Canned & Preserved', ar: 'المعلبات' }, emoji: '🥫', packSize: '24x400g', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'tins', ar: 'علبة' }, unitsPerCase: 24,
     listPrice: 8_900,
     tiers: [{ minQty: 30, unitPrice: 8_600 }, { minQty: 80, unitPrice: 8_250 }],
     cost: 6_800, floorPrice: 7_900, inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-6115', name: { en: 'White Sugar 50kg', ar: 'سكر أبيض ٥٠ كجم' },
-    brand: 'Al Khaleej', category: { en: 'Sugar & Sweeteners', ar: 'السكر والمحليات' }, emoji: '🧂', packSize: '50kg', unitOfMeasure: { en: 'sack', ar: 'كيس' }, unitsPerCase: 1,
+    brand: 'Al Khaleej', category: { en: 'Sugar & Sweeteners', ar: 'السكر والمحليات' }, emoji: '🧂', packSize: '50kg', unitOfMeasure: { en: 'sack', ar: 'كيس' }, baseUnit: { en: 'sacks', ar: 'كيس' }, unitsPerCase: 1,
     listPrice: 12_300, tiers: [],
     cost: 10_100, floorPrice: 11_200, inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-1004', name: { en: 'Infant Formula Stage 1', ar: 'حليب أطفال المرحلة الأولى' },
-    brand: 'Nutricare', category: { en: 'Baby Care', ar: 'العناية بالطفل' }, emoji: '🍼', packSize: '400g', unitOfMeasure: { en: 'tin', ar: 'علبة' }, unitsPerCase: 1,
+    brand: 'Nutricare', category: { en: 'Baby Care', ar: 'العناية بالطفل' }, emoji: '🍼', packSize: '400g', unitOfMeasure: { en: 'tin', ar: 'علبة' }, baseUnit: { en: 'tins', ar: 'علبة' }, unitsPerCase: 1,
     listPrice: 4_200, tiers: [],
     cost: 3_500, floorPrice: 4_000, inStock: true, backorderable: false,
     // Q-11 / FR-2.1 — a controlled-price category. No entry point is rendered at all (AC-1.3).

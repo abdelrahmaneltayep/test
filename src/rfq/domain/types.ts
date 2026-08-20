@@ -48,7 +48,14 @@ export interface Product {
   /** Stands in for the catalogue image the live product renders here. */
   emoji: string
   packSize: string
+  /** The package label — what the card chip shows ("case", "bag", "tin"). */
   unitOfMeasure: { en: string; ar: string }
+  /**
+   * The base unit inside that package, plural. AC-2.4 asks for the equivalent unit count
+   * and its unit of measure, which is this and not the package label: 40 cases of milk is
+   * 480 litres, not "480 case".
+   */
+  baseUnit: { en: string; ar: string }
   unitsPerCase: number
   listPrice: Minor
   tiers: Tier[]
