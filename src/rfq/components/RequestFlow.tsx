@@ -15,7 +15,7 @@
  * discrete step, so US-7 should be rewritten against this before it is used as a test.
  */
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
 import { formatMoney, parseMoney } from '../domain/money'
 import { makeRef } from '../domain/reference'
 import { IMPLAUSIBLE_ASK_RATIO } from '../domain/guardrails'
@@ -70,9 +70,18 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
   const { state, dispatch, lang } = useRfq()
 
   const [qtyText, setQtyText] = useState('')
-  // AC-3.3 — where Phase 2 is off there is only one route, so it is the route. The
-  // chooser is not rendered at all rather than shown with one disabled card.
-  const [route, setRoute] = useState<'case_1' | 'case_2' | null>(state.phase2Enabled ? null : 'case_2')
+  /*
+   * The route is a tab, and one is always selected: "I have a price to match" leads.
+   * AC-3.3 still holds — where Phase 2 is off there is only one route, so it is the
+   * route and the tab strip is not rendered at all.
+   *
+   * Note against FR-2.2 / AC-3.2, which asked for no preselection so the buyer had to
+   * choose: with a default there is no unchosen state, so a buyer who wanted a quote can
+   * land in the proof form without noticing the other tab. The route is still explicit
+   * and never inferred from field state (AC-3.5), and the tabs sit directly above the
+   * fields they govern, but AC-3.2 no longer describes this.
+   */
+  const [route, setRoute] = useState<'case_1' | 'case_2'>(state.phase2Enabled ? 'case_1' : 'case_2')
   const [targetText, setTargetText] = useState('')
   const [supplier, setSupplier] = useState('')
   const [theirSku, setTheirSku] = useState('')
@@ -113,11 +122,10 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
 
   const supplierError = showErrors && route === 'case_1' && !supplier.trim() ? t(lang, 'supplierRequired') : null
   const proofFileError = showErrors && route === 'case_1' && !proof ? t(lang, 'fileRequired') : null
-  const routeError = showErrors && route === null ? t(lang, 'routeRequired') : null
 
   /** Everything the current line needs before it can join the request. */
   const lineComplete =
-    qtyText !== '' && qtyError === null && route !== null &&
+    qtyText !== '' && qtyError === null &&
     (route === 'case_2' || (targetPrice !== null && targetError === null && supplier.trim() !== '' && proof !== null))
 
   /** The form is untouched, so "Send" means "send what is already in the request". */
@@ -157,6 +165,13 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
     })
     setProof(built)
     setConflictResolved(null)
+  }
+
+  /** Left/right (or up/down) move between tabs, per the tablist pattern. */
+  function onRouteKeyDown(e: ReactKeyboardEvent) {
+    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
+    e.preventDefault()
+    setRoute((r) => (r === 'case_1' ? 'case_2' : 'case_1'))
   }
 
   function currentLine(): DraftLine {
@@ -219,8 +234,13 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
     )
   }
 
-  const blockedReason = !lineComplete && !(lineUntouched && draftLines.length > 0)
-    ? (draftLines.length === 0 && lineUntouched ? t(lang, 'emptyRequestBlocked') : t(lang, 'completeFormFirst'))
+  /*
+   * E-2 — the reason a send is blocked, shown only once the buyer has actually tried to
+   * send. Before that the form is simply unfilled, and nagging about it on open reads as
+   * an error the buyer has not made yet.
+   */
+  const blockedReason = showErrors && !lineComplete && !(lineUntouched && draftLines.length > 0)
+    ? t(lang, 'completeFormFirst')
     : null
 
   return (
@@ -287,26 +307,36 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
       {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
       {state.phase2Enabled && (
         <div className="hb-field">
-          <span className="hb-label">{t(lang, 'routeStepTitle')}</span>
-          <div className="hb-stack">
+          <span className="hb-label" id="hb-route-label">{t(lang, 'routeStepTitle')}</span>
+          <div className="hb-tabs" role="tablist" aria-labelledby="hb-route-label" onKeyDown={onRouteKeyDown}>
             <button
-              type="button" className="hb-choice" aria-pressed={route === 'case_1'}
+              type="button" role="tab" id="hb-tab-case1" className="hb-tab"
+              aria-selected={route === 'case_1'} aria-controls="hb-route-panel"
+              tabIndex={route === 'case_1' ? 0 : -1}
               onClick={() => setRoute('case_1')}
             >
-              <div className="hb-choice-title">{t(lang, 'case1Title')}</div>
-              <div className="hb-choice-body">{t(lang, 'case1Body')}</div>
+              <span aria-hidden="true">🏷</span>{t(lang, 'case1Title')}
             </button>
             <button
-              type="button" className="hb-choice" aria-pressed={route === 'case_2'}
+              type="button" role="tab" id="hb-tab-case2" className="hb-tab"
+              aria-selected={route === 'case_2'} aria-controls="hb-route-panel"
+              tabIndex={route === 'case_2' ? 0 : -1}
               onClick={() => setRoute('case_2')}
             >
-              <div className="hb-choice-title">{t(lang, 'case2Title')}</div>
-              <div className="hb-choice-body">{t(lang, 'case2Body')}</div>
+              <span aria-hidden="true">📄</span>{t(lang, 'case2Title')}
             </button>
           </div>
-          {routeError && <div className="hb-error" role="alert">{routeError}</div>}
+          {/* The selected tab still says what it means; the cards used to carry this. */}
+          <p className="hb-hint" style={{ marginTop: 10 }}>
+            {t(lang, route === 'case_1' ? 'case1Body' : 'case2Body')}
+          </p>
         </div>
       )}
+
+      <div
+        id="hb-route-panel" role={state.phase2Enabled ? 'tabpanel' : undefined}
+        aria-labelledby={state.phase2Enabled ? (route === 'case_1' ? 'hb-tab-case1' : 'hb-tab-case2') : undefined}
+      >
 
       {/* ── Case 1 (US-4) ────────────────────────────────────────────────── */}
       {route === 'case_1' && (
@@ -374,6 +404,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
           {/* AC-5.4 — no file upload is offered on the Case 2 form. */}
         </>
       )}
+
+      </div>
 
       {/* ── What is already in the request (US-6, and what US-7 was for) ─── */}
       {draftLines.length > 0 && <DraftSummary lang={lang} />}

@@ -180,12 +180,6 @@ body {
 .hb-filterbar .hb-input { flex: 1 1 240px; }
 .hb-filterbar .hb-select { flex: 0 1 190px; }
 
-/* ── Choice cards (US-3 route selection) ──────────────────────────────────── */
-.hb-choice { display: block; width: 100%; text-align: start; background: #fff; border: 1.5px solid var(--hb-line); border-radius: var(--hb-r-lg); padding: 16px; cursor: pointer; font-family: inherit; }
-.hb-choice:hover { border-color: #b9d3e8; }
-.hb-choice[aria-pressed="true"] { border-color: var(--hb-blue); background: var(--hb-blue-wash); box-shadow: 0 0 0 3px rgba(2,109,189,.1); }
-.hb-choice-title { font-size: 15px; font-weight: 700; color: var(--hb-navy); margin-bottom: 4px; }
-.hb-choice-body { font-size: 13px; color: var(--hb-ink-2); }
 
 /* ── Status pills — soft fill, rounded rect, always with a word (FR-11.5) ─── */
 .hb-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; border-radius: 6px; padding: 4px 10px; white-space: nowrap; }
@@ -217,6 +211,9 @@ body {
 .hb-tab { font-family: inherit; font-size: 14px; font-weight: 600; background: none; border: none; border-bottom: 3px solid transparent; padding: 11px 14px; cursor: pointer; color: var(--hb-ink-2); display: inline-flex; align-items: center; gap: 7px; margin-bottom: -1px; }
 .hb-tab:hover { color: var(--hb-navy); }
 .hb-tab[aria-selected="true"] { color: var(--hb-navy); border-bottom-color: var(--hb-blue); }
+.hb-tab:focus-visible { outline: 3px solid #7cc2f2; outline-offset: -3px; border-radius: var(--hb-r-sm); }
+/* Inside the request form the two route tabs share the width evenly. */
+.hb-field > .hb-tabs .hb-tab { flex: 1; justify-content: center; text-align: center; }
 
 /* ── Product card (marketplace) ───────────────────────────────────────────── */
 .hb-prod { display: flex; flex-direction: column; overflow: hidden; }
