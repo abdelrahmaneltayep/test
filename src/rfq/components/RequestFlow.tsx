@@ -1,11 +1,13 @@
 /**
  * Buyer request creation — US-2 … US-6.
  *
- * One form, not a wizard. The order of the fields still carries the reasoning US-2 gives —
- * quantity first, so the seller is answering "is this cheaper at my volume?", then the
- * explicit route choice (FR-2.2, never inferred from whether a file is attached, AC-3.5),
- * then the fields that route needs — but the buyer sees all of it at once and sends from
- * the same screen.
+ * One form, not a wizard. It opens on the question that decides the shape of everything
+ * below it — "What would you like to ask for?" — because the route is an explicit choice
+ * (FR-2.2, never inferred from whether a file is attached, AC-3.5) and answering it first
+ * means the fields underneath never rearrange themselves after the buyer has started
+ * filling them in. Quantity follows, so the seller is still answering "is this cheaper at
+ * my volume?" (US-2), and then the fields the chosen route needs. The buyer sees all of it
+ * at once and sends from the same screen.
  *
  * Divergence from the PRD, deliberate: US-7 specifies a separate review step. The
  * information that step existed to give — what is in the request and what it totals — is
@@ -275,6 +277,35 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         </span>
       }
     >
+      {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
+      {state.phase2Enabled && (
+        <div className="hb-field">
+          <span className="hb-label" id="hb-route-label">{t(lang, 'routeStepTitle')}</span>
+          <div className="hb-tabs" role="tablist" aria-labelledby="hb-route-label" onKeyDown={onRouteKeyDown}>
+            <button
+              type="button" role="tab" id="hb-tab-case1" className="hb-tab"
+              aria-selected={route === 'case_1'} aria-controls="hb-route-panel"
+              tabIndex={route === 'case_1' ? 0 : -1}
+              onClick={() => setRoute('case_1')}
+            >
+              <span aria-hidden="true">🏷</span>{t(lang, 'case1Title')}
+            </button>
+            <button
+              type="button" role="tab" id="hb-tab-case2" className="hb-tab"
+              aria-selected={route === 'case_2'} aria-controls="hb-route-panel"
+              tabIndex={route === 'case_2' ? 0 : -1}
+              onClick={() => setRoute('case_2')}
+            >
+              <span aria-hidden="true">📄</span>{t(lang, 'case2Title')}
+            </button>
+          </div>
+          {/* The selected tab still says what it means; the cards used to carry this. */}
+          <p className="hb-hint" style={{ marginTop: 10 }}>
+            {t(lang, route === 'case_1' ? 'case1Body' : 'case2Body')}
+          </p>
+        </div>
+      )}
+
       {/* ── Quantity (US-2) ──────────────────────────────────────────────── */}
       <Field
         label={t(lang, 'quantityLabel')}
@@ -311,35 +342,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         </div>
       )}
 
-      {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
-      {state.phase2Enabled && (
-        <div className="hb-field">
-          <span className="hb-label" id="hb-route-label">{t(lang, 'routeStepTitle')}</span>
-          <div className="hb-tabs" role="tablist" aria-labelledby="hb-route-label" onKeyDown={onRouteKeyDown}>
-            <button
-              type="button" role="tab" id="hb-tab-case1" className="hb-tab"
-              aria-selected={route === 'case_1'} aria-controls="hb-route-panel"
-              tabIndex={route === 'case_1' ? 0 : -1}
-              onClick={() => setRoute('case_1')}
-            >
-              <span aria-hidden="true">🏷</span>{t(lang, 'case1Title')}
-            </button>
-            <button
-              type="button" role="tab" id="hb-tab-case2" className="hb-tab"
-              aria-selected={route === 'case_2'} aria-controls="hb-route-panel"
-              tabIndex={route === 'case_2' ? 0 : -1}
-              onClick={() => setRoute('case_2')}
-            >
-              <span aria-hidden="true">📄</span>{t(lang, 'case2Title')}
-            </button>
-          </div>
-          {/* The selected tab still says what it means; the cards used to carry this. */}
-          <p className="hb-hint" style={{ marginTop: 10 }}>
-            {t(lang, route === 'case_1' ? 'case1Body' : 'case2Body')}
-          </p>
-        </div>
-      )}
-
+      {/* The quantity field sits between the tabs and their panel because it belongs to
+          both routes; the panel below holds only what the chosen route adds. */}
       <div
         id="hb-route-panel" role={state.phase2Enabled ? 'tabpanel' : undefined}
         aria-labelledby={state.phase2Enabled ? (route === 'case_1' ? 'hb-tab-case1' : 'hb-tab-case2') : undefined}

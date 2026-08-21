@@ -33,9 +33,9 @@ Google Fonts stylesheet, and the page falls back to the system stack without a n
 Three surfaces, switchable from the demo bar at the top:
 
 - **Buyer · Marketplace** — the product grid and the product details page, each carrying
-  the negotiation entry point, plus the request form: quantity, then a tab per route —
-  "I have a price to match" (the default) and "Ask the seller to quote" — with that
-  route's fields directly below. A request is one line; multi-line drafts still arrive
+  the negotiation entry point, plus the request form: the route question first — a tab
+  per route, "I have a price to match" (the default) and "Ask the seller to quote" — then
+  quantity, then that route's fields. A request is one line; multi-line drafts still arrive
   through Re-request and are summarised at the foot of the form.
 - **Buyer · Dashboard** — the request list and the three-column original / asked / offered
   comparison, with accept, counter, decline and withdraw.
