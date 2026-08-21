@@ -10,6 +10,7 @@ in the browser with in-memory data — there is no backend.
 | `index.html` | Salla — branches & warehouses plan-limit upgrade nudge | — |
 | `rfq.html` | HIGHBASE — Special Price Request & RFQ | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md) |
 | `variants.html` | HIGHBASE — design variant sheets | — |
+| `stories.html` | HIGHBASE — user story grooming register | [`docs/HIGHBASE-Special-Price-RFQ-User-Stories.md`](docs/HIGHBASE-Special-Price-RFQ-User-Stories.md) |
 
 ## Running
 
@@ -21,8 +22,8 @@ npm run build      # builds both into dist/
 npm run build:single   # rebuilds the single-file prototypes for offline review
 ```
 
-`rfq-prototype.html` and `variants-prototype.html` are committed, dependency-free builds
-for offline review — open either straight from disk and it runs. CSS and JS are inlined; the only external reference is the
+`rfq-prototype.html`, `variants-prototype.html` and `stories-prototype.html` are committed,
+dependency-free builds for offline review — open any of them straight from disk and it runs. CSS and JS are inlined; the only external reference is the
 Google Fonts stylesheet, and the page falls back to the system stack without a network.
 
 ## Special Price Request & RFQ
@@ -69,6 +70,19 @@ The first sheet covers the product card's action row: ten arrangements of **Add*
 **Request special price** (which becomes **View request** once one is open), switchable
 across request state, card width and reading direction, because those three are what
 actually separate the layouts.
+
+## User story grooming register
+
+`stories.html` renders the 28 user stories generated from the original feature-flow draft.
+A flat read buries what the document is actually for: the twenty places the draft is
+silent, ambiguous or contradicts itself. So the register counts them, filters by them, and
+flags them in colour where they bite — amber for a spec gap, red for one that blocks
+estimation. The four blocking questions sit above the register, because the rest is not
+safe to groom around them.
+
+`docs/HIGHBASE-Special-Price-RFQ-User-Stories.md` is the document of record;
+`src/stories/storiesData.ts` carries the same content as data so it can be filtered.
+Keep the two in step when either changes.
 
 ### How the code maps to the PRD
 

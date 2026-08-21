@@ -15,6 +15,7 @@ export default defineConfig({
         rfq: path.resolve(__dirname, 'rfq.html'),
         // Design-variants sheets live alongside the prototypes they explore.
         variants: path.resolve(__dirname, 'variants.html'),
+        stories: path.resolve(__dirname, 'stories.html'),
       },
     },
   },
