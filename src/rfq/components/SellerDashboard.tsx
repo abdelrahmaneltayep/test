@@ -38,6 +38,10 @@ export function SellerDashboard() {
   const [openRef, setOpenRef] = useState<string | null>(null)
   // Feature Flow Draft §8/§9 — the seller gets the same Inbox and the same order list.
   const [section, setSection] = useState<'special' | 'inbox' | 'orders'>('special')
+  // The three decisions are taken from the row now, so the two irreversible ones get a
+  // confirmation that puts the numbers in front of the seller first (FR-5.3 is a seller
+  // fact, so it belongs in a seller confirmation).
+  const [confirming, setConfirming] = useState<{ ref: string; kind: 'accept' | 'decline' } | null>(null)
 
   const rows = useMemo(() => {
     return state.requests
@@ -143,6 +147,8 @@ export function SellerDashboard() {
                   const escalated = isEscalated(r.slaDueAt, state.now)
                   const open = () => { dispatch({ type: 'seller_opens', ref: r.ref }); setOpenRef(r.ref) }
                   const mine = STATE_META[r.state].turn === 'seller'
+                  // §5 — "Accept" takes the ask exactly as sent, so every line needs one.
+                  const acceptableAsAsked = r.lines.every((l) => l.askedPrice !== null)
                   return (
                     <tr
                       key={r.ref} className={`hb-clickable${escalated ? ' hb-row-action' : ''}`}
@@ -166,19 +172,45 @@ export function SellerDashboard() {
                       <td><StatusPill state={r.state} viewer="seller" lang={lang} /></td>
                       <td>
                         <div className="hb-rowactions">
-                          {/*
-                            Respond opens the panel rather than deciding here: margin, the
-                            proof checks and the floor guard all live there, and with the
-                            margin column gone a one-click accept from this table would be
-                            an acceptance taken blind (AC-15.5, FR-5.3).
-                          */}
-                          <button
-                            type="button"
-                            className={`hb-btn hb-btn--sm hb-btn--${mine ? 'primary' : 'secondary'}`}
-                            onClick={(e) => { e.stopPropagation(); open() }}
-                          >
-                            {t(lang, mine ? 'respondNow' : 'viewRequest')}
-                          </button>
+                          {mine ? (
+                            <>
+                              {/*
+                                §5 — the seller's three decisions, in the row. Accept and
+                                Decline settle the request from here; Counter cannot, because
+                                it needs a price typed per line, so it opens the panel.
+                              */}
+                              <button
+                                type="button" className="hb-btn hb-btn--sm hb-btn--primary"
+                                // E-2 — a Case 2 line has no asked price, so there is nothing
+                                // to accept as-is; the control says so rather than going quiet.
+                                disabled={!acceptableAsAsked}
+                                title={acceptableAsAsked ? undefined : t(lang, 'acceptDisabledQuoteOnly')}
+                                onClick={(e) => { e.stopPropagation(); setConfirming({ ref: r.ref, kind: 'accept' }) }}
+                              >
+                                {t(lang, 'accept')}
+                              </button>
+                              <button
+                                type="button" className="hb-btn hb-btn--sm hb-btn--secondary"
+                                onClick={(e) => { e.stopPropagation(); open() }}
+                              >
+                                {t(lang, 'counter')}
+                              </button>
+                              {/* FR-11.6 — the destructive action is quiet and never primary. */}
+                              <button
+                                type="button" className="hb-btn hb-btn--sm hb-btn--danger"
+                                onClick={(e) => { e.stopPropagation(); setConfirming({ ref: r.ref, kind: 'decline' }) }}
+                              >
+                                {t(lang, 'decline')}
+                              </button>
+                            </>
+                          ) : (
+                            <button
+                              type="button" className="hb-btn hb-btn--sm hb-btn--secondary"
+                              onClick={(e) => { e.stopPropagation(); open() }}
+                            >
+                              {t(lang, 'viewRequest')}
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -192,11 +224,141 @@ export function SellerDashboard() {
       )}
 
       {open && <RespondPanel request={open} onClose={() => setOpenRef(null)} />}
+
+      {confirming && (
+        <DecisionConfirm
+          request={state.requests.find((r) => r.ref === confirming.ref) as NegotiationRequest}
+          kind={confirming.kind}
+          onClose={() => setConfirming(null)}
+        />
+      )}
     </DashboardChrome>
   )
 }
 
 interface Decision { outcome: LineOutcome; price: Minor | null }
+
+/**
+ * Feature Flow Draft §5 — confirming a decision taken from the queue row.
+ *
+ * Accept and Decline are irreversible and, taken from a row, are taken without the panel's
+ * numbers in view. So the confirmation carries them: the ask against list, and the margin
+ * that ask leaves. That is seller-internal (FR-5.3 / A7) and never crosses to the buyer.
+ *
+ * A floor breach is not confirmable here at all. AC-15.5 requires a written reason for an
+ * override, and there is nowhere to write one in a two-button dialog, so the seller is sent
+ * to the panel instead of being offered a shortcut past the guard.
+ */
+function DecisionConfirm({ request, kind, onClose }: {
+  request: NegotiationRequest
+  kind: 'accept' | 'decline'
+  onClose: () => void
+}) {
+  const { state, dispatch, lang } = useRfq()
+  const margin = marginAfterAsk(request.lines)
+  const belowFloor = request.lines.find(
+    (l) => l.floorSnapshot !== null && l.askedPrice !== null && l.askedPrice < l.floorSnapshot,
+  )
+  const blocked = kind === 'accept' && belowFloor !== undefined
+
+  function run() {
+    if (kind === 'accept') {
+      dispatch({ type: 'seller_accepts', ref: request.ref })
+    } else {
+      // FR-6.3 — a declined line resolves at list price; the reducer applies that.
+      dispatch({
+        type: 'seller_responds', ref: request.ref,
+        decisions: Object.fromEntries(
+          request.lines.map((l) => [l.id, { outcome: 'declined' as LineOutcome, price: null }]),
+        ),
+        validityDays: DEFAULT_VALIDITY, overrideReason: null,
+      })
+    }
+    onClose()
+  }
+
+  return (
+    <Modal
+      title={<h2 className="hb-h2">{t(lang, kind === 'accept' ? 'confirmSellerAcceptTitle' : 'confirmSellerDeclineTitle')}</h2>}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="hb-btn hb-btn--secondary" onClick={onClose}>{t(lang, 'cancel')}</button>
+          <span className="hb-primary-slot">
+            {blocked ? (
+              <button type="button" className="hb-btn hb-btn--primary" onClick={onClose}>
+                {t(lang, 'viewRequest')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`hb-btn hb-btn--${kind === 'accept' ? 'primary' : 'danger'}`}
+                onClick={run}
+              >
+                {t(lang, kind === 'accept' ? 'accept' : 'decline')}
+              </button>
+            )}
+          </span>
+        </>
+      }
+    >
+      <p className="hb-sub" style={{ marginBottom: 14 }}>
+        {t(lang, kind === 'accept' ? 'confirmSellerAcceptBody' : 'confirmSellerDeclineBody')}
+      </p>
+
+      <div className="hb-row" style={{ marginBottom: 12 }}>
+        <span className="hb-hint">{request.buyerName}</span>
+        <span className="hb-ref">{request.ref}</span>
+      </div>
+
+      {/* The numbers the row no longer shows, at the moment they decide something. */}
+      <div className="hb-table-wrap">
+        <table className="hb-table">
+          <thead>
+            <tr>
+              <th>{t(lang, 'askedVsList')}</th>
+              <th>{t(lang, 'requestMargin')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <Money value={margin.askedTotal} lang={lang} withCurrency />
+                <div className="hb-hint hb-strike">{formatMoney(margin.listTotal, { withCurrency: true, lang })}</div>
+              </td>
+              <td>
+                {margin.pct === null ? (
+                  <span className="hb-pill hb-pill--neutral">
+                    {t(lang, margin.reason === 'cost_missing' ? 'costNotConfigured' : 'quoteRequested')}
+                  </span>
+                ) : (
+                  <span className={`hb-pill hb-pill--${BAND_TONE[margin.band]}`}>
+                    {margin.pct}% · {t(lang, BAND_KEY[margin.band])}
+                  </span>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {blocked && belowFloor && (
+        <div className="hb-banner hb-banner--bad" style={{ marginTop: 14 }}>
+          {t(lang, 'belowFloorWarning', { sku: belowFloor.sku })}
+        </div>
+      )}
+
+      {/* AC-15.6 — an acceptance settles the request; there is no offer clock left to run. */}
+      {kind === 'accept' && !blocked && state.canCreateTemplate && (
+        <p className="hb-hint" style={{ marginTop: 12 }}>
+          {lang === 'ar'
+            ? 'لحفظ هذا السعر لطلبات المشتري القادمة، افتح الطلب واستخدم «اقبل واحفظه كقالب».'
+            : 'To carry this price forward to their next orders, open the request and use “Accept & apply as template”.'}
+        </p>
+      )}
+    </Modal>
+  )
+}
 
 /** US-15 … US-18 — the response surface: line by line, with live margin. */
 function RespondPanel({ request, onClose }: { request: NegotiationRequest; onClose: () => void }) {

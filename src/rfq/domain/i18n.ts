@@ -226,8 +226,13 @@ export const STRINGS: Dict = {
   noActionYet: { en: 'Waiting on the supplier', ar: 'بانتظار المورّد' },
 
   // ── Row actions on the seller's queue (US-14) ─────────────────────────────
-  respondNow: { en: 'Respond', ar: 'الرد' },
   viewRequest: { en: 'View', ar: 'عرض' },
+  acceptDisabledQuoteOnly: { en: 'This request has no asked price to accept — open it and quote a price.', ar: 'لا يوجد سعر مطلوب لقبوله — افتح الطلب وقدّم سعراً.' },
+  confirmSellerAcceptTitle: { en: 'Accept this price?', ar: 'قبول هذا السعر؟' },
+  confirmSellerAcceptBody: { en: 'You accept the buyer\u2019s asked price for this order. It applies once and is not saved to their price list.', ar: 'أنت تقبل السعر الذي طلبه المشتري لهذا الطلب. ينطبق مرة واحدة ولا يُحفظ في قائمة أسعاره.' },
+  confirmSellerDeclineTitle: { en: 'Decline this request?', ar: 'رفض هذا الطلب؟' },
+  confirmSellerDeclineBody: { en: 'Every item resolves at its list price and the negotiation ends. The buyer can still order at that price, and can send a new request.', ar: 'تُحسم كل الأصناف بسعرها المعلن وتنتهي المفاوضة. ويظل بإمكان المشتري الطلب بهذا السعر وإرسال طلب جديد.' },
+  belowFloorWarning: { en: 'The asked price is below your floor on {sku}. Open the request to override it with a reason.', ar: 'السعر المطلوب أقل من حدك الأدنى في {sku}. افتح الطلب لتجاوزه مع ذكر السبب.' },
 
   // ── Inbox — Feature Flow Draft §8 ─────────────────────────────────────────
   navInbox: { en: 'Inbox', ar: 'صندوق الوارد' },
