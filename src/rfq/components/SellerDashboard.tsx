@@ -130,23 +130,23 @@ export function SellerDashboard() {
                   <th>{t(lang, 'buyer')}</th>
                   <th>{t(lang, 'lines')}</th>
                   <th>{t(lang, 'askedVsList')}</th>
-                  <th>{t(lang, 'marginAfterAsk')}<span className="hb-sortarrow" aria-hidden="true">⇅</span></th>
-                  <th>{t(lang, 'proof')}</th>
-                  <th>{t(lang, 'slaRemaining')}<span className="hb-sortarrow" aria-hidden="true">⇅</span></th>
-                  <th>{t(lang, 'roundsUsed')}</th>
                   <th>{t(lang, 'status')}</th>
+                  <th>{t(lang, 'actionsColumn')}</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => {
                   const margin = marginAfterAsk(r.lines)
+                  // AC-14.4 sorts this queue by SLA. The countdown column is gone, so the
+                  // tint is now the only urgency signal in the list — the number itself is
+                  // on the response panel, beside the decision it constrains.
                   const escalated = isEscalated(r.slaDueAt, state.now)
-                  const proofLines = r.lines.filter((l) => l.proof)
-                  const anyFailed = proofLines.some((l) => hasFailedCheck(l.proof?.checks ?? []))
+                  const open = () => { dispatch({ type: 'seller_opens', ref: r.ref }); setOpenRef(r.ref) }
+                  const mine = STATE_META[r.state].turn === 'seller'
                   return (
                     <tr
                       key={r.ref} className={`hb-clickable${escalated ? ' hb-row-action' : ''}`}
-                      onClick={() => { dispatch({ type: 'seller_opens', ref: r.ref }); setOpenRef(r.ref) }}
+                      onClick={open}
                     >
                       <td>
                         <strong>{r.buyerName}</strong>
@@ -163,33 +163,24 @@ export function SellerDashboard() {
                         <Money value={margin.askedTotal} lang={lang} />
                         <div className="hb-hint hb-strike">{formatMoney(margin.listTotal)}</div>
                       </td>
-                      <td>
-                        {/*
-                          AC-14.6 / FR-5.7 — where cost is missing the cell reads "—" with
-                          the reason available on hover and focus. It is never 0 %, and the
-                          row is never dropped from the queue.
-                        */}
-                        {margin.pct === null ? (
-                          <span
-                            className="hb-pill hb-pill--neutral" tabIndex={0}
-                            title={margin.reason === 'cost_missing' ? t(lang, 'costNotConfigured') : t(lang, 'quoteRequested')}
-                          >—</span>
-                        ) : (
-                          <span className={`hb-pill hb-pill--${BAND_TONE[margin.band]}`}>
-                            {margin.pct}% · {t(lang, BAND_KEY[margin.band])}
-                          </span>
-                        )}
-                      </td>
-                      <td>
-                        {proofLines.length === 0
-                          ? <span className="hb-muted">—</span>
-                          : <span className={`hb-pill hb-pill--${anyFailed ? 'bad' : 'good'}`}>
-                              {anyFailed ? (lang === 'ar' ? 'يحتاج مراجعة' : 'Needs review') : (lang === 'ar' ? 'مُتحقق' : 'Checked')}
-                            </span>}
-                      </td>
-                      <td><Countdown dueAt={r.slaDueAt ?? r.offerExpiresAt} now={state.now} lang={lang} escalate={escalated} /></td>
-                      <td className="hb-num">{r.rounds}</td>
                       <td><StatusPill state={r.state} viewer="seller" lang={lang} /></td>
+                      <td>
+                        <div className="hb-rowactions">
+                          {/*
+                            Respond opens the panel rather than deciding here: margin, the
+                            proof checks and the floor guard all live there, and with the
+                            margin column gone a one-click accept from this table would be
+                            an acceptance taken blind (AC-15.5, FR-5.3).
+                          */}
+                          <button
+                            type="button"
+                            className={`hb-btn hb-btn--sm hb-btn--${mine ? 'primary' : 'secondary'}`}
+                            onClick={(e) => { e.stopPropagation(); open() }}
+                          >
+                            {t(lang, mine ? 'respondNow' : 'viewRequest')}
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   )
                 })}
@@ -280,6 +271,20 @@ function RespondPanel({ request, onClose }: { request: NegotiationRequest; onClo
           <div className="hb-row" style={{ marginTop: 6 }}>
             <span className="hb-hint hb-num">{request.ref}</span>
             <StatusPill state={request.state} viewer="seller" lang={lang} />
+            {/*
+              AC-14.5 / FR-4.6 — the SLA countdown moved off the queue row and onto the
+              decision itself, where it constrains what the seller is about to do. It is
+              still interpolated from the server clock, so both surfaces agree to the minute.
+            */}
+            {(request.slaDueAt ?? request.offerExpiresAt) && (
+              <span className="hb-hint">
+                {t(lang, request.slaDueAt ? 'slaRemaining' : 'offerExpiresIn')}:{' '}
+                <Countdown
+                  dueAt={request.slaDueAt ?? request.offerExpiresAt} now={state.now} lang={lang}
+                  escalate={isEscalated(request.slaDueAt, state.now)}
+                />
+              </span>
+            )}
             {/* AC-14.2 — margin is stated in words as well as colour (FR-11.5). */}
             {liveMargin.pct !== null && (
               <span className={`hb-pill hb-pill--${BAND_TONE[liveMargin.band]}`}>

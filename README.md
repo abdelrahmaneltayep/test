@@ -40,8 +40,9 @@ Three surfaces, switchable from the demo bar at the top:
 - **Buyer · Dashboard** — the request list, carrying each row's next step and its cancel,
   and the three-column original / asked / offered comparison behind it, with accept,
   counter, decline and withdraw.
-- **Seller · Dashboard** — the triage queue showing margin after the ask, and the
-  line-by-line response surface with the proof panel and price-list write-back.
+- **Seller · Dashboard** — the triage queue, one row per request with its action, and the
+  line-by-line response surface behind it carrying the SLA countdown, margin after the
+  ask, the proof panel and the price-list write-back.
 
 Both dashboards also carry two shared surfaces from the feature flow draft, reachable from
 the sidebar:

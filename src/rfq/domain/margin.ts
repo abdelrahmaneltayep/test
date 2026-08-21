@@ -28,7 +28,11 @@ export interface MarginResult {
   reason: 'cost_missing' | 'no_priced_lines' | null
   /** AC-14.3 — how many lines carry no asked price, so the row can say so. */
   quoteOnlyLines: number
-  askedTotal: Minor
+  /**
+   * AC-9.2 — null where no line carries an asked price. An all-quote request has no asked
+   * total, and summing it to zero would report a price the buyer never named.
+   */
+  askedTotal: Minor | null
   listTotal: Minor
 }
 
@@ -47,7 +51,7 @@ export function marginAfterAsk(
   const askedTotal = sumMinor(priced.map((l) => lineTotal(l.askedPrice as Minor, l.quantity)))
 
   if (priced.length === 0) {
-    return { pct: null, band: 'unknown', reason: 'no_priced_lines', quoteOnlyLines, askedTotal, listTotal }
+    return { pct: null, band: 'unknown', reason: 'no_priced_lines', quoteOnlyLines, askedTotal: null, listTotal }
   }
   // EC-20 — a single missing cost makes the whole row's margin unknowable. Never guess.
   if (priced.some((l) => l.costSnapshot === null)) {

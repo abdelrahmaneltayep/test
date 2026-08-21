@@ -87,3 +87,17 @@ describe('FR-6.7 — live line margin for the counter input', () => {
     expect(lineMargin(10000, null)).toBeNull()
   })
 })
+
+describe('AC-9.2 — an all-quote request has no asked total', () => {
+  it('reports null rather than zero, so the queue renders "—"', () => {
+    const result = marginAfterAsk([
+      line({ id: 'q1', route: 'case_2', askedPrice: null }),
+      line({ id: 'q2', route: 'case_2', askedPrice: null }),
+    ])
+    expect(result.askedTotal).toBeNull()
+    expect(result.reason).toBe('no_priced_lines')
+    expect(result.quoteOnlyLines).toBe(2)
+    // The list total is still real: those lines have a published price.
+    expect(result.listTotal).toBeGreaterThan(0)
+  })
+})

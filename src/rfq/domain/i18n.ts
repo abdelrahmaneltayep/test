@@ -225,6 +225,10 @@ export const STRINGS: Dict = {
   requestAgain: { en: 'Request again', ar: 'اطلب مرة أخرى' },
   noActionYet: { en: 'Waiting on the supplier', ar: 'بانتظار المورّد' },
 
+  // ── Row actions on the seller's queue (US-14) ─────────────────────────────
+  respondNow: { en: 'Respond', ar: 'الرد' },
+  viewRequest: { en: 'View', ar: 'عرض' },
+
   // ── Inbox — Feature Flow Draft §8 ─────────────────────────────────────────
   navInbox: { en: 'Inbox', ar: 'صندوق الوارد' },
   // §8 names the three categories; the Inbox uses those names rather than the shorter
