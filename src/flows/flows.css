@@ -150,6 +150,21 @@ body {
 .f-arrowhead { fill: var(--f-ink-3); }
 .f-edge-label { font-family: var(--f-mono); font-size: 9.5px; fill: var(--f-ink-2); }
 
+/* ── Swimlane bands ───────────────────────────────────────────────────────── */
+.f-lane-band { fill: currentColor; opacity: .045; }
+.f-lane-head { fill: currentColor; opacity: .12; }
+.f-lane-label { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; fill: currentColor; font-weight: 600; }
+.f-lane--buyer { color: var(--f-buyer); }
+.f-lane--system { color: var(--f-system); }
+.f-lane--seller { color: var(--f-seller); }
+.f-canvas--tall { max-height: 78vh; overflow: auto; resize: vertical; }
+
+/* ── Guarantees that hold across the whole flow ───────────────────────────── */
+.f-also { margin: 0 18px 18px; border: 1px solid var(--f-rule); background: var(--f-paper); padding: 12px 15px; }
+.f-also b { display: block; font-family: var(--f-mono); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--f-ink-3); font-weight: 500; margin-bottom: 7px; }
+.f-also ul { margin: 0; padding-inline-start: 18px; }
+.f-also li { font-size: 13px; line-height: 1.55; color: var(--f-ink-2); margin-bottom: 4px; }
+
 .f-empty { padding: 44px 20px; text-align: center; color: var(--f-ink-2); background: var(--f-card); border: 1px dashed var(--f-rule-2); }
 
 @media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }

@@ -9,12 +9,16 @@
 import { useMemo, useState } from 'react'
 import { ACTOR_LABELS, FLOWS, GROUPS, type Group } from './flowsData'
 import { FlowDiagram } from './FlowDiagram'
+import { MASTER_FLOWS } from './masterFlows'
+import { SwimlaneDiagram } from './SwimlaneDiagram'
 
 type RoleFilter = 'all' | Group
 type PhaseFilter = 'all' | 'P1' | 'P2'
 type Theme = 'system' | 'light' | 'dark'
+type View = 'master' | 'story'
 
 export function FlowsApp() {
+  const [view, setView] = useState<View>('master')
   const [role, setRole] = useState<RoleFilter>('all')
   const [phase, setPhase] = useState<PhaseFilter>('all')
   const [theme, setTheme] = useState<Theme>('system')
@@ -43,20 +47,21 @@ export function FlowsApp() {
     <div className="f-wrap">
       <header className="f-masthead">
         <div className="f-kicker">HIGHBASE · Special Price Request &amp; RFQ · User flows</div>
-        <h1 className="f-h1">Every user story as a flow, and who is holding the request at each step</h1>
+        <h1 className="f-h1">Two flows: everything a buyer hits, and everything a seller hits</h1>
         <p className="f-lede">
-          Twenty-three flows, one per user story in the PRD, grouped by the role that owns them.
-          Inside each diagram the colour of a step says <em>who acts</em> — so a handoff between buyer
-          and seller reads as a colour change rather than something to work out from the labels.
+          One end-to-end flow per role, each handling every case that role can land on — including
+          the ones the rules decide before anyone sees them, the two ways a send gets blocked, and
+          the paths that end without an order.
         </p>
         <p className="f-lede">
-          Blocked outcomes are drawn in red, which is a separate signal from the three role colours:
-          it marks the places the system stops the flow rather than the person deciding to.
-          Three flows carry an amber note where the prototype has already moved past the document.
+          The lane a step sits in is <em>who acts</em>, so a handoff between buyer and seller is a
+          lane crossing rather than something to work out from the labels. Blocked outcomes are red,
+          which is a separate signal from the three role colours: it marks where the system stops
+          the flow rather than a person deciding to.
         </p>
         <div className="f-byline">
-          Source: docs/HIGHBASE-Special-Price-RFQ-PRD.md · {FLOWS.length} flows ·{' '}
-          {counts.buyer} buyer · {counts.seller} seller · {counts.cross} both · {counts.diverge} diverge from the PRD
+          Source: docs/HIGHBASE-Special-Price-RFQ-PRD.md · 2 master flows ·{' '}
+          {FLOWS.length} per-story flows behind the toggle · {counts.diverge} diverge from the PRD
         </div>
 
         <div className="f-legend">
@@ -78,18 +83,23 @@ export function FlowsApp() {
 
       <div className="f-controls">
         <div className="f-ctrl">
+          <span>View</span>
+          <button type="button" className="f-btn" aria-pressed={view === 'master'} onClick={() => setView('master')}>Master flows 2</button>
+          <button type="button" className="f-btn" aria-pressed={view === 'story'} onClick={() => setView('story')}>Per story {FLOWS.length}</button>
+        </div>
+        {view === 'story' && <div className="f-ctrl">
           <span>Role</span>
           <button type="button" className="f-btn" aria-pressed={role === 'all'} onClick={() => setRole('all')}>All {FLOWS.length}</button>
           <button type="button" className="f-btn" aria-pressed={role === 'buyer'} onClick={() => setRole('buyer')}>Buyer {counts.buyer}</button>
           <button type="button" className="f-btn" aria-pressed={role === 'seller'} onClick={() => setRole('seller')}>Seller {counts.seller}</button>
           <button type="button" className="f-btn" aria-pressed={role === 'cross'} onClick={() => setRole('cross')}>Both {counts.cross}</button>
-        </div>
-        <div className="f-ctrl">
+        </div>}
+        {view === 'story' && <div className="f-ctrl">
           <span>Phase</span>
           <button type="button" className="f-btn" aria-pressed={phase === 'all'} onClick={() => setPhase('all')}>All</button>
           <button type="button" className="f-btn" aria-pressed={phase === 'P1'} onClick={() => setPhase('P1')}>P1 {counts.p1}</button>
           <button type="button" className="f-btn" aria-pressed={phase === 'P2'} onClick={() => setPhase('P2')}>P2 {counts.p2}</button>
-        </div>
+        </div>}
         <div className="f-ctrl" style={{ marginInlineStart: 'auto' }}>
           <button type="button" className="f-btn" onClick={() => applyTheme(theme === 'dark' ? 'light' : 'dark')}>
             {theme === 'dark' ? 'Light' : 'Dark'}
@@ -97,9 +107,29 @@ export function FlowsApp() {
         </div>
       </div>
 
-      {shown.length === 0 && <p className="f-empty">No flows match that combination.</p>}
+      {view === 'master' && MASTER_FLOWS.map((flow) => (
+        <section className="f-group" id={flow.role} key={flow.id}>
+          <div className="f-group-head">
+            <h2>{flow.title}</h2>
+            <p>{flow.caption}</p>
+          </div>
+          <figure className="f-figure">
+            <div className="f-canvas f-canvas--tall"><SwimlaneDiagram flow={flow} /></div>
+            <figcaption className="f-figcaption">
+              Lanes read left to right as Buyer, System, Seller; the flow runs top to bottom.
+              A step’s lane is who performs it.
+            </figcaption>
+            <div className="f-also">
+              <b>True everywhere on this flow, so drawn nowhere</b>
+              <ul>{flow.alsoTrue.map((t) => <li key={t}>{t}</li>)}</ul>
+            </div>
+          </figure>
+        </section>
+      ))}
 
-      {GROUPS.map((g) => {
+      {view === 'story' && shown.length === 0 && <p className="f-empty">No flows match that combination.</p>}
+
+      {view === 'story' && GROUPS.map((g) => {
         const flows = shown.filter((f) => f.group === g.id)
         if (flows.length === 0) return null
         return (

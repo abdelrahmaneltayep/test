@@ -88,15 +88,23 @@ Keep the two in step when either changes.
 
 ## User flows
 
-`flows.html` draws one flow per PRD user story — 23 of them, grouped by the role that owns
-it: 14 buyer, 6 seller, 3 belonging to neither side alone.
+`flows.html` leads with two end-to-end flows — **Buyer, every case** and **Seller, every
+case** — each covering every branch that role can land on, including the ones the rules
+decide before anyone sees them and the paths that end without an order. The 23 per-story
+flows sit behind a toggle for tracing a single story back to the PRD.
 
-Each diagram is inline SVG generated from `src/flows/flowsData.ts` rather than drawn by
-hand, because the set shares one grid and twenty-three hand-placed diagrams would not hold
-it. Node colour is the load-bearing encoding: it says *who acts* at that step, so a handoff
-between buyer and seller reads as a colour change. That is the PRD's own G3 — both parties
-always know whose turn it is — carried by the picture. Blocked outcomes use a semantic red
-kept separate from the three role hues.
+The master flows are vertical swimlanes: three lanes, Buyer / System / Seller, running top
+to bottom. The lane a step sits in is who performs it, so a handoff is a lane crossing you
+can see without reading a label. Each carries a short list of the guarantees that hold
+across the whole flow — idempotent submission, the actor boundary, ordered auto-rules —
+which are true everywhere and so are drawn nowhere.
+
+Every diagram is inline SVG generated from data rather than drawn by hand, because each set
+shares one grid and hand-placing them would not hold it: `src/flows/masterFlows.ts` with
+`SwimlaneDiagram` for the two, `src/flows/flowsData.ts` with `FlowDiagram` for the 23.
+Colour repeats the actor encoding for anyone scanning a single node out of context, and
+blocked outcomes use a semantic red kept separate from the three role hues — it marks where
+the system stops the flow rather than a person deciding to.
 
 Three flows carry an amber note where the prototype has moved past the document: US-3
 (route now preselected), US-6 (multi-line removed) and US-7 (review step collapsed). The
