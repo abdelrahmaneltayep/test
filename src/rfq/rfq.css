@@ -365,3 +365,6 @@ body {
 @media (max-width: 640px) {
   .hb-inbox-time { display: none; }
 }
+
+/* The buyer list's action column — two small buttons that must not wrap the row. */
+.hb-rowactions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }

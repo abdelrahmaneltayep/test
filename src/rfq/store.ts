@@ -169,11 +169,15 @@ export function listTotalOf(lines: RequestLine[]): Minor {
   return sumMinor(lines.map((l) => lineTotal(l.listPriceSnapshot, l.quantity)))
 }
 
-/** AC-7.2 — Case 2 lines are excluded from the asked total, which says so on the label. */
-export function askedTotalOf(lines: RequestLine[]): Minor {
-  return sumMinor(
-    lines.filter((l) => l.askedPrice !== null).map((l) => lineTotal(l.askedPrice as Minor, l.quantity)),
-  )
+/**
+ * AC-7.2 — Case 2 lines are excluded from the asked total, which says so on the label.
+ * AC-9.2 — where no line carries an asked price at all, the total is null and renders
+ * "—". Summing an all-RFQ request to zero would state an ask the buyer never made.
+ */
+export function askedTotalOf(lines: RequestLine[]): Minor | null {
+  const priced = lines.filter((l) => l.askedPrice !== null)
+  if (priced.length === 0) return null
+  return sumMinor(priced.map((l) => lineTotal(l.askedPrice as Minor, l.quantity)))
 }
 
 /** AC-9.3 — the offered total is computed over resolved lines only. */

@@ -37,8 +37,9 @@ Three surfaces, switchable from the demo bar at the top:
   per route, "I have a price to match" (the default) and "Ask the seller to quote" — then
   quantity, then that route's fields. A request is one line; multi-line drafts still arrive
   through Re-request and are summarised at the foot of the form.
-- **Buyer · Dashboard** — the request list and the three-column original / asked / offered
-  comparison, with accept, counter, decline and withdraw.
+- **Buyer · Dashboard** — the request list, carrying each row's next step and its cancel,
+  and the three-column original / asked / offered comparison behind it, with accept,
+  counter, decline and withdraw.
 - **Seller · Dashboard** — the triage queue showing margin after the ask, and the
   line-by-line response surface with the proof panel and price-list write-back.
 

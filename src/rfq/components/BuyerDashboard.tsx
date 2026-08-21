@@ -5,8 +5,8 @@
  * which answers "what changed and what do I do about it?" in three columns.
  */
 
-import { useMemo, useState } from 'react'
-import { acceptanceAllowed, isEscalated } from '../domain/clocks'
+import { useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react'
+import { acceptanceAllowed } from '../domain/clocks'
 import { guardrailValue } from '../domain/guardrails'
 import { renderHistory, t } from '../domain/i18n'
 import { formatMoney, parseMoney, percentOff } from '../domain/money'
@@ -24,7 +24,7 @@ import { buildInbox, unreadCount } from '../domain/inbox'
 const MAX_ROUNDS = guardrailValue('maxRounds')
 
 export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
-  const { state, lang, setLang } = useRfq()
+  const { state, dispatch, lang, setLang } = useRfq()
   const [openRef, setOpenRef] = useState<string | null>(null)
   // Feature Flow Draft §8/§9 — the Inbox and Final Orders are two more places the same
   // negotiation shows up, so the sidebar actually navigates now.
@@ -128,14 +128,13 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                   <th>{t(lang, 'supplier')}</th>
                   <th>{t(lang, 'lines')}</th>
                   <th>{t(lang, 'status')}</th>
-                  <th>{t(lang, 'timeRemaining')}</th>
                   <th>{t(lang, 'totalAsked')}</th>
+                  <th>{t(lang, 'actionsColumn')}</th>
                 </tr>
               </thead>
               <tbody>
                 {visible.map((r) => {
                   const needsMe = STATE_META[r.state].buyerActionRequired
-                  const clock = r.slaDueAt ?? r.offerExpiresAt
                   return (
                     <tr
                       key={r.ref}
@@ -146,8 +145,15 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                       <td>{r.sellerName}</td>
                       <td className="hb-num">{r.lines.length}</td>
                       <td><StatusPill state={r.state} viewer="buyer" lang={lang} /></td>
-                      <td><Countdown dueAt={clock} now={state.now} lang={lang} escalate={isEscalated(clock, state.now)} /></td>
                       <td><Money value={askedTotalOf(r.lines)} lang={lang} withCurrency /></td>
+                      <td>
+                        <RowActions
+                          request={r} lang={lang} now={state.now}
+                          onOpen={() => setOpenRef(r.ref)}
+                          onWithdraw={() => dispatch({ type: 'buyer_withdraws', ref: r.ref })}
+                          onReRequest={() => { dispatch({ type: 're_request', ref: r.ref }); onBrowse() }}
+                        />
+                      </td>
                     </tr>
                   )
                 })}
@@ -160,6 +166,60 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
 
       {open && <Comparison request={open} onClose={() => setOpenRef(null)} />}
     </DashboardChrome>
+  )
+}
+
+/**
+ * US-8 — the row's next step, in the list.
+ *
+ * The list carries the action that moves the request on and the one that ends it, not the
+ * whole decision set: accepting a counter needs the original / asked / offered comparison
+ * in front of you (AC-10.1 puts Accept on that surface, as its single primary action), so
+ * the row opens it rather than pretending a one-click accept is safe from a table that
+ * does not show the offered price.
+ *
+ * The offer countdown that used to sit in this column lives on the comparison, next to the
+ * decision it constrains; the row still sorts action-first and tints (AC-8.2).
+ */
+function RowActions({ request, lang, now, onOpen, onWithdraw, onReRequest }: {
+  request: NegotiationRequest
+  lang: 'en' | 'ar'
+  now: Date
+  onOpen: () => void
+  onWithdraw: () => void
+  onReRequest: () => void
+}) {
+  const meta = STATE_META[request.state]
+  // EC-16 — server time decides. An expired offer is not reviewable, only re-requestable.
+  const live = acceptanceAllowed(request.offerExpiresAt, now)
+  const canWithdraw = ['submitted', 'viewed', 'info_requested', 'countered_by_seller', 'countered_by_buyer']
+    .includes(request.state)
+
+  // A click on a button must not also open the row.
+  const act = (fn: () => void) => (e: ReactMouseEvent) => { e.stopPropagation(); fn() }
+
+  const primary =
+    request.state === 'countered_by_seller' && live ? { label: t(lang, 'reviewOffer'), run: onOpen }
+      : request.state === 'info_requested' ? { label: t(lang, 'addInformation'), run: onOpen }
+        : meta.terminal || !live ? { label: t(lang, 'requestAgain'), run: onReRequest }
+          : null
+
+  return (
+    <div className="hb-rowactions">
+      {primary && (
+        <button type="button" className="hb-btn hb-btn--sm hb-btn--primary" onClick={act(primary.run)}>
+          {primary.label}
+        </button>
+      )}
+      {canWithdraw && (
+        // FR-11.6 — the destructive action is quiet and never primary.
+        <button type="button" className="hb-btn hb-btn--sm hb-btn--danger" onClick={act(onWithdraw)}>
+          {t(lang, 'cancelRequest')}
+        </button>
+      )}
+      {/* E-2 / FR-11.5 — a row with nothing to do says so rather than sitting blank. */}
+      {!primary && !canWithdraw && <span className="hb-hint">{t(lang, 'noActionYet')}</span>}
+    </div>
   )
 }
 

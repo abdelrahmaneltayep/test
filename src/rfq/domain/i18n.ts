@@ -217,6 +217,14 @@ export const STRINGS: Dict = {
   checksNotRun: { en: 'Checks could not run — review the document manually.', ar: 'تعذّر تشغيل الفحوص — راجع المستند يدوياً.' },
   duplicateSeenBefore: { en: 'This document was submitted before, on {date}.', ar: 'سبق تقديم هذا المستند بتاريخ {date}.' },
 
+  // ── Row actions on the buyer's request list (US-8) ────────────────────────
+  actionsColumn: { en: 'Actions', ar: 'الإجراءات' },
+  reviewOffer: { en: 'Review offer', ar: 'مراجعة العرض' },
+  addInformation: { en: 'Add information', ar: 'إضافة المعلومات' },
+  cancelRequest: { en: 'Cancel', ar: 'إلغاء' },
+  requestAgain: { en: 'Request again', ar: 'اطلب مرة أخرى' },
+  noActionYet: { en: 'Waiting on the supplier', ar: 'بانتظار المورّد' },
+
   // ── Inbox — Feature Flow Draft §8 ─────────────────────────────────────────
   navInbox: { en: 'Inbox', ar: 'صندوق الوارد' },
   // §8 names the three categories; the Inbox uses those names rather than the shorter
