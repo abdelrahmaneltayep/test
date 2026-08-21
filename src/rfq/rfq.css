@@ -204,7 +204,8 @@ body {
 .hb-table tfoot td { padding: 14px 16px; font-weight: 700; background: var(--hb-thead); border-top: 1px solid var(--hb-line); }
 .hb-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hb-strike { text-decoration: line-through; color: var(--hb-ink-3); }
-.hb-ref { color: var(--hb-blue); font-weight: 600; font-variant-numeric: tabular-nums; }
+/* A reference is one token; breaking it across lines makes it unreadable and unsearchable. */
+.hb-ref { color: var(--hb-blue); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* ── Tabs — icon + label, navy underline on the active one ────────────────── */
 .hb-tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--hb-line); flex-wrap: wrap; }
@@ -368,3 +369,6 @@ body {
 
 /* The buyer list's action column — two small buttons that must not wrap the row. */
 .hb-rowactions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+/* Both routes on one row wrap rather than widening the column. */
+.hb-routetags { display: inline-flex; gap: 5px; flex-wrap: wrap; }

@@ -16,7 +16,7 @@ import { hasFailedCheck } from '../domain/proof'
 import { STATE_META } from '../domain/states'
 import type { InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } from '../domain/types'
 import { useRfq } from '../store'
-import { CheckBadge, Countdown, Empty, Field, Modal, Money, StatusPill } from './ui'
+import { CheckBadge, Countdown, Empty, Field, Modal, Money, RouteTags, StatusPill } from './ui'
 import { DashboardChrome, type NavGroup } from './Chrome'
 import { Inbox } from './Inbox'
 import { Orders } from './Orders'
@@ -132,6 +132,7 @@ export function SellerDashboard() {
               <thead>
                 <tr>
                   <th>{t(lang, 'buyer')}</th>
+                  <th>{t(lang, 'requestType')}</th>
                   <th>{t(lang, 'lines')}</th>
                   <th>{t(lang, 'askedVsList')}</th>
                   <th>{t(lang, 'status')}</th>
@@ -158,6 +159,7 @@ export function SellerDashboard() {
                         <strong>{r.buyerName}</strong>
                         <div className="hb-ref" style={{ fontSize: 12 }}>{r.ref}</div>
                       </td>
+                      <td><RouteTags lines={r.lines} lang={lang} /></td>
                       <td className="hb-num">
                         {r.lines.length}
                         {/* AC-14.3 — the row states how many lines are quote-only. */}

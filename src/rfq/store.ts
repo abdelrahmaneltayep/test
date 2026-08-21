@@ -741,6 +741,12 @@ export function initialState(now: Date): RfqState {
       sellerResponses: [{ sellerId: SELLER.id, respondedAt: addHours(now, -17).toISOString(), expiresAt: addDays(now, 4).toISOString(), floorOverrideReason: null }],
     }),
 
+    // A pure-RFQ request still awaiting the seller — what the seller's RFQ tab is for,
+    // and the case where Accept has nothing to accept as-is (draft §4, §5).
+    base('SPR-2608-0006', 'submitted', [
+      mkLine('HB-7788', 300, 'case_2', null, null, 'pending'),
+    ], { slaDueAt: addHours(now, 12).toISOString(), submittedAt: addHours(now, -12).toISOString() }),
+
     // EC-20 — a request whose only priced line has no cost configured.
     base('SPR-2608-0003', 'viewed', [
       mkLine('HB-9032', 80, 'case_1', 6_100, null, 'pending'),
@@ -801,7 +807,7 @@ export function initialState(now: Date): RfqState {
   ]
 
   return {
-    now, seq: 7, requests: seeded, orders, orderSeq: 20, priceList: [],
+    now, seq: 8, requests: seeded, orders, orderSeq: 20, priceList: [],
     draft: null, submittedDrafts: {},
     phase2Enabled: true, autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
     canOverrideFloor: true, canCreateTemplate: true, opsAlerts: [],

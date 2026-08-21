@@ -170,6 +170,7 @@ export const STRINGS: Dict = {
   tabSent: { en: 'Sent', ar: 'المُرسل' },
   buyer: { en: 'Buyer', ar: 'المشتري' },
   askedVsList: { en: 'Asked vs list', ar: 'المطلوب مقابل المعلن' },
+  requestType: { en: 'Type', ar: 'النوع' },
   marginAfterAsk: { en: 'Margin after the ask', ar: 'الهامش بعد الطلب' },
   proof: { en: 'Proof', ar: 'الإثبات' },
   slaRemaining: { en: 'SLA left', ar: 'المتبقي من المهلة' },

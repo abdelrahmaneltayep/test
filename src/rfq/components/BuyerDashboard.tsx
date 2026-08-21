@@ -15,7 +15,7 @@ import { STATE_META } from '../domain/states'
 import { toBuyerView } from '../domain/serialize'
 import type { NegotiationRequest, RequestLine } from '../domain/types'
 import { askedTotalOf, listTotalOf, offeredTotalOf, useRfq } from '../store'
-import { Countdown, Empty, Modal, Money, StatusPill } from './ui'
+import { Countdown, Empty, Modal, Money, RouteTags, StatusPill } from './ui'
 import { DashboardChrome, type NavGroup } from './Chrome'
 import { Inbox } from './Inbox'
 import { Orders } from './Orders'
@@ -125,6 +125,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
               <thead>
                 <tr>
                   <th>{t(lang, 'reference')}</th>
+                  <th>{t(lang, 'requestType')}</th>
                   <th>{t(lang, 'supplier')}</th>
                   <th>{t(lang, 'lines')}</th>
                   <th>{t(lang, 'status')}</th>
@@ -142,6 +143,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                       onClick={() => setOpenRef(r.ref)}
                     >
                       <td><span className="hb-ref">{r.ref}</span></td>
+                      <td><RouteTags lines={r.lines} lang={lang} /></td>
                       <td>{r.sellerName}</td>
                       <td className="hb-num">{r.lines.length}</td>
                       <td><StatusPill state={r.state} viewer="buyer" lang={lang} /></td>

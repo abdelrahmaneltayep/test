@@ -11,12 +11,31 @@ import { formatCountdown, remainingMs } from '../domain/clocks'
 import { formatMoney } from '../domain/money'
 import { STATE_META, type RequestState } from '../domain/states'
 import type { Lang } from '../domain/i18n'
-import type { CheckSeverity, Minor } from '../domain/types'
+import { t } from '../domain/i18n'
+import type { CheckSeverity, Minor, RequestLine } from '../domain/types'
 
 export function Money({ value, lang, withCurrency }: { value: Minor | null; lang?: Lang; withCurrency?: boolean }) {
   // AC-9.2 — a missing value renders "—", never a fabricated or inferred number.
   if (value === null) return <span className="hb-num hb-muted">—</span>
   return <span className="hb-num">{formatMoney(value, { withCurrency, lang })}</span>
+}
+
+/**
+ * Feature Flow Draft §1 — which of the two routes a request took, on the row.
+ *
+ * A request that carries both shows both, rather than being flattened to the stronger one:
+ * "Special price" alone on a row that also has a line awaiting a quote would misdescribe
+ * what the other party has to answer.
+ */
+export function RouteTags({ lines, lang }: { lines: RequestLine[]; lang: Lang }) {
+  const hasCase1 = lines.some((l) => l.route === 'case_1')
+  const hasCase2 = lines.some((l) => l.route === 'case_2')
+  return (
+    <span className="hb-routetags">
+      {hasCase1 && <span className="hb-pill hb-pill--info">{t(lang, 'tabSpecialPrice')}</span>}
+      {hasCase2 && <span className="hb-pill hb-pill--neutral">{t(lang, 'tabRfq')}</span>}
+    </span>
+  )
 }
 
 export function StatusPill({ state, viewer, lang }: { state: RequestState; viewer: 'buyer' | 'seller'; lang: Lang }) {
