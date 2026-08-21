@@ -334,3 +334,34 @@ body {
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* ── Inbox — Feature Flow Draft §8 ──────────────────────────────────────── */
+
+.hb-tab-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--hb-blue-wash-2); color: var(--hb-blue-deep); font-size: 12px; font-weight: 700; }
+.hb-tab[aria-selected="true"] .hb-tab-count { background: var(--hb-blue); color: #fff; }
+/* On the Inbox the number is "needs you", not "how many rows", so it wears the same
+   orange the sidebar badge does rather than reading as a plain item count. */
+.hb-tab-count--action, .hb-tab[aria-selected="true"] .hb-tab-count--action { background: var(--hb-orange); color: #fff; }
+
+.hb-navitem-badge { margin-inline-start: auto; display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: var(--hb-orange); color: #fff; font-size: 12px; font-weight: 700; }
+
+.hb-inbox { list-style: none; margin: 0; padding: 0; }
+.hb-inbox-item { border-top: 1px solid var(--hb-line-soft); }
+.hb-inbox-item:first-child { border-top: none; }
+.hb-inbox-btn { display: flex; align-items: flex-start; gap: 12px; width: 100%; background: none; border: none; padding: 14px 20px; font-family: inherit; font-size: 14px; color: var(--hb-ink); text-align: start; cursor: pointer; }
+.hb-inbox-btn:hover { background: var(--hb-blue-wash); }
+.hb-inbox-btn:focus-visible { outline: 3px solid #7cc2f2; outline-offset: -3px; }
+/* FR-11.5 — the unread marker is redundant with the "Needs you" pill beside it, never
+   the only signal. */
+.hb-inbox-mark { flex: 0 0 auto; width: 8px; height: 8px; margin-top: 7px; border-radius: 50%; background: transparent; }
+.hb-inbox-item--unread .hb-inbox-mark { background: var(--hb-orange); }
+.hb-inbox-item--unread { background: var(--hb-orange-wash); }
+.hb-inbox-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 auto; }
+.hb-inbox-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.hb-inbox-line { color: var(--hb-ink); }
+.hb-inbox-meta { color: var(--hb-ink-2); font-size: 13px; }
+.hb-inbox-time { flex: 0 0 auto; color: var(--hb-ink-2); font-size: 12.5px; white-space: nowrap; padding-top: 2px; }
+
+@media (max-width: 640px) {
+  .hb-inbox-time { display: none; }
+}

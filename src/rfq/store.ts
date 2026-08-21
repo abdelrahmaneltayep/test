@@ -12,6 +12,7 @@ import { addDays, addHours, dueForExpiry } from './domain/clocks'
 import { GATING, GUARDRAILS, guardrailValue } from './domain/guardrails'
 import { lineTotal, sumMinor } from './domain/money'
 import { hasFailedCheck, runAutoChecks } from './domain/proof'
+import { makeOrderId, orderLinesFrom, viewOrder, type Order } from './domain/orders'
 import { makeRef } from './domain/reference'
 import { evaluateAutoRules } from './domain/rules'
 import { attemptTransition, type RequestState } from './domain/states'
@@ -121,6 +122,13 @@ export interface RfqState {
   now: Date
   seq: number
   requests: NegotiationRequest[]
+  /**
+   * Feature Flow Draft §7/§9 — the order the buyer is actually placing. A separate
+   * aggregate from the negotiation (PRD §6.6 Decision 2); everything the draft calls an
+   * order status is projected in domain/orders.ts rather than stored twice.
+   */
+  orders: Order[]
+  orderSeq: number
   priceList: PriceListEntry[]
   draft: Draft | null
   /** FR-2.9 — draft ids already submitted; a repeat submit returns the same reference. */
@@ -190,6 +198,10 @@ export type Action =
   | { type: 'buyer_declines'; ref: string }
   | { type: 'buyer_withdraws'; ref: string }
   | { type: 're_request'; ref: string }
+  | { type: 'seller_accepts_template'; ref: string; prices: Record<string, Minor>; template: Omit<PriceListEntry, 'buyerId' | 'sourceRequestRef' | 'active'>; conflictResolution?: 'replace' | 'supersede' }
+  | { type: 'seller_accepts'; ref: string }
+  | { type: 'confirm_order'; id: string }
+  | { type: 'cancel_order'; id: string }
   | { type: 'set_flag'; key: 'phase2Enabled' | 'canOverrideFloor' | 'canCreateTemplate'; value: boolean }
   | { type: 'set_auto_accept'; percent: number }
 
@@ -197,6 +209,16 @@ function withRequest(
   state: RfqState, ref: string, fn: (r: NegotiationRequest) => NegotiationRequest,
 ): RfqState {
   return { ...state, requests: state.requests.map((r) => (r.ref === ref ? fn(r) : r)) }
+}
+
+/** FR-8.3 / AC-18.4 — never a silent overwrite; the caller has already chosen. */
+function writeTemplate(
+  priceList: PriceListEntry[], entry: PriceListEntry, resolution: 'replace' | 'supersede' | undefined,
+): PriceListEntry[] {
+  return resolution === 'replace'
+    ? [...priceList.filter((e) => !(e.buyerId === entry.buyerId && e.sku === entry.sku)), entry]
+    : [...priceList.map((e) =>
+        e.buyerId === entry.buyerId && e.sku === entry.sku ? { ...e, active: false } : e), entry]
 }
 
 /**
@@ -298,10 +320,26 @@ export function reducer(state: RfqState, action: Action): RfqState {
         }
       }
 
+      // Feature Flow Draft §2/§7 — the buyer is placing an order at a quantity, and the
+      // price on it is what is under negotiation. The order opens Pending against this
+      // request; its status, its buttons and the price it shows are all projected from
+      // the request in domain/orders.ts, so the two records cannot drift apart.
+      const order: Order = {
+        id: makeOrderId(now, state.orderSeq),
+        buyerId: BUYER.id, buyerName: BUYER.name[lang],
+        sellerId: SELLER.id, sellerName: SELLER.name[lang],
+        placedAt: now.toISOString(),
+        lines: orderLinesFrom(lines),
+        requestRef: ref,
+        resolution: null,
+      }
+
       return {
         ...state,
         seq: state.seq + 1,
+        orderSeq: state.orderSeq + 1,
         requests: [request, ...state.requests],
+        orders: [order, ...state.orders],
         draft: null,
         submittedDrafts: { ...state.submittedDrafts, [draft.id]: ref },
         opsAlerts,
@@ -410,11 +448,7 @@ export function reducer(state: RfqState, action: Action): RfqState {
           sourceRequestRef: request.ref,
           active: true,
         }
-        // FR-8.3 — never a silent overwrite; the caller has already chosen.
-        priceList = action.conflictResolution === 'replace'
-          ? [...priceList.filter((e) => !(e.buyerId === entry.buyerId && e.sku === entry.sku)), entry]
-          : [...priceList.map((e) =>
-              e.buyerId === entry.buyerId && e.sku === entry.sku ? { ...e, active: false } : e), entry]
+        priceList = writeTemplate(priceList, entry, action.conflictResolution)
       }
 
       return {
@@ -494,6 +528,92 @@ export function reducer(state: RfqState, action: Action): RfqState {
         },
       }
     }
+
+    /**
+     * Feature Flow Draft §5 — "Accept & apply as template": accept the ask as it stands
+     * and write the price forward. Distinct from Accept, which settles this order only.
+     */
+    case 'seller_accepts_template': {
+      const request = state.requests.find((r) => r.ref === action.ref)
+      if (!request) return state
+      const entry: PriceListEntry = {
+        ...action.template,
+        buyerId: request.buyerId,
+        sourceRequestRef: request.ref,
+        active: true,
+      }
+      const next = withRequest(state, action.ref, (r) => {
+        const moved = transitioned(
+          r, 'accepted_as_template', 'seller', SELLER.name[lang], state.now, 'RequestAccepted',
+        )
+        // The guard rejected it — the price list must not be written either.
+        if (moved === r) return r
+        return {
+          ...moved,
+          history: [...moved.history, event('TemplateCreated', 'seller', SELLER.name[lang], state.now, { validUntil: action.template.validUntil })],
+          lines: moved.lines.map((l) => ({
+            ...l,
+            outcome: 'accepted' as LineOutcome,
+            offeredPrice: action.prices[l.id] ?? l.offeredPrice ?? l.askedPrice ?? l.listPriceSnapshot,
+          })),
+          slaDueAt: null, offerExpiresAt: null,
+        }
+      })
+      // A rejected transition leaves the request identical; nothing else may change.
+      if (next.requests === state.requests) return state
+      return { ...next, priceList: writeTemplate(state.priceList, entry, action.conflictResolution) }
+    }
+
+    /**
+     * Feature Flow Draft §5 — "Accept: one-time acceptance for this order only." The ask
+     * is taken exactly as sent, with no counter and nothing written forward.
+     */
+    case 'seller_accepts':
+      return withRequest(state, action.ref, (r) => {
+        const moved = transitioned(
+          r, 'accepted', 'seller', SELLER.name[lang], state.now, 'RequestAccepted', { lines: r.lines.length },
+        )
+        if (moved === r) return r
+        return {
+          ...moved,
+          lines: moved.lines.map((l) => ({
+            ...l, outcome: 'accepted' as LineOutcome, offeredPrice: l.askedPrice ?? l.listPriceSnapshot,
+          })),
+          slaDueAt: null, offerExpiresAt: null,
+          sellerResponses: [...moved.sellerResponses, {
+            sellerId: SELLER.id, respondedAt: state.now.toISOString(),
+            expiresAt: state.now.toISOString(), floorOverrideReason: null,
+          }],
+        }
+      })
+
+    /**
+     * §6/§7 — the buyer's answer to the seller's response, or to a reject that put the
+     * order back at the original price. It settles the order, never the negotiation:
+     * a terminal request stays terminal (PRD §6.6 Decision 2).
+     */
+    case 'confirm_order':
+      return {
+        ...state,
+        orders: state.orders.map((o) => {
+          if (o.id !== action.id || o.resolution) return o
+          const request = state.requests.find((r) => r.ref === o.requestRef) ?? null
+          const view = viewOrder(o, request)
+          if (!view.buyerActions.includes('confirm')) return o
+          return { ...o, resolution: { kind: 'confirmed' as const, at: state.now.toISOString(), prices: view.prices } }
+        }),
+      }
+
+    case 'cancel_order':
+      return {
+        ...state,
+        orders: state.orders.map((o) => {
+          if (o.id !== action.id || o.resolution) return o
+          const request = state.requests.find((r) => r.ref === o.requestRef) ?? null
+          if (!viewOrder(o, request).buyerActions.includes('cancel')) return o
+          return { ...o, resolution: { kind: 'cancelled' as const, at: state.now.toISOString(), prices: {} } }
+        }),
+      }
 
     case 'set_flag':
       return { ...state, [action.key]: action.value }
@@ -601,10 +721,38 @@ export function initialState(now: Date): RfqState {
       sellerResponses: [{ sellerId: SELLER.id, respondedAt: addHours(now, -24).toISOString(), expiresAt: addDays(now, 5).toISOString(), floorOverrideReason: null }],
     }),
 
+    // A pure-RFQ thread the seller has already quoted — the draft's Case 2 round trip,
+    // and what fills the Inbox's RFQ category on both sides (§4, §8).
+    base('SPR-2608-0005', 'countered_by_seller', [
+      mkLine('HB-6115', 30, 'case_2', null, 11_800, 'countered'),
+    ], {
+      rounds: 1, slaDueAt: null,
+      offerExpiresAt: addDays(now, 4).toISOString(),
+      submittedAt: addHours(now, -20).toISOString(),
+      history: [
+        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -20), { lines: 1 }),
+        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -18)),
+        event('SellerResponded', 'seller', SELLER.name.en, addHours(now, -17), { lines: 1 }),
+      ],
+      sellerResponses: [{ sellerId: SELLER.id, respondedAt: addHours(now, -17).toISOString(), expiresAt: addDays(now, 4).toISOString(), floorOverrideReason: null }],
+    }),
+
     // EC-20 — a request whose only priced line has no cost configured.
     base('SPR-2608-0003', 'viewed', [
       mkLine('HB-9032', 80, 'case_1', 6_100, null, 'pending'),
     ], { slaDueAt: addHours(now, 30).toISOString() }),
+
+    // A settled one, so Final Orders has a negotiated row with a real saving on it (§9).
+    base('SPR-2607-0031', 'accepted', [
+      mkLine('HB-5520', 60, 'case_1', 8_300, 8_300, 'accepted', proofOk),
+    ], {
+      slaDueAt: null, submittedAt: addHours(now, -96).toISOString(),
+      history: [
+        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -96), { lines: 1 }),
+        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -92)),
+        event('RequestAccepted', 'seller', SELLER.name.en, addHours(now, -90)),
+      ],
+    }),
 
     // A closed one, so the buyer list is not all live rows (AC-22.1).
     base('SPR-2607-0044', 'declined', [
@@ -618,8 +766,39 @@ export function initialState(now: Date): RfqState {
     }),
   ]
 
+  /**
+   * Feature Flow Draft §9 — "Final Orders = orders with no RFQ/special price negotiation
+   * at all (standard orders), plus RFQ/special-price orders once approved." Both kinds are
+   * seeded so the list shows the mix, and every seeded negotiation carries its order.
+   */
+  const standard = (id: string, hoursAgo: number, lines: [string, number][]): Order => ({
+    id, buyerId: BUYER.id, buyerName: BUYER.name.en,
+    sellerId: SELLER.id, sellerName: SELLER.name.en,
+    placedAt: addHours(now, hoursAgo).toISOString(),
+    lines: lines.map(([sku, quantity]) => {
+      const p = productBySku(sku)
+      return { sku, productName: p.name, quantity, originalUnitPrice: p.listPrice }
+    }),
+    requestRef: null, resolution: null,
+  })
+
+  const orders: Order[] = [
+    ...seeded.map((r, i) => ({
+      id: makeOrderId(now, 900 + i),
+      buyerId: BUYER.id, buyerName: BUYER.name.en,
+      sellerId: SELLER.id, sellerName: SELLER.name.en,
+      placedAt: r.submittedAt ?? now.toISOString(),
+      lines: orderLinesFrom(r.lines),
+      requestRef: r.ref,
+      resolution: null,
+    })),
+    standard('ORD-2608-0912', -20, [['HB-7788', 60], ['HB-9032', 12]]),
+    standard('ORD-2608-0908', -52, [['HB-2210', 18]]),
+  ]
+
   return {
-    now, seq: 5, requests: seeded, priceList: [], draft: null, submittedDrafts: {},
+    now, seq: 7, requests: seeded, orders, orderSeq: 20, priceList: [],
+    draft: null, submittedDrafts: {},
     phase2Enabled: true, autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
     canOverrideFloor: true, canCreateTemplate: true, opsAlerts: [],
   }

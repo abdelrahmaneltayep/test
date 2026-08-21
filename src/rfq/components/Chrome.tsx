@@ -82,20 +82,22 @@ export function MarketplaceChrome({ lang, setLang, cartCount, children }: {
 
 export interface NavGroup {
   label: string
-  items: { key: string; icon: string; label: string }[]
+  items: { key: string; icon: string; label: string; badge?: number }[]
 }
 
 /**
  * The dashboard shell. The sidebar reproduces the live grouping so the prototype lands
  * the feature where a buyer would actually go looking for it — Purchasing → RFQs.
  */
-export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavigate, title, subtitle, breadcrumb, action, children }: {
+export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavigate, alerts, title, subtitle, breadcrumb, action, children }: {
   lang: Lang
   setLang: (l: Lang) => void
   viewer: 'buyer' | 'seller'
   groups: NavGroup[]
   active: string
   onNavigate: (key: string) => void
+  /** Draft §8 — the bell counts the same unread items the Inbox does; it is not decor. */
+  alerts?: number
   title: string
   subtitle?: string
   breadcrumb: string
@@ -117,6 +119,7 @@ export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavig
                 onClick={() => onNavigate(item.key)}
               >
                 <span className="hb-navitem-icon" aria-hidden="true">{item.icon}</span>{item.label}
+                {item.badge ? <span className="hb-navitem-badge">{item.badge}</span> : null}
               </button>
             ))}
             <hr />
@@ -129,8 +132,8 @@ export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavig
           <button type="button" className="hb-burger" aria-label="Toggle navigation">☰</button>
           <div className="hb-topbar-right">
             <LangToggle lang={lang} setLang={setLang} />
-            <button type="button" className="hb-iconbtn" aria-label={t(lang, 'navAlerts')}>
-              🔔<span className="hb-dot">2</span>
+            <button type="button" className="hb-iconbtn" aria-label={t(lang, 'navAlerts')} onClick={() => onNavigate('inbox')}>
+              🔔{alerts ? <span className="hb-dot">{alerts}</span> : null}
             </button>
             <UserChip
               name={who}

@@ -17,12 +17,18 @@ import type { NegotiationRequest, RequestLine } from '../domain/types'
 import { askedTotalOf, listTotalOf, offeredTotalOf, useRfq } from '../store'
 import { Countdown, Empty, Modal, Money, StatusPill } from './ui'
 import { DashboardChrome, type NavGroup } from './Chrome'
+import { Inbox } from './Inbox'
+import { Orders } from './Orders'
+import { buildInbox, unreadCount } from '../domain/inbox'
 
 const MAX_ROUNDS = guardrailValue('maxRounds')
 
 export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
   const { state, lang, setLang } = useRfq()
   const [openRef, setOpenRef] = useState<string | null>(null)
+  // Feature Flow Draft §8/§9 — the Inbox and Final Orders are two more places the same
+  // negotiation shows up, so the sidebar actually navigates now.
+  const [section, setSection] = useState<'special' | 'inbox' | 'orders'>('special')
   const [statusFilter, setStatusFilter] = useState('all')
   const [query, setQuery] = useState('')
 
@@ -49,28 +55,48 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
   // The live product files this under Purchasing, beside RFQs and Quotations.
+  const unread = unreadCount(buildInbox(state.requests, 'buyer'))
+
   const groups: NavGroup[] = [
     { label: t(lang, 'navOverview'), items: [{ key: 'dashboard', icon: '▦', label: t(lang, 'navDashboard') }] },
     { label: t(lang, 'navComms'), items: [
+      { key: 'inbox', icon: '📥', label: t(lang, 'navInbox'), badge: unread || undefined },
       { key: 'messages', icon: '💬', label: t(lang, 'navMessagesCenter') },
       { key: 'vendors', icon: '👥', label: t(lang, 'navVendorList') },
     ] },
     { label: t(lang, 'navPurchasing'), items: [
-      { key: 'orders', icon: '🛒', label: t(lang, 'navPurchaseOrders') },
+      { key: 'orders', icon: '🛒', label: t(lang, 'navFinalOrders') },
       { key: 'rfqs', icon: '📄', label: t(lang, 'navRfqs') },
       { key: 'special', icon: '🏷', label: t(lang, 'navSpecialPrice') },
       { key: 'quotations', icon: '🧾', label: t(lang, 'navQuotations') },
     ] },
   ]
 
+  const HEAD = {
+    special: { title: t(lang, 'myRequests'), subtitle: t(lang, 'buyerSubtitle'), crumb: t(lang, 'navSpecialPrice') },
+    inbox: { title: t(lang, 'inboxTitle'), subtitle: t(lang, 'inboxSubtitleBuyer'), crumb: t(lang, 'navInbox') },
+    orders: { title: t(lang, 'ordersTitle'), subtitle: t(lang, 'ordersSubtitleBuyer'), crumb: t(lang, 'navFinalOrders') },
+  }[section]
+
   return (
     <DashboardChrome
       lang={lang} setLang={setLang} viewer="buyer"
-      groups={groups} active="special" onNavigate={() => {}}
-      title={t(lang, 'myRequests')}
-      subtitle={t(lang, 'buyerSubtitle')}
-      breadcrumb={t(lang, 'navSpecialPrice')}
+      groups={groups} active={section} alerts={unread}
+      onNavigate={(key) => { if (key === 'inbox' || key === 'orders' || key === 'special') setSection(key) }}
+      title={HEAD.title}
+      subtitle={HEAD.subtitle}
+      breadcrumb={HEAD.crumb}
     >
+      {section === 'inbox' && (
+        <Inbox
+          requests={state.requests} viewer="buyer" lang={lang}
+          onOpen={(ref) => { setSection('special'); setOpenRef(ref) }}
+        />
+      )}
+
+      {section === 'orders' && <Orders viewer="buyer" lang={lang} />}
+
+      {section === 'special' && (
       <div className="hb-card">
         <div className="hb-filterbar">
             {/* AC-8.3 — filter by status, search by reference and product name. */}
@@ -130,6 +156,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
           </div>
         )}
       </div>
+      )}
 
       {open && <Comparison request={open} onClose={() => setOpenRef(null)} />}
     </DashboardChrome>

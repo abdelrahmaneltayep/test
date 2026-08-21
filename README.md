@@ -8,7 +8,7 @@ in the browser with in-memory data — there is no backend.
 | Entry | Prototype | Document |
 |---|---|---|
 | `index.html` | Salla — branches & warehouses plan-limit upgrade nudge | — |
-| `rfq.html` | HIGHBASE — Special Price Request & RFQ | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md) |
+| `rfq.html` | HIGHBASE — Special Price Request & RFQ | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md), [feature flow draft](docs/HIGHBASE-Special-Price-RFQ-Feature-Flow-Draft.md) |
 | `variants.html` | HIGHBASE — design variant sheets | — |
 | `stories.html` | HIGHBASE — user story grooming register | [`docs/HIGHBASE-Special-Price-RFQ-User-Stories.md`](docs/HIGHBASE-Special-Price-RFQ-User-Stories.md) |
 | `flows.html` | HIGHBASE — user flows per story, by role | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md) |
@@ -41,6 +41,25 @@ Three surfaces, switchable from the demo bar at the top:
   comparison, with accept, counter, decline and withdraw.
 - **Seller · Dashboard** — the triage queue showing margin after the ask, and the
   line-by-line response surface with the proof panel and price-list write-back.
+
+Both dashboards also carry two shared surfaces from the feature flow draft, reachable from
+the sidebar:
+
+- **Inbox** — Special Price Request · RFQ · Sent, for either role. A projection of the
+  append-only history log rather than a stored feed, so Sent is the same events read from
+  the other side and the three tabs partition the log rather than overlapping it. The
+  sidebar badge and the bell count the same unread number.
+- **Final Orders** — standard orders and negotiated ones in one list, split into Pending,
+  Final Orders and Cancelled, each row carrying the old price against the agreed price. The
+  order page states whether the order went through a negotiation and whether an invoice was
+  submitted, and holds the whole back-and-forth; an HB Admin view names the document on
+  record.
+
+The order is a second aggregate that observes the negotiation and stores only whether the
+buyer confirmed or cancelled — which is how the draft's "rejected → back to Pending with a
+Cancel still available" holds without any request leaving a terminal state. See
+[`docs/HIGHBASE-Draft-Coverage-Audit.md`](docs/HIGHBASE-Draft-Coverage-Audit.md) for the
+section-by-section reading.
 
 The demo bar also flips language and direction (English / Arabic RTL), turns Phase 2 on and
 off, changes the auto-accept rule and the seller's permissions, and moves the simulated

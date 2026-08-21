@@ -18,6 +18,9 @@ import type { InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } 
 import { useRfq } from '../store'
 import { CheckBadge, Countdown, Empty, Field, Modal, Money, StatusPill } from './ui'
 import { DashboardChrome, type NavGroup } from './Chrome'
+import { Inbox } from './Inbox'
+import { Orders } from './Orders'
+import { buildInbox, unreadCount } from '../domain/inbox'
 
 const MAX_INFO_REQUESTS = guardrailValue('maxInfoRequests')
 const DEFAULT_VALIDITY = guardrailValue('offerValidityDays')
@@ -33,6 +36,8 @@ export function SellerDashboard() {
   const { state, dispatch, lang, setLang } = useRfq()
   const [tab, setTab] = useState<'special' | 'rfq' | 'sent'>('special')
   const [openRef, setOpenRef] = useState<string | null>(null)
+  // Feature Flow Draft §8/§9 — the seller gets the same Inbox and the same order list.
+  const [section, setSection] = useState<'special' | 'inbox' | 'orders'>('special')
 
   const rows = useMemo(() => {
     return state.requests
@@ -52,13 +57,17 @@ export function SellerDashboard() {
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
+  const unread = unreadCount(buildInbox(state.requests, 'seller'))
+
   const groups: NavGroup[] = [
     { label: t(lang, 'navOverview'), items: [{ key: 'dashboard', icon: '▦', label: t(lang, 'navDashboard') }] },
     { label: t(lang, 'navComms'), items: [
+      { key: 'inbox', icon: '📥', label: t(lang, 'navInbox'), badge: unread || undefined },
       { key: 'messages', icon: '💬', label: t(lang, 'navMessagesCenter') },
       { key: 'buyers', icon: '👥', label: t(lang, 'navBuyerList') },
     ] },
     { label: t(lang, 'navSelling'), items: [
+      { key: 'orders', icon: '🛒', label: t(lang, 'navFinalOrders') },
       { key: 'rfqs', icon: '📄', label: t(lang, 'navRfqs') },
       { key: 'special', icon: '🏷', label: t(lang, 'navSpecialPrice') },
       { key: 'quotations', icon: '🧾', label: t(lang, 'navQuotations') },
@@ -66,22 +75,39 @@ export function SellerDashboard() {
     ] },
   ]
 
+  const HEAD = {
+    special: { title: t(lang, 'sellerQueue'), subtitle: t(lang, 'sellerSubtitle'), crumb: t(lang, 'navSpecialPrice') },
+    inbox: { title: t(lang, 'inboxTitle'), subtitle: t(lang, 'inboxSubtitleSeller'), crumb: t(lang, 'navInbox') },
+    orders: { title: t(lang, 'ordersTitle'), subtitle: t(lang, 'ordersSubtitleSeller'), crumb: t(lang, 'navFinalOrders') },
+  }[section]
+
   return (
     <DashboardChrome
       lang={lang} setLang={setLang} viewer="seller"
-      groups={groups} active="special" onNavigate={() => {}}
-      title={t(lang, 'sellerQueue')}
-      subtitle={t(lang, 'sellerSubtitle')}
-      breadcrumb={t(lang, 'navSpecialPrice')}
+      groups={groups} active={section} alerts={unread}
+      onNavigate={(key) => { if (key === 'inbox' || key === 'orders' || key === 'special') setSection(key) }}
+      title={HEAD.title}
+      subtitle={HEAD.subtitle}
+      breadcrumb={HEAD.crumb}
     >
 
       {/* EC-21 — a misconfigured floor raises an operations alert rather than firing. */}
-      {state.opsAlerts.length > 0 && (
+      {state.opsAlerts.length > 0 && section === 'special' && (
         <div className="hb-banner hb-banner--warn" style={{ marginBottom: 14 }}>
           <div>{state.opsAlerts[state.opsAlerts.length - 1]}</div>
         </div>
       )}
 
+      {section === 'inbox' && (
+        <Inbox
+          requests={state.requests} viewer="seller" lang={lang}
+          onOpen={(ref) => { setSection('special'); setOpenRef(ref) }}
+        />
+      )}
+
+      {section === 'orders' && <Orders viewer="seller" lang={lang} />}
+
+      {section === 'special' && (
       <div className="hb-card">
         <div className="hb-card-head" style={{ paddingBottom: 0, borderBottom: 'none' }}>
           <div className="hb-tabs" style={{ border: 'none' }}>
@@ -172,6 +198,7 @@ export function SellerDashboard() {
           </div>
         )}
       </div>
+      )}
 
       {open && <RespondPanel request={open} onClose={() => setOpenRef(null)} />}
     </DashboardChrome>
@@ -222,6 +249,8 @@ function RespondPanel({ request, onClose }: { request: NegotiationRequest; onClo
     return d.outcome !== 'declined' && d.price < l.floorSnapshot
   })
   const needsOverride = belowFloor.length > 0
+  // §5 — accepting "as-is" needs something to accept. A Case 2 line has no asked price.
+  const acceptableAsAsked = request.lines.every((l) => l.askedPrice !== null)
   const overrideOk = !needsOverride || (state.canOverrideFloor && overrideReason.trim().length > 0)
 
   function send() {
@@ -276,11 +305,26 @@ function RespondPanel({ request, onClose }: { request: NegotiationRequest; onClo
               {t(lang, 'requestMoreInfo')}
             </button>
           )}
-          {state.canCreateTemplate && (
-            <button type="button" className="hb-btn hb-btn--secondary" onClick={() => setTemplateOpen(true)}>
-              {t(lang, 'saveAsTemplate')}
+          {/*
+            Feature Flow Draft §5 — Accept and "Accept & apply as template" are two
+            decisions, not one with a checkbox: the first settles this order, the second
+            also writes the price forward. Both take the ask exactly as sent, so neither
+            is offered unless every line carries one — an RFQ line has no price to accept.
+          */}
+          {acceptableAsAsked && (
+            <button
+              type="button" className="hb-btn hb-btn--secondary"
+              onClick={() => { dispatch({ type: 'seller_accepts', ref: request.ref }); onClose() }}
+            >
+              {t(lang, 'acceptThisOrderOnly')}
             </button>
           )}
+          {state.canCreateTemplate && acceptableAsAsked && (
+            <button type="button" className="hb-btn hb-btn--secondary" onClick={() => setTemplateOpen(true)}>
+              {t(lang, 'acceptAsTemplate')}
+            </button>
+          )}
+          {/* Modify and Reject are the per-line decisions above; this sends them. */}
           <span className="hb-primary-slot">
             <button type="button" className="hb-btn hb-btn--primary" onClick={send}>{t(lang, 'sendResponse')}</button>
           </span>
@@ -558,17 +602,18 @@ function TemplateDialog({ request, decisions, onClose, onSaved }: {
 
   return (
     <Modal
-      title={<h2 className="hb-h2">{t(lang, 'saveAsTemplate')}</h2>}
+      title={<h2 className="hb-h2">{t(lang, 'acceptAsTemplate')}</h2>}
       onClose={onClose}
       footer={
         <>
-          <button type="button" className="hb-btn hb-btn--secondary" onClick={onClose}>{t(lang, 'thisOrderOnly')}</button>
+          <button type="button" className="hb-btn hb-btn--secondary" onClick={onClose}>{t(lang, 'cancel')}</button>
           <span className="hb-primary-slot">
             <button
               type="button" className="hb-btn hb-btn--primary"
               onClick={() => {
                 dispatch({
-                  type: 'buyer_accepts', ref: request.ref, asTemplate: true,
+                  type: 'seller_accepts_template', ref: request.ref,
+                  prices: { [line.id]: price },
                   template: {
                     sku: line.sku, price, validFrom, validUntil,
                     minQty: Number(minQty), maxQty: Number(maxQty), maxOrders: null,
@@ -578,7 +623,7 @@ function TemplateDialog({ request, decisions, onClose, onSaved }: {
                 onClose(); onSaved()
               }}
             >
-              {t(lang, 'saveAsTemplate')}
+              {t(lang, 'acceptAsTemplate')}
             </button>
           </span>
         </>

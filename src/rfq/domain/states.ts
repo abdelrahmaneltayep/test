@@ -140,6 +140,14 @@ export const TRANSITIONS: readonly Transition[] = [
   { from: 'submitted', to: 'accepted', trigger: 'accept_as_asked', actors: ['seller', 'system'] },
   { from: 'viewed', to: 'accepted', trigger: 'accept_as_asked', actors: ['seller', 'system'] },
 
+  // Feature Flow Draft §5 — the seller's two acceptances are different decisions, not one
+  // decision with a checkbox: "Accept" is a one-time acceptance for this order only, and
+  // "Accept & apply as template" also writes the price forward. Both are the seller's, and
+  // the PRD's own FR-10.4 already treats template creation as a separate permission.
+  { from: 'submitted', to: 'accepted_as_template', trigger: 'accept_as_template', actors: ['seller'] },
+  { from: 'viewed', to: 'accepted_as_template', trigger: 'accept_as_template', actors: ['seller'] },
+  { from: 'countered_by_buyer', to: 'accepted_as_template', trigger: 'accept_as_template', actors: ['seller'] },
+
   { from: 'submitted', to: 'declined', trigger: 'decline', actors: ['seller', 'system'] },
   { from: 'viewed', to: 'declined', trigger: 'decline', actors: ['seller', 'system'] },
 
