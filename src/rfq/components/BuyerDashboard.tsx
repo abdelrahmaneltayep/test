@@ -19,23 +19,31 @@ import { Countdown, Empty, Modal, Money, RouteTags, StatusPill } from './ui'
 import { DashboardChrome, type NavGroup } from './Chrome'
 import { Inbox } from './Inbox'
 import { Orders } from './Orders'
-import { buildInbox, unreadCount } from '../domain/inbox'
+import { buildInbox, threadCategory, unreadCount } from '../domain/inbox'
 
 const MAX_ROUNDS = guardrailValue('maxRounds')
 
 export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
   const { state, dispatch, lang, setLang } = useRfq()
   const [openRef, setOpenRef] = useState<string | null>(null)
-  // Feature Flow Draft §8/§9 — the Inbox and Final Orders are two more places the same
-  // negotiation shows up, so the sidebar actually navigates now.
-  const [section, setSection] = useState<'special' | 'inbox' | 'orders'>('special')
+  /**
+   * Feature Flow Draft §1/§8/§9 — every sidebar item here is a real page now. Special Price
+   * Requests and RFQs are the two routes as two lists, because a priced ask backed by
+   * evidence and a request to quote are answered differently and are looked for separately;
+   * threadCategory puts each request in exactly one of them, so nothing is listed twice or
+   * missed. Inbox and Final Orders are the draft's other two surfaces.
+   */
+  const [section, setSection] = useState<'special' | 'rfqs' | 'inbox' | 'orders'>('special')
   const [statusFilter, setStatusFilter] = useState('all')
   const [query, setQuery] = useState('')
+
+  const rfqPage = section === 'rfqs'
 
   const visible = useMemo(() => {
     return state.requests
       // FR-3.2 — `lost` has no buyer label; it does not appear on a buyer surface at all.
       .filter((r) => STATE_META[r.state].buyerLabel !== null && r.state !== 'draft')
+      .filter((r) => (threadCategory(r) === 'rfq') === rfqPage)
       .filter((r) => statusFilter === 'all' || r.state === statusFilter)
       .filter((r) => {
         if (!query.trim()) return true
@@ -50,7 +58,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
         if (aAction !== bAction) return aAction - bAction
         return (b.submittedAt ?? '').localeCompare(a.submittedAt ?? '')
       })
-  }, [state.requests, statusFilter, query, lang])
+  }, [state.requests, statusFilter, query, lang, rfqPage])
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
@@ -74,6 +82,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
 
   const HEAD = {
     special: { title: t(lang, 'myRequests'), subtitle: t(lang, 'buyerSubtitle'), crumb: t(lang, 'navSpecialPrice') },
+    rfqs: { title: t(lang, 'myRfqs'), subtitle: t(lang, 'buyerRfqSubtitle'), crumb: t(lang, 'navRfqs') },
     inbox: { title: t(lang, 'inboxTitle'), subtitle: t(lang, 'inboxSubtitleBuyer'), crumb: t(lang, 'navInbox') },
     orders: { title: t(lang, 'ordersTitle'), subtitle: t(lang, 'ordersSubtitleBuyer'), crumb: t(lang, 'navFinalOrders') },
   }[section]
@@ -82,7 +91,9 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
     <DashboardChrome
       lang={lang} setLang={setLang} viewer="buyer"
       groups={groups} active={section} alerts={unread}
-      onNavigate={(key) => { if (key === 'inbox' || key === 'orders' || key === 'special') setSection(key) }}
+      onNavigate={(key) => {
+        if (key === 'inbox' || key === 'orders' || key === 'special' || key === 'rfqs') setSection(key)
+      }}
       title={HEAD.title}
       subtitle={HEAD.subtitle}
       breadcrumb={HEAD.crumb}
@@ -96,7 +107,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
 
       {section === 'orders' && <Orders viewer="buyer" lang={lang} />}
 
-      {section === 'special' && (
+      {(section === 'special' || section === 'rfqs') && (
       <div className="hb-card">
         <div className="hb-filterbar">
             {/* AC-8.3 — filter by status, search by reference and product name. */}
@@ -116,7 +127,8 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
         {visible.length === 0 ? (
           // AC-8.5 — the empty state explains what a request is and links to the marketplace.
           <Empty
-            title={t(lang, 'emptyListTitle')} body={t(lang, 'emptyListBody')}
+            title={t(lang, rfqPage ? 'emptyRfqTitle' : 'emptyListTitle')}
+            body={t(lang, rfqPage ? 'emptyRfqBody' : 'emptyListBody')}
             action={<button type="button" className="hb-btn hb-btn--primary" onClick={onBrowse}>{t(lang, 'browseMarketplace')}</button>}
           />
         ) : (

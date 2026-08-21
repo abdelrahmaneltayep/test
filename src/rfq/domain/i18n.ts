@@ -124,7 +124,14 @@ export const STRINGS: Dict = {
   yourReference: { en: 'Your reference', ar: 'رقم طلبك' },
 
   // ── Buyer dashboard (US-8 … US-13) ────────────────────────────────────────
-  myRequests: { en: 'My requests', ar: 'طلباتي' },
+  myRequests: { en: 'My special price requests', ar: 'طلبات الأسعار الخاصة' },
+  myRfqs: { en: 'My RFQs', ar: 'طلبات التسعير' },
+  buyerRfqSubtitle: { en: 'Quantities you have asked suppliers to quote', ar: 'الكميات التي طلبت من المورّدين تسعيرها' },
+  sellerRfqQueue: { en: 'Requests for quotation', ar: 'طلبات التسعير' },
+  sellerRfqSubtitle: { en: 'Buyers waiting on a price from you, newest deadline first', ar: 'مشترون بانتظار سعر منك، مرتبين حسب أقرب مهلة' },
+  emptyRfqTitle: { en: 'No RFQs yet', ar: 'لا توجد طلبات تسعير بعد' },
+  emptyRfqBody: { en: 'An RFQ asks a supplier to quote a price for a quantity, when you have no invoice to match.', ar: 'طلب التسعير يسأل المورّد سعراً لكمية معيّنة عندما لا تملك فاتورة تُطابقها.' },
+  tabOpen: { en: 'Open', ar: 'مفتوح' },
   reference: { en: 'Reference', ar: 'الرقم' },
   supplier: { en: 'Supplier', ar: 'المورّد' },
   lines: { en: 'Items', ar: 'الأصناف' },
@@ -164,7 +171,7 @@ export const STRINGS: Dict = {
   cancel: { en: 'Cancel', ar: 'إلغاء' },
 
   // ── Seller dashboard (US-14 … US-19) ──────────────────────────────────────
-  sellerQueue: { en: 'Price requests', ar: 'طلبات الأسعار' },
+  sellerQueue: { en: 'Special price requests', ar: 'طلبات الأسعار الخاصة' },
   tabSpecialPrice: { en: 'Special price', ar: 'سعر خاص' },
   tabRfq: { en: 'RFQ', ar: 'طلب تسعير' },
   tabSent: { en: 'Sent', ar: 'المُرسل' },

@@ -20,7 +20,7 @@ import { CheckBadge, Countdown, Empty, Field, Modal, Money, RouteTags, StatusPil
 import { DashboardChrome, type NavGroup } from './Chrome'
 import { Inbox } from './Inbox'
 import { Orders } from './Orders'
-import { buildInbox, unreadCount } from '../domain/inbox'
+import { buildInbox, threadCategory, unreadCount } from '../domain/inbox'
 
 const MAX_INFO_REQUESTS = guardrailValue('maxInfoRequests')
 const DEFAULT_VALIDITY = guardrailValue('offerValidityDays')
@@ -34,30 +34,42 @@ const BAND_KEY: Record<MarginBand, string> = {
 
 export function SellerDashboard() {
   const { state, dispatch, lang, setLang } = useRfq()
-  const [tab, setTab] = useState<'special' | 'rfq' | 'sent'>('special')
+  const [tab, setTab] = useState<'open' | 'sent'>('open')
   const [openRef, setOpenRef] = useState<string | null>(null)
-  // Feature Flow Draft §8/§9 — the seller gets the same Inbox and the same order list.
-  const [section, setSection] = useState<'special' | 'inbox' | 'orders'>('special')
+  /**
+   * Feature Flow Draft §1/§8/§9 — the sidebar navigates for real, and the two routes are
+   * two pages rather than two tabs.
+   *
+   * Divergence from FR-5.1, deliberate: it specifies the queue's tabs as Special price ·
+   * RFQ · Sent. All three views survive, and none is further away than it was — the axis
+   * moved, so the route is the page (which is what the sidebar already promised with its
+   * RFQs entry) and Open · Sent is the tab within it. What that buys is a Sent list scoped
+   * to the route you are working in, and a sidebar highlight that is never lying about
+   * which list you are looking at. FR-5.1 should be rewritten against this before it is
+   * used as a test.
+   */
+  const [section, setSection] = useState<'special' | 'rfqs' | 'inbox' | 'orders'>('special')
   // The three decisions are taken from the row now, so the two irreversible ones get a
   // confirmation that puts the numbers in front of the seller first (FR-5.3 is a seller
   // fact, so it belongs in a seller confirmation).
   const [confirming, setConfirming] = useState<{ ref: string; kind: 'accept' | 'decline' } | null>(null)
 
+  const rfqPage = section === 'rfqs'
+
   const rows = useMemo(() => {
     return state.requests
       .filter((r) => STATE_META[r.state].sellerLabel !== null)
+      // The route decides the page; a request appears on exactly one of the two.
+      .filter((r) => (threadCategory(r) === 'rfq') === rfqPage)
       .filter((r) => {
-        const live = !STATE_META[r.state].terminal && r.state !== 'draft'
-        // FR-5.1 — Special price · RFQ · Sent.
-        if (tab === 'sent') return !live || r.state === 'countered_by_seller' || r.state === 'info_requested'
-        if (!live) return false
-        if (r.state === 'countered_by_seller' || r.state === 'info_requested') return false
-        const anyCase1 = r.lines.some((l) => l.route === 'case_1')
-        return tab === 'special' ? anyCase1 : !anyCase1
+        // Sent is everything already answered or closed; Open is what still needs a decision.
+        const waiting = !STATE_META[r.state].terminal && r.state !== 'draft'
+          && r.state !== 'countered_by_seller' && r.state !== 'info_requested'
+        return tab === 'sent' ? !waiting : waiting
       })
       // AC-14.4 — default sort is SLA ascending, so the most urgent row is first.
       .sort((a, b) => (a.slaDueAt ?? '9999').localeCompare(b.slaDueAt ?? '9999'))
-  }, [state.requests, tab])
+  }, [state.requests, tab, rfqPage])
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
@@ -81,6 +93,7 @@ export function SellerDashboard() {
 
   const HEAD = {
     special: { title: t(lang, 'sellerQueue'), subtitle: t(lang, 'sellerSubtitle'), crumb: t(lang, 'navSpecialPrice') },
+    rfqs: { title: t(lang, 'sellerRfqQueue'), subtitle: t(lang, 'sellerRfqSubtitle'), crumb: t(lang, 'navRfqs') },
     inbox: { title: t(lang, 'inboxTitle'), subtitle: t(lang, 'inboxSubtitleSeller'), crumb: t(lang, 'navInbox') },
     orders: { title: t(lang, 'ordersTitle'), subtitle: t(lang, 'ordersSubtitleSeller'), crumb: t(lang, 'navFinalOrders') },
   }[section]
@@ -89,14 +102,16 @@ export function SellerDashboard() {
     <DashboardChrome
       lang={lang} setLang={setLang} viewer="seller"
       groups={groups} active={section} alerts={unread}
-      onNavigate={(key) => { if (key === 'inbox' || key === 'orders' || key === 'special') setSection(key) }}
+      onNavigate={(key) => {
+        if (key === 'inbox' || key === 'orders' || key === 'special' || key === 'rfqs') setSection(key)
+      }}
       title={HEAD.title}
       subtitle={HEAD.subtitle}
       breadcrumb={HEAD.crumb}
     >
 
       {/* EC-21 — a misconfigured floor raises an operations alert rather than firing. */}
-      {state.opsAlerts.length > 0 && section === 'special' && (
+      {state.opsAlerts.length > 0 && (section === 'special' || section === 'rfqs') && (
         <div className="hb-banner hb-banner--warn" style={{ marginBottom: 14 }}>
           <div>{state.opsAlerts[state.opsAlerts.length - 1]}</div>
         </div>
@@ -111,12 +126,11 @@ export function SellerDashboard() {
 
       {section === 'orders' && <Orders viewer="seller" lang={lang} />}
 
-      {section === 'special' && (
+      {(section === 'special' || section === 'rfqs') && (
       <div className="hb-card">
         <div className="hb-card-head" style={{ paddingBottom: 0, borderBottom: 'none' }}>
           <div className="hb-tabs" style={{ border: 'none' }}>
-            <button type="button" className="hb-tab" aria-selected={tab === 'special'} onClick={() => setTab('special')}>{t(lang, 'tabSpecialPrice')}</button>
-            <button type="button" className="hb-tab" aria-selected={tab === 'rfq'} onClick={() => setTab('rfq')}>{t(lang, 'tabRfq')}</button>
+            <button type="button" className="hb-tab" aria-selected={tab === 'open'} onClick={() => setTab('open')}>{t(lang, 'tabOpen')}</button>
             <button type="button" className="hb-tab" aria-selected={tab === 'sent'} onClick={() => setTab('sent')}>{t(lang, 'tabSent')}</button>
           </div>
         </div>
