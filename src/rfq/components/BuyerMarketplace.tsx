@@ -188,7 +188,6 @@ function Flow({ product, onClose, onToast, onDone }: {
           ? `تم اعتماد السعر المعلن ${formatMoney(unitPrice, { withCurrency: true, lang })} — لا حاجة لطلب.`
           : `Taken at the published price of ${formatMoney(unitPrice, { withCurrency: true, lang })} — no request needed.`)
       }}
-      onAddAnother={onClose}
       onSubmitted={() => { onClose(); onDone() }}
     />
   )

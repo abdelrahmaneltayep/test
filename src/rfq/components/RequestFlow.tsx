@@ -32,7 +32,6 @@ interface Props {
   product: Product
   onClose: () => void
   onTierAccepted: (unitPrice: number) => void
-  onAddAnother: () => void
   onSubmitted: (ref: string) => void
 }
 
@@ -43,8 +42,16 @@ function applicableTier(product: Product, qty: number) {
     .sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
 }
 
-/** Stand-in for the FR-7.10 extraction adapter. A real provider sits behind this shape. */
-function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean): Proof {
+/**
+ * Stand-in for the FR-7.10 extraction adapter. A real provider sits behind this shape.
+ *
+ * The document date is optional for the buyer to type because FR-7.2 has extraction read
+ * it off the document — that is the whole point of the adapter. This stand-in does the
+ * same: where the buyer left the date blank, the extractor supplies one, so the freshness
+ * check still has something to judge rather than failing for a field nobody had to fill.
+ */
+function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean, now: Date): Proof {
+  const readDate = typed.documentDate ?? new Date(now.getTime() - 8 * 86_400_000).toISOString().slice(0, 10)
   return {
     fileName: file.name,
     mimeType: file.type || 'application/octet-stream',
@@ -58,7 +65,7 @@ function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean
       supplier: typed.supplier ? `${typed.supplier} W.L.L.` : '',
       sku: typed.sku,
       unitPrice: typed.unitPrice,
-      documentDate: typed.documentDate,
+      documentDate: readDate,
       currency: 'BHD',
     },
     extractionUnavailable: unavailable,
@@ -66,7 +73,7 @@ function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean
   }
 }
 
-export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, onSubmitted }: Props) {
+export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: Props) {
   const { state, dispatch, lang } = useRfq()
 
   const [qtyText, setQtyText] = useState('')
@@ -86,7 +93,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
   const [supplier, setSupplier] = useState('')
   const [theirSku, setTheirSku] = useState('')
   const [docDate, setDocDate] = useState('')
-  const [proof, setProof] = useState<Proof | null>(null)
+  const [file, setFile] = useState<File | null>(null)
   const [proofError, setProofError] = useState<string | null>(null)
   const [conflictResolved, setConflictResolved] = useState<'typed' | 'extracted' | null>(null)
   const [frequency, setFrequency] = useState<Frequency>('one_off')
@@ -98,6 +105,54 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
   const tier = useMemo(() => applicableTier(product, qty), [product, qty])
   const targetPrice = parseMoney(targetText)
   const draftLines = state.draft?.lines ?? []
+
+  function handleFile(picked: File | null) {
+    setProofError(null)
+    setConflictResolved(null)
+    if (!picked) { setFile(null); return }
+    // EC-30 — the size limit is enforced before upload completes where the client can see it.
+    if (picked.size > MAX_FILE_BYTES) {
+      setProofError(lang === 'ar' ? 'الحد الأقصى لحجم الملف ١٠ ميجابايت.' : 'The maximum file size is 10 MB.')
+      return
+    }
+    // EC-29 — an unsupported type is rejected with the accepted formats listed.
+    if (picked.type && !(ACCEPTED_MIME_TYPES as readonly string[]).includes(picked.type)) {
+      setProofError(lang === 'ar'
+        ? 'الصيغ المقبولة: PDF، JPG، PNG، WEBP، HEIC.'
+        : 'Accepted formats: PDF, JPG, PNG, WEBP, HEIC.')
+      return
+    }
+    setFile(picked)
+  }
+
+  /*
+   * The proof is derived, not snapshotted. The upload sits above the SKU and date fields,
+   * so a value typed after the file was picked has to reach the extraction comparison and
+   * the auto-checks — freezing the typed set at upload time would silently compare against
+   * empty fields.
+   */
+  const proof = useMemo<Proof | null>(() => {
+    if (!file) return null
+    const typed: ProofFields = {
+      supplier: supplier.trim(),
+      sku: theirSku.trim() || product.sku,
+      unitPrice: targetPrice,
+      documentDate: docDate || null,
+      currency: 'BHD',
+    }
+    // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
+    // request is marked for manual review rather than blocked.
+    const built = simulateExtraction(file, typed, !state.phase2Enabled, state.now)
+    built.checks = runAutoChecks(built, {
+      now: state.now,
+      target: { sku: product.sku, brand: product.brand, packSize: product.packSize, unitOfMeasure: product.unitOfMeasure.en },
+      buyerHashes: [],
+      otherBuyerHashes: [],
+      tenantCurrency: 'BHD',
+    })
+    return built
+  }, [file, supplier, theirSku, targetPrice, docDate, product, state.phase2Enabled, state.now])
+
 
   // ── AC-2.5 / AC-2.3 — quantity validation names the constraint and the value ──
   const qtyError =
@@ -131,42 +186,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
   /** The form is untouched, so "Send" means "send what is already in the request". */
   const lineUntouched = qtyText === '' && targetText === '' && supplier === '' && proof === null
 
-  function handleFile(file: File | null) {
-    setProofError(null)
-    if (!file) return
-    // EC-30 — the size limit is enforced before upload completes where the client can see it.
-    if (file.size > MAX_FILE_BYTES) {
-      setProofError(lang === 'ar' ? 'الحد الأقصى لحجم الملف ١٠ ميجابايت.' : 'The maximum file size is 10 MB.')
-      return
-    }
-    // EC-29 — an unsupported type is rejected with the accepted formats listed.
-    if (file.type && !(ACCEPTED_MIME_TYPES as readonly string[]).includes(file.type)) {
-      setProofError(lang === 'ar'
-        ? 'الصيغ المقبولة: PDF، JPG، PNG، WEBP، HEIC.'
-        : 'Accepted formats: PDF, JPG, PNG, WEBP, HEIC.')
-      return
-    }
-    const typed: ProofFields = {
-      supplier: supplier.trim(),
-      sku: theirSku.trim() || product.sku,
-      unitPrice: targetPrice,
-      documentDate: docDate || null,
-      currency: 'BHD',
-    }
-    // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
-    // request is marked for manual review rather than blocked.
-    const built = simulateExtraction(file, typed, !state.phase2Enabled)
-    built.checks = runAutoChecks(built, {
-      now: state.now,
-      target: { sku: product.sku, brand: product.brand, packSize: product.packSize, unitOfMeasure: product.unitOfMeasure.en },
-      buyerHashes: [],
-      otherBuyerHashes: [],
-      tenantCurrency: 'BHD',
-    })
-    setProof(built)
-    setConflictResolved(null)
-  }
-
   /** Left/right (or up/down) move between tabs, per the tablist pattern. */
   function onRouteKeyDown(e: ReactKeyboardEvent) {
     if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
@@ -189,13 +208,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
   function commitLine() {
     if (!state.draft) dispatch({ type: 'start_draft' })
     dispatch({ type: 'add_line', line: currentLine() })
-  }
-
-  function handleAddAnother() {
-    setShowErrors(true)
-    if (!lineComplete) return
-    commitLine()
-    onAddAnother()
   }
 
   function handleSend() {
@@ -253,19 +265,14 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
       }
       onClose={onClose}
       footer={
-        <>
-          <button type="button" className="hb-btn hb-btn--secondary" onClick={handleAddAnother}>
-            {t(lang, 'addAnotherItem')}
+        // AC-7.3 — exactly one action on this surface, and it is the primary one.
+        <span className="hb-primary-slot">
+          {/* E-2 — a blocked control states its reason, once a send has been attempted. */}
+          {blockedReason && <span className="hb-hint">{blockedReason}</span>}
+          <button type="button" className="hb-btn hb-btn--primary" onClick={handleSend}>
+            {t(lang, 'sendRequest')}
           </button>
-          {/* AC-7.3 — exactly one primary action on this surface. */}
-          <span className="hb-primary-slot">
-            {/* E-2 — a blocked control states its reason, on hover and on focus. */}
-            {blockedReason && <span className="hb-hint">{blockedReason}</span>}
-            <button type="button" className="hb-btn hb-btn--primary" onClick={handleSend}>
-              {t(lang, 'sendRequest')}
-            </button>
-          </span>
-        </>
+        </span>
       }
     >
       {/* ── Quantity (US-2) ──────────────────────────────────────────────── */}
@@ -354,14 +361,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
             <input className="hb-input" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
           </Field>
 
-          <Field label={t(lang, 'competitorSku')}>
-            <input className="hb-input" value={theirSku} onChange={(e) => setTheirSku(e.target.value)} />
-          </Field>
-
-          <Field label={lang === 'ar' ? 'تاريخ المستند' : 'Document date'}>
-            <input className="hb-input" type="date" value={docDate} onChange={(e) => setDocDate(e.target.value)} />
-          </Field>
-
           {/* FR-7.7 / EC-36 — the exclusions are stated before upload, not after rejection. */}
           <details style={{ marginBottom: 14 }}>
             <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>{t(lang, 'whatWeCannotMatch')}</summary>
@@ -382,6 +381,21 @@ export function RequestFlow({ product, onClose, onTierAccepted, onAddAnother, on
             proof={proof} lang={lang} typedSupplier={supplier}
             resolution={conflictResolved} onResolve={setConflictResolved}
           />}
+
+          {/*
+            Both optional, and both below the attachment on purpose: extraction reads them
+            off the document (FR-7.2), so they are a correction to what was read rather
+            than something the buyer has to supply before uploading.
+          */}
+          <div style={{ marginTop: 18 }}>
+            <Field label={t(lang, 'competitorSku')}>
+              <input className="hb-input" value={theirSku} onChange={(e) => setTheirSku(e.target.value)} />
+            </Field>
+
+            <Field label={t(lang, 'documentDate')} hint={t(lang, 'documentDateHint')}>
+              <input className="hb-input" type="date" value={docDate} onChange={(e) => setDocDate(e.target.value)} />
+            </Field>
+          </div>
         </>
       )}
 

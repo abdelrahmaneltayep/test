@@ -83,6 +83,8 @@ export const STRINGS: Dict = {
   targetPrice: { en: 'Your target price per unit', ar: 'السعر المستهدف للوحدة' },
   competitorName: { en: 'Supplier offering that price', ar: 'المورّد صاحب هذا السعر' },
   competitorSku: { en: 'Their SKU or reference (optional)', ar: 'رقم الصنف لديهم (اختياري)' },
+  documentDate: { en: 'Document date (optional)', ar: 'تاريخ المستند (اختياري)' },
+  documentDateHint: { en: 'We read this from the document — set it only if we got it wrong.', ar: 'نقرأ التاريخ من المستند — حدّده فقط إذا كانت القراءة خاطئة.' },
   uploadProof: { en: 'Attach the invoice, quote or screenshot', ar: 'أرفق الفاتورة أو عرض السعر أو لقطة الشاشة' },
   uploadHint: { en: 'PDF, JPG, PNG, WEBP or HEIC · up to 10 MB · camera or gallery', ar: 'PDF أو JPG أو PNG أو WEBP أو HEIC · حتى ١٠ ميجابايت · من الكاميرا أو المعرض' },
   extractedConfirm: { en: 'extracted — please confirm', ar: 'مستخرج — يرجى التأكيد' },
@@ -100,7 +102,6 @@ export const STRINGS: Dict = {
   noteToSeller: { en: 'Note to the supplier (optional)', ar: 'ملاحظة للمورّد (اختياري)' },
 
   // ── Step 4, review (US-6, US-7) ───────────────────────────────────────────
-  addAnotherItem: { en: 'Add another item', ar: 'أضف صنفاً آخر' },
   itemsInRequest: { en: '{n} items in this request', ar: '{n} أصناف في هذا الطلب' },
   itemInRequest: { en: '1 item in this request', ar: 'صنف واحد في هذا الطلب' },
   product: { en: 'Product', ar: 'الصنف' },

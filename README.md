@@ -31,7 +31,8 @@ Three surfaces, switchable from the demo bar at the top:
 - **Buyer · Marketplace** — the product grid and the product details page, each carrying
   the negotiation entry point, plus the request form: quantity, then a tab per route —
   "I have a price to match" (the default) and "Ask the seller to quote" — with that
-  route's fields directly below, and the lines already added summarised beneath.
+  route's fields directly below. A request is one line; multi-line drafts still arrive
+  through Re-request and are summarised at the foot of the form.
 - **Buyer · Dashboard** — the request list and the three-column original / asked / offered
   comparison, with accept, counter, decline and withdraw.
 - **Seller · Dashboard** — the triage queue showing margin after the ask, and the
