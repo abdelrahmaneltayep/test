@@ -16,6 +16,7 @@ export default defineConfig({
         // Design-variants sheets live alongside the prototypes they explore.
         variants: path.resolve(__dirname, 'variants.html'),
         stories: path.resolve(__dirname, 'stories.html'),
+        flows: path.resolve(__dirname, 'flows.html'),
       },
     },
   },

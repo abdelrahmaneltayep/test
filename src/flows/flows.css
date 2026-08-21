@@ -1,0 +1,161 @@
+/*
+ * User-flow sheet for the Special Price Request & RFQ PRD.
+ *
+ * A handout for a PM: read once, scanned, pointed at in a meeting. The frame is quiet so
+ * the twenty-three diagrams carry the page. Colour inside a diagram is not decoration — it
+ * says who acts at that step, which is the one thing a flow has to communicate.
+ *
+ * Full light and dark; every colour resolves from a token in both.
+ */
+
+:root {
+  --f-paper: #f6f7f9;
+  --f-card: #ffffff;
+  --f-rule: #e3e7ec;
+  --f-rule-2: #cfd6de;
+  --f-ink: #151a20;
+  --f-ink-2: #59636e;
+  --f-ink-3: #8d97a2;
+
+  /* Actor hues — the load-bearing encoding. Each has a wash for fills. */
+  --f-buyer: #1f66ad;
+  --f-buyer-wash: #e9f2fb;
+  --f-seller: #0d7360;
+  --f-seller-wash: #e5f5f1;
+  --f-system: #6a5aa0;
+  --f-system-wash: #eeecf8;
+  --f-either: #5b6672;
+  --f-either-wash: #eef1f4;
+
+  /* Semantic, deliberately not an actor hue. */
+  --f-stop: #b02f22;
+  --f-stop-wash: #fdeeec;
+
+  --f-flag: #8a5000;
+  --f-flag-wash: #fdf3e3;
+  --f-flag-rule: #e9c68e;
+
+  --f-serif: 'Newsreader', Georgia, serif;
+  --f-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --f-paper: #10141a;
+    --f-card: #171c23;
+    --f-rule: #29313a;
+    --f-rule-2: #3a444f;
+    --f-ink: #e8edf2;
+    --f-ink-2: #a5b1bd;
+    --f-ink-3: #78848f;
+    --f-buyer: #74b4ee; --f-buyer-wash: #14212e;
+    --f-seller: #58c7ae; --f-seller-wash: #102621;
+    --f-system: #a99bea; --f-system-wash: #1e1b2e;
+    --f-either: #9aa6b3; --f-either-wash: #1c2128;
+    --f-stop: #f09186; --f-stop-wash: #2c1815;
+    --f-flag: #f0bd74; --f-flag-wash: #2b2313; --f-flag-rule: #5b4923;
+  }
+}
+:root[data-theme="dark"] {
+  --f-paper: #10141a;
+  --f-card: #171c23;
+  --f-rule: #29313a;
+  --f-rule-2: #3a444f;
+  --f-ink: #e8edf2;
+  --f-ink-2: #a5b1bd;
+  --f-ink-3: #78848f;
+  --f-buyer: #74b4ee; --f-buyer-wash: #14212e;
+  --f-seller: #58c7ae; --f-seller-wash: #102621;
+  --f-system: #a99bea; --f-system-wash: #1e1b2e;
+  --f-either: #9aa6b3; --f-either-wash: #1c2128;
+  --f-stop: #f09186; --f-stop-wash: #2c1815;
+  --f-flag: #f0bd74; --f-flag-wash: #2b2313; --f-flag-rule: #5b4923;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--f-paper);
+  color: var(--f-ink);
+  font-family: var(--f-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.f-wrap { max-width: 1180px; margin: 0 auto; padding: 0 22px 96px; }
+
+/* ── Masthead ─────────────────────────────────────────────────────────────── */
+.f-masthead { padding: 40px 0 24px; border-bottom: 1px solid var(--f-rule-2); }
+.f-kicker { font-family: var(--f-mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--f-ink-3); }
+.f-h1 { font-family: var(--f-serif); font-size: clamp(29px, 4.2vw, 42px); font-weight: 500; line-height: 1.12; letter-spacing: -.015em; margin: 12px 0 14px; text-wrap: balance; }
+.f-lede { max-width: 64ch; font-size: 16px; line-height: 1.7; color: var(--f-ink-2); margin: 0 0 10px; }
+.f-byline { font-family: var(--f-mono); font-size: 11.5px; color: var(--f-ink-3); margin-top: 16px; }
+
+/* ── Legend — the encoding repeats across 23 figures, so it earns a key ───── */
+.f-legend { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 24px; padding: 14px 16px; background: var(--f-card); border: 1px solid var(--f-rule); }
+.f-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--f-ink-2); }
+.f-swatch { width: 22px; height: 13px; border-radius: 3px; border: 1.5px solid currentColor; flex: 0 0 auto; }
+.f-swatch--buyer { color: var(--f-buyer); background: var(--f-buyer-wash); }
+.f-swatch--seller { color: var(--f-seller); background: var(--f-seller-wash); }
+.f-swatch--system { color: var(--f-system); background: var(--f-system-wash); }
+.f-swatch--either { color: var(--f-either); background: var(--f-either-wash); }
+.f-swatch--stop { color: var(--f-stop); background: var(--f-stop-wash); border-radius: 7px; }
+.f-swatch-svg { flex: 0 0 auto; }
+.f-swatch-svg path { fill: none; stroke: var(--f-ink-2); stroke-width: 1.5; }
+
+/* ── Controls ─────────────────────────────────────────────────────────────── */
+.f-controls { position: sticky; top: 0; z-index: 40; background: var(--f-paper); border-bottom: 1px solid var(--f-rule); padding: 13px 0; margin: 26px 0 30px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center; }
+.f-ctrl { display: flex; align-items: center; gap: 6px; }
+.f-ctrl > span { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--f-ink-3); white-space: nowrap; }
+.f-btn { font-family: var(--f-sans); font-size: 12.5px; background: var(--f-card); color: var(--f-ink-2); border: 1px solid var(--f-rule-2); border-radius: 4px; padding: 5px 11px; cursor: pointer; white-space: nowrap; }
+.f-btn:hover { color: var(--f-ink); border-color: var(--f-ink-3); }
+.f-btn[aria-pressed="true"] { background: var(--f-ink); border-color: var(--f-ink); color: var(--f-paper); font-weight: 500; }
+.f-btn:focus-visible { outline: 2px solid var(--f-buyer); outline-offset: 2px; }
+
+/* ── Group sections ───────────────────────────────────────────────────────── */
+.f-group { margin-bottom: 46px; scroll-margin-top: 76px; }
+.f-group-head { border-bottom: 2px solid var(--f-ink); padding-bottom: 10px; margin-bottom: 22px; }
+.f-group-head h2 { font-family: var(--f-serif); font-size: 26px; font-weight: 500; margin: 0; letter-spacing: -.01em; }
+.f-group-head p { margin: 5px 0 0; font-size: 13.5px; color: var(--f-ink-2); max-width: 70ch; }
+
+/* ── Figures ──────────────────────────────────────────────────────────────── */
+.f-figure { margin: 0 0 22px; background: var(--f-card); border: 1px solid var(--f-rule); }
+.f-fig-head { padding: 14px 18px; border-bottom: 1px solid var(--f-rule); display: flex; align-items: baseline; gap: 11px; flex-wrap: wrap; }
+.f-fig-id { font-family: var(--f-mono); font-size: 13px; font-weight: 600; }
+.f-fig-title { font-size: 16px; font-weight: 600; margin: 0; letter-spacing: -.005em; }
+.f-fig-phase { margin-inline-start: auto; font-family: var(--f-mono); font-size: 10.5px; border: 1px solid var(--f-rule-2); color: var(--f-ink-2); border-radius: 2px; padding: 2px 7px; }
+.f-canvas { overflow-x: auto; padding: 18px; background: var(--f-card); }
+.f-svg { display: block; max-width: 100%; height: auto; }
+.f-figcaption { padding: 0 18px 15px; font-size: 13.5px; color: var(--f-ink-2); max-width: 78ch; }
+.f-divergence { margin: 0 18px 16px; background: var(--f-flag-wash); border: 1px solid var(--f-flag-rule); padding: 10px 13px; font-size: 12.8px; line-height: 1.55; color: var(--f-ink); }
+.f-divergence b { color: var(--f-flag); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 3px; }
+
+/* ── SVG node and edge styling ────────────────────────────────────────────── */
+.f-shape { stroke-width: 1.6; }
+.f-node--buyer .f-shape { stroke: var(--f-buyer); fill: var(--f-buyer-wash); }
+.f-node--seller .f-shape { stroke: var(--f-seller); fill: var(--f-seller-wash); }
+.f-node--system .f-shape { stroke: var(--f-system); fill: var(--f-system-wash); }
+.f-node--either .f-shape { stroke: var(--f-either); fill: var(--f-either-wash); }
+.f-node--stop .f-shape { stroke: var(--f-stop); fill: var(--f-stop-wash); stroke-width: 2; }
+.f-node--start .f-shape, .f-node--end .f-shape { stroke-width: 2.4; }
+
+.f-label { font-family: var(--f-sans); font-size: 11px; fill: var(--f-ink); }
+.f-node--start .f-label, .f-node--end .f-label, .f-node--stop .f-label { font-weight: 600; }
+.f-node--stop .f-label { fill: var(--f-stop); }
+.f-ref { font-family: var(--f-mono); font-size: 8.6px; fill: var(--f-ink-3); letter-spacing: .01em; }
+.f-edge { stroke: var(--f-ink-3); stroke-width: 1.5; }
+.f-arrowhead { fill: var(--f-ink-3); }
+.f-edge-label { font-family: var(--f-mono); font-size: 9.5px; fill: var(--f-ink-2); }
+
+.f-empty { padding: 44px 20px; text-align: center; color: var(--f-ink-2); background: var(--f-card); border: 1px dashed var(--f-rule-2); }
+
+@media (prefers-reduced-motion: reduce) { * { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+@media (max-width: 640px) {
+  .f-wrap { padding: 0 13px 64px; }
+  .f-canvas { padding: 12px; }
+  .f-controls { gap: 11px; }
+}

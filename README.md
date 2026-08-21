@@ -11,6 +11,7 @@ in the browser with in-memory data — there is no backend.
 | `rfq.html` | HIGHBASE — Special Price Request & RFQ | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md) |
 | `variants.html` | HIGHBASE — design variant sheets | — |
 | `stories.html` | HIGHBASE — user story grooming register | [`docs/HIGHBASE-Special-Price-RFQ-User-Stories.md`](docs/HIGHBASE-Special-Price-RFQ-User-Stories.md) |
+| `flows.html` | HIGHBASE — user flows per story, by role | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md) |
 
 ## Running
 
@@ -22,8 +23,9 @@ npm run build      # builds both into dist/
 npm run build:single   # rebuilds the single-file prototypes for offline review
 ```
 
-`rfq-prototype.html`, `variants-prototype.html` and `stories-prototype.html` are committed,
-dependency-free builds for offline review — open any of them straight from disk and it runs. CSS and JS are inlined; the only external reference is the
+Each prototype has a committed, dependency-free single-file build for offline review —
+`rfq-prototype.html`, `variants-prototype.html`, `stories-prototype.html`,
+`flows-prototype.html`. Open any of them straight from disk and it runs. CSS and JS are inlined; the only external reference is the
 Google Fonts stylesheet, and the page falls back to the system stack without a network.
 
 ## Special Price Request & RFQ
@@ -83,6 +85,22 @@ safe to groom around them.
 `docs/HIGHBASE-Special-Price-RFQ-User-Stories.md` is the document of record;
 `src/stories/storiesData.ts` carries the same content as data so it can be filtered.
 Keep the two in step when either changes.
+
+## User flows
+
+`flows.html` draws one flow per PRD user story — 23 of them, grouped by the role that owns
+it: 14 buyer, 6 seller, 3 belonging to neither side alone.
+
+Each diagram is inline SVG generated from `src/flows/flowsData.ts` rather than drawn by
+hand, because the set shares one grid and twenty-three hand-placed diagrams would not hold
+it. Node colour is the load-bearing encoding: it says *who acts* at that step, so a handoff
+between buyer and seller reads as a colour change. That is the PRD's own G3 — both parties
+always know whose turn it is — carried by the picture. Blocked outcomes use a semantic red
+kept separate from the three role hues.
+
+Three flows carry an amber note where the prototype has moved past the document: US-3
+(route now preselected), US-6 (multi-line removed) and US-7 (review step collapsed). The
+flows show the PRD, since that is what engineering estimates against.
 
 ### How the code maps to the PRD
 
