@@ -9,6 +9,7 @@ in the browser with in-memory data — there is no backend.
 |---|---|---|
 | `index.html` | Salla — branches & warehouses plan-limit upgrade nudge | — |
 | `rfq.html` | HIGHBASE — Special Price Request & RFQ | [`docs/HIGHBASE-Special-Price-RFQ-PRD.md`](docs/HIGHBASE-Special-Price-RFQ-PRD.md) |
+| `variants.html` | HIGHBASE — design variant sheets | — |
 
 ## Running
 
@@ -17,11 +18,11 @@ npm install
 npm run dev        # both prototypes; open /index.html or /rfq.html
 npm test           # domain + acceptance-criteria tests
 npm run build      # builds both into dist/
-npm run build:single   # rebuilds rfq-prototype.html, a single self-contained file
+npm run build:single   # rebuilds the single-file prototypes for offline review
 ```
 
-`rfq-prototype.html` is a committed, dependency-free build for offline review — open it
-straight from disk and it runs. CSS and JS are inlined; the only external reference is the
+`rfq-prototype.html` and `variants-prototype.html` are committed, dependency-free builds
+for offline review — open either straight from disk and it runs. CSS and JS are inlined; the only external reference is the
 Google Fonts stylesheet, and the page falls back to the system stack without a network.
 
 ## Special Price Request & RFQ
@@ -55,6 +56,19 @@ a blue outline button against the filled one — so a buyer weighing the price c
 it without hunting (AC-1.1). The card and the detail page share the same eligibility rules:
 no entry point at all where the product is not negotiable, a deep link where an open
 request already covers the SKU, and none where an agreed price is already in force.
+
+## Design variant sheets
+
+`variants.html` is where component alternatives get compared side by side, separately from
+the prototype so exploring an option never destabilises it. Each sheet renders real
+specimens in the HIGHBASE system inside a deliberately plain frame, and annotates every
+option with what it buys and what it costs — plus a flag where an option contradicts a
+stated acceptance criterion.
+
+The first sheet covers the product card's action row: ten arrangements of **Add** and
+**Request special price** (which becomes **View request** once one is open), switchable
+across request state, card width and reading direction, because those three are what
+actually separate the layouts.
 
 ### How the code maps to the PRD
 

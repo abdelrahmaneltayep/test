@@ -13,6 +13,8 @@ export default defineConfig({
         // The existing Salla prototype and the HIGHBASE SPR/RFQ prototype build side by side.
         main: path.resolve(__dirname, 'index.html'),
         rfq: path.resolve(__dirname, 'rfq.html'),
+        // Design-variants sheets live alongside the prototypes they explore.
+        variants: path.resolve(__dirname, 'variants.html'),
       },
     },
   },

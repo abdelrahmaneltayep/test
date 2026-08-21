@@ -1,6 +1,10 @@
 /**
- * Bundles the SPR/RFQ prototype into one HTML file, matching the offline-preview
- * convention already used by prototype.html. All CSS and JS are inlined, so the file
+ * Bundles a prototype into one HTML file, matching the offline-preview convention
+ * already used by prototype.html. Pass the entry name as an argument:
+ *
+ *   node scripts/build-single.mjs rfq        -> rfq-prototype.html
+ *   node scripts/build-single.mjs variants   -> variants-prototype.html
+ * All CSS and JS are inlined, so the file
  * opens straight from disk; the single remaining external reference is the Google Fonts
  * stylesheet, which degrades to the declared fallback stack when there is no network.
  */
@@ -9,6 +13,8 @@ import react from '@vitejs/plugin-react'
 import { readFileSync, writeFileSync, rmSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
+const entry = process.argv[2] ?? 'rfq'
+const outFile = `${entry}-prototype.html`
 const out = path.resolve('.single-build')
 rmSync(out, { recursive: true, force: true })
 
@@ -20,7 +26,7 @@ await build({
     outDir: out,
     emptyOutDir: true,
     rollupOptions: {
-      input: path.resolve('rfq.html'),
+      input: path.resolve(`${entry}.html`),
       output: { inlineDynamicImports: true, entryFileNames: 'app.js', assetFileNames: 'app.[ext]' },
     },
   },
@@ -32,7 +38,7 @@ const files = readdirSync(out)
 const js = readFileSync(path.join(out, files.find((f) => f.endsWith('.js'))), 'utf8')
 const css = readFileSync(path.join(out, files.find((f) => f.endsWith('.css'))), 'utf8')
 
-let html = readFileSync(path.join(out, 'rfq.html'), 'utf8')
+let html = readFileSync(path.join(out, `${entry}.html`), 'utf8')
 // The replacements go through replacer functions on purpose: the minified bundle
 // contains `$&` and `$\`` sequences, and String.replace would interpret those as
 // substitution patterns and splice `</body>` into the middle of the JavaScript.
@@ -44,6 +50,6 @@ html = html
   .replace('</head>', () => `<style>${css}</style>\n  </head>`)
   .replace('</body>', () => `<script type="module">${js}</script>\n  </body>`)
 
-writeFileSync('rfq-prototype.html', html)
+writeFileSync(outFile, html)
 rmSync(out, { recursive: true, force: true })
-console.log(`rfq-prototype.html — ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB · CSS and JS inlined; the only external request is the Google Fonts stylesheet, which falls back to the system stack offline`)
+console.log(`${outFile} — ${(Buffer.byteLength(html) / 1024).toFixed(0)} KB · CSS and JS inlined; the only external request is the Google Fonts stylesheet, which falls back to the system stack offline`)

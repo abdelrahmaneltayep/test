@@ -1,0 +1,106 @@
+/*
+ * Specimen sheet for HIGHBASE card CTA variants.
+ *
+ * Two layers, deliberately unlike each other: the cards inside each plate render in the
+ * product's own system (rfq.css, imported alongside this), while the frame around them —
+ * plate borders, numbers, notes — is drafting-sheet furniture, so a specimen is never
+ * mistaken for product chrome.
+ *
+ * Single-theme by choice: these are colour-critical specimens of a light-mode product,
+ * and re-tinting them for a dark host would misrepresent what is being reviewed. Every
+ * colour is therefore painted explicitly and the page holds on either host ground.
+ */
+
+:root {
+  --v-ground: #f4f6f9;
+  --v-plate: #ffffff;
+  --v-line: #dfe5ec;
+  --v-line-strong: #c3ccd8;
+  --v-ink: #16283c;
+  --v-ink-2: #5b6b7d;
+  --v-ink-3: #8b99a8;
+  --v-flag: #b45309;
+  --v-flag-wash: #fff6e6;
+  --v-label: 'Jost', 'Inter', system-ui, sans-serif;
+}
+
+body { background: var(--v-ground); color: var(--v-ink); }
+
+.v-page { max-width: 1320px; margin: 0 auto; padding: 28px 22px 88px; }
+
+/* ── Masthead ─────────────────────────────────────────────────────────────── */
+.v-head { border-bottom: 2px solid var(--v-ink); padding-bottom: 16px; margin-bottom: 22px; }
+.v-eyebrow { font-family: var(--v-label); font-size: 11px; font-weight: 400; letter-spacing: .28em; text-transform: uppercase; color: var(--v-ink-3); }
+.v-title { font-size: 27px; font-weight: 700; letter-spacing: -.015em; margin: 6px 0 8px; text-wrap: balance; }
+.v-standfirst { max-width: 62ch; font-size: 14px; line-height: 1.65; color: var(--v-ink-2); margin: 0; }
+
+/* ── Control bar ──────────────────────────────────────────────────────────── */
+.v-controls { position: sticky; top: 0; z-index: 50; background: var(--v-ground); border-bottom: 1px solid var(--v-line); padding: 12px 0 14px; margin-bottom: 26px; display: flex; flex-wrap: wrap; gap: 20px; align-items: center; }
+.v-ctrl { display: flex; align-items: center; gap: 7px; }
+.v-ctrl > span { font-family: var(--v-label); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--v-ink-3); white-space: nowrap; }
+.v-btn { font-family: inherit; font-size: 12.5px; font-weight: 500; background: var(--v-plate); color: var(--v-ink-2); border: 1px solid var(--v-line-strong); border-radius: 7px; padding: 5px 12px; cursor: pointer; white-space: nowrap; }
+.v-btn:hover { border-color: var(--v-ink-3); color: var(--v-ink); }
+.v-btn[aria-pressed="true"] { background: var(--v-ink); border-color: var(--v-ink); color: #fff; font-weight: 600; }
+.v-btn:focus-visible { outline: 3px solid #7cc2f2; outline-offset: 2px; }
+
+/* ── Plates ───────────────────────────────────────────────────────────────── */
+.v-grid { display: grid; gap: 22px; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); align-items: start; }
+.v-plate { background: var(--v-plate); border: 1px solid var(--v-line); border-radius: 4px; display: flex; flex-direction: column; }
+.v-plate-head { display: flex; align-items: baseline; gap: 10px; padding: 13px 16px; border-bottom: 1px dashed var(--v-line); }
+/* The number is a reference handle — "let's go with 4" — not a sequence position. */
+.v-num { font-family: var(--v-label); font-size: 12px; font-weight: 400; letter-spacing: .1em; color: var(--v-ink-3); font-variant-numeric: tabular-nums; }
+.v-name { font-size: 14px; font-weight: 700; letter-spacing: -.005em; }
+.v-stage { padding: 22px 16px; background: repeating-linear-gradient(45deg, #fbfcfd, #fbfcfd 9px, #f7f9fb 9px, #f7f9fb 18px); display: flex; justify-content: center; border-bottom: 1px dashed var(--v-line); }
+.v-note { padding: 13px 16px; display: flex; flex-direction: column; gap: 7px; font-size: 12.5px; line-height: 1.55; }
+.v-note-row { display: flex; gap: 8px; }
+.v-note-key { font-family: var(--v-label); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--v-ink-3); flex: 0 0 42px; padding-top: 2px; }
+.v-note-val { color: var(--v-ink-2); }
+.v-flag { margin: 0 16px 14px; background: var(--v-flag-wash); border: 1px solid #f3cf95; border-radius: 5px; padding: 9px 11px; font-size: 12px; color: var(--v-flag); display: flex; gap: 8px; }
+
+/* ── Card sizing — the constraint that decides several of these ───────────── */
+.v-card-w { transition: width .18s ease; }
+.v-card-w--grid { width: 232px; }
+.v-card-w--narrow { width: 168px; }
+.v-card-w--wide { width: 300px; }
+
+/* ── Variant-specific arrangements ────────────────────────────────────────── */
+.v-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: auto; }
+.v-row2 .hb-btn { padding-inline: 8px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.v-rowIcon { display: flex; gap: 8px; margin-top: auto; align-items: stretch; }
+.v-grow { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v-iconsq { flex: 0 0 42px; padding: 0; }
+
+.v-split { display: flex; margin-top: auto; }
+.v-split-main { flex: 1; border-start-end-radius: 0; border-end-end-radius: 0; }
+.v-split-aside { flex: 0 0 44px; padding: 0; border-start-start-radius: 0; border-end-start-radius: 0; box-shadow: none; position: relative; }
+.v-split-aside::before { content: ""; position: absolute; inset-block: 7px; inset-inline-start: 0; width: 1px; background: rgba(255,255,255,.42); }
+
+.v-link { background: none; border: none; font-family: inherit; font-size: 13px; font-weight: 600; color: var(--hb-blue); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 3px; width: 100%; }
+.v-link:hover { color: var(--hb-blue-deep); }
+
+.v-chip { font-family: inherit; font-size: 11px; font-weight: 700; color: var(--hb-blue); background: #fff; border: 1px solid var(--hb-blue); border-radius: 999px; padding: 2px 9px; cursor: pointer; white-space: nowrap; }
+.v-chip:hover { background: var(--hb-blue-wash); }
+
+.v-stepper { display: flex; align-items: center; justify-content: space-between; border: 1.5px solid var(--hb-line); border-radius: var(--hb-r); padding: 4px 6px; }
+.v-stepper button { width: 30px; height: 30px; border: none; background: none; font-size: 17px; color: var(--hb-blue); cursor: pointer; border-radius: 6px; }
+.v-stepper button:hover { background: var(--hb-blue-wash); }
+
+.v-segment { display: flex; border: 1.5px solid var(--hb-blue); border-radius: var(--hb-r); overflow: hidden; margin-top: auto; }
+.v-segment-btn { flex: 1; min-width: 0; font-family: inherit; font-size: 13px; font-weight: 600; padding: 9px 6px; background: #fff; color: var(--hb-blue); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v-segment-btn:hover { background: var(--hb-blue-wash); }
+.v-segment-btn--lead { border-inline-end: 1.5px solid var(--hb-blue); }
+
+.v-cornertag { position: absolute; top: 8px; inset-inline-start: 8px; z-index: 2; font-family: inherit; font-size: 10.5px; font-weight: 700; background: var(--hb-blue); color: #fff; border: none; border-radius: 999px; padding: 4px 10px; cursor: pointer; display: inline-flex; gap: 5px; align-items: center; box-shadow: 0 2px 8px rgba(2,26,55,.28); }
+
+/* When a corner tag is present the unit chip steps aside rather than stacking on it. */
+.v-media-tagged .hb-prod-unit { top: 36px; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+@media (max-width: 640px) {
+  .v-page { padding: 18px 12px 64px; }
+  .v-grid { grid-template-columns: 1fr; }
+  .v-controls { gap: 12px; }
+}
