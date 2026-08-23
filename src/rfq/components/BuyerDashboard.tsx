@@ -38,16 +38,32 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
   // in view — Decline already had to (AC-10.6), and Accept is just as final.
   const [confirming, setConfirming] = useState<{ ref: string; kind: 'accept' | 'decline' } | null>(null)
   const [counterRef, setCounterRef] = useState<string | null>(null)
+  // The same Open / Closed split the seller's queue uses, so the two sides read alike.
+  // "Sent" is a seller word — from here every request has been sent — so the pair that
+  // means something to a buyer is whether the thread is still live.
+  const [listTab, setListTab] = useState<'open' | 'closed'>('open')
   const [statusFilter, setStatusFilter] = useState('all')
   const [query, setQuery] = useState('')
 
   const rfqPage = section === 'rfqs'
 
+  /** Everything on this page, before the tab and the filters narrow it. */
+  const onPage = useMemo(() => state.requests
+    // FR-3.2 — `lost` has no buyer label; it does not appear on a buyer surface at all.
+    .filter((r) => STATE_META[r.state].buyerLabel !== null && r.state !== 'draft')
+    .filter((r) => (threadCategory(r) === 'rfq') === rfqPage),
+  [state.requests, rfqPage])
+
+  // Counted over this page only, so the special price and RFQ numbers never bleed together
+  // and each tab's count matches the rows it actually shows.
+  const counts = {
+    open: onPage.filter((r) => !STATE_META[r.state].terminal).length,
+    closed: onPage.filter((r) => STATE_META[r.state].terminal).length,
+  }
+
   const visible = useMemo(() => {
-    return state.requests
-      // FR-3.2 — `lost` has no buyer label; it does not appear on a buyer surface at all.
-      .filter((r) => STATE_META[r.state].buyerLabel !== null && r.state !== 'draft')
-      .filter((r) => (threadCategory(r) === 'rfq') === rfqPage)
+    return onPage
+      .filter((r) => STATE_META[r.state].terminal === (listTab === 'closed'))
       .filter((r) => statusFilter === 'all' || r.state === statusFilter)
       .filter((r) => {
         if (!query.trim()) return true
@@ -62,7 +78,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
         if (aAction !== bAction) return aAction - bAction
         return (b.submittedAt ?? '').localeCompare(a.submittedAt ?? '')
       })
-  }, [state.requests, statusFilter, query, lang, rfqPage])
+  }, [onPage, listTab, statusFilter, query, lang])
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
@@ -96,7 +112,12 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
       lang={lang} setLang={setLang} viewer="buyer"
       groups={groups} active={section} alerts={unread}
       onNavigate={(key) => {
-        if (key === 'inbox' || key === 'orders' || key === 'special' || key === 'rfqs') setSection(key)
+        if (key !== 'inbox' && key !== 'orders' && key !== 'special' && key !== 'rfqs') return
+        setSection(key)
+        // Each page carries its own pile. Landing on the other page's tab shows an empty
+        // table beside a count that says otherwise, so the list opens on Open every time.
+        setListTab('open')
+        setStatusFilter('all')
       }}
       title={HEAD.title}
       subtitle={HEAD.subtitle}
@@ -113,12 +134,31 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
 
       {(section === 'special' || section === 'rfqs') && (
       <div className="hb-card">
+        <div className="hb-card-head" style={{ paddingBottom: 0, borderBottom: 'none' }}>
+          <div className="hb-tabs" style={{ border: 'none' }}>
+            {([['open', 'tabOpen'], ['closed', 'tabClosed']] as const).map(([key, label]) => (
+              <button
+                key={key} type="button" className="hb-tab"
+                aria-selected={listTab === key}
+                // A status chosen under the other tab would select nothing here, so the
+                // filter resets with the tab rather than leaving an empty table behind.
+                onClick={() => { setListTab(key); setStatusFilter('all') }}
+              >
+                {t(lang, label)}
+                {counts[key] > 0 && <span className="hb-tab-count">{counts[key]}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="hb-filterbar">
             {/* AC-8.3 — filter by status, search by reference and product name. */}
           <select className="hb-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">{t(lang, 'allStatuses')}</option>
             {Object.entries(STATE_META)
-              .filter(([s, m]) => m.buyerLabel !== null && s !== 'draft')
+              // Only the statuses this tab can hold; the rest would be a dead end.
+              .filter(([s, m]) => m.buyerLabel !== null && s !== 'draft'
+                && m.terminal === (listTab === 'closed'))
               .map(([s, m]) => <option key={s} value={s}>{m.buyerLabel?.[lang]}</option>)}
           </select>
           <input
@@ -131,8 +171,8 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
         {visible.length === 0 ? (
           // AC-8.5 — the empty state explains what a request is and links to the marketplace.
           <Empty
-            title={t(lang, rfqPage ? 'emptyRfqTitle' : 'emptyListTitle')}
-            body={t(lang, rfqPage ? 'emptyRfqBody' : 'emptyListBody')}
+            title={t(lang, listTab === 'closed' ? 'emptyClosedTitle' : rfqPage ? 'emptyRfqTitle' : 'emptyListTitle')}
+            body={t(lang, listTab === 'closed' ? 'emptyClosedBody' : rfqPage ? 'emptyRfqBody' : 'emptyListBody')}
             action={<button type="button" className="hb-btn hb-btn--primary" onClick={onBrowse}>{t(lang, 'browseMarketplace')}</button>}
           />
         ) : (

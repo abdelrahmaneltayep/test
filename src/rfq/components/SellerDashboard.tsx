@@ -112,7 +112,10 @@ export function SellerDashboard() {
       lang={lang} setLang={setLang} viewer="seller"
       groups={groups} active={section} alerts={unread}
       onNavigate={(key) => {
-        if (key === 'inbox' || key === 'orders' || key === 'special' || key === 'rfqs') setSection(key)
+        if (key !== 'inbox' && key !== 'orders' && key !== 'special' && key !== 'rfqs') return
+        setSection(key)
+        // The queue opens on what needs deciding, whichever page you arrive from.
+        setTab('open')
       }}
       title={HEAD.title}
       subtitle={HEAD.subtitle}
