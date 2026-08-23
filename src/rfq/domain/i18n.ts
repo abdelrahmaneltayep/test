@@ -228,6 +228,9 @@ export const STRINGS: Dict = {
   // ── Row actions on the buyer's request list (US-8) ────────────────────────
   actionsColumn: { en: 'Actions', ar: 'الإجراءات' },
   reviewOffer: { en: 'Review offer', ar: 'مراجعة العرض' },
+  confirmBuyerAcceptTitle: { en: 'Accept this price?', ar: 'قبول هذا السعر؟' },
+  confirmBuyerAcceptBody: { en: 'The supplier\u2019s price becomes binding for this request and the negotiation closes. Any item they declined stays at its list price.', ar: 'يصبح سعر المورّد ملزماً لهذا الطلب وتنتهي المفاوضة. ويبقى أي صنف رفضه بسعره المعلن.' },
+  supplierOffers: { en: 'Supplier offers', ar: 'عرض المورّد' },
   addInformation: { en: 'Add information', ar: 'إضافة المعلومات' },
   cancelRequest: { en: 'Cancel', ar: 'إلغاء' },
   requestAgain: { en: 'Request again', ar: 'اطلب مرة أخرى' },

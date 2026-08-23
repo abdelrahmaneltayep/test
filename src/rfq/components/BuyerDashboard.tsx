@@ -34,6 +34,10 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
    * missed. Inbox and Final Orders are the draft's other two surfaces.
    */
   const [section, setSection] = useState<'special' | 'rfqs' | 'inbox' | 'orders'>('special')
+  // Accept and Decline are taken from the row now, so both confirm first with the numbers
+  // in view — Decline already had to (AC-10.6), and Accept is just as final.
+  const [confirming, setConfirming] = useState<{ ref: string; kind: 'accept' | 'decline' } | null>(null)
+  const [counterRef, setCounterRef] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState('all')
   const [query, setQuery] = useState('')
 
@@ -164,6 +168,8 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                         <RowActions
                           request={r} lang={lang} now={state.now}
                           onOpen={() => setOpenRef(r.ref)}
+                          onCounter={() => { setCounterRef(r.ref); setOpenRef(r.ref) }}
+                          onDecide={(kind) => setConfirming({ ref: r.ref, kind })}
                           onWithdraw={() => dispatch({ type: 'buyer_withdraws', ref: r.ref })}
                           onReRequest={() => { dispatch({ type: 're_request', ref: r.ref }); onBrowse() }}
                         />
@@ -178,28 +184,48 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
       </div>
       )}
 
-      {open && <Comparison request={open} onClose={() => setOpenRef(null)} />}
+      {open && (
+        <Comparison
+          request={open}
+          initialCounter={counterRef === open.ref}
+          onClose={() => { setOpenRef(null); setCounterRef(null) }}
+        />
+      )}
+
+      {confirming && (
+        <DecisionConfirm
+          request={state.requests.find((r) => r.ref === confirming.ref) as NegotiationRequest}
+          kind={confirming.kind}
+          onClose={() => setConfirming(null)}
+        />
+      )}
     </DashboardChrome>
   )
 }
 
 /**
- * US-8 — the row's next step, in the list.
+ * US-8 — the buyer's decision, in the list.
  *
- * The list carries the action that moves the request on and the one that ends it, not the
- * whole decision set: accepting a counter needs the original / asked / offered comparison
- * in front of you (AC-10.1 puts Accept on that surface, as its single primary action), so
- * the row opens it rather than pretending a one-click accept is safe from a table that
- * does not show the offered price.
+ * Accept, Counter and Decline mirror the seller's row, because the two sides answer each
+ * other with the same three moves. Accept and Decline settle the negotiation from here,
+ * each behind a confirmation that carries the numbers the row does not show — AC-10.1 puts
+ * Accept on the comparison as its single primary action, and the confirmation is how that
+ * holds when the click starts in a table. Counter cannot be taken here at all: it needs a
+ * price per line, so it opens the comparison with the counter fields already live.
+ *
+ * Withdraw is not offered beside Decline. On a countered row the two would read as the
+ * same button, and only one of them is an answer to the offer; it stays on the comparison.
  *
  * The offer countdown that used to sit in this column lives on the comparison, next to the
  * decision it constrains; the row still sorts action-first and tints (AC-8.2).
  */
-function RowActions({ request, lang, now, onOpen, onWithdraw, onReRequest }: {
+function RowActions({ request, lang, now, onOpen, onCounter, onDecide, onWithdraw, onReRequest }: {
   request: NegotiationRequest
   lang: 'en' | 'ar'
   now: Date
   onOpen: () => void
+  onCounter: () => void
+  onDecide: (kind: 'accept' | 'decline') => void
   onWithdraw: () => void
   onReRequest: () => void
 }) {
@@ -212,11 +238,35 @@ function RowActions({ request, lang, now, onOpen, onWithdraw, onReRequest }: {
   // A click on a button must not also open the row.
   const act = (fn: () => void) => (e: ReactMouseEvent) => { e.stopPropagation(); fn() }
 
+  // The seller has answered and the offer still stands: the three decisions apply.
+  if (request.state === 'countered_by_seller' && live) {
+    const roundsLeft = MAX_ROUNDS - request.rounds
+    return (
+      <div className="hb-rowactions">
+        <button type="button" className="hb-btn hb-btn--sm hb-btn--primary" onClick={act(() => onDecide('accept'))}>
+          {t(lang, 'accept')}
+        </button>
+        <button
+          type="button" className="hb-btn hb-btn--sm hb-btn--secondary"
+          // AC-10.4 — past the cap the counter is not offered, and says why.
+          disabled={roundsLeft <= 0}
+          title={roundsLeft <= 0 ? t(lang, 'roundCapReached', { n: MAX_ROUNDS }) : undefined}
+          onClick={act(onCounter)}
+        >
+          {t(lang, 'counter')}
+        </button>
+        {/* FR-11.6 — the destructive action is quiet and never primary. */}
+        <button type="button" className="hb-btn hb-btn--sm hb-btn--danger" onClick={act(() => onDecide('decline'))}>
+          {t(lang, 'decline')}
+        </button>
+      </div>
+    )
+  }
+
   const primary =
-    request.state === 'countered_by_seller' && live ? { label: t(lang, 'reviewOffer'), run: onOpen }
-      : request.state === 'info_requested' ? { label: t(lang, 'addInformation'), run: onOpen }
-        : meta.terminal || !live ? { label: t(lang, 'requestAgain'), run: onReRequest }
-          : null
+    request.state === 'info_requested' ? { label: t(lang, 'addInformation'), run: onOpen }
+      : meta.terminal || !live ? { label: t(lang, 'requestAgain'), run: onReRequest }
+        : null
 
   return (
     <div className="hb-rowactions">
@@ -226,7 +276,6 @@ function RowActions({ request, lang, now, onOpen, onWithdraw, onReRequest }: {
         </button>
       )}
       {canWithdraw && (
-        // FR-11.6 — the destructive action is quiet and never primary.
         <button type="button" className="hb-btn hb-btn--sm hb-btn--danger" onClick={act(onWithdraw)}>
           {t(lang, 'cancelRequest')}
         </button>
@@ -237,12 +286,99 @@ function RowActions({ request, lang, now, onOpen, onWithdraw, onReRequest }: {
   )
 }
 
+/**
+ * Confirming an Accept or a Decline taken from the list.
+ *
+ * AC-10.6 already required a confirmation before declining, naming the consequence. Accept
+ * is just as final and, taken from a row, is taken without the comparison in view — so it
+ * gets the same treatment, and the dialog carries what the row leaves out: the list total,
+ * what the supplier is offering, and the difference between them.
+ */
+function DecisionConfirm({ request, kind, onClose }: {
+  request: NegotiationRequest
+  kind: 'accept' | 'decline'
+  onClose: () => void
+}) {
+  const { dispatch, lang } = useRfq()
+  const listTotal = listTotalOf(request.lines)
+  const offeredTotal = offeredTotalOf(request.lines)
+  const saving = listTotal - offeredTotal
+
+  function run() {
+    dispatch(kind === 'accept'
+      ? { type: 'buyer_accepts', ref: request.ref, asTemplate: false }
+      : { type: 'buyer_declines', ref: request.ref })
+    onClose()
+  }
+
+  return (
+    <Modal
+      title={<h2 className="hb-h2">{t(lang, kind === 'accept' ? 'confirmBuyerAcceptTitle' : 'confirmDeclineTitle')}</h2>}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="hb-btn hb-btn--secondary" onClick={onClose}>{t(lang, 'cancel')}</button>
+          <span className="hb-primary-slot">
+            <button
+              type="button"
+              className={`hb-btn hb-btn--${kind === 'accept' ? 'primary' : 'danger'}`}
+              onClick={run}
+            >
+              {t(lang, kind === 'accept' ? 'accept' : 'decline')}
+            </button>
+          </span>
+        </>
+      }
+    >
+      <p className="hb-sub" style={{ marginBottom: 14 }}>
+        {t(lang, kind === 'accept' ? 'confirmBuyerAcceptBody' : 'confirmDeclineBody')}
+      </p>
+
+      <div className="hb-row" style={{ marginBottom: 12 }}>
+        <span className="hb-hint">{request.sellerName}</span>
+        <span className="hb-ref">{request.ref}</span>
+      </div>
+
+      {/* The numbers the row does not carry, at the moment they decide something. */}
+      <div className="hb-table-wrap">
+        <table className="hb-table">
+          <thead>
+            <tr>
+              <th>{t(lang, 'original')}</th>
+              <th className="hb-col-offered">{t(lang, 'supplierOffers')}</th>
+              <th>{t(lang, 'estimatedSaving')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><Money value={listTotal} lang={lang} withCurrency /></td>
+              <td className="hb-col-offered"><Money value={offeredTotal} lang={lang} withCurrency /></td>
+              <td>
+                {saving > 0
+                  ? <span className="hb-num" style={{ color: 'var(--hb-good)' }}>
+                      {formatMoney(saving, { withCurrency: true, lang })} · {percentOff(listTotal, offeredTotal)}%
+                    </span>
+                  : <span className="hb-muted">{t(lang, 'noPriceChange')}</span>}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Modal>
+  )
+}
+
 /** US-9 / US-10 — three columns, per-line outcomes, and the decision actions. */
-function Comparison({ request, onClose }: { request: NegotiationRequest; onClose: () => void }) {
+function Comparison({ request, initialCounter, onClose }: {
+  request: NegotiationRequest
+  /** Counter was chosen from the row, so the per-line fields open already live. */
+  initialCounter?: boolean
+  onClose: () => void
+}) {
   const { state, dispatch, lang } = useRfq()
   const [tab, setTab] = useState<'compare' | 'history' | 'comments'>('compare')
   const [confirmDecline, setConfirmDecline] = useState(false)
-  const [counterMode, setCounterMode] = useState(false)
+  const [counterMode, setCounterMode] = useState(initialCounter ?? false)
   const [counters, setCounters] = useState<Record<string, string>>({})
 
   // The buyer only ever sees the projection. Cost, margin and floor are not in it (A7).

@@ -37,9 +37,10 @@ Three surfaces, switchable from the demo bar at the top:
   per route, "I have a price to match" (the default) and "Ask the seller to quote" — then
   quantity, then that route's fields. A request is one line; multi-line drafts still arrive
   through Re-request and are summarised at the foot of the form.
-- **Buyer · Dashboard** — Special Price Requests and RFQs as two lists, each row carrying
-  its next step and its cancel, with the three-column original / asked / offered
-  comparison behind it: accept, counter, decline and withdraw.
+- **Buyer · Dashboard** — Special Price Requests and RFQs as two lists. A row the supplier
+  has answered offers Accept, Counter and Decline, the same three the seller's row does;
+  Counter opens the three-column original / asked / offered comparison with its per-line
+  fields already live, and withdraw stays there.
 - **Seller · Dashboard** — the same two pages as triage queues, split Open / Sent, each row
   offering Accept, Counter and Decline, and the line-by-line response surface behind them
   carrying the SLA countdown, margin after the ask, the proof panel and the price-list
