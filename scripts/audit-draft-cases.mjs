@@ -52,12 +52,11 @@ await p.locator('.hb-modal-body input[type="file"]').setInputFiles({
   name: 'gulf-foods-invoice.pdf', mimeType: 'application/pdf', buffer: Buffer.from('invoice'),
 })
 await p.waitForTimeout(400)
-const panel = await p.locator('.hb-proof').count()
-const checks = await p.locator('.hb-proof .hb-check').allInnerTexts()
-// AC-16.2 — the checks still report; the passes are summarised rather than listed one
-// green row each, so what is on screen is what needs a decision.
-check('3.extraction-and-checks', panel === 1 && checks.length === 1
-  && /All automatic checks passed/i.test(checks[0] ?? ''), `panel=${panel} · ${checks.join(' | ').slice(0, 140)}`)
+// The buyer sees the file and nothing else: extraction and its checks are the seller's
+// evidence, and asserting their absence here is half of what makes that true.
+check('3.buyer-sees-only-the-file', await p.locator('.hb-modal-body .hb-filechip').count() === 1
+  && await p.locator('.hb-modal-body .hb-proof').count() === 0,
+  await txt('.hb-modal-body .hb-filechip'))
 await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
 const sentBody = await txt('.hb-overlay')
 check('3.case1-sent', /Request sent/i.test(sentBody) && /SPR-\d{4}-\d{4}/.test(sentBody), sentBody)
@@ -90,6 +89,11 @@ const creditRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
 await p.locator('tbody tr', { hasText: creditRef }).click(); await p.waitForTimeout(350)
+// §3 — the invoice-reading result lands on the seller's page, where the decision is.
+check('3.extraction-reaches-the-seller', await p.locator('.hb-proof').count() === 1
+  && /Buyer typed/i.test(await txt('.hb-proof'))
+  && /All automatic checks passed|Warn|Fail/i.test(await txt('.hb-proof')),
+  (await txt('.hb-proof')).slice(0, 140))
 const linePills = await p.locator('.hb-content .hb-pill').allInnerTexts()
 check('11.special-credit-shown-to-seller', linePills.some((x) => /continuing arrangement/i.test(x)),
   `${creditRef} :: ${linePills.join(' | ')}`)

@@ -36,7 +36,9 @@ Three surfaces, switchable from the demo bar at the top:
 - **Buyer · Marketplace** — the product grid and the product details page, each carrying
   the negotiation entry point, plus the request form: the route question first — a tab
   per route, "I have a price to match" (the default) and "Ask the seller to quote" — then
-  quantity, then that route's fields. A request is one line; multi-line drafts still arrive
+  quantity, then that route's fields. The attachment shows the picker before the upload and
+  the file after it; extraction and its checks run on submission and are shown to the
+  seller, whose decision they are for. A request is one line; multi-line drafts still arrive
   through Re-request and are summarised at the foot of the form.
 - **Buyer · Dashboard** — Special Price Requests and RFQs as two lists, each split Open /
   Closed with its count. A row the supplier has answered offers Accept and Decline; both

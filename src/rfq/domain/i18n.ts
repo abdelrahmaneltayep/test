@@ -239,6 +239,7 @@ export const STRINGS: Dict = {
   proofDuplicate: { en: 'Duplicate', ar: 'التكرار' },
   buyerTyped: { en: 'Buyer typed', ar: 'ما أدخله المشتري' },
   documentSays: { en: 'Document says', ar: 'ما يقوله المستند' },
+  removeFile: { en: 'Remove', ar: 'إزالة' },
   allChecksPassed: { en: 'All automatic checks passed — freshness, product identity and duplicate.', ar: 'اجتاز المستند كل الفحوص التلقائية — الحداثة ومطابقة الصنف وعدم التكرار.' },
   checksNeedingAttention: { en: 'Checks needing attention', ar: 'فحوص تحتاج انتباهك' },
   counterNeedsPrice: { en: 'Enter a counter price to send one.', ar: 'أدخل سعراً مقابلاً لإرساله.' },

@@ -25,7 +25,7 @@ import { runAutoChecks, PROOF_EXCLUSIONS, ACCEPTED_MIME_TYPES, MAX_FILE_BYTES } 
 import { t, type Lang } from '../domain/i18n'
 import type { Frequency, Product, Proof, ProofFields } from '../domain/types'
 import { case1Available, frequencyAvailable, phase2Only, productBySku, useRfq, type DraftLine } from '../store'
-import { CheckBadge, Field, Modal, Money } from './ui'
+import { Field, Modal, Money } from './ui'
 
 /** FR-2.1 — the seller's configured negotiation minimum, per line. */
 export const NEGOTIATION_MIN_QTY = 10
@@ -98,7 +98,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   const [docDate, setDocDate] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [proofError, setProofError] = useState<string | null>(null)
-  const [conflictResolved, setConflictResolved] = useState<'typed' | 'extracted' | null>(null)
   const [frequency, setFrequency] = useState<Frequency>('one_off')
   const [specialCredit, setSpecialCredit] = useState(false)
   const [note, setNote] = useState('')
@@ -112,7 +111,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
 
   function handleFile(picked: File | null) {
     setProofError(null)
-    setConflictResolved(null)
     if (!picked) { setFile(null); return }
     // EC-30 — the size limit is enforced before upload completes where the client can see it.
     if (picked.size > MAX_FILE_BYTES) {
@@ -377,18 +375,41 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
             </ul>
           </details>
 
-          <Field label={t(lang, 'uploadProof')} hint={t(lang, 'uploadHint')} error={proofFileError ?? proofError}>
-            {/* AC-21.4 — camera and gallery on a phone, not a desktop-only file picker. */}
-            <input
-              className="hb-input" type="file" accept=".pdf,image/*" capture="environment"
-              onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-            />
+          {/*
+            Before the upload, the picker. After it, the file — and nothing else.
+            The extraction read-back and its checks used to sit here, and they are the
+            seller's evidence, not the buyer's: the buyer knows what they attached, and a
+            panel telling them what a machine read off their own invoice asked them to
+            adjudicate a mismatch they cannot see the document behind. FR-7.2 extraction
+            and the FR-7.3 checks still run on submission and still reach the seller's
+            request page in full (§3) — what is gone is the buyer being shown the working.
+          */}
+          <Field
+            label={t(lang, 'uploadProof')}
+            hint={file ? undefined : t(lang, 'uploadHint')}
+            error={proofFileError ?? proofError}
+          >
+            {file ? (
+              <div className="hb-filechip">
+                <span aria-hidden="true">{file.type.startsWith('image/') ? '🖼' : '📄'}</span>
+                <span className="hb-filechip-name" dir="ltr">{file.name}</span>
+                <span className="hb-hint">{Math.max(1, Math.round(file.size / 1024))} KB</span>
+                <button
+                  type="button" className="hb-btn hb-btn--quiet hb-btn--sm"
+                  style={{ marginInlineStart: 'auto' }}
+                  onClick={() => handleFile(null)}
+                >
+                  {t(lang, 'removeFile')}
+                </button>
+              </div>
+            ) : (
+              /* AC-21.4 — camera and gallery on a phone, not a desktop-only file picker. */
+              <input
+                className="hb-input" type="file" accept=".pdf,image/*" capture="environment"
+                onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+              />
+            )}
           </Field>
-
-          {proof && <ExtractionPanel
-            proof={proof} lang={lang} typedSupplier={supplier}
-            resolution={conflictResolved} onResolve={setConflictResolved}
-          />}
 
           {/*
             Both optional, and both below the attachment on purpose: extraction reads them
@@ -541,69 +562,3 @@ function DraftSummary({ lang }: { lang: Lang }) {
   )
 }
 
-/** AC-4.3 / AC-4.4 — extracted values shown as "extracted — please confirm", with any
- *  conflict against the typed value surfaced rather than silently resolved. */
-function ExtractionPanel({ proof, lang, typedSupplier, resolution, onResolve }: {
-  proof: Proof
-  lang: Lang
-  typedSupplier: string
-  resolution: 'typed' | 'extracted' | null
-  onResolve: (r: 'typed' | 'extracted') => void
-}) {
-  if (proof.extractionUnavailable) {
-    // EC-27 / E-4 — a system failure says so, and is never phrased as user error.
-    return <div className="hb-banner hb-banner--warn">{t(lang, 'checksNotRun')}</div>
-  }
-  const conflict = proof.extracted && typedSupplier.trim() && proof.extracted.supplier !== typedSupplier.trim()
-  const notable = proof.checks.filter((c) => c.severity !== 'pass')
-  return (
-    <div className="hb-proof" style={{ marginTop: 10 }}>
-      <div className="hb-proof-grid">
-        <div>
-          <div className="hb-hint">{t(lang, 'buyerTyped')}</div>
-          <strong>{typedSupplier || '—'}</strong>
-        </div>
-        <div>
-          <div className="hb-hint">{t(lang, 'extractedConfirm')}</div>
-          <strong>{proof.extracted?.supplier || '—'}</strong>
-        </div>
-      </div>
-      {conflict && (
-        <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--hb-line-soft)' }}>
-          <div className="hb-warning" style={{ marginTop: 0 }}>
-            {t(lang, 'extractionConflict', { typed: typedSupplier, extracted: proof.extracted?.supplier ?? '' })}
-          </div>
-          <div className="hb-row" style={{ marginTop: 8 }}>
-            <button type="button" className={`hb-btn hb-btn--sm ${resolution === 'typed' ? 'hb-btn--primary' : 'hb-btn--secondary'}`} onClick={() => onResolve('typed')}>
-              {t(lang, 'keepTyped')}
-            </button>
-            <button type="button" className={`hb-btn hb-btn--sm ${resolution === 'extracted' ? 'hb-btn--primary' : 'hb-btn--secondary'}`} onClick={() => onResolve('extracted')}>
-              {t(lang, 'useExtracted')}
-            </button>
-          </div>
-        </div>
-      )}
-      {/*
-        AC-4.5 — a failed check warns inline and states why, without blocking submission.
-        A passing one is the expected case, so the three of them collapse to a single line
-        and only what needs the buyer's attention gets a row of its own.
-      */}
-      {notable.length === 0 ? (
-        <div className="hb-check">
-          <CheckBadge severity="pass" lang={lang} />
-          <div className="hb-hint" style={{ marginTop: 3 }}>{t(lang, 'allChecksPassed')}</div>
-        </div>
-      ) : (
-        notable.map((c) => (
-          <div className="hb-check" key={c.check}>
-            <CheckBadge severity={c.severity} lang={lang} />
-            <div>
-              <strong>{t(lang, c.check === 'freshness' ? 'proofFreshness' : c.check === 'identity' ? 'proofIdentity' : 'proofDuplicate')}</strong>
-              <div className="hb-hint">{c.reasonCode.replace(/_/g, ' ')}</div>
-            </div>
-          </div>
-        ))
-      )}
-    </div>
-  )
-}
