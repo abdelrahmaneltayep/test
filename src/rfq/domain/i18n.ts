@@ -270,7 +270,8 @@ export const STRINGS: Dict = {
   whatYouSent: { en: 'What you sent', ar: 'ما أرسلته' },
   whatSupplierAnswered: { en: 'What the supplier answered', ar: 'رد المورّد' },
   awaitingSupplier: { en: 'The supplier has not answered yet. You can withdraw the request until they do.', ar: 'لم يرد المورّد بعد. يمكنك سحب الطلب حتى ذلك الحين.' },
-  counterNeedsPriceBuyer: { en: 'Enter a price to counter with.', ar: 'أدخل السعر الذي تريد عرضه.' },
+  // Draft §6 — "Buyer always has two actions available: Accept … or Reject … / Cancel".
+  buyerDecisionHint: { en: 'Accept the supplier\u2019s price and the order proceeds, or decline it and the items stay available at list price.', ar: 'اقبل سعر المورّد فيمضي الطلب، أو ارفضه وتبقى الأصناف متاحة بالسعر المعلن.' },
   backToRequests: { en: 'Back to my requests', ar: 'العودة إلى طلباتي' },
   whatBuyerSentHint: { en: 'The request exactly as it was submitted. Nothing here is editable.', ar: 'الطلب كما أُرسل تماماً. لا شيء هنا قابل للتعديل.' },
   yourDecision: { en: 'Your decision', ar: 'قرارك' },

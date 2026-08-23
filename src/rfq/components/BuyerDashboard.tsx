@@ -7,7 +7,6 @@
 
 import { useMemo, useState, type MouseEvent as ReactMouseEvent } from 'react'
 import { acceptanceAllowed } from '../domain/clocks'
-import { guardrailValue } from '../domain/guardrails'
 import { t } from '../domain/i18n'
 import { STATE_META } from '../domain/states'
 import type { NegotiationRequest } from '../domain/types'
@@ -18,8 +17,6 @@ import { Inbox } from './Inbox'
 import { Orders } from './Orders'
 import { BuyerRequestPage } from './RequestDetail'
 import { buildInbox, threadCategory, unreadCount } from '../domain/inbox'
-
-const MAX_ROUNDS = guardrailValue('maxRounds')
 
 export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
   const { state, dispatch, lang, setLang } = useRfq()
@@ -276,23 +273,19 @@ function RowActions({ request, lang, now, onOpen, onOpenDecision, onWithdraw, on
   // A click on a button must not also open the row.
   const act = (fn: () => void) => (e: ReactMouseEvent) => { e.stopPropagation(); fn() }
 
-  // The supplier has answered and the offer still stands: the three decisions apply, and
-  // each one opens the page where the numbers behind it are.
+  /*
+   * The supplier has answered and the offer still stands.
+   *
+   * Draft §6 gives the buyer two moves and only two — "Accept (confirms the seller's price,
+   * order proceeds) or Reject the modified or original price / Cancel" — so there is no
+   * counter on this side. Both open the request page, where the original sits beside the
+   * ask beside what came back (AC-10.1).
+   */
   if (request.state === 'countered_by_seller' && live) {
-    const roundsLeft = MAX_ROUNDS - request.rounds
     return (
       <div className="hb-rowactions">
         <button type="button" className="hb-btn hb-btn--sm hb-btn--primary" onClick={act(onOpenDecision)}>
           {t(lang, 'accept')}
-        </button>
-        <button
-          type="button" className="hb-btn hb-btn--sm hb-btn--outline"
-          // AC-10.4 — past the cap the counter is not offered, and says why.
-          disabled={roundsLeft <= 0}
-          title={roundsLeft <= 0 ? t(lang, 'roundCapReached', { n: MAX_ROUNDS }) : undefined}
-          onClick={act(onOpenDecision)}
-        >
-          {t(lang, 'counter')}
         </button>
         {/* FR-11.6 — the destructive action is quiet and never primary. */}
         <button type="button" className="hb-btn hb-btn--sm hb-btn--danger" onClick={act(onOpenDecision)}>

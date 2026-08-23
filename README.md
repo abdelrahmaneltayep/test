@@ -39,10 +39,13 @@ Three surfaces, switchable from the demo bar at the top:
   quantity, then that route's fields. A request is one line; multi-line drafts still arrive
   through Re-request and are summarised at the foot of the form.
 - **Buyer · Dashboard** — Special Price Requests and RFQs as two lists, each split Open /
-  Closed with its count. A row the supplier has answered offers Accept, Counter and
-  Decline, the same three the seller's row does;
-  Counter opens the three-column original / asked / offered comparison with its per-line
-  fields already live, and withdraw stays there.
+  Closed with its count. A row the supplier has answered offers Accept and Decline; both
+  open the request page, where the numbers behind the decision are. That page mirrors the
+  seller's: what you sent read back field by field, what the supplier answered with the
+  three prices side by side, then the decision. The draft gives the buyer two moves on an
+  offer and only two — accept it, or reject it — so there is no counter on this side;
+  Withdraw sits beside them as the quiet action that ends the request rather than answering
+  it. The full log lives on the order, where §9 and §10 ask for it.
 - **Seller · Dashboard** — the same two pages as triage queues, split Open / Sent, each row
   offering Accept, Counter and Decline. Opening a row is a page, not a dialog: the buyer's
   submission read back field by field, then the document and its checks, then the decision:

@@ -171,7 +171,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Thirty-seven checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Thirty-nine checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -224,8 +224,18 @@ this pass and still unreconciled in the PRD text itself:
 
 1. **US-7** — the review step was collapsed into the single form.
 2. **AC-3.2** — the route is preselected, so there is no unchosen state.
-3. **US-6 / §6.6 Decision 1 / M-L8** — Add-another was removed, so a request is effectively
-   single-line; multi-line drafts arrive only via Re-request.
+3. **US-6 / §6.6 Decision 1 / M-L8** — a request holds one item, which is what the draft's
+   §2 describes: the buyer asks from a product's card, so a product is a request. The object
+   model still holds a line collection for FR-1.9.
+4. **US-10 / AC-10.4 / FR-3.4c** — the buyer cannot counter. Draft §6 gives them two moves
+   and only two — "Accept (confirms the seller's price, order proceeds) or Reject the
+   modified or original price / Cancel" — so the counter is a seller move now. The
+   transition and its round cap stay in the state machine, because the PRD's multi-round
+   negotiation is still what the domain describes, but nothing on a buyer surface reaches
+   them. Rounds therefore only ever increment from the seller's side.
+5. **AC-13.1** — the request page no longer carries the history panel. The log is not lost:
+   it is on the order (§9, §10), where the draft asks for it and where an HB Admin looks
+   for it. What no longer exists is a second copy of it beside the decision.
 
 The draft's §4 ("both paths should be presented together/combinable under each item") reads
 alongside 3 rather than against it: the two routes are combinable per item, but a request

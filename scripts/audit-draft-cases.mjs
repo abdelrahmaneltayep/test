@@ -235,9 +235,22 @@ check('6.buyer-detail-is-a-page', await p.locator('.hb-overlay').count() === 0
 const buyerActions = await p.locator('.hb-modal-foot button').allInnerTexts()
 const buyerTypes = await p.locator('.hb-modal-foot button').evaluateAll((els) => els.map((e) => e.className
   .split(' ').find((c) => c.startsWith('hb-btn--')) ?? 'none'))
-check('6.buyer-four-actions', buyerActions.join('|') === 'Withdraw request|Decline|Counter|Accept'
-  && buyerTypes.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--outline|hb-btn--primary',
+// §6 — "Accept … or Reject … / Cancel". Two moves on the offer, and the withdraw that
+// ends the request; no counter on this side.
+check('6.buyer-two-moves-plus-withdraw', buyerActions.join('|') === 'Withdraw request|Decline|Accept'
+  && buyerTypes.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--primary',
   `${buyerActions.join(' | ')} :: ${buyerTypes.join(' | ')}`)
+// "Counter received" and "Counter-offered" still describe what the supplier did; what is
+// gone is any control that lets the buyer make one.
+const buyerControls = [
+  ...await p.locator('.hb-content button').allInnerTexts(),
+  ...await p.locator('.hb-content .hb-label').allInnerTexts(),
+]
+check('6.no-buyer-counter', !buyerControls.some((x) => /counter/i.test(x))
+  && await p.locator('.hb-content input[inputmode="decimal"]').count() === 0,
+  buyerControls.join(' | ').slice(0, 120))
+check('6.no-history-tab-on-request', await p.locator('.hb-content > .hb-tabs').count() === 0,
+  'the log is on the order, per §9 and §10')
 const buyerCompare = await txt('.hb-content table')
 check('6.buyer-three-prices', /Original/i.test(buyerCompare) && /You asked/i.test(buyerCompare)
   && /Supplier offers/i.test(buyerCompare), buyerCompare.slice(0, 160))

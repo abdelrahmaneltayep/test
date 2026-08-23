@@ -19,7 +19,7 @@
 import { useState } from 'react'
 import { acceptanceAllowed, addDays, isEscalated } from '../domain/clocks'
 import { guardrailValue, SAME_AS_LAST_TIME_DAYS } from '../domain/guardrails'
-import { renderHistory, t, type Lang } from '../domain/i18n'
+import { t, type Lang } from '../domain/i18n'
 import { formatMoney, lineTotal, parseMoney } from '../domain/money'
 import { lineMargin, marginAfterAsk, type MarginBand } from '../domain/margin'
 import { hasFailedCheck, triStateOutcome } from '../domain/proof'
@@ -633,8 +633,6 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
 }) {
   const { state, dispatch, lang } = useRfq()
   const line = request.lines[0]
-  const [tab, setTab] = useState<'outcome' | 'history'>('outcome')
-  const [priceText, setPriceText] = useState('')
   const [confirmDecline, setConfirmDecline] = useState(false)
 
   const meta = STATE_META[request.state]
@@ -643,8 +641,6 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
   const answered = request.state === 'countered_by_seller' && live
   const canWithdraw = ['submitted', 'viewed', 'info_requested', 'countered_by_seller', 'countered_by_buyer']
     .includes(request.state)
-  const roundsLeft = guardrailValue('maxRounds') - request.rounds
-  const counterPrice = parseMoney(priceText)
 
   const listTotal = lineTotal(line.listPriceSnapshot, line.quantity)
   const offeredTotal = lineTotal(line.offeredPrice ?? line.listPriceSnapshot, line.quantity)
@@ -673,40 +669,7 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
         </div>
       </div>
 
-      {/* AC-13.1 — the outcome and the log are two distinct panels. */}
-      <div className="hb-tabs" style={{ marginBottom: 14 }}>
-        {(['outcome', 'history'] as const).map((k) => (
-          <button key={k} type="button" className="hb-tab" aria-selected={tab === k} onClick={() => setTab(k)}>
-            {t(lang, k === 'outcome' ? 'outcome' : 'history')}
-          </button>
-        ))}
-      </div>
-
-      {tab === 'history' ? (
-        <div className="hb-card">
-          <div className="hb-card-body hb-log">
-            <ul>
-              {request.history.map((h) => (
-                <li key={h.id}>
-                  {/* AC-13.2 — timestamp, actor, event type, and before/after on money. */}
-                  <time dir="ltr">{h.at.replace('T', ' ').slice(0, 16)} UTC</time>
-                  {renderHistory(h, lang)}
-                  {h.before !== null && h.after !== null && (
-                    <span className="hb-hint"> ({formatMoney(h.before)} → {formatMoney(h.after)})</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            <p className="hb-hint">
-              {lang === 'ar'
-                ? 'السجل غير قابل للتعديل أو الحذف من أي دور، بما في ذلك إدارة المنصة.'
-                : 'The history log is append-only and cannot be edited or deleted by any role, including HIGHBASE administrators.'}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <>
-          <SubmissionReadback line={line} lang={lang} title={t(lang, 'whatYouSent')} />
+      <SubmissionReadback line={line} lang={lang} title={t(lang, 'whatYouSent')} />
 
           {/* ── What came back ─────────────────────────────────────────────── */}
           <div className="hb-card">
@@ -783,18 +746,7 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
             <div className="hb-card-head"><h2 className="hb-h2">{t(lang, 'yourDecision')}</h2></div>
             <div className="hb-card-body">
               {answered ? (
-                <div className="hb-row" style={{ alignItems: 'flex-end' }}>
-                  <Field
-                    label={t(lang, 'counterPrice')}
-                    hint={roundsLeft > 0 ? t(lang, 'counterNeedsPriceBuyer') : t(lang, 'roundCapReached', { n: guardrailValue('maxRounds') })}
-                  >
-                    <input
-                      className="hb-input" inputMode="decimal" style={{ minWidth: 140 }}
-                      disabled={roundsLeft <= 0}
-                      value={priceText} onChange={(e) => setPriceText(e.target.value)}
-                    />
-                  </Field>
-                </div>
+                <p className="hb-sub">{t(lang, 'buyerDecisionHint')}</p>
               ) : request.state === 'info_requested' ? (
                 <p className="hb-sub">{t(lang, 'actionNeededBanner')}</p>
               ) : meta.terminal ? (
@@ -818,22 +770,8 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
                   <button type="button" className="hb-btn hb-btn--danger" onClick={() => setConfirmDecline(true)}>
                     {t(lang, 'decline')}
                   </button>
+                  {/* AC-10.1 — Accept is the single primary action on this surface. */}
                   <span className="hb-primary-slot">
-                    {/* AC-10.4 — past the round cap the counter is not offered, and says why. */}
-                    <button
-                      type="button" className="hb-btn hb-btn--outline"
-                      disabled={counterPrice === null || roundsLeft <= 0}
-                      title={roundsLeft <= 0
-                        ? t(lang, 'roundCapReached', { n: guardrailValue('maxRounds') })
-                        : counterPrice === null ? t(lang, 'counterNeedsPriceBuyer') : undefined}
-                      onClick={() => {
-                        dispatch({ type: 'buyer_counters', ref: request.ref, prices: { [line.id]: counterPrice as Minor } })
-                        onBack()
-                      }}
-                    >
-                      {t(lang, 'counter')}
-                    </button>
-                    {/* AC-10.1 — Accept is the single primary action on this surface. */}
                     <button type="button" className="hb-btn hb-btn--primary"
                       onClick={() => { dispatch({ type: 'buyer_accepts', ref: request.ref, asTemplate: false }); onBack() }}>
                       {t(lang, 'accept')}
@@ -861,9 +799,6 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
               )}
             </div>
           </div>
-        </>
-      )}
-
       {/* AC-10.6 — a confirmation naming the consequence before a decline. */}
       {confirmDecline && (
         <Modal
