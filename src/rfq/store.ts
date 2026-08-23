@@ -141,11 +141,17 @@ export interface RfqState {
   /** FR-10.4 — template creation is a distinct permission from ordinary acceptance. */
   canCreateTemplate: boolean
   /**
-   * Card CTA layout, a prototype option rather than a tenant setting: the full-width
-   * stacked pair, or the compact row where the request action is an icon and one word.
-   * Both satisfy AC-1.1 — the action stays on the card, under the price, out of any menu.
+   * Card CTA layout, a prototype option rather than a tenant setting.
+   *
+   *  - `stacked`      the full-width pair, each with its full sentence
+   *  - `compact`      one row, the request action reduced to a mark and one word
+   *  - `beside_price` the request action moves up next to the number it challenges,
+   *                   leaving the bottom row to the cart alone
+   *
+   * All three satisfy AC-1.1: the action stays on the card, at or under the price, and
+   * never in an overflow menu.
    */
-  compactCardCta: boolean
+  cardCta: 'stacked' | 'compact' | 'beside_price'
   opsAlerts: string[]
 }
 
@@ -212,7 +218,8 @@ export type Action =
   | { type: 'seller_accepts'; ref: string }
   | { type: 'confirm_order'; id: string }
   | { type: 'cancel_order'; id: string }
-  | { type: 'set_flag'; key: 'phase2Enabled' | 'canOverrideFloor' | 'canCreateTemplate' | 'compactCardCta'; value: boolean }
+  | { type: 'set_flag'; key: 'phase2Enabled' | 'canOverrideFloor' | 'canCreateTemplate'; value: boolean }
+  | { type: 'set_card_cta'; layout: RfqState['cardCta'] }
   | { type: 'set_auto_accept'; percent: number }
 
 function withRequest(
@@ -628,6 +635,9 @@ export function reducer(state: RfqState, action: Action): RfqState {
     case 'set_flag':
       return { ...state, [action.key]: action.value }
 
+    case 'set_card_cta':
+      return { ...state, cardCta: action.layout }
+
     case 'set_auto_accept':
       return { ...state, autoAcceptPercent: action.percent }
 
@@ -816,7 +826,7 @@ export function initialState(now: Date): RfqState {
     now, seq: 8, requests: seeded, orders, orderSeq: 20, priceList: [],
     draft: null, submittedDrafts: {},
     phase2Enabled: true, autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
-    canOverrideFloor: true, canCreateTemplate: true, compactCardCta: false, opsAlerts: [],
+    canOverrideFloor: true, canCreateTemplate: true, cardCta: 'stacked', opsAlerts: [],
   }
 }
 

@@ -62,6 +62,9 @@ export const STRINGS: Dict = {
   // is horizontal and has to share its width with Add to Cart.
   requestShort: { en: 'Request', ar: 'اطلب' },
   viewRequestShort: { en: 'View request', ar: 'عرض الطلب' },
+  // Beside the price the band already takes most of the row, so the existing-request
+  // label drops to one word; the reference under the card still says which request.
+  viewShort: { en: 'View', ar: 'عرض' },
   addToCartShort: { en: 'Add', ar: 'أضف' },
   viewMyRequest: { en: 'View my request', ar: 'عرض طلبي' },
   volumeTiers: { en: 'Volume pricing', ar: 'أسعار الكميات' },

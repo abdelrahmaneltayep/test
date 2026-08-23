@@ -79,6 +79,40 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
           const template = templateFor(p.sku)
           const eligible = isNegotiable(p)
           const bestTier = p.tiers.slice().sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
+          const compact = state.cardCta === 'compact'
+          const besidePrice = state.cardCta === 'beside_price'
+          // Beside the price there is no room for a sentence either, so both of the
+          // narrow layouts use the short labels and the marks.
+          const shortLabels = compact || besidePrice
+
+          /*
+            One button, placed differently. AC-1.3 — where the product is not negotiable
+            nothing is rendered in its place; a disabled control would only frustrate.
+          */
+          const requestCta = eligible && !template ? (
+            existing ? (
+              <button
+                type="button"
+                className={`hb-btn hb-btn--outline${besidePrice ? ' hb-btn--sm' : ' hb-btn--block'}`}
+                onClick={onGoToRequests}
+              >
+                {besidePrice ? <><EyeMark />{t(lang, 'viewShort')}</>
+                  : compact ? <><EyeMark />{t(lang, 'viewRequestShort')}</>
+                    : <>{t(lang, 'viewMyRequest')} · {existing.ref}</>}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className={`hb-btn hb-btn--outline${besidePrice ? ' hb-btn--sm' : ' hb-btn--block'}`}
+                onClick={() => startRequest(p)}
+              >
+                {shortLabels
+                  ? <><TagMark />{t(lang, 'requestShort')}</>
+                  : <><span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}</>}
+              </button>
+            )
+          ) : null
+
           return (
             <div className="hb-card hb-prod" key={p.sku}>
               <div className="hb-prod-media">
@@ -97,11 +131,22 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   {p.name[lang]}
                 </button>
 
-                <div className="hb-priceband">
-                  <span className="hb-priceband-label">{t(lang, 'listPrice')}</span>
-                  <span className="hb-priceband-value">
-                    <small>BHD</small>{formatMoney(template?.price ?? p.listPrice)}
-                  </span>
+                {/*
+                  AC-1.1 asks for the negotiation action directly beneath the price. The
+                  third layout takes that one step further and sets it *against* the price,
+                  in the same row as the number it challenges — which is the moment the
+                  buyer feels the friction (§6.6 Decision 1). The price band keeps the width
+                  it needs and the button holds its own; below the card's minimum the row
+                  wraps rather than crushing either.
+                */}
+                <div className={besidePrice ? 'hb-priceband-row' : undefined}>
+                  <div className="hb-priceband">
+                    <span className="hb-priceband-label">{t(lang, 'listPrice')}</span>
+                    <span className="hb-priceband-value">
+                      <small>BHD</small>{formatMoney(template?.price ?? p.listPrice)}
+                    </span>
+                  </div>
+                  {besidePrice && requestCta}
                 </div>
 
                 {/* AC-1.4 — the tier ladder is visible before the request flow opens. */}
@@ -137,33 +182,21 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   and dropping the reference would lose the one thing that identifies which
                   request is already open.
                 */}
-                <div className={`hb-prod-actions${state.compactCardCta ? ' hb-prod-actions--compact' : ''}`}>
+                <div className={`hb-prod-actions${compact ? ' hb-prod-actions--compact' : ''}`}>
                   <div className="hb-prod-ctarow">
                     <button type="button" className="hb-btn hb-btn--primary hb-btn--block">
-                      {state.compactCardCta
+                      {compact
                         ? <><CartMark />{t(lang, 'addToCartShort')}</>
                         : <><span aria-hidden="true">🛒</span>{t(lang, 'addToCart')}</>}
                     </button>
-
-                    {eligible && !template && (
-                      existing
-                        ? (
-                          <button type="button" className="hb-btn hb-btn--outline hb-btn--block" onClick={onGoToRequests}>
-                            {state.compactCardCta
-                              ? <><EyeMark />{t(lang, 'viewRequestShort')}</>
-                              : <>{t(lang, 'viewMyRequest')} · {existing.ref}</>}
-                          </button>
-                        ) : (
-                          <button type="button" className="hb-btn hb-btn--outline hb-btn--block" onClick={() => startRequest(p)}>
-                            {state.compactCardCta
-                              ? <><TagMark />{t(lang, 'requestShort')}</>
-                              : <><span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}</>}
-                          </button>
-                        )
-                    )}
+                    {!besidePrice && requestCta}
                   </div>
 
-                  {state.compactCardCta && eligible && !template && existing && (
+                  {/*
+                    Where the label is short the reference cannot ride on it, and dropping
+                    it would lose the one thing that says which request is already open.
+                  */}
+                  {shortLabels && existing && eligible && !template && (
                     <div className="hb-hint hb-prod-ctaref">{existing.ref}</div>
                   )}
                 </div>

@@ -96,7 +96,7 @@ body {
 .hb-navlink { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; color: var(--hb-ink); background: none; border: none; cursor: pointer; font-family: inherit; padding: 6px 2px; white-space: nowrap; }
 .hb-navlink:hover { color: var(--hb-blue); }
 .hb-search { flex: 1; min-width: 120px; max-width: 380px; display: flex; align-items: center; gap: 9px; background: var(--hb-field); border: 1px solid transparent; border-radius: 999px; padding: 9px 16px; color: var(--hb-ink-3); font-size: 13.5px; }
-.hb-navicons { display: flex; align-items: center; gap: 8px; margin-inline-start: auto; }
+.hb-navicons { display: flex; align-items: center; gap: 8px; margin-inline-start: auto; min-width: 0; }
 .hb-iconbtn { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--hb-line); background: #fff; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--hb-ink-2); position: relative; font-size: 15px; }
 .hb-iconbtn:hover { border-color: #c3d4e2; color: var(--hb-blue); }
 .hb-iconbtn .hb-dot { position: absolute; top: -3px; inset-inline-end: -3px; background: var(--hb-bad); color: #fff; font-size: 10px; font-weight: 700; min-width: 17px; height: 17px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; }
@@ -104,9 +104,12 @@ body {
 .hb-langbtn:hover { border-color: var(--hb-blue); color: var(--hb-blue); }
 .hb-userchip { display: flex; align-items: center; gap: 10px; background: var(--hb-blue-wash); border: 1px solid transparent; border-radius: 999px; padding: 5px 14px 5px 6px; white-space: nowrap; }
 .hb-avatar { width: 30px; height: 30px; border-radius: 50%; background: #fff; color: var(--hb-blue); font-size: 11.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; letter-spacing: .02em; }
-.hb-userchip-text { display: flex; flex-direction: column; min-width: 0; }
+/* The account name is arbitrary length and must not push the navbar past the viewport;
+   between the desktop layout and the 900px collapse there is no other slack in the row. */
+.hb-userchip-text { display: flex; flex-direction: column; min-width: 0; max-width: 172px; }
 .hb-userchip-name { font-size: 13px; font-weight: 700; line-height: 1.25; }
 .hb-userchip-sub { font-size: 11px; color: var(--hb-ink-2); line-height: 1.25; }
+.hb-userchip-name, .hb-userchip-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── Dashboard chrome ─────────────────────────────────────────────────────── */
 .hb-layout { display: flex; align-items: stretch; min-height: calc(100vh - 42px); }
@@ -241,6 +244,15 @@ body {
 .hb-prod-actions--compact .hb-prod-ctarow { flex-direction: row; align-items: stretch; }
 .hb-prod-actions--compact .hb-prod-ctarow .hb-btn { flex: 1 1 0; min-width: 0; padding-inline: 10px; white-space: nowrap; }
 .hb-prod-ctaref { text-align: center; }
+/* Beside the price: the band takes what it needs, the button holds its own, and below
+   the card's minimum the pair wraps rather than crushing either. */
+.hb-priceband-row { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+/* The band gives up its horizontal padding and lets its label take two lines before the
+   row is allowed to wrap — at the narrowest card the point of this layout is that the
+   button stays next to the number, and a two-line "List price" costs less than losing that. */
+.hb-priceband-row > .hb-priceband { flex: 1 1 110px; min-width: 0; padding: 7px 10px; gap: 6px; }
+.hb-priceband-row .hb-priceband-label { white-space: normal; }
+.hb-priceband-row > .hb-btn { flex: 0 0 auto; white-space: nowrap; padding-inline: 10px; gap: 6px; }
 
 /* ── Product details page ─────────────────────────────────────────────────── */
 .hb-pdp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 36px; align-items: start; }
@@ -315,7 +327,10 @@ body {
  * has to shed content rather than push the page sideways — at 360 px the whole row would
  * otherwise run ~450 px past the viewport and take the product grid with it (FR-11.4).
  */
-@media (max-width: 900px) {
+/* The marketplace navbar runs out of room before 900px: the category links, the search
+   field and the account chip together exceed the row from about 1080px down, so the
+   collapse has to start there rather than where the dashboard's does. */
+@media (max-width: 1080px) {
   .hb-navbar-inner { flex-wrap: wrap; gap: 12px; }
   .hb-navlink { display: none; }
   .hb-search { order: 3; flex: 1 1 100%; max-width: none; }

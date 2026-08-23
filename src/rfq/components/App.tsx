@@ -82,11 +82,20 @@ export function App() {
 
             <div className="hb-demo-group">
               <span>Card CTA</span>
-              {/* Two layouts for the same action, switchable so they can be compared in place. */}
-              <button type="button" className="hb-demo-btn" aria-pressed={!state.compactCardCta}
-                onClick={() => dispatch({ type: 'set_flag', key: 'compactCardCta', value: false })}>full label</button>
-              <button type="button" className="hb-demo-btn" aria-pressed={state.compactCardCta}
-                onClick={() => dispatch({ type: 'set_flag', key: 'compactCardCta', value: true })}>icon + Request</button>
+              {/* Three layouts for the same action, switchable so they compare in place. */}
+              {([
+                ['stacked', 'full label'],
+                ['compact', 'icon + Request'],
+                ['beside_price', 'beside the price'],
+              ] as const).map(([layout, label]) => (
+                <button
+                  key={layout} type="button" className="hb-demo-btn"
+                  aria-pressed={state.cardCta === layout}
+                  onClick={() => dispatch({ type: 'set_card_cta', layout })}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <div className="hb-demo-group">
