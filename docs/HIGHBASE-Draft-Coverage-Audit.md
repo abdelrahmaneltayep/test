@@ -171,7 +171,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Twenty-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Twenty-eight checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -184,22 +184,36 @@ Twenty-five checks, exit non-zero on any failure. Current run: all pass. What ea
 | §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |
 | §9 | Standard and negotiated orders in one Final Orders list; the old-versus-accepted indicator; the full log on the order |
 | §10 | The negotiation and invoice flags on the order page, and the HB Admin view |
-| §11 | Recorded as a conflict — see below |
+| §11 | Special credit offered, captured and shown to the seller; both readings of the phase cut are walkable |
 
-## The one conflict the check records
+## §11 in full
 
-Draft §4 says the frequency field is the Phase 2 addition and quantity ships first. The PRD
-cuts the phases the other way round: Case 1, the evidenced ask, is **[P2]** (AC-3.3, with the
-rationale at PRD §2 — Phase 1 first because it is the half with working implementations to
-copy, and it builds the container the proof flow needs), while frequency is a Case 2 field
-captured from Phase 1 (AC-5.2, Q-8).
+**Frequency, and the phase cut.** The two documents disagree about where Phase 1 ends.
+Draft §4 makes frequency the Phase 2 addition — "quantity ships first" — with both routes
+live from the start. The PRD cuts it the other way: Case 1, the evidenced ask, is **[P2]**
+(AC-3.3, with the rationale at PRD §2 — Phase 1 first because it is the half with working
+implementations to copy, and it builds the container the proof flow needs), while frequency
+is a Case 2 field captured from Phase 1 (AC-5.2, Q-8).
 
-The prototype follows the PRD, so switching the demo bar to **P1 only** drops Case 1 and
-keeps frequency, which is the inverse of what the draft describes. Both cases exist and are
-reachable in the default **P1 + P2** mode, so nothing the draft asks for is missing — what
-differs is only where the release line falls. That is a question for the PM to settle, not
-a defect to code around, so the check asserts the PRD behaviour and names the conflict
-rather than quietly picking a side.
+Rather than assert one and leave the other unwalkable, the demo bar now offers three
+release lines and the prototype honours each:
+
+| Setting | Routes offered | Frequency | Extraction · special credit |
+| --- | --- | --- | --- |
+| **P1 + P2** | both | yes | yes |
+| **P1 · PRD** | RFQ only (AC-3.3) | yes (AC-5.2, Q-8) | no |
+| **P1 · draft** | both (§1, §4) | no — quantity ships first | no |
+
+Both readings are now demonstrable side by side, which is what the walkthrough needs; the
+choice between them stays with the PM, and neither document is silently overruled.
+
+**Special Credit (استمرارية).** Built, as a Phase 2 field on the request form — offered on
+both routes, because continuity belongs to the arrangement rather than to either route. The
+draft gives it one line and no rules and the PRD does not pick it up, so it is captured and
+displayed and nothing else: it changes no price, fires no rule, and never enters the margin
+maths. That is exactly the treatment frequency gets under Q-8, for the same reason. The
+seller sees it on the request line, beside the frequency the buyer asked for. Anything more
+— what continuity actually entitles a buyer to — needs a definition before it can be built.
 
 ---
 

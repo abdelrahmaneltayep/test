@@ -20,7 +20,7 @@ function line(route: 'case_1' | 'case_2', sku = 'HB-4471'): RequestLine {
   return {
     id: `l-${sku}-${route}`, sku, productName: { en: 'Milk', ar: 'حليب' }, route,
     quantity: 10, listPriceSnapshot: 10_000, askedPrice: route === 'case_1' ? 9_000 : null,
-    offeredPrice: null, outcome: 'pending', proof: null, frequency: null, note: null,
+    offeredPrice: null, outcome: 'pending', proof: null, frequency: null, specialCredit: false, note: null,
     costSnapshot: null, floorSnapshot: null,
   }
 }

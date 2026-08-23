@@ -61,12 +61,26 @@ export function App() {
             </div>
 
             <div className="hb-demo-group">
-              <span>Phase</span>
-              {/* AC-3.3 — with Phase 2 off the Case 1 card is not rendered at all. */}
-              <button type="button" className="hb-demo-btn" aria-pressed={state.phase2Enabled}
-                onClick={() => dispatch({ type: 'set_flag', key: 'phase2Enabled', value: true })}>P1 + P2</button>
-              <button type="button" className="hb-demo-btn" aria-pressed={!state.phase2Enabled}
-                onClick={() => dispatch({ type: 'set_flag', key: 'phase2Enabled', value: false })}>P1 only</button>
+              <span>Release line</span>
+              {/*
+                The two documents cut Phase 1 differently, so both cuts are selectable
+                rather than one being asserted: the PRD holds the evidenced ask back to
+                Phase 2 (AC-3.3), the draft ships both routes and holds frequency back
+                (§4). Everything on is the picture they agree about.
+              */}
+              {([
+                ['p1_p2', 'P1 + P2'],
+                ['p1_prd', 'P1 · PRD'],
+                ['p1_draft', 'P1 · draft'],
+              ] as const).map(([phase, label]) => (
+                <button
+                  key={phase} type="button" className="hb-demo-btn"
+                  aria-pressed={state.phase === phase}
+                  onClick={() => dispatch({ type: 'set_phase', phase })}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
 
             <div className="hb-demo-group">

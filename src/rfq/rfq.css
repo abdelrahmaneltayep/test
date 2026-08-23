@@ -393,3 +393,8 @@ body {
 
 /* Both routes on one row wrap rather than widening the column. */
 .hb-routetags { display: inline-flex; gap: 5px; flex-wrap: wrap; }
+
+/* A checkbox whose label is two lines: the control stays on the first line's baseline. */
+.hb-checkfield { display: flex; gap: 10px; align-items: flex-start; }
+.hb-checkfield input { margin-top: 3px; flex: 0 0 auto; width: 16px; height: 16px; accent-color: var(--hb-blue); }
+.hb-checkfield > span { display: flex; flex-direction: column; min-width: 0; }

@@ -13,7 +13,7 @@ function line(overrides: Partial<RequestLine> = {}): RequestLine {
     id: 'l1', sku: 'SKU-1', productName: { en: 'Milk 12x1L', ar: 'حليب ١٢×١ لتر' },
     route: 'case_1', quantity: 40,
     listPriceSnapshot: 10000, askedPrice: 9000, offeredPrice: 9250,
-    outcome: 'countered', proof: null, frequency: null, note: null,
+    outcome: 'countered', proof: null, frequency: null, specialCredit: false, note: null,
     // Deliberately populated: the point of the test is that these do not come out again.
     costSnapshot: 7000, floorSnapshot: 8800,
     ...overrides,

@@ -24,7 +24,7 @@ function line(overrides: Partial<RequestLine> = {}): RequestLine {
     id: 'l1', sku: 'HB-4471', productName: { en: 'Milk', ar: 'حليب' },
     route: 'case_1', quantity: 10, listPriceSnapshot: 10_000,
     askedPrice: 9_000, offeredPrice: null, outcome: 'pending' as LineOutcome,
-    proof: null, frequency: null, note: null, costSnapshot: 7_000, floorSnapshot: 8_000,
+    proof: null, frequency: null, specialCredit: false, note: null, costSnapshot: 7_000, floorSnapshot: 8_000,
     ...overrides,
   }
 }

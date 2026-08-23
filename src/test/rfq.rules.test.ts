@@ -18,7 +18,7 @@ function line(overrides: Partial<RequestLine> = {}): RequestLine {
     offeredPrice: null,
     outcome: 'pending',
     proof: null,
-    frequency: null,
+    frequency: null, specialCredit: false,
     note: null,
     costSnapshot: 7000,
     floorSnapshot: 9000,

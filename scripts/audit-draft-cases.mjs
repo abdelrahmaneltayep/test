@@ -68,21 +68,55 @@ const rfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
 check('4.rfq-no-price', !rfqLabels.some((l) => /target price/i.test(l)), rfqLabels.join(' / '))
 check('4.rfq-frequency-p2', rfqLabels.some((l) => /how often/i.test(l)), rfqLabels.join(' / '))
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(150)
-await p.getByRole('button', { name: 'P1 only' }).click(); await p.waitForTimeout(200)
+
+// ── §11 special credit: captured, shown, and Phase 2 under either reading ────
 await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Request special price/ }).click()
 await p.waitForTimeout(300)
-const p1Labels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
-/*
- * Draft §4 says frequency is the Phase 2 addition and quantity ships first. The PRD cuts
- * the phases the other way — Case 1, the evidenced ask, is [P2] (AC-3.3, and the rationale
- * at PRD §2), and frequency is a Case 2 field captured from Phase 1 (AC-5.2, Q-8). The
- * prototype follows the PRD, so under "P1 only" it is Case 1 that disappears, not the
- * frequency field. Both cases exist and are reachable in the default P1 + P2 mode; what
- * differs is only where the release line falls, which is a question for the PM, not a
- * defect to code around. Asserted as the PRD behaviour so a silent change is still caught.
- */
-check('11.phase-cut-follows-prd', !p1Labels.some((l) => /target price/i.test(l)),
-  `P1 only drops Case 1, keeps frequency — conflicts with draft §4: ${p1Labels.join(' / ')}`)
+const creditField = p.locator('.hb-modal-body .hb-checkfield')
+check('11.special-credit-offered', await creditField.count() === 1, await txt('.hb-modal-body .hb-checkfield'))
+await creditField.locator('input').check()
+await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
+await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
+await p.locator('.hb-modal-body label.hb-field', { hasText: /Supplier offering/ }).locator('input').fill('Gulf Foods')
+await p.locator('.hb-modal-body input[type="file"]').setInputFiles({
+  name: 'inv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
+})
+await p.waitForTimeout(300)
+await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
+const creditRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
+await p.locator('tbody tr', { hasText: creditRef }).click(); await p.waitForTimeout(350)
+const linePills = await p.locator('.hb-modal-body .hb-pill').allInnerTexts()
+check('11.special-credit-shown-to-seller', linePills.some((x) => /continuing arrangement/i.test(x)),
+  `${creditRef} :: ${linePills.join(' | ')}`)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+
+// ── §11 / AC-3.3 — both release lines are walkable ───────────────────────────
+async function formLabels(phaseBtn) {
+  await reset()
+  await p.getByRole('button', { name: phaseBtn }).click(); await p.waitForTimeout(200)
+  await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Request special price/ }).click()
+  await p.waitForTimeout(300)
+  const labels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
+  const routes = await p.locator('.hb-modal-body [role="tab"]').count()
+  const credit = await p.locator('.hb-modal-body .hb-checkfield').count()
+  return { labels, routes, credit }
+}
+
+// The PRD's cut: Case 1 is [P2] (AC-3.3), frequency is captured from P1 (AC-5.2, Q-8).
+const prd = await formLabels('P1 · PRD')
+check('11.p1-prd-cut', prd.routes === 0 && !prd.labels.some((l) => /target price/i.test(l))
+  && prd.labels.some((l) => /how often/i.test(l)) && prd.credit === 0,
+  `routes=${prd.routes} credit=${prd.credit} · ${prd.labels.join(' / ')}`)
+
+// The draft's cut: both routes ship (§1, §4), frequency waits — "quantity ships first".
+const draft = await formLabels('P1 · draft')
+await p.locator('.hb-modal-body [role="tab"]').nth(1).click(); await p.waitForTimeout(200)
+const draftRfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
+check('11.p1-draft-cut', draft.routes === 2 && draft.labels.some((l) => /target price/i.test(l))
+  && !draftRfqLabels.some((l) => /how often/i.test(l)) && draft.credit === 0,
+  `routes=${draft.routes} credit=${draft.credit} · case1: ${draft.labels.join(' / ')} · rfq: ${draftRfqLabels.join(' / ')}`)
 
 // ── §5 the four seller actions ───────────────────────────────────────────────
 await reset()

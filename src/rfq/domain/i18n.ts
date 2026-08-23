@@ -103,6 +103,12 @@ export const STRINGS: Dict = {
 
   // ── Step 3b, Case 2 (US-5) ────────────────────────────────────────────────
   frequency: { en: 'How often will you order this?', ar: 'كم مرة ستطلب هذا الصنف؟' },
+  // §11 — Special Credit (استمرارية). One line in the draft and nothing in the PRD, so it
+  // is captured and displayed only, exactly as frequency is under Q-8, and never priced.
+  specialCredit: { en: 'Special credit (استمرارية)', ar: 'الاستمرارية (سعر ائتماني خاص)' },
+  specialCreditHint: { en: 'Ask the supplier to treat this as a continuing arrangement rather than a one-off. Captured with the request and shown to them; it does not change any price by itself.', ar: 'اطلب من المورّد اعتبار هذا ترتيباً مستمراً لا طلباً لمرة واحدة. يُسجَّل مع الطلب ويظهر له، ولا يغيّر أي سعر بذاته.' },
+  specialCreditOn: { en: 'Requested as a continuing arrangement', ar: 'مطلوب كترتيب مستمر' },
+  phaseTwoField: { en: 'Phase 2', ar: 'المرحلة الثانية' },
   freqOneOff: { en: 'One-off', ar: 'مرة واحدة' },
   freqWeekly: { en: 'Weekly', ar: 'أسبوعياً' },
   freqFortnightly: { en: 'Fortnightly', ar: 'كل أسبوعين' },

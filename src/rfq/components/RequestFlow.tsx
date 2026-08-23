@@ -24,7 +24,7 @@ import { IMPLAUSIBLE_ASK_RATIO } from '../domain/guardrails'
 import { runAutoChecks, PROOF_EXCLUSIONS, ACCEPTED_MIME_TYPES, MAX_FILE_BYTES } from '../domain/proof'
 import { t, type Lang } from '../domain/i18n'
 import type { Frequency, Product, Proof, ProofFields } from '../domain/types'
-import { productBySku, useRfq, type DraftLine } from '../store'
+import { case1Available, frequencyAvailable, phase2Only, productBySku, useRfq, type DraftLine } from '../store'
 import { CheckBadge, Field, Modal, Money } from './ui'
 
 /** FR-2.1 — the seller's configured negotiation minimum, per line. */
@@ -90,7 +90,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
    * and never inferred from field state (AC-3.5), and the tabs sit directly above the
    * fields they govern, but AC-3.2 no longer describes this.
    */
-  const [route, setRoute] = useState<'case_1' | 'case_2'>(state.phase2Enabled ? 'case_1' : 'case_2')
+  const routeChoice = case1Available(state.phase)
+  const [route, setRoute] = useState<'case_1' | 'case_2'>(routeChoice ? 'case_1' : 'case_2')
   const [targetText, setTargetText] = useState('')
   const [supplier, setSupplier] = useState('')
   const [theirSku, setTheirSku] = useState('')
@@ -99,6 +100,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   const [proofError, setProofError] = useState<string | null>(null)
   const [conflictResolved, setConflictResolved] = useState<'typed' | 'extracted' | null>(null)
   const [frequency, setFrequency] = useState<Frequency>('one_off')
+  const [specialCredit, setSpecialCredit] = useState(false)
   const [note, setNote] = useState('')
   const [showErrors, setShowErrors] = useState(false)
   const [submittedRef, setSubmittedRef] = useState<string | null>(null)
@@ -144,7 +146,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
     }
     // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
     // request is marked for manual review rather than blocked.
-    const built = simulateExtraction(file, typed, !state.phase2Enabled, state.now)
+    // §3 — the invoice-reading service is Phase 2 under either reading of the phases.
+    const built = simulateExtraction(file, typed, !phase2Only(state.phase), state.now)
     built.checks = runAutoChecks(built, {
       now: state.now,
       target: { sku: product.sku, brand: product.brand, packSize: product.packSize, unitOfMeasure: product.unitOfMeasure.en },
@@ -153,7 +156,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       tenantCurrency: 'BHD',
     })
     return built
-  }, [file, supplier, theirSku, targetPrice, docDate, product, state.phase2Enabled, state.now])
+  }, [file, supplier, theirSku, targetPrice, docDate, product, state.phase, state.now])
 
 
   // ── AC-2.5 / AC-2.3 — quantity validation names the constraint and the value ──
@@ -201,7 +204,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       route: route as 'case_1' | 'case_2',
       quantity: qty,
       askedPrice: route === 'case_1' ? targetPrice : null,
-      frequency: route === 'case_2' ? frequency : null,
+      frequency: route === 'case_2' && frequencyAvailable(state.phase) ? frequency : null,
+      specialCredit: phase2Only(state.phase) && specialCredit,
       note: route === 'case_2' && note.trim() ? note.trim().slice(0, 500) : null,
       proof: route === 'case_1' ? proof : null,
     }
@@ -278,7 +282,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       }
     >
       {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
-      {state.phase2Enabled && (
+      {routeChoice && (
         <div className="hb-field">
           <span className="hb-label" id="hb-route-label">{t(lang, 'routeStepTitle')}</span>
           <div className="hb-tabs" role="tablist" aria-labelledby="hb-route-label" onKeyDown={onRouteKeyDown}>
@@ -345,8 +349,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       {/* The quantity field sits between the tabs and their panel because it belongs to
           both routes; the panel below holds only what the chosen route adds. */}
       <div
-        id="hb-route-panel" role={state.phase2Enabled ? 'tabpanel' : undefined}
-        aria-labelledby={state.phase2Enabled ? (route === 'case_1' ? 'hb-tab-case1' : 'hb-tab-case2') : undefined}
+        id="hb-route-panel" role={routeChoice ? 'tabpanel' : undefined}
+        aria-labelledby={routeChoice ? (route === 'case_1' ? 'hb-tab-case1' : 'hb-tab-case2') : undefined}
       >
 
       {/* ── Case 1 (US-4) ────────────────────────────────────────────────── */}
@@ -406,15 +410,18 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       {/* ── Case 2 (US-5) ────────────────────────────────────────────────── */}
       {route === 'case_2' && (
         <>
-          <Field label={t(lang, 'frequency')}>
-            {/* AC-5.2 — a controlled picker, never free text. */}
-            <select className="hb-select" value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}>
-              <option value="one_off">{t(lang, 'freqOneOff')}</option>
-              <option value="weekly">{t(lang, 'freqWeekly')}</option>
-              <option value="fortnightly">{t(lang, 'freqFortnightly')}</option>
-              <option value="monthly">{t(lang, 'freqMonthly')}</option>
-            </select>
-          </Field>
+          {/* §4/§11 — under the draft's cut quantity ships first and this waits. */}
+          {frequencyAvailable(state.phase) && (
+            <Field label={t(lang, 'frequency')}>
+              {/* AC-5.2 — a controlled picker, never free text. */}
+              <select className="hb-select" value={frequency} onChange={(e) => setFrequency(e.target.value as Frequency)}>
+                <option value="one_off">{t(lang, 'freqOneOff')}</option>
+                <option value="weekly">{t(lang, 'freqWeekly')}</option>
+                <option value="fortnightly">{t(lang, 'freqFortnightly')}</option>
+                <option value="monthly">{t(lang, 'freqMonthly')}</option>
+              </select>
+            </Field>
+          )}
           {/* AC-5.3 — optional, capped at 500 characters, sanitised on submission. */}
           <Field label={t(lang, 'noteToSeller')} hint={`${note.length} / 500`}>
             <textarea className="hb-textarea" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
@@ -423,6 +430,26 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         </>
       )}
 
+      {/*
+        §11 — Special Credit (استمرارية). It belongs to the arrangement rather than to
+        either route, so it is offered on both; it is Phase 2 under both readings, and it
+        is captured and shown, never priced.
+      */}
+      {phase2Only(state.phase) && (
+        <label className="hb-field hb-checkfield">
+          <input
+            type="checkbox" checked={specialCredit}
+            onChange={(e) => setSpecialCredit(e.target.checked)}
+          />
+          <span>
+            <span className="hb-label" style={{ marginBottom: 2 }}>
+              {t(lang, 'specialCredit')}
+              <span className="hb-pill hb-pill--neutral" style={{ marginInlineStart: 8 }}>{t(lang, 'phaseTwoField')}</span>
+            </span>
+            <span className="hb-hint" style={{ marginTop: 0 }}>{t(lang, 'specialCreditHint')}</span>
+          </span>
+        </label>
+      )}
       </div>
 
       {/* ── What is already in the request (US-6, and what US-7 was for) ─── */}

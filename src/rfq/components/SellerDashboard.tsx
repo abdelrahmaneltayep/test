@@ -25,6 +25,11 @@ import { buildInbox, threadCategory, unreadCount } from '../domain/inbox'
 const MAX_INFO_REQUESTS = guardrailValue('maxInfoRequests')
 const DEFAULT_VALIDITY = guardrailValue('offerValidityDays')
 
+/** AC-5.2 — the controlled vocabulary, localised at render time like everything else. */
+const FREQUENCY_KEY: Record<NonNullable<RequestLine['frequency']>, string> = {
+  one_off: 'freqOneOff', weekly: 'freqWeekly', fortnightly: 'freqFortnightly', monthly: 'freqMonthly',
+}
+
 const BAND_TONE: Record<MarginBand, string> = {
   healthy: 'good', thin: 'warn', below_floor: 'bad', unknown: 'neutral',
 }
@@ -552,6 +557,21 @@ function RespondPanel({ request, onClose }: { request: NegotiationRequest; onClo
                   <div>
                     <strong>{l.productName[lang]}</strong>
                     <div className="hb-hint">{l.sku} · {t(lang, 'quantity')} {l.quantity}</div>
+                    {/*
+                      §4/§11 — what the buyer asked for beyond the number. Both are
+                      captured metadata: they are shown to the seller and recorded, and
+                      neither changes a price or fires a rule (Q-8).
+                    */}
+                    <div className="hb-row" style={{ marginTop: 6 }}>
+                      {l.frequency && (
+                        <span className="hb-pill hb-pill--neutral">
+                          {t(lang, 'frequency')} {t(lang, FREQUENCY_KEY[l.frequency])}
+                        </span>
+                      )}
+                      {l.specialCredit && (
+                        <span className="hb-pill hb-pill--info">{t(lang, 'specialCreditOn')}</span>
+                      )}
+                    </div>
                   </div>
                   <div className="hb-row">
                     <span className="hb-hint">{t(lang, 'listPrice')} <Money value={l.listPriceSnapshot} lang={lang} /></span>

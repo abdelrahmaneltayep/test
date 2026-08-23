@@ -67,8 +67,9 @@ Cancel still available" holds without any request leaving a terminal state. See
 [`docs/HIGHBASE-Draft-Coverage-Audit.md`](docs/HIGHBASE-Draft-Coverage-Audit.md) for the
 section-by-section reading.
 
-The demo bar also flips language and direction (English / Arabic RTL), turns Phase 2 on and
-off, switches the product card's request action between four placements — the stacked
+The demo bar also flips language and direction (English / Arabic RTL), switches between the
+three release lines — everything on, the PRD's Phase 1 and the feature flow draft's Phase 1,
+which cut the phases differently and are both walkable — switches the product card's request action between four placements — the stacked
 full-label pair, the compact **icon + Request** row, **beside the price** and **under the
 price** — changes the
 auto-accept rule and the seller's permissions,

@@ -106,6 +106,7 @@ export interface DraftLine {
   quantity: number
   askedPrice: Minor | null
   frequency: Frequency | null
+  specialCredit: boolean
   note: string | null
   proof: Proof | null
 }
@@ -115,6 +116,23 @@ export interface Draft {
   id: string
   lines: DraftLine[]
   sellerId: string
+}
+
+export type Phase = 'p1_prd' | 'p1_draft' | 'p1_p2'
+
+/** §1/§3 — is the evidenced ask offered at all? The PRD holds it back to Phase 2. */
+export function case1Available(phase: Phase): boolean {
+  return phase !== 'p1_prd'
+}
+
+/** §4/§11 — the draft makes frequency the Phase 2 addition; the PRD captures it from P1. */
+export function frequencyAvailable(phase: Phase): boolean {
+  return phase !== 'p1_draft'
+}
+
+/** §3 extraction and §11 special credit are Phase 2 under either reading. */
+export function phase2Only(phase: Phase): boolean {
+  return phase === 'p1_p2'
 }
 
 export interface RfqState {
@@ -133,8 +151,22 @@ export interface RfqState {
   draft: Draft | null
   /** FR-2.9 — draft ids already submitted; a repeat submit returns the same reference. */
   submittedDrafts: Record<string, string>
-  /** AC-3.3 — when Phase 2 is off, the Case 1 card is not rendered at all. */
-  phase2Enabled: boolean
+  /**
+   * Which release line is being walked.
+   *
+   * The two source documents cut the phases differently and the prototype has to be able
+   * to show both, or one of them is unwalkable:
+   *
+   *  - `p1_p2`     everything on. Both documents agree on the finished picture.
+   *  - `p1_prd`    the PRD's Phase 1. Case 1, the evidenced ask, is [P2] (AC-3.3, with the
+   *                rationale at PRD §2), so only the RFQ route exists; frequency is a Case 2
+   *                field captured from Phase 1 (AC-5.2, Q-8), so it stays.
+   *  - `p1_draft`  the draft's Phase 1. Both routes ship together (§1, §4); frequency is the
+   *                Phase 2 addition — "quantity ships first" — so it is the field that goes.
+   *
+   * Extraction and special credit are Phase 2 under either reading, and are off in both P1s.
+   */
+  phase: Phase
   autoAcceptPercent: number
   /** FR-10.3 — does the signed-in seller user hold the floor-override permission? */
   canOverrideFloor: boolean
@@ -172,6 +204,7 @@ function buildLine(d: DraftLine, now: Date): RequestLine {
     outcome: 'pending',
     proof: d.proof,
     frequency: d.frequency,
+    specialCredit: d.specialCredit,
     note: d.note,
     // Seller-internal snapshots, excluded at the serialiser (A7).
     costSnapshot: product.cost,
@@ -220,7 +253,8 @@ export type Action =
   | { type: 'seller_accepts'; ref: string }
   | { type: 'confirm_order'; id: string }
   | { type: 'cancel_order'; id: string }
-  | { type: 'set_flag'; key: 'phase2Enabled' | 'canOverrideFloor' | 'canCreateTemplate'; value: boolean }
+  | { type: 'set_flag'; key: 'canOverrideFloor' | 'canCreateTemplate'; value: boolean }
+  | { type: 'set_phase'; phase: Phase }
   | { type: 'set_card_cta'; layout: RfqState['cardCta'] }
   | { type: 'set_auto_accept'; percent: number }
 
@@ -542,7 +576,8 @@ export function reducer(state: RfqState, action: Action): RfqState {
           sellerId: source.sellerId,
           lines: source.lines.map((l) => ({
             sku: l.sku, route: l.route, quantity: l.quantity,
-            askedPrice: l.askedPrice, frequency: l.frequency, note: l.note, proof: l.proof,
+            askedPrice: l.askedPrice, frequency: l.frequency, specialCredit: l.specialCredit,
+            note: l.note, proof: l.proof,
           })),
         },
       }
@@ -637,6 +672,9 @@ export function reducer(state: RfqState, action: Action): RfqState {
     case 'set_flag':
       return { ...state, [action.key]: action.value }
 
+    case 'set_phase':
+      return { ...state, phase: action.phase }
+
     case 'set_card_cta':
       return { ...state, cardCta: action.layout }
 
@@ -681,7 +719,7 @@ export function initialState(now: Date): RfqState {
     return {
       id: `${sku}-seed-${quantity}`, sku, productName: p.name, route, quantity,
       listPriceSnapshot: p.listPrice, askedPrice, offeredPrice, outcome,
-      proof, frequency: route === 'case_2' ? 'monthly' : null, note: null,
+      proof, frequency: route === 'case_2' ? 'monthly' : null, specialCredit: false, note: null,
       costSnapshot: p.cost, floorSnapshot: p.floorPrice,
     }
   }
@@ -827,7 +865,7 @@ export function initialState(now: Date): RfqState {
   return {
     now, seq: 8, requests: seeded, orders, orderSeq: 20, priceList: [],
     draft: null, submittedDrafts: {},
-    phase2Enabled: true, autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
+    phase: 'p1_p2', autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
     canOverrideFloor: true, canCreateTemplate: true, cardCta: 'stacked', opsAlerts: [],
   }
 }

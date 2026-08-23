@@ -115,6 +115,13 @@ export interface RequestLine {
   outcome: LineOutcome
   proof: Proof | null
   frequency: Frequency | null
+  /**
+   * §11 — Special Credit (استمرارية). The draft gives it one line and no rules, and the
+   * PRD does not pick it up, so it is captured and shown and nothing else: it changes no
+   * price, fires no rule, and never crosses into the margin maths. Same treatment the
+   * frequency field gets under Q-8, for the same reason.
+   */
+  specialCredit: boolean
   note: string | null
   /** FR-5.3 — seller-internal cost snapshot. Never crosses the actor boundary (A7). */
   costSnapshot: Minor | null
