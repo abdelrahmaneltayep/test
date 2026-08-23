@@ -223,6 +223,25 @@ check('9.standard-plus-negotiated', finalRefs.some((r) => /Standard order/i.test
   && finalRefs.some((r) => /Special price negotiation/i.test(r)),
   finalRefs.map((r) => r.split('\n')[1]).join(' | '))
 
+// ── §6 the buyer's request detail is a page, with the same ranked actions ────
+await reset()
+await p.getByRole('button', { name: 'Buyer · Dashboard' }).click(); await p.waitForTimeout(250)
+await p.locator('tbody tr', { hasText: 'Counter received' }).first()
+  .getByRole('button', { name: 'Accept' }).click()
+await p.waitForTimeout(350)
+check('6.buyer-detail-is-a-page', await p.locator('.hb-overlay').count() === 0
+  && await p.locator('.hb-readback').count() === 1,
+  `overlays=${await p.locator('.hb-overlay').count()} readback=${await p.locator('.hb-readback').count()}`)
+const buyerActions = await p.locator('.hb-modal-foot button').allInnerTexts()
+const buyerTypes = await p.locator('.hb-modal-foot button').evaluateAll((els) => els.map((e) => e.className
+  .split(' ').find((c) => c.startsWith('hb-btn--')) ?? 'none'))
+check('6.buyer-four-actions', buyerActions.join('|') === 'Withdraw request|Decline|Counter|Accept'
+  && buyerTypes.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--outline|hb-btn--primary',
+  `${buyerActions.join(' | ')} :: ${buyerTypes.join(' | ')}`)
+const buyerCompare = await txt('.hb-content table')
+check('6.buyer-three-prices', /Original/i.test(buyerCompare) && /You asked/i.test(buyerCompare)
+  && /Supplier offers/i.test(buyerCompare), buyerCompare.slice(0, 160))
+
 // ── §8 Inbox, three categories, both roles ───────────────────────────────────
 for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashboard', 'seller']]) {
   await p.getByRole('button', { name: surface }).click(); await p.waitForTimeout(250)

@@ -17,12 +17,12 @@
  */
 
 import { useState } from 'react'
-import { addDays, isEscalated } from '../domain/clocks'
+import { acceptanceAllowed, addDays, isEscalated } from '../domain/clocks'
 import { guardrailValue, SAME_AS_LAST_TIME_DAYS } from '../domain/guardrails'
-import { t, type Lang } from '../domain/i18n'
-import { formatMoney, parseMoney } from '../domain/money'
+import { renderHistory, t, type Lang } from '../domain/i18n'
+import { formatMoney, lineTotal, parseMoney } from '../domain/money'
 import { lineMargin, marginAfterAsk, type MarginBand } from '../domain/margin'
-import { hasFailedCheck } from '../domain/proof'
+import { hasFailedCheck, triStateOutcome } from '../domain/proof'
 import { STATE_META } from '../domain/states'
 import type { InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } from '../domain/types'
 import { productBySku, useRfq } from '../store'
@@ -58,6 +58,80 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     <div className="hb-readrow">
       <dt>{label}</dt>
       <dd>{children}</dd>
+    </div>
+  )
+}
+
+/**
+ * The submission, read back. Shared by both roles: the seller reads it to decide, the
+ * buyer reads it to remember what they asked for and to check it before re-requesting.
+ * Nothing here is editable on either side — a request is a record once it is sent.
+ */
+export function SubmissionReadback({ line, lang, title }: {
+  line: RequestLine
+  lang: Lang
+  title: string
+}) {
+  const typed = line.proof?.typed ?? null
+  return (
+      <div className="hb-card">
+      <div className="hb-card-head">
+        <div>
+          <h2 className="hb-h2">{title}</h2>
+          <p className="hb-hint">{t(lang, 'whatBuyerSentHint')}</p>
+        </div>
+      </div>
+      <div className="hb-card-body">
+        <dl className="hb-readback">
+          <Row label={t(lang, 'requestRoute')}>
+            <span className={`hb-pill hb-pill--${line.route === 'case_1' ? 'info' : 'neutral'}`}>
+              {t(lang, line.route === 'case_1' ? 'routeCase1' : 'routeCase2')}
+            </span>
+          </Row>
+          <Row label={t(lang, 'product')}>
+            <strong>{line.productName[lang]}</strong>
+            <div className="hb-hint">{line.sku}</div>
+          </Row>
+          <Row label={t(lang, 'quantity')}>
+            <span className="hb-num">{line.quantity}</span>
+            <div className="hb-hint">
+              {t(lang, 'equalsUnits', {
+                units: line.quantity * (productUnits(line.sku) ?? 1),
+                uom: productBaseUnit(line.sku, lang),
+              })}
+            </div>
+          </Row>
+          <Row label={t(lang, 'listPrice')}><Money value={line.listPriceSnapshot} lang={lang} withCurrency /></Row>
+          {/* AC-9.2 — a Case 2 line shows "—", never an inferred value. */}
+          <Row label={t(lang, 'askedPrice')}>
+            <Money value={line.askedPrice} lang={lang} withCurrency />
+          </Row>
+          {line.route === 'case_1' && (
+            <>
+              <Row label={t(lang, 'competitorName')}>{typed?.supplier || t(lang, 'notProvided')}</Row>
+              <Row label={t(lang, 'theirReference')}>{typed?.sku || t(lang, 'notProvided')}</Row>
+              <Row label={t(lang, 'documentDateLabel')}>{typed?.documentDate || t(lang, 'notProvided')}</Row>
+            </>
+          )}
+          <Row label={t(lang, 'attachment')}>
+            {line.proof
+              ? <span dir="ltr">{line.proof.fileName} · {Math.round(line.proof.sizeBytes / 1024)} KB</span>
+              : <span className="hb-muted">{t(lang, 'noAttachment')}</span>}
+          </Row>
+          {/* §4/§11 — captured metadata: shown and recorded, never priced (Q-8). */}
+          {line.frequency && (
+            <Row label={t(lang, 'frequency')}>{t(lang, FREQUENCY_KEY[line.frequency])}</Row>
+          )}
+          <Row label={t(lang, 'specialCredit')}>
+            {line.specialCredit
+              ? <span className="hb-pill hb-pill--info">{t(lang, 'specialCreditOn')}</span>
+              : <span className="hb-muted">—</span>}
+          </Row>
+          <Row label={t(lang, 'noteToSeller')}>
+            {line.note || <span className="hb-muted">{t(lang, 'notProvided')}</span>}
+          </Row>
+        </dl>
+      </div>
     </div>
   )
 }
@@ -144,8 +218,6 @@ export function SellerRequestPage({ request, onBack }: {
     setSendError(null)
   }
 
-  const typed = line.proof?.typed ?? null
-
   return (
     <>
       <button type="button" className="hb-btn hb-btn--quiet hb-btn--sm hb-backlink" onClick={onBack}>
@@ -178,66 +250,7 @@ export function SellerRequestPage({ request, onBack }: {
         </div>
       </div>
 
-      {/* ── What the buyer sent — the form, read back ─────────────────────── */}
-      <div className="hb-card">
-        <div className="hb-card-head">
-          <div>
-            <h2 className="hb-h2">{t(lang, 'whatBuyerSent')}</h2>
-            <p className="hb-hint">{t(lang, 'whatBuyerSentHint')}</p>
-          </div>
-        </div>
-        <div className="hb-card-body">
-          <dl className="hb-readback">
-            <Row label={t(lang, 'requestRoute')}>
-              <span className={`hb-pill hb-pill--${line.route === 'case_1' ? 'info' : 'neutral'}`}>
-                {t(lang, line.route === 'case_1' ? 'routeCase1' : 'routeCase2')}
-              </span>
-            </Row>
-            <Row label={t(lang, 'product')}>
-              <strong>{line.productName[lang]}</strong>
-              <div className="hb-hint">{line.sku}</div>
-            </Row>
-            <Row label={t(lang, 'quantity')}>
-              <span className="hb-num">{line.quantity}</span>
-              <div className="hb-hint">
-                {t(lang, 'equalsUnits', {
-                  units: line.quantity * (productUnits(line.sku) ?? 1),
-                  uom: productBaseUnit(line.sku, lang),
-                })}
-              </div>
-            </Row>
-            <Row label={t(lang, 'listPrice')}><Money value={line.listPriceSnapshot} lang={lang} withCurrency /></Row>
-            {/* AC-9.2 — a Case 2 line shows "—", never an inferred value. */}
-            <Row label={t(lang, 'askedPrice')}>
-              <Money value={line.askedPrice} lang={lang} withCurrency />
-            </Row>
-            {line.route === 'case_1' && (
-              <>
-                <Row label={t(lang, 'competitorName')}>{typed?.supplier || t(lang, 'notProvided')}</Row>
-                <Row label={t(lang, 'theirReference')}>{typed?.sku || t(lang, 'notProvided')}</Row>
-                <Row label={t(lang, 'documentDateLabel')}>{typed?.documentDate || t(lang, 'notProvided')}</Row>
-              </>
-            )}
-            <Row label={t(lang, 'attachment')}>
-              {line.proof
-                ? <span dir="ltr">{line.proof.fileName} · {Math.round(line.proof.sizeBytes / 1024)} KB</span>
-                : <span className="hb-muted">{t(lang, 'noAttachment')}</span>}
-            </Row>
-            {/* §4/§11 — captured metadata: shown and recorded, never priced (Q-8). */}
-            {line.frequency && (
-              <Row label={t(lang, 'frequency')}>{t(lang, FREQUENCY_KEY[line.frequency])}</Row>
-            )}
-            <Row label={t(lang, 'specialCredit')}>
-              {line.specialCredit
-                ? <span className="hb-pill hb-pill--info">{t(lang, 'specialCreditOn')}</span>
-                : <span className="hb-muted">—</span>}
-            </Row>
-            <Row label={t(lang, 'noteToSeller')}>
-              {line.note || <span className="hb-muted">{t(lang, 'notProvided')}</span>}
-            </Row>
-          </dl>
-        </div>
-      </div>
+      <SubmissionReadback line={line} lang={lang} title={t(lang, 'whatBuyerSent')} />
 
       {/* ── The document and its checks ───────────────────────────────────── */}
       {line.proof && (
@@ -600,4 +613,294 @@ function TemplateDialog({ request, onClose, onSaved }: {
       <Field label={t(lang, 'maxQty')}><input className="hb-input" inputMode="numeric" value={maxQty} onChange={(e) => setMaxQty(e.target.value)} /></Field>
     </Modal>
   )
+}
+
+/**
+ * The buyer's request page — the mirror of the seller's.
+ *
+ * Same shape for the same reason: this is a document to read before committing, not a
+ * decision to take at a glance. What you sent, then what the supplier answered with the
+ * three prices side by side (§6), then the decision — ranked by button type exactly as the
+ * seller's is, because the two sides answer each other with the same moves.
+ *
+ * Withdraw takes the place of the seller's Request more info as the quiet fourth: it ends
+ * the request rather than answering the offer, so it decides nothing about the price.
+ */
+export function BuyerRequestPage({ request, onBack, onBrowse }: {
+  request: NegotiationRequest
+  onBack: () => void
+  onBrowse: () => void
+}) {
+  const { state, dispatch, lang } = useRfq()
+  const line = request.lines[0]
+  const [tab, setTab] = useState<'outcome' | 'history'>('outcome')
+  const [priceText, setPriceText] = useState('')
+  const [confirmDecline, setConfirmDecline] = useState(false)
+
+  const meta = STATE_META[request.state]
+  // EC-16 — server time decides, and an expired offer disables every decision action.
+  const live = acceptanceAllowed(request.offerExpiresAt, state.now)
+  const answered = request.state === 'countered_by_seller' && live
+  const canWithdraw = ['submitted', 'viewed', 'info_requested', 'countered_by_seller', 'countered_by_buyer']
+    .includes(request.state)
+  const roundsLeft = guardrailValue('maxRounds') - request.rounds
+  const counterPrice = parseMoney(priceText)
+
+  const listTotal = lineTotal(line.listPriceSnapshot, line.quantity)
+  const offeredTotal = lineTotal(line.offeredPrice ?? line.listPriceSnapshot, line.quantity)
+  const saving = listTotal - offeredTotal
+
+  return (
+    <>
+      <button type="button" className="hb-btn hb-btn--quiet hb-btn--sm hb-backlink" onClick={onBack}>
+        <span aria-hidden="true">←</span>{t(lang, 'backToRequests')}
+      </button>
+
+      <div className="hb-card">
+        <div className="hb-card-body hb-row">
+          <span className="hb-ref">{request.ref}</span>
+          <StatusPill state={request.state} viewer="buyer" lang={lang} />
+          <span className="hb-hint">{request.sellerName}</span>
+          {request.offerExpiresAt && live && (
+            <span className="hb-hint">
+              {t(lang, 'offerExpiresIn')}:{' '}
+              <Countdown dueAt={request.offerExpiresAt} now={state.now} lang={lang} />
+            </span>
+          )}
+          <span className="hb-hint" style={{ marginInlineStart: 'auto' }} dir="ltr">
+            {t(lang, 'submittedAt')} {(request.submittedAt ?? '').replace('T', ' ').slice(0, 16)} UTC
+          </span>
+        </div>
+      </div>
+
+      {/* AC-13.1 — the outcome and the log are two distinct panels. */}
+      <div className="hb-tabs" style={{ marginBottom: 14 }}>
+        {(['outcome', 'history'] as const).map((k) => (
+          <button key={k} type="button" className="hb-tab" aria-selected={tab === k} onClick={() => setTab(k)}>
+            {t(lang, k === 'outcome' ? 'outcome' : 'history')}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'history' ? (
+        <div className="hb-card">
+          <div className="hb-card-body hb-log">
+            <ul>
+              {request.history.map((h) => (
+                <li key={h.id}>
+                  {/* AC-13.2 — timestamp, actor, event type, and before/after on money. */}
+                  <time dir="ltr">{h.at.replace('T', ' ').slice(0, 16)} UTC</time>
+                  {renderHistory(h, lang)}
+                  {h.before !== null && h.after !== null && (
+                    <span className="hb-hint"> ({formatMoney(h.before)} → {formatMoney(h.after)})</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+            <p className="hb-hint">
+              {lang === 'ar'
+                ? 'السجل غير قابل للتعديل أو الحذف من أي دور، بما في ذلك إدارة المنصة.'
+                : 'The history log is append-only and cannot be edited or deleted by any role, including HIGHBASE administrators.'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <SubmissionReadback line={line} lang={lang} title={t(lang, 'whatYouSent')} />
+
+          {/* ── What came back ─────────────────────────────────────────────── */}
+          <div className="hb-card">
+            <div className="hb-card-head"><h2 className="hb-h2">{t(lang, 'whatSupplierAnswered')}</h2></div>
+            <div className="hb-card-body">
+              {/* AC-11.1 — the seller's reason, verbatim, with the affected line named. */}
+              {request.state === 'info_requested' && request.infoReason && (
+                <div className="hb-banner hb-banner--action" style={{ marginBottom: 14 }}>
+                  <div>
+                    <strong>{t(lang, 'actionNeededBanner')}</strong>
+                    <div style={{ marginTop: 4 }}>
+                      {t(lang, `reason${request.infoReason.code.replace(/(^|_)(\w)/g, (_, __, c) => c.toUpperCase())}`)} — {request.infoReason.note}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* AC-9.6 — an expired offer disables every decision action, with the date. */}
+              {!live && request.offerExpiresAt && (
+                <div className="hb-banner hb-banner--bad" style={{ marginBottom: 14 }}>
+                  {t(lang, 'offerExpiredOn', { date: request.offerExpiresAt.slice(0, 10) })}
+                </div>
+              )}
+
+              {/* AC-22.1 — a failed negotiation never costs the buyer the goods. */}
+              {['declined', 'expired', 'withdrawn'].includes(request.state) && (
+                <div className="hb-banner hb-banner--info" style={{ marginBottom: 14 }}>{t(lang, 'stillPurchasable')}</div>
+              )}
+
+              {meta.turn === 'seller' && (
+                <div className="hb-banner hb-banner--info" style={{ marginBottom: 14 }}>{t(lang, 'awaitingSupplier')}</div>
+              )}
+
+              {/* §6 — the original price beside what the supplier came back with. */}
+              <div className="hb-table-wrap">
+                <table className="hb-table">
+                  <thead className="hb-compare-head">
+                    <tr>
+                      <th>{t(lang, 'original')}</th>
+                      <th className="hb-col-asked">{t(lang, 'askedPrice')}</th>
+                      <th className="hb-col-offered">{t(lang, 'supplierOffers')}</th>
+                      <th>{t(lang, 'outcome')}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><Money value={line.listPriceSnapshot} lang={lang} withCurrency /></td>
+                      {/* AC-9.2 — a Case 2 line shows "—", never an inferred value. */}
+                      <td className="hb-col-asked"><Money value={line.askedPrice} lang={lang} withCurrency /></td>
+                      <td className="hb-col-offered"><Money value={line.offeredPrice} lang={lang} withCurrency /></td>
+                      <td><OutcomePill line={line} lang={lang} /></td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colSpan={2}>{t(lang, 'requestTotal')}</td>
+                      <td colSpan={2}>
+                        <Money value={offeredTotal} lang={lang} withCurrency />
+                        {saving > 0 && (
+                          <span style={{ color: 'var(--hb-good)' }}>
+                            {' · '}{t(lang, 'estimatedSaving')} {formatMoney(saving, { withCurrency: true, lang })}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* ── The decision ───────────────────────────────────────────────── */}
+          <div className="hb-card">
+            <div className="hb-card-head"><h2 className="hb-h2">{t(lang, 'yourDecision')}</h2></div>
+            <div className="hb-card-body">
+              {answered ? (
+                <div className="hb-row" style={{ alignItems: 'flex-end' }}>
+                  <Field
+                    label={t(lang, 'counterPrice')}
+                    hint={roundsLeft > 0 ? t(lang, 'counterNeedsPriceBuyer') : t(lang, 'roundCapReached', { n: guardrailValue('maxRounds') })}
+                  >
+                    <input
+                      className="hb-input" inputMode="decimal" style={{ minWidth: 140 }}
+                      disabled={roundsLeft <= 0}
+                      value={priceText} onChange={(e) => setPriceText(e.target.value)}
+                    />
+                  </Field>
+                </div>
+              ) : request.state === 'info_requested' ? (
+                <p className="hb-sub">{t(lang, 'actionNeededBanner')}</p>
+              ) : meta.terminal ? (
+                <p className="hb-sub">{t(lang, 'stillPurchasable')}</p>
+              ) : (
+                <p className="hb-sub">{t(lang, 'awaitingSupplier')}</p>
+              )}
+            </div>
+
+            <div className="hb-modal-foot">
+              {/* Quiet: it ends the request rather than answering the price. */}
+              {canWithdraw && (
+                <button type="button" className="hb-btn hb-btn--quiet"
+                  onClick={() => { dispatch({ type: 'buyer_withdraws', ref: request.ref }); onBack() }}>
+                  {t(lang, 'withdraw')}
+                </button>
+              )}
+              {answered && (
+                <>
+                  {/* FR-11.6 — destructive, so quiet and never primary. AC-10.6 confirms it. */}
+                  <button type="button" className="hb-btn hb-btn--danger" onClick={() => setConfirmDecline(true)}>
+                    {t(lang, 'decline')}
+                  </button>
+                  <span className="hb-primary-slot">
+                    {/* AC-10.4 — past the round cap the counter is not offered, and says why. */}
+                    <button
+                      type="button" className="hb-btn hb-btn--outline"
+                      disabled={counterPrice === null || roundsLeft <= 0}
+                      title={roundsLeft <= 0
+                        ? t(lang, 'roundCapReached', { n: guardrailValue('maxRounds') })
+                        : counterPrice === null ? t(lang, 'counterNeedsPriceBuyer') : undefined}
+                      onClick={() => {
+                        dispatch({ type: 'buyer_counters', ref: request.ref, prices: { [line.id]: counterPrice as Minor } })
+                        onBack()
+                      }}
+                    >
+                      {t(lang, 'counter')}
+                    </button>
+                    {/* AC-10.1 — Accept is the single primary action on this surface. */}
+                    <button type="button" className="hb-btn hb-btn--primary"
+                      onClick={() => { dispatch({ type: 'buyer_accepts', ref: request.ref, asTemplate: false }); onBack() }}>
+                      {t(lang, 'accept')}
+                    </button>
+                  </span>
+                </>
+              )}
+              {/* US-11 — from info_requested the buyer resubmits or withdraws; no accept. */}
+              {request.state === 'info_requested' && (
+                <span className="hb-primary-slot">
+                  <button type="button" className="hb-btn hb-btn--primary"
+                    onClick={() => { dispatch({ type: 'buyer_resubmits', ref: request.ref }); onBack() }}>
+                    {t(lang, 'resubmit')}
+                  </button>
+                </span>
+              )}
+              {/* AC-22.3 — a re-request is a new request, linked to the closed one. */}
+              {(meta.terminal || !live) && (
+                <span className="hb-primary-slot">
+                  <button type="button" className="hb-btn hb-btn--primary"
+                    onClick={() => { dispatch({ type: 're_request', ref: request.ref }); onBrowse() }}>
+                    {t(lang, 'requestAgain')}
+                  </button>
+                </span>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* AC-10.6 — a confirmation naming the consequence before a decline. */}
+      {confirmDecline && (
+        <Modal
+          title={<h2 className="hb-h2">{t(lang, 'confirmDeclineTitle')}</h2>}
+          onClose={() => setConfirmDecline(false)}
+          footer={
+            <>
+              <button type="button" className="hb-btn hb-btn--secondary" onClick={() => setConfirmDecline(false)}>
+                {t(lang, 'cancel')}
+              </button>
+              <span className="hb-primary-slot">
+                <button type="button" className="hb-btn hb-btn--danger"
+                  onClick={() => { dispatch({ type: 'buyer_declines', ref: request.ref }); setConfirmDecline(false); onBack() }}>
+                  {t(lang, 'decline')}
+                </button>
+              </span>
+            </>
+          }
+        >
+          <p>{t(lang, 'confirmDeclineBody')}</p>
+        </Modal>
+      )}
+    </>
+  )
+}
+
+/**
+ * FR-7.8 / Decision 3 — a Case 1 claim is named matched or beaten, by name, so the buyer
+ * knows which of the three happened. A seller who countered *above* the asked price has not
+ * declined it — it is a live counter the buyer can still accept, so it reads as a counter.
+ */
+function OutcomePill({ line, lang }: { line: RequestLine; lang: Lang }) {
+  if (line.outcome === 'pending') return <span className="hb-pill hb-pill--neutral">{t(lang, 'pendingOutcome')}</span>
+  if (line.outcome === 'declined') return <span className="hb-pill hb-pill--bad">{t(lang, 'declinedOutcome')}</span>
+  if (line.route === 'case_2') return <span className="hb-pill hb-pill--good">{lang === 'ar' ? 'تم التسعير' : 'Quoted'}</span>
+  const tri = triStateOutcome(line.askedPrice, line.offeredPrice, false)
+  if (tri === 'beaten') return <span className="hb-pill hb-pill--good">{t(lang, 'beaten')}</span>
+  if (tri === 'matched') return <span className="hb-pill hb-pill--good">{t(lang, 'matched')}</span>
+  return <span className="hb-pill hb-pill--warn">{t(lang, 'counteredOutcome')}</span>
 }

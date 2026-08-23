@@ -267,6 +267,11 @@ export const STRINGS: Dict = {
   // ── The seller's request page (draft §5) ──────────────────────────────────
   backToQueue: { en: 'Back to the queue', ar: 'العودة إلى القائمة' },
   whatBuyerSent: { en: 'What the buyer sent', ar: 'ما أرسله المشتري' },
+  whatYouSent: { en: 'What you sent', ar: 'ما أرسلته' },
+  whatSupplierAnswered: { en: 'What the supplier answered', ar: 'رد المورّد' },
+  awaitingSupplier: { en: 'The supplier has not answered yet. You can withdraw the request until they do.', ar: 'لم يرد المورّد بعد. يمكنك سحب الطلب حتى ذلك الحين.' },
+  counterNeedsPriceBuyer: { en: 'Enter a price to counter with.', ar: 'أدخل السعر الذي تريد عرضه.' },
+  backToRequests: { en: 'Back to my requests', ar: 'العودة إلى طلباتي' },
   whatBuyerSentHint: { en: 'The request exactly as it was submitted. Nothing here is editable.', ar: 'الطلب كما أُرسل تماماً. لا شيء هنا قابل للتعديل.' },
   yourDecision: { en: 'Your decision', ar: 'قرارك' },
   requestRoute: { en: 'Asking for', ar: 'نوع الطلب' },
