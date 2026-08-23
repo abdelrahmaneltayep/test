@@ -555,6 +555,7 @@ function ExtractionPanel({ proof, lang, typedSupplier, resolution, onResolve }: 
     return <div className="hb-banner hb-banner--warn">{t(lang, 'checksNotRun')}</div>
   }
   const conflict = proof.extracted && typedSupplier.trim() && proof.extracted.supplier !== typedSupplier.trim()
+  const notable = proof.checks.filter((c) => c.severity !== 'pass')
   return (
     <div className="hb-proof" style={{ marginTop: 10 }}>
       <div className="hb-proof-grid">
@@ -582,16 +583,27 @@ function ExtractionPanel({ proof, lang, typedSupplier, resolution, onResolve }: 
           </div>
         </div>
       )}
-      {/* AC-4.5 — a failed check warns inline and states why, without blocking submission. */}
-      {proof.checks.map((c) => (
-        <div className="hb-check" key={c.check}>
-          <CheckBadge severity={c.severity} lang={lang} />
-          <div>
-            <strong>{t(lang, c.check === 'freshness' ? 'proofFreshness' : c.check === 'identity' ? 'proofIdentity' : 'proofDuplicate')}</strong>
-            <div className="hb-hint">{c.reasonCode.replace(/_/g, ' ')}</div>
-          </div>
+      {/*
+        AC-4.5 — a failed check warns inline and states why, without blocking submission.
+        A passing one is the expected case, so the three of them collapse to a single line
+        and only what needs the buyer's attention gets a row of its own.
+      */}
+      {notable.length === 0 ? (
+        <div className="hb-check">
+          <CheckBadge severity="pass" lang={lang} />
+          <div className="hb-hint" style={{ marginTop: 3 }}>{t(lang, 'allChecksPassed')}</div>
         </div>
-      ))}
+      ) : (
+        notable.map((c) => (
+          <div className="hb-check" key={c.check}>
+            <CheckBadge severity={c.severity} lang={lang} />
+            <div>
+              <strong>{t(lang, c.check === 'freshness' ? 'proofFreshness' : c.check === 'identity' ? 'proofIdentity' : 'proofDuplicate')}</strong>
+              <div className="hb-hint">{c.reasonCode.replace(/_/g, ' ')}</div>
+            </div>
+          </div>
+        ))
+      )}
     </div>
   )
 }

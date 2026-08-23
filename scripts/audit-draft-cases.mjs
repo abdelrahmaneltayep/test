@@ -54,7 +54,10 @@ await p.locator('.hb-modal-body input[type="file"]').setInputFiles({
 await p.waitForTimeout(400)
 const panel = await p.locator('.hb-proof').count()
 const checks = await p.locator('.hb-proof .hb-check').allInnerTexts()
-check('3.extraction-and-checks', panel === 1 && checks.length >= 2, `panel=${panel} checks=${checks.length}`)
+// AC-16.2 — the checks still report; the passes are summarised rather than listed one
+// green row each, so what is on screen is what needs a decision.
+check('3.extraction-and-checks', panel === 1 && checks.length === 1
+  && /All automatic checks passed/i.test(checks[0] ?? ''), `panel=${panel} · ${checks.join(' | ').slice(0, 140)}`)
 await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
 const sentBody = await txt('.hb-overlay')
 check('3.case1-sent', /Request sent/i.test(sentBody) && /SPR-\d{4}-\d{4}/.test(sentBody), sentBody)
@@ -136,9 +139,18 @@ check('5.detail-is-a-page', await p.locator('.hb-overlay').count() === 0
 const readback = await txt('.hb-readback')
 check('5.buyer-form-read-back', /Asking for/i.test(readback) && /Quantity/i.test(readback)
   && /Supplier offering/i.test(readback) && /Attachment/i.test(readback), readback.slice(0, 220))
-const footer = await p.locator('.hb-modal-foot button').allInnerTexts()
-check('5.accept-and-template', footer.some((f) => /apply as template/i.test(f)), footer.join(' | '))
-await p.getByRole('button', { name: 'Accept & apply as template' }).click(); await p.waitForTimeout(250)
+const segments = await p.locator('.hb-segment-btn').allInnerTexts()
+check('5.one-outcome-selector', segments.join('|') === 'Accept|Counter|Decline', segments.join(' | '))
+// The primary is named after the decision, so the seller reads it back before committing.
+const primary = p.locator('.hb-modal-foot .hb-btn--primary')
+check('5.primary-blocked-until-chosen', await primary.isDisabled(), await txt('.hb-modal-foot'))
+await p.getByRole('button', { name: 'Accept', exact: true }).click(); await p.waitForTimeout(200)
+const acceptLabel = await primary.innerText()
+await p.locator('.hb-checkfield input').check(); await p.waitForTimeout(200)
+const templateLabel = await primary.innerText()
+check('5.accept-and-template', /Accept and reply/i.test(acceptLabel) && /save as template/i.test(templateLabel),
+  `${acceptLabel} -> ${templateLabel}`)
+await primary.click(); await p.waitForTimeout(250)
 await p.locator('.hb-overlay').last().getByRole('button', { name: 'Accept & apply as template' }).click()
 await p.waitForTimeout(350)
 await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Sent' }).click(); await p.waitForTimeout(200)

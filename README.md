@@ -45,9 +45,10 @@ Three surfaces, switchable from the demo bar at the top:
   fields already live, and withdraw stays there.
 - **Seller · Dashboard** — the same two pages as triage queues, split Open / Sent, each row
   offering Accept, Counter and Decline. Opening a row is a page, not a dialog: the buyer's
-  submission read back field by field, then the document and its three checks, then the
-  decision — Accept, Accept & apply as template, Counter, Decline and Request more info —
-  with the SLA countdown, margin after the ask and the price-list write-back.
+  submission read back field by field, then the document and its checks, then the decision:
+  one outcome — Accept, Counter or Decline — and one primary action named after it, with
+  the acceptance's write-forward as a choice under Accept and Request more info as the
+  side path. The SLA countdown and margin after the ask sit above it.
 
 A request holds **one item**. The buyer asks about a product from that product's card, so a
 request is a product, a quantity and one route; a second product is a second request. The
