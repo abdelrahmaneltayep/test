@@ -159,6 +159,50 @@ worth following up on.
 
 ---
 
+## Verified, not asserted
+
+`scripts/audit-draft-cases.mjs` drives the built prototype in a browser and checks each
+numbered case is actually reachable and behaves as the draft describes. The domain tests
+already prove the rules; this proves a person can get to them.
+
+```
+npm run build
+npx vite preview --port 4173 &
+node scripts/audit-draft-cases.mjs
+```
+
+Twenty-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
+
+| Case | Checked |
+| --- | --- |
+| §2 | The entry point is on the card, and the form asks for quantity |
+| §3 | A priced ask cannot be sent without its document; extraction runs and the three checks report; the request sends and returns a reference |
+| §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
+| §5 | Accept, Counter and Decline on the queue row; Accept & apply as template in the panel; the template acceptance lands the request in Template active |
+| §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |
+| §6 | A modified price gives the buyer Accept and Cancel; an acceptance as-is asks nothing of them; original and agreed sit side by side |
+| §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |
+| §9 | Standard and negotiated orders in one Final Orders list; the old-versus-accepted indicator; the full log on the order |
+| §10 | The negotiation and invoice flags on the order page, and the HB Admin view |
+| §11 | Recorded as a conflict — see below |
+
+## The one conflict the check records
+
+Draft §4 says the frequency field is the Phase 2 addition and quantity ships first. The PRD
+cuts the phases the other way round: Case 1, the evidenced ask, is **[P2]** (AC-3.3, with the
+rationale at PRD §2 — Phase 1 first because it is the half with working implementations to
+copy, and it builds the container the proof flow needs), while frequency is a Case 2 field
+captured from Phase 1 (AC-5.2, Q-8).
+
+The prototype follows the PRD, so switching the demo bar to **P1 only** drops Case 1 and
+keeps frequency, which is the inverse of what the draft describes. Both cases exist and are
+reachable in the default **P1 + P2** mode, so nothing the draft asks for is missing — what
+differs is only where the release line falls. That is a question for the PM to settle, not
+a defect to code around, so the check asserts the PRD behaviour and names the conflict
+rather than quietly picking a side.
+
+---
+
 ## Still open
 
 Three places where the prototype diverges from the PRD at the user's direction, unchanged by

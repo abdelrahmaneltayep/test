@@ -19,6 +19,7 @@ in the browser with in-memory data — there is no backend.
 npm install
 npm run dev        # both prototypes; open /index.html or /rfq.html
 npm test           # domain + acceptance-criteria tests
+npm run audit:draft    # walks the built prototype and checks the feature flow draft's cases
 npm run build      # builds both into dist/
 npm run build:single   # rebuilds the single-file prototypes for offline review
 ```

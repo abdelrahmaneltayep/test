@@ -8,7 +8,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src --ext ts,tsx",
-    "build:single": "node scripts/build-single.mjs rfq && node scripts/build-single.mjs variants && node scripts/build-single.mjs stories && node scripts/build-single.mjs flows"
+    "build:single": "node scripts/build-single.mjs rfq && node scripts/build-single.mjs variants && node scripts/build-single.mjs stories && node scripts/build-single.mjs flows",
+    "audit:draft": "node scripts/audit-draft-cases.mjs"
   },
   "dependencies": {
     "react": "^18.3.1",
