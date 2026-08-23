@@ -171,7 +171,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Thirty-one checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Thirty-seven checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -180,7 +180,7 @@ Thirty-one checks, exit non-zero on any failure. Current run: all pass. What eac
 | §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
 | §5 | Accept, Counter and Decline on the queue row; the detail opens as a page carrying the buyer's submission read back; Accept & apply as template on it; the template acceptance lands the request in Template active |
 | §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |
-| §6 | A modified price gives the buyer Accept and Cancel; an acceptance as-is asks nothing of them; original and agreed sit side by side |
+| §6 | A modified price gives the buyer Accept and Cancel on the order; an acceptance as-is asks nothing of them; original and agreed sit side by side; the buyer's request detail is a page carrying the same four ranked actions the seller's has, and §6's three prices |
 | §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |
 | §9 | Standard and negotiated orders in one Final Orders list; the old-versus-accepted indicator; the full log on the order |
 | §10 | The negotiation and invoice flags on the order page, and the HB Admin view |
