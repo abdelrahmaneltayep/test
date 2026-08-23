@@ -171,14 +171,14 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Twenty-eight checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Thirty-one checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
-| §2 | The entry point is on the card, and the form asks for quantity |
+| §2 | The entry point is on the card, the form asks for quantity, and no request holds more than one item |
 | §3 | A priced ask cannot be sent without its document; extraction runs and the three checks report; the request sends and returns a reference |
 | §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
-| §5 | Accept, Counter and Decline on the queue row; Accept & apply as template in the panel; the template acceptance lands the request in Template active |
+| §5 | Accept, Counter and Decline on the queue row; the detail opens as a page carrying the buyer's submission read back; Accept & apply as template on it; the template acceptance lands the request in Template active |
 | §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |
 | §6 | A modified price gives the buyer Accept and Cancel; an acceptance as-is asks nothing of them; original and agreed sit side by side |
 | §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |

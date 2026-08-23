@@ -87,10 +87,10 @@ const creditRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
 await p.locator('tbody tr', { hasText: creditRef }).click(); await p.waitForTimeout(350)
-const linePills = await p.locator('.hb-modal-body .hb-pill').allInnerTexts()
+const linePills = await p.locator('.hb-content .hb-pill').allInnerTexts()
 check('11.special-credit-shown-to-seller', linePills.some((x) => /continuing arrangement/i.test(x)),
   `${creditRef} :: ${linePills.join(' | ')}`)
-await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.getByRole('button', { name: /Back to the queue/ }).click(); await p.waitForTimeout(200)
 
 // ── §11 / AC-3.3 — both release lines are walkable ───────────────────────────
 async function formLabels(phaseBtn) {
@@ -118,6 +118,12 @@ check('11.p1-draft-cut', draft.routes === 2 && draft.labels.some((l) => /target 
   && !draftRfqLabels.some((l) => /how often/i.test(l)) && draft.credit === 0,
   `routes=${draft.routes} credit=${draft.credit} · case1: ${draft.labels.join(' / ')} · rfq: ${draftRfqLabels.join(' / ')}`)
 
+// ── §2 one item per request ──────────────────────────────────────────────────
+await reset()
+await p.getByRole('button', { name: 'Buyer · Dashboard' }).click(); await p.waitForTimeout(250)
+const buyerItems = await p.locator('tbody tr td:nth-child(4)').allInnerTexts()
+check('2.one-item-buyer', buyerItems.every((x) => !/^\d+$/.test(x.trim())), buyerItems.map((x) => x.split('\n')[0]).join(' | '))
+
 // ── §5 the four seller actions ───────────────────────────────────────────────
 await reset()
 await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
@@ -125,6 +131,11 @@ const rowActions = await p.locator('tbody tr').first().locator('td:last-child bu
 check('5.seller-accept-modify-reject', ['Accept', 'Counter', 'Decline'].every((x) => rowActions.includes(x)), rowActions.join(' | '))
 await p.locator('tbody tr', { hasText: 'SPR-2608-0003' }).getByRole('button', { name: 'Counter' }).click()
 await p.waitForTimeout(300)
+check('5.detail-is-a-page', await p.locator('.hb-overlay').count() === 0
+  && await p.locator('.hb-readback').count() === 1, `overlays=${await p.locator('.hb-overlay').count()}`)
+const readback = await txt('.hb-readback')
+check('5.buyer-form-read-back', /Asking for/i.test(readback) && /Quantity/i.test(readback)
+  && /Supplier offering/i.test(readback) && /Attachment/i.test(readback), readback.slice(0, 220))
 const footer = await p.locator('.hb-modal-foot button').allInnerTexts()
 check('5.accept-and-template', footer.some((f) => /apply as template/i.test(f)), footer.join(' | '))
 await p.getByRole('button', { name: 'Accept & apply as template' }).click(); await p.waitForTimeout(250)

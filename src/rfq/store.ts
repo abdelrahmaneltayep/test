@@ -757,26 +757,30 @@ export function initialState(now: Date): RfqState {
     ...extra,
   })
 
+  /**
+   * Feature Flow Draft §2 — one item per request. The buyer asks about a product from that
+   * product's card, so a request is a product, a quantity and one route; a second product
+   * is a second request. Every fixture is single-line for the same reason, and the object
+   * model keeps its line collection because FR-1.9's one-to-many RFQ still has to be
+   * reachable without a breaking migration.
+   */
   const seeded: NegotiationRequest[] = [
-    // A mixed request awaiting the seller, with two hours of SLA left (AC-14.5 escalation).
+    // Awaiting the seller with two hours of SLA left (AC-14.5 escalation).
     base('SPR-2608-0001', 'submitted', [
       mkLine('HB-4471', 60, 'case_1', 9_400, null, 'pending', proofOk),
-      mkLine('HB-7788', 200, 'case_2', null, null, 'pending'),
     ], { slaDueAt: addHours(now, 2).toISOString() }),
 
-    // A request the seller has answered; it is the buyer's turn (AC-9.1 comparison).
+    // Answered by the seller; it is the buyer's turn (AC-9.1 comparison).
     base('SPR-2608-0002', 'countered_by_seller', [
       mkLine('HB-2210', 40, 'case_1', 13_500, 14_100, 'countered', proofStale),
-      mkLine('HB-9032', 25, 'case_2', null, 6_200, 'countered'),
-      mkLine('HB-7788', 150, 'case_1', 1_650, 1_950, 'declined'),
     ], {
       rounds: 1, slaDueAt: null,
       offerExpiresAt: addDays(now, 5).toISOString(),
       submittedAt: addHours(now, -30).toISOString(),
       history: [
-        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -30), { lines: 3 }),
+        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -30), { lines: 1 }),
         event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -26)),
-        event('SellerResponded', 'seller', SELLER.name.en, addHours(now, -24), { lines: 3 }),
+        event('SellerResponded', 'seller', SELLER.name.en, addHours(now, -24), { lines: 1 }),
       ],
       sellerResponses: [{ sellerId: SELLER.id, respondedAt: addHours(now, -24).toISOString(), expiresAt: addDays(now, 5).toISOString(), floorOverrideReason: null }],
     }),
@@ -803,7 +807,7 @@ export function initialState(now: Date): RfqState {
       mkLine('HB-7788', 300, 'case_2', null, null, 'pending'),
     ], { slaDueAt: addHours(now, 12).toISOString(), submittedAt: addHours(now, -12).toISOString() }),
 
-    // EC-20 — a request whose only priced line has no cost configured.
+    // EC-20 — a request whose priced line has no cost configured.
     base('SPR-2608-0003', 'viewed', [
       mkLine('HB-9032', 80, 'case_1', 6_100, null, 'pending'),
     ], { slaDueAt: addHours(now, 30).toISOString() }),

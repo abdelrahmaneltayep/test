@@ -398,3 +398,31 @@ body {
 .hb-checkfield { display: flex; gap: 10px; align-items: flex-start; }
 .hb-checkfield input { margin-top: 3px; flex: 0 0 auto; width: 16px; height: 16px; accent-color: var(--hb-blue); }
 .hb-checkfield > span { display: flex; flex-direction: column; min-width: 0; }
+
+/* ── The seller's request page ──────────────────────────────────────────── */
+
+.hb-backlink { margin-bottom: 12px; padding-inline: 6px; }
+
+/* The buyer's submission, read back. Label and value in two columns while there is room;
+   stacked once the label column would squeeze the value. */
+.hb-readback { margin: 0; display: grid; grid-template-columns: minmax(150px, 210px) 1fr; }
+.hb-readrow { display: contents; }
+.hb-readback dt,
+.hb-readback dd {
+  padding: 11px 0;
+  border-top: 1px solid var(--hb-line-soft);
+  margin: 0;
+  min-width: 0;
+}
+.hb-readback .hb-readrow:first-child dt,
+.hb-readback .hb-readrow:first-child dd { border-top: none; }
+.hb-readback dt { color: var(--hb-ink-2); font-size: 13px; padding-inline-end: 16px; }
+.hb-readback dd { color: var(--hb-ink); }
+.hb-readback .hb-hint { margin-top: 2px; }
+
+@media (max-width: 560px) {
+  .hb-readback { grid-template-columns: 1fr; }
+  .hb-readback dd { padding-top: 0; border-top: none; }
+  .hb-readback dt { padding-bottom: 2px; }
+  .hb-readback .hb-readrow:first-child dd { padding-top: 0; }
+}

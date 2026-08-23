@@ -183,7 +183,7 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                   <th>{t(lang, 'reference')}</th>
                   <th>{t(lang, 'requestType')}</th>
                   <th>{t(lang, 'supplier')}</th>
-                  <th>{t(lang, 'lines')}</th>
+                  <th>{t(lang, 'product')}</th>
                   <th>{t(lang, 'status')}</th>
                   <th>{t(lang, 'totalAsked')}</th>
                   <th>{t(lang, 'actionsColumn')}</th>
@@ -201,7 +201,11 @@ export function BuyerDashboard({ onBrowse }: { onBrowse: () => void }) {
                       <td><span className="hb-ref">{r.ref}</span></td>
                       <td><RouteTags lines={r.lines} lang={lang} /></td>
                       <td>{r.sellerName}</td>
-                      <td className="hb-num">{r.lines.length}</td>
+                      {/* §2 — one item per request, so the row names it. */}
+                      <td>
+                        {r.lines[0].productName[lang]}
+                        <div className="hb-hint">{r.lines[0].sku} · {t(lang, 'quantity')} {r.lines[0].quantity}</div>
+                      </td>
                       <td><StatusPill state={r.state} viewer="buyer" lang={lang} /></td>
                       <td><Money value={askedTotalOf(r.lines)} lang={lang} withCurrency /></td>
                       <td>

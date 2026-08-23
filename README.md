@@ -44,9 +44,15 @@ Three surfaces, switchable from the demo bar at the top:
   Counter opens the three-column original / asked / offered comparison with its per-line
   fields already live, and withdraw stays there.
 - **Seller · Dashboard** — the same two pages as triage queues, split Open / Sent, each row
-  offering Accept, Counter and Decline, and the line-by-line response surface behind them
-  carrying the SLA countdown, margin after the ask, the proof panel and the price-list
-  write-back.
+  offering Accept, Counter and Decline. Opening a row is a page, not a dialog: the buyer's
+  submission read back field by field, then the document and its three checks, then the
+  decision — Accept, Accept & apply as template, Counter, Decline and Request more info —
+  with the SLA countdown, margin after the ask and the price-list write-back.
+
+A request holds **one item**. The buyer asks about a product from that product's card, so a
+request is a product, a quantity and one route; a second product is a second request. The
+object model keeps its line collection because FR-1.9's one-to-many RFQ has to stay
+reachable, but every surface is written for one.
 
 Both dashboards also carry two shared surfaces from the feature flow draft, reachable from
 the sidebar:

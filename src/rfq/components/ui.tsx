@@ -68,9 +68,10 @@ export function Money({ value, lang, withCurrency }: { value: Minor | null; lang
 /**
  * Feature Flow Draft §1 — which of the two routes a request took, on the row.
  *
- * A request that carries both shows both, rather than being flattened to the stronger one:
- * "Special price" alone on a row that also has a line awaiting a quote would misdescribe
- * what the other party has to answer.
+ * One item per request (§2) means one route per request in practice. It is still derived
+ * from the lines rather than assumed, and still renders both where both appear, because
+ * FR-1.9 keeps a many-line request reachable and a row that lied about it would be worse
+ * than a row with two tags.
  */
 export function RouteTags({ lines, lang }: { lines: RequestLine[]; lang: Lang }) {
   const hasCase1 = lines.some((l) => l.route === 'case_1')

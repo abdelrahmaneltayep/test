@@ -255,6 +255,21 @@ export const STRINGS: Dict = {
 
   // ── Row actions on the seller's queue (US-14) ─────────────────────────────
   viewRequest: { en: 'View', ar: 'عرض' },
+  // ── The seller's request page (draft §5) ──────────────────────────────────
+  backToQueue: { en: 'Back to the queue', ar: 'العودة إلى القائمة' },
+  whatBuyerSent: { en: 'What the buyer sent', ar: 'ما أرسله المشتري' },
+  whatBuyerSentHint: { en: 'The request exactly as it was submitted. Nothing here is editable.', ar: 'الطلب كما أُرسل تماماً. لا شيء هنا قابل للتعديل.' },
+  yourDecision: { en: 'Your decision', ar: 'قرارك' },
+  requestRoute: { en: 'Asking for', ar: 'نوع الطلب' },
+  routeCase1: { en: 'A specific price, with proof', ar: 'سعر محدد مع إثبات' },
+  routeCase2: { en: 'A quote for this quantity', ar: 'عرض سعر لهذه الكمية' },
+  submittedAt: { en: 'Sent', ar: 'أُرسل' },
+  theirReference: { en: 'Their SKU or reference', ar: 'رقم الصنف لديهم' },
+  documentDateLabel: { en: 'Document date', ar: 'تاريخ المستند' },
+  attachment: { en: 'Attachment', ar: 'المرفق' },
+  noAttachment: { en: 'No document — this is a quote request', ar: 'بلا مستند — هذا طلب تسعير' },
+  notProvided: { en: 'Not given', ar: 'غير مذكور' },
+  readOnlyRequest: { en: 'This request is read-only now.', ar: 'هذا الطلب للقراءة فقط الآن.' },
   acceptDisabledQuoteOnly: { en: 'This request has no asked price to accept — open it and quote a price.', ar: 'لا يوجد سعر مطلوب لقبوله — افتح الطلب وقدّم سعراً.' },
   confirmSellerAcceptTitle: { en: 'Accept this price?', ar: 'قبول هذا السعر؟' },
   confirmSellerAcceptBody: { en: 'You accept the buyer\u2019s asked price for this order. It applies once and is not saved to their price list.', ar: 'أنت تقبل السعر الذي طلبه المشتري لهذا الطلب. ينطبق مرة واحدة ولا يُحفظ في قائمة أسعاره.' },
