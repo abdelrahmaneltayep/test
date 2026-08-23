@@ -56,20 +56,29 @@ export function SellerDashboard() {
 
   const rfqPage = section === 'rfqs'
 
-  const rows = useMemo(() => {
-    return state.requests
-      .filter((r) => STATE_META[r.state].sellerLabel !== null)
-      // The route decides the page; a request appears on exactly one of the two.
-      .filter((r) => (threadCategory(r) === 'rfq') === rfqPage)
-      .filter((r) => {
-        // Sent is everything already answered or closed; Open is what still needs a decision.
-        const waiting = !STATE_META[r.state].terminal && r.state !== 'draft'
-          && r.state !== 'countered_by_seller' && r.state !== 'info_requested'
-        return tab === 'sent' ? !waiting : waiting
-      })
-      // AC-14.4 — default sort is SLA ascending, so the most urgent row is first.
-      .sort((a, b) => (a.slaDueAt ?? '9999').localeCompare(b.slaDueAt ?? '9999'))
-  }, [state.requests, tab, rfqPage])
+  /** Sent is everything already answered or closed; Open is what still needs a decision. */
+  function isOpen(r: NegotiationRequest): boolean {
+    return !STATE_META[r.state].terminal && r.state !== 'draft'
+      && r.state !== 'countered_by_seller' && r.state !== 'info_requested'
+  }
+
+  const onPage = useMemo(() => state.requests
+    .filter((r) => STATE_META[r.state].sellerLabel !== null)
+    // The route decides the page; a request appears on exactly one of the two.
+    .filter((r) => (threadCategory(r) === 'rfq') === rfqPage),
+  [state.requests, rfqPage])
+
+  // AC-14.4 — default sort is SLA ascending, so the most urgent row is first.
+  const rows = useMemo(
+    () => onPage
+      .filter((r) => (tab === 'sent' ? !isOpen(r) : isOpen(r)))
+      .sort((a, b) => (a.slaDueAt ?? '9999').localeCompare(b.slaDueAt ?? '9999')),
+    [onPage, tab],
+  )
+
+  // How many rows sit behind each tab, so the seller can see the size of the pile
+  // without opening it. Counted over this page only, so the two never bleed together.
+  const counts = { open: onPage.filter(isOpen).length, sent: onPage.filter((r) => !isOpen(r)).length }
 
   const open = state.requests.find((r) => r.ref === openRef) ?? null
 
@@ -130,8 +139,15 @@ export function SellerDashboard() {
       <div className="hb-card">
         <div className="hb-card-head" style={{ paddingBottom: 0, borderBottom: 'none' }}>
           <div className="hb-tabs" style={{ border: 'none' }}>
-            <button type="button" className="hb-tab" aria-selected={tab === 'open'} onClick={() => setTab('open')}>{t(lang, 'tabOpen')}</button>
-            <button type="button" className="hb-tab" aria-selected={tab === 'sent'} onClick={() => setTab('sent')}>{t(lang, 'tabSent')}</button>
+            {([['open', 'tabOpen'], ['sent', 'tabSent']] as const).map(([key, label]) => (
+              <button
+                key={key} type="button" className="hb-tab"
+                aria-selected={tab === key} onClick={() => setTab(key)}
+              >
+                {t(lang, label)}
+                {counts[key] > 0 && <span className="hb-tab-count">{counts[key]}</span>}
+              </button>
+            ))}
           </div>
         </div>
 
