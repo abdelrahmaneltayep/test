@@ -147,11 +147,13 @@ export interface RfqState {
    *  - `compact`      one row, the request action reduced to a mark and one word
    *  - `beside_price` the request action moves up next to the number it challenges,
    *                   leaving the bottom row to the cart alone
+   *  - `under_price`  the same move, but the action keeps its full sentence and sits
+   *                   directly under the price ladder rather than inside its row
    *
    * All three satisfy AC-1.1: the action stays on the card, at or under the price, and
    * never in an overflow menu.
    */
-  cardCta: 'stacked' | 'compact' | 'beside_price'
+  cardCta: 'stacked' | 'compact' | 'beside_price' | 'under_price'
   opsAlerts: string[]
 }
 

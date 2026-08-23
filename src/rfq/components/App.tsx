@@ -87,6 +87,7 @@ export function App() {
                 ['stacked', 'full label'],
                 ['compact', 'icon + Request'],
                 ['beside_price', 'beside the price'],
+                ['under_price', 'under the price'],
               ] as const).map(([layout, label]) => (
                 <button
                   key={layout} type="button" className="hb-demo-btn"

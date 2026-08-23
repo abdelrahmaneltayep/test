@@ -81,6 +81,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
           const bestTier = p.tiers.slice().sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
           const compact = state.cardCta === 'compact'
           const besidePrice = state.cardCta === 'beside_price'
+          const underPrice = state.cardCta === 'under_price'
           // Beside the price there is no room for a sentence either, so both of the
           // narrow layouts use the short labels and the marks.
           const shortLabels = compact || besidePrice
@@ -164,6 +165,16 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   </div>
                 )}
 
+                {/*
+                  Under the price ladder rather than at the foot of the card: the action
+                  belongs to the number it challenges, and keeping it above the supplier
+                  line means the price block reads as price, alternatives, then "ask for
+                  better". It sits after the tier band, not between the two bands, so the
+                  ladder stays whole and the CTA lands in the same place on every card
+                  whether or not the product has tiers (AC-1.4).
+                */}
+                {underPrice && requestCta}
+
                 <div className="hb-prod-supplier">
                   {t(lang, 'supplier')}: <b>{state.requests[0]?.sellerName ?? ''}</b>
                 </div>
@@ -189,7 +200,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                         ? <><CartMark />{t(lang, 'addToCartShort')}</>
                         : <><span aria-hidden="true">🛒</span>{t(lang, 'addToCart')}</>}
                     </button>
-                    {!besidePrice && requestCta}
+                    {!besidePrice && !underPrice && requestCta}
                   </div>
 
                   {/*
