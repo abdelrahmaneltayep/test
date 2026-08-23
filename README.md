@@ -67,7 +67,9 @@ Cancel still available" holds without any request leaving a terminal state. See
 section-by-section reading.
 
 The demo bar also flips language and direction (English / Arabic RTL), turns Phase 2 on and
-off, changes the auto-accept rule and the seller's permissions, and moves the simulated
+off, switches the product card's action row between the stacked full-label pair and the
+compact **icon + Request** row, changes the auto-accept rule and the seller's permissions,
+and moves the simulated
 **server clock** so SLA countdowns, offer expiry and the expiry sweep can be watched
 happening.
 

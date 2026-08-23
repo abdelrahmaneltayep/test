@@ -13,6 +13,7 @@ import { t } from '../domain/i18n'
 import { formatMoney } from '../domain/money'
 import { isNegotiable, PRODUCTS, useRfq } from '../store'
 import type { Product } from '../domain/types'
+import { CartMark, EyeMark, TagMark } from './ui'
 import { ProductDetails } from './ProductDetails'
 import { RequestFlow } from './RequestFlow'
 
@@ -122,27 +123,48 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   {t(lang, 'supplier')}: <b>{state.requests[0]?.sellerName ?? ''}</b>
                 </div>
 
-                <div className="hb-prod-actions">
-                  <button type="button" className="hb-btn hb-btn--primary hb-btn--block">
-                    <span aria-hidden="true">🛒</span>{t(lang, 'addToCart')}
-                  </button>
+                {/*
+                  AC-1.1 — the negotiation action sits directly beneath the price, not in
+                  an overflow menu. AC-1.3 — where the product is not negotiable nothing
+                  is rendered in its place; a disabled control would only frustrate.
 
-                  {/*
-                    AC-1.1 — the negotiation action sits directly beneath the price, not in
-                    an overflow menu. AC-1.3 — where the product is not negotiable nothing
-                    is rendered in its place; a disabled control would only frustrate.
-                  */}
-                  {eligible && !template && (
-                    existing
-                      ? (
-                        <button type="button" className="hb-btn hb-btn--outline hb-btn--block" onClick={onGoToRequests}>
-                          {t(lang, 'viewMyRequest')} · {existing.ref}
-                        </button>
-                      ) : (
-                        <button type="button" className="hb-btn hb-btn--outline hb-btn--block" onClick={() => startRequest(p)}>
-                          <span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}
-                        </button>
-                      )
+                  Two layouts, switchable from the demo bar. Stacked, each action gets the
+                  full width and its full sentence. Compact, they share one row: the cart
+                  keeps the width it needs for a verb, and the request action shrinks to a
+                  mark and one word — which is what makes the pair fit at card width without
+                  either wrapping. The reference moves to a line under the row in that
+                  layout, because "View request · SPR-2608-0001" cannot survive the squeeze
+                  and dropping the reference would lose the one thing that identifies which
+                  request is already open.
+                */}
+                <div className={`hb-prod-actions${state.compactCardCta ? ' hb-prod-actions--compact' : ''}`}>
+                  <div className="hb-prod-ctarow">
+                    <button type="button" className="hb-btn hb-btn--primary hb-btn--block">
+                      {state.compactCardCta
+                        ? <><CartMark />{t(lang, 'addToCartShort')}</>
+                        : <><span aria-hidden="true">🛒</span>{t(lang, 'addToCart')}</>}
+                    </button>
+
+                    {eligible && !template && (
+                      existing
+                        ? (
+                          <button type="button" className="hb-btn hb-btn--outline hb-btn--block" onClick={onGoToRequests}>
+                            {state.compactCardCta
+                              ? <><EyeMark />{t(lang, 'viewRequestShort')}</>
+                              : <>{t(lang, 'viewMyRequest')} · {existing.ref}</>}
+                          </button>
+                        ) : (
+                          <button type="button" className="hb-btn hb-btn--outline hb-btn--block" onClick={() => startRequest(p)}>
+                            {state.compactCardCta
+                              ? <><TagMark />{t(lang, 'requestShort')}</>
+                              : <><span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}</>}
+                          </button>
+                        )
+                    )}
+                  </div>
+
+                  {state.compactCardCta && eligible && !template && existing && (
+                    <div className="hb-hint hb-prod-ctaref">{existing.ref}</div>
                   )}
                 </div>
               </div>

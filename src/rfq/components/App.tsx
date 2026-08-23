@@ -81,6 +81,15 @@ export function App() {
             </div>
 
             <div className="hb-demo-group">
+              <span>Card CTA</span>
+              {/* Two layouts for the same action, switchable so they can be compared in place. */}
+              <button type="button" className="hb-demo-btn" aria-pressed={!state.compactCardCta}
+                onClick={() => dispatch({ type: 'set_flag', key: 'compactCardCta', value: false })}>full label</button>
+              <button type="button" className="hb-demo-btn" aria-pressed={state.compactCardCta}
+                onClick={() => dispatch({ type: 'set_flag', key: 'compactCardCta', value: true })}>icon + Request</button>
+            </div>
+
+            <div className="hb-demo-group">
               <span>Seller permissions</span>
               <button type="button" className="hb-demo-btn" aria-pressed={state.canOverrideFloor}
                 onClick={() => dispatch({ type: 'set_flag', key: 'canOverrideFloor', value: !state.canOverrideFloor })}>

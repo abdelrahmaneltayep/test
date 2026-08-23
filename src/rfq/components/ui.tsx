@@ -14,6 +14,51 @@ import type { Lang } from '../domain/i18n'
 import { t } from '../domain/i18n'
 import type { CheckSeverity, Minor, RequestLine } from '../domain/types'
 
+/**
+ * Inline marks for the compact card CTA.
+ *
+ * Drawn rather than typed: an emoji would carry its own colour into a button that changes
+ * ground with its state, and at 15px the difference between a tag and a price tag emoji is
+ * the difference between a legible affordance and a smudge. `currentColor` keeps them in
+ * step with the label they sit beside.
+ */
+export function TagMark({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M8.6 1.6H14.4V7.4L7.7 14.1a1 1 0 0 1-1.4 0L1.9 9.7a1 1 0 0 1 0-1.4L8.6 1.6Z"
+        stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"
+      />
+      <circle cx="11.3" cy="4.7" r="1.15" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function EyeMark({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M1 8s2.6-4.3 7-4.3S15 8 15 8s-2.6 4.3-7 4.3S1 8 1 8Z"
+        stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"
+      />
+      <circle cx="8" cy="8" r="1.9" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
+  )
+}
+
+export function CartMark({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+      <path
+        d="M1 1.6h1.9l1.6 7.7h7.2l1.4-5.4H4"
+        stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"
+      />
+      <circle cx="6.2" cy="13" r="1.2" fill="currentColor" />
+      <circle cx="11.6" cy="13" r="1.2" fill="currentColor" />
+    </svg>
+  )
+}
+
 export function Money({ value, lang, withCurrency }: { value: Minor | null; lang?: Lang; withCurrency?: boolean }) {
   // AC-9.2 — a missing value renders "—", never a fabricated or inferred number.
   if (value === null) return <span className="hb-num hb-muted">—</span>

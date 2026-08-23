@@ -58,6 +58,11 @@ export const STRINGS: Dict = {
   // ── Marketplace entry point (US-1) ────────────────────────────────────────
   requestSpecialPrice: { en: 'Request special price', ar: 'اطلب سعراً خاصاً' },
   requestMyPrice: { en: 'Request my price', ar: 'اطلب سعري الخاص' },
+  // The compact card CTA — the short label that sits beside the icon when the action row
+  // is horizontal and has to share its width with Add to Cart.
+  requestShort: { en: 'Request', ar: 'اطلب' },
+  viewRequestShort: { en: 'View request', ar: 'عرض الطلب' },
+  addToCartShort: { en: 'Add', ar: 'أضف' },
   viewMyRequest: { en: 'View my request', ar: 'عرض طلبي' },
   volumeTiers: { en: 'Volume pricing', ar: 'أسعار الكميات' },
   perUnit: { en: 'per unit', ar: 'للوحدة' },

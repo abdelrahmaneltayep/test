@@ -140,6 +140,12 @@ export interface RfqState {
   canOverrideFloor: boolean
   /** FR-10.4 — template creation is a distinct permission from ordinary acceptance. */
   canCreateTemplate: boolean
+  /**
+   * Card CTA layout, a prototype option rather than a tenant setting: the full-width
+   * stacked pair, or the compact row where the request action is an icon and one word.
+   * Both satisfy AC-1.1 — the action stays on the card, under the price, out of any menu.
+   */
+  compactCardCta: boolean
   opsAlerts: string[]
 }
 
@@ -206,7 +212,7 @@ export type Action =
   | { type: 'seller_accepts'; ref: string }
   | { type: 'confirm_order'; id: string }
   | { type: 'cancel_order'; id: string }
-  | { type: 'set_flag'; key: 'phase2Enabled' | 'canOverrideFloor' | 'canCreateTemplate'; value: boolean }
+  | { type: 'set_flag'; key: 'phase2Enabled' | 'canOverrideFloor' | 'canCreateTemplate' | 'compactCardCta'; value: boolean }
   | { type: 'set_auto_accept'; percent: number }
 
 function withRequest(
@@ -810,7 +816,7 @@ export function initialState(now: Date): RfqState {
     now, seq: 8, requests: seeded, orders, orderSeq: 20, priceList: [],
     draft: null, submittedDrafts: {},
     phase2Enabled: true, autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
-    canOverrideFloor: true, canCreateTemplate: true, opsAlerts: [],
+    canOverrideFloor: true, canCreateTemplate: true, compactCardCta: false, opsAlerts: [],
   }
 }
 
