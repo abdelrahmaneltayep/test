@@ -426,20 +426,3 @@ body {
   .hb-readback dt { padding-bottom: 2px; }
   .hb-readback .hb-readrow:first-child dd { padding-top: 0; }
 }
-
-/* One decision, three mutually exclusive options — a segmented control rather than three
-   loose buttons, because only one of them can be true at a time and the shape should say so. */
-.hb-segment { display: inline-flex; border: 1px solid var(--hb-line); border-radius: var(--hb-r); overflow: hidden; background: #fff; }
-.hb-segment-btn {
-  font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--hb-ink);
-  background: none; border: none; border-inline-start: 1px solid var(--hb-line);
-  padding: 9px 18px; cursor: pointer;
-}
-.hb-segment-btn:first-child { border-inline-start: none; }
-/* Hover must not outrank the selected state: the pointer is still over the button the
-   moment after it is clicked, and a hover tint under white text is white on near-white. */
-.hb-segment-btn:not([aria-pressed="true"]):hover:not(:disabled) { background: var(--hb-field); }
-.hb-segment-btn[aria-pressed="true"] { background: var(--hb-blue); color: #fff; }
-.hb-segment-btn--danger[aria-pressed="true"] { background: var(--hb-bad); }
-.hb-segment-btn:disabled { opacity: .45; cursor: not-allowed; }
-.hb-segment-btn:focus-visible { outline: 3px solid #7cc2f2; outline-offset: -3px; }

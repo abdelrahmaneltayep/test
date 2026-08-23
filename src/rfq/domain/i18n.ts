@@ -241,7 +241,7 @@ export const STRINGS: Dict = {
   documentSays: { en: 'Document says', ar: 'ما يقوله المستند' },
   allChecksPassed: { en: 'All automatic checks passed — freshness, product identity and duplicate.', ar: 'اجتاز المستند كل الفحوص التلقائية — الحداثة ومطابقة الصنف وعدم التكرار.' },
   checksNeedingAttention: { en: 'Checks needing attention', ar: 'فحوص تحتاج انتباهك' },
-  chooseAnOutcome: { en: 'Choose accept, counter or decline first.', ar: 'اختر القبول أو عرضاً مقابلاً أو الرفض أولاً.' },
+  counterNeedsPrice: { en: 'Enter a counter price to send one.', ar: 'أدخل سعراً مقابلاً لإرساله.' },
   alsoSaveTemplate: { en: 'Also save this price to their price list', ar: 'احفظ هذا السعر أيضاً في قائمة أسعارهم' },
   alsoSaveTemplateHint: { en: 'It applies to their next orders too, not just this one.', ar: 'ينطبق على طلباتهم القادمة أيضاً وليس هذا الطلب فقط.' },
   sendAccept: { en: 'Accept and reply', ar: 'اقبل وأرسل الرد' },
@@ -280,6 +280,8 @@ export const STRINGS: Dict = {
   notProvided: { en: 'Not given', ar: 'غير مذكور' },
   readOnlyRequest: { en: 'This request is read-only now.', ar: 'هذا الطلب للقراءة فقط الآن.' },
   acceptDisabledQuoteOnly: { en: 'This request has no asked price to accept — open it and quote a price.', ar: 'لا يوجد سعر مطلوب لقبوله — افتح الطلب وقدّم سعراً.' },
+  // On the page the request is already open, so the way out is the counter beside it.
+  acceptDisabledOnPage: { en: 'A quote request names no price to accept — send a counter instead.', ar: 'طلب التسعير لا يذكر سعراً لقبوله — أرسل عرضاً مقابلاً بدلاً من ذلك.' },
   confirmSellerAcceptTitle: { en: 'Accept this price?', ar: 'قبول هذا السعر؟' },
   confirmSellerAcceptBody: { en: 'You accept the buyer\u2019s asked price for this order. It applies once and is not saved to their price list.', ar: 'أنت تقبل السعر الذي طلبه المشتري لهذا الطلب. ينطبق مرة واحدة ولا يُحفظ في قائمة أسعاره.' },
   confirmSellerDeclineTitle: { en: 'Decline this request?', ar: 'رفض هذا الطلب؟' },

@@ -52,11 +52,6 @@ function productBaseUnit(sku: string, lang: Lang): string {
   return productBySku(sku).baseUnit[lang]
 }
 
-interface Decision {
-  outcome: LineOutcome
-  price: Minor | null
-}
-
 /** One row of the buyer's submission, read back. */
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -73,10 +68,13 @@ export function SellerRequestPage({ request, onBack }: {
 }) {
   const { state, dispatch, lang } = useRfq()
   const line = request.lines[0]
-  const [decisions, setDecisions] = useState<Record<string, Decision>>(
-    Object.fromEntries(request.lines.map((l) => [l.id, { outcome: 'pending' as LineOutcome, price: null }])),
-  )
-  const [priceText, setPriceText] = useState<Record<string, string>>({})
+  /**
+   * The counter price, as typed. It is the only staged input on the page — Accept and
+   * Decline need nothing beyond the click, and Counter needs this. Everything else the
+   * decision shows is derived from it, so the margin and the floor warning track what the
+   * seller is typing rather than what they last committed to.
+   */
+  const [priceText, setPriceText] = useState('')
   const [validityDays, setValidityDays] = useState(DEFAULT_VALIDITY)
   const [infoOpen, setInfoOpen] = useState(false)
   const [templateOpen, setTemplateOpen] = useState(false)
@@ -86,73 +84,64 @@ export function SellerRequestPage({ request, onBack }: {
   const [sendError, setSendError] = useState<string | null>(null)
 
   const readOnly = STATE_META[request.state].terminal || STATE_META[request.state].turn !== 'seller'
-  const d = decisions[line.id]
-  /** The one outcome chosen for the item; null until the seller picks. */
-  const outcome = d?.outcome === 'pending' ? null : d?.outcome ?? null
 
-  function choose(next: Exclude<LineOutcome, 'pending'>) {
-    setSendError(null)
-    if (next !== 'accepted') setAsTemplate(false)
-    setLine(line, next, next === 'countered' ? priceText[line.id] ?? '' : undefined)
-  }
-
-  function setLine(l: RequestLine, outcome: LineOutcome, raw?: string) {
-    const price = outcome === 'accepted' ? l.askedPrice
-      : outcome === 'declined' ? l.listPriceSnapshot
-        : raw !== undefined ? parseMoney(raw) : decisions[l.id]?.price ?? null
-    setDecisions((prev) => ({ ...prev, [l.id]: { outcome, price } }))
-    if (raw !== undefined) setPriceText((p) => ({ ...p, [l.id]: raw }))
-  }
+  const counterPrice = parseMoney(priceText)
+  /** What the seller is currently proposing: the typed counter, or the ask as it stands. */
+  const livePrice = counterPrice ?? line.askedPrice
 
   /**
    * FR-6.7 / AC-15.2 — margin recalculates from the cost snapshot already on the line,
    * with no server round-trip, so the 300 ms budget is met by construction (T3).
    */
-  const projected = request.lines.map((l) => {
-    const dd = decisions[l.id]
-    const price = dd?.outcome === 'declined' ? l.listPriceSnapshot : dd?.price ?? l.askedPrice
-    return { ...l, askedPrice: price }
-  })
-  const liveMargin = marginAfterAsk(projected)
+  const liveMargin = marginAfterAsk([{ ...line, askedPrice: livePrice }])
+  const margin = lineMargin(livePrice ?? line.listPriceSnapshot, line.costSnapshot)
 
-  const price = d?.outcome === 'declined' ? line.listPriceSnapshot : d?.price ?? line.askedPrice
-  const margin = lineMargin(price ?? line.listPriceSnapshot, line.costSnapshot)
-  const floorBreached = line.floorSnapshot !== null && price !== null
-    && price < line.floorSnapshot && d?.outcome !== 'declined'
+  // AC-15.5 — a counter below floor is blocked unless the permission is held and a reason
+  // is written. It only bites on a counter: an acceptance is the buyer's own number, and a
+  // decline resolves at list price.
+  const floorBreached = line.floorSnapshot !== null && counterPrice !== null
+    && counterPrice < line.floorSnapshot
+  const overrideOk = !floorBreached || (state.canOverrideFloor && overrideReason.trim().length > 0)
 
-  // AC-15.5 — a counter below floor blocks the send unless the override permission is held.
-  const belowFloor = request.lines.filter((l) => {
-    const dd = decisions[l.id]
-    if (!dd || dd.price === null || l.floorSnapshot === null) return false
-    return dd.outcome !== 'declined' && dd.price < l.floorSnapshot
-  })
-  const needsOverride = belowFloor.length > 0
-  const overrideOk = !needsOverride || (state.canOverrideFloor && overrideReason.trim().length > 0)
-
-  function send() {
-    // AC-15.4 — sending is blocked and the reason is named.
-    if (outcome === null) {
-      setSendError(t(lang, 'chooseAnOutcome'))
-      return
-    }
-    if (!overrideOk) {
-      const l = belowFloor[0]
-      setSendError(t(lang, 'floorBlocked', { floor: formatMoney(l.floorSnapshot as Minor, { withCurrency: true, lang }), sku: l.sku }))
-      return
-    }
-    // §5 — the two acceptances are the same decision with and without the write-forward,
-    // so they share the selector and part company only here.
-    if (outcome === 'accepted') {
-      if (asTemplate) { setTemplateOpen(true); return }
-      dispatch({ type: 'seller_accepts', ref: request.ref })
-      onBack()
-      return
-    }
+  /** Resolve the request in one move, with the outcome the button names. */
+  function resolve(outcome: Exclude<LineOutcome, 'pending'>, price: Minor | null) {
     dispatch({
-      type: 'seller_responds', ref: request.ref, decisions, validityDays,
-      overrideReason: needsOverride ? overrideReason.trim() : null,
+      type: 'seller_responds',
+      ref: request.ref,
+      decisions: { [line.id]: { outcome, price } },
+      validityDays,
+      overrideReason: floorBreached ? overrideReason.trim() : null,
     })
     onBack()
+  }
+
+  /** §5 — accept the ask exactly as sent: once, or once and forward as a template. */
+  function accept() {
+    if (asTemplate) { setTemplateOpen(true); return }
+    dispatch({ type: 'seller_accepts', ref: request.ref })
+    onBack()
+  }
+
+  function counter() {
+    // The button is already disabled in both cases; these are the second guard.
+    if (counterPrice === null) { setSendError(t(lang, 'counterNeedsPrice')); return }
+    if (!overrideOk) {
+      setSendError(t(lang, 'floorBlocked', {
+        floor: formatMoney(line.floorSnapshot as Minor, { withCurrency: true, lang }), sku: line.sku,
+      }))
+      return
+    }
+    resolve('countered', counterPrice)
+  }
+
+  /** FR-6.3 — a declined line resolves at list price; the reducer applies that. */
+  function decline() {
+    resolve('declined', null)
+  }
+
+  function setPrice(raw: string) {
+    setPriceText(raw)
+    setSendError(null)
   }
 
   const typed = line.proof?.typed ?? null
@@ -273,50 +262,69 @@ export function SellerRequestPage({ request, onBack }: {
               )}
 
               {/*
-                One decision, then one action that carries it out.
-                §5 names four seller moves and the surface used to render all four as
-                buttons alongside three more that only selected an outcome — so "Accept"
-                appeared twice, meaning two different things, and nothing said which of the
-                seven actually sent. Now the outcome is picked once and the primary button
-                is named after it, so the seller reads their own decision back before
-                committing to it. "Accept & apply as template" is the same acceptance with
-                the price written forward, so it is a choice under Accept rather than a
-                fifth button competing with it.
+                Four actions, and the inputs one of them needs.
+                §5's moves are not equals and the buttons no longer pretend they are:
+                Accept is the primary, Counter the secondary that carries the typed price,
+                Decline the quiet destructive one (FR-11.6), and Request more info the
+                quietest of the four because it decides nothing — it sends the request back
+                for better evidence (US-17). Each acts on click; nothing selects a mode and
+                waits for a second button to mean it.
               */}
-              <div className="hb-row">
-                <div className="hb-segment" role="group" aria-label={t(lang, 'yourDecision')}>
-                  <button type="button" className="hb-segment-btn" aria-pressed={outcome === 'accepted'}
-                    disabled={line.askedPrice === null}
-                    title={line.askedPrice === null ? t(lang, 'acceptDisabledQuoteOnly') : undefined}
-                    onClick={() => choose('accepted')}>
-                    {t(lang, 'accept')}
-                  </button>
-                  <button type="button" className="hb-segment-btn" aria-pressed={outcome === 'countered'}
-                    onClick={() => choose('countered')}>
-                    {t(lang, 'counter')}
-                  </button>
-                  <button type="button" className="hb-segment-btn hb-segment-btn--danger" aria-pressed={outcome === 'declined'}
-                    onClick={() => choose('declined')}>
-                    {t(lang, 'decline')}
-                  </button>
+              <div className="hb-row" style={{ alignItems: 'flex-end' }}>
+                <Field
+                  label={t(lang, 'counterPrice')}
+                  hint={t(lang, 'counterNeedsPrice')}
+                  error={floorBreached && !state.canOverrideFloor
+                    ? t(lang, 'floorBlocked', { floor: formatMoney(line.floorSnapshot as Minor, { withCurrency: true, lang }), sku: line.sku })
+                    : null}
+                >
+                  <input className="hb-input" inputMode="decimal" style={{ minWidth: 140 }}
+                    value={priceText} onChange={(e) => setPrice(e.target.value)} />
+                </Field>
+                {/* AC-15.6 / FR-6.8 — a counter carries an expiry, editable within bounds. */}
+                <Field label={t(lang, 'offerValidFor')}>
+                  <select className="hb-select" value={validityDays} onChange={(e) => setValidityDays(Number(e.target.value))}>
+                    {[1, 3, 7, 14, 30].map((x) => <option key={x} value={x}>{x} {t(lang, 'days')}</option>)}
+                  </select>
+                </Field>
+                {/* FR-6.9 / AC-19.6 — a one-click repeat of a recent agreed price. */}
+                <div style={{ marginBottom: 15 }}>
+                  <PreviousPrice line={line} onUse={(p) => setPrice(formatMoney(p))} lang={lang} />
                 </div>
-
                 {/* AC-14.2 — margin in words as well as colour, against the live price. */}
-                {margin !== null && (
-                  <span className={`hb-pill hb-pill--${floorBreached ? 'bad' : margin >= 20 ? 'good' : 'warn'}`}
-                    style={{ marginInlineStart: 'auto' }}>
-                    {t(lang, 'lineMargin')} {margin}%
-                  </span>
-                )}
-                {margin === null && (
-                  <span className="hb-pill hb-pill--neutral" tabIndex={0} title={t(lang, 'costNotConfigured')}
-                    style={{ marginInlineStart: 'auto' }}>—</span>
-                )}
+                <span style={{ marginInlineStart: 'auto', marginBottom: 15 }}>
+                  {margin !== null ? (
+                    <span className={`hb-pill hb-pill--${floorBreached ? 'bad' : margin >= 20 ? 'good' : 'warn'}`}>
+                      {t(lang, 'lineMargin')} {margin}%
+                    </span>
+                  ) : (
+                    <span className="hb-pill hb-pill--neutral" tabIndex={0} title={t(lang, 'costNotConfigured')}>—</span>
+                  )}
+                </span>
               </div>
 
-              {/* Only what the chosen outcome needs, so nothing on screen is inert. */}
-              {outcome === 'accepted' && state.canCreateTemplate && (
-                <label className="hb-field hb-checkfield" style={{ marginTop: 16, marginBottom: 0 }}>
+              {/* FR-10.3 — an override needs the permission, a confirmation and a recorded reason. */}
+              {floorBreached && state.canOverrideFloor && (
+                <div className="hb-banner hb-banner--bad" style={{ marginBottom: 4 }}>
+                  <div style={{ width: '100%' }}>
+                    <strong>{t(lang, 'floorBlocked', {
+                      floor: formatMoney(line.floorSnapshot as Minor, { withCurrency: true, lang }),
+                      sku: line.sku,
+                    })}</strong>
+                    <Field label={t(lang, 'floorOverrideReason')}>
+                      <input className="hb-input" value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} />
+                    </Field>
+                  </div>
+                </div>
+              )}
+
+              {/*
+                §5 — the acceptance that also writes the price forward. It is the same
+                decision as Accept, not a fifth action, so it rides on Accept as a choice
+                rather than adding a button to a row of four.
+              */}
+              {state.canCreateTemplate && line.askedPrice !== null && (
+                <label className="hb-field hb-checkfield" style={{ marginBottom: 0 }}>
                   <input type="checkbox" checked={asTemplate} onChange={(e) => setAsTemplate(e.target.checked)} />
                   <span>
                     <span className="hb-label" style={{ marginBottom: 2 }}>{t(lang, 'alsoSaveTemplate')}</span>
@@ -324,65 +332,16 @@ export function SellerRequestPage({ request, onBack }: {
                   </span>
                 </label>
               )}
-
-              {outcome === 'countered' && (
-                <>
-                  <div className="hb-row" style={{ marginTop: 14, alignItems: 'flex-end' }}>
-                    <Field label={t(lang, 'counterPrice')}>
-                      <input className="hb-input" inputMode="decimal" style={{ minWidth: 130 }}
-                        value={priceText[line.id] ?? ''} onChange={(e) => setLine(line, 'countered', e.target.value)} />
-                    </Field>
-                    {/* AC-15.6 / FR-6.8 — a counter carries an expiry; an acceptance has no
-                        clock left to run, which is why this only appears here. */}
-                    <Field label={t(lang, 'offerValidFor')}>
-                      <select className="hb-select" value={validityDays} onChange={(e) => setValidityDays(Number(e.target.value))}>
-                        {[1, 3, 7, 14, 30].map((x) => <option key={x} value={x}>{x} {t(lang, 'days')}</option>)}
-                      </select>
-                    </Field>
-                    {/* FR-6.9 / AC-19.6 — a one-click repeat of a recent agreed price. */}
-                    <PreviousPrice line={line} onUse={(p) => setLine(line, 'countered', formatMoney(p))} lang={lang} />
-                  </div>
-
-                  {/* FR-10.3 — an override needs the permission, a confirmation and a recorded reason. */}
-                  {needsOverride && (
-                    <div className="hb-banner hb-banner--bad" style={{ marginTop: 14 }}>
-                      <div style={{ width: '100%' }}>
-                        <strong>{t(lang, 'floorBlocked', {
-                          floor: formatMoney(belowFloor[0].floorSnapshot as Minor, { withCurrency: true, lang }),
-                          sku: belowFloor[0].sku,
-                        })}</strong>
-                        {state.canOverrideFloor ? (
-                          <Field label={t(lang, 'floorOverrideReason')}>
-                            <input className="hb-input" value={overrideReason} onChange={(e) => setOverrideReason(e.target.value)} />
-                          </Field>
-                        ) : (
-                          <div className="hb-hint" style={{ marginTop: 6 }}>
-                            {lang === 'ar' ? 'ليس لديك صلاحية تجاوز الحد الأدنى.' : 'You do not hold the floor-override permission.'}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </>
-              )}
-
-              {/* FR-6.3 — a declined line resolves at list price, and says so before sending. */}
-              {outcome === 'declined' && (
-                <p className="hb-hint" style={{ marginTop: 14 }}>
-                  {t(lang, 'confirmSellerDeclineBody')}
-                </p>
-              )}
             </>
           )}
         </div>
 
         {!readOnly && (
           <div className="hb-modal-foot">
-            {/* US-17 — a side path, not an outcome: it sends the request back for better
-                evidence without deciding it either way. */}
+            {/* Quietest: it decides nothing, it asks for better evidence (US-17). */}
             {line.route === 'case_1' && (
               <button
-                type="button" className="hb-btn hb-btn--secondary"
+                type="button" className="hb-btn hb-btn--quiet"
                 disabled={request.infoRequests >= MAX_INFO_REQUESTS}
                 title={request.infoRequests >= MAX_INFO_REQUESTS ? t(lang, 'infoRequestsExhausted') : undefined}
                 onClick={() => setInfoOpen(true)}
@@ -390,14 +349,28 @@ export function SellerRequestPage({ request, onBack }: {
                 {t(lang, 'requestMoreInfo')}
               </button>
             )}
+            {/* FR-11.6 — destructive, so quiet and never primary. */}
+            <button type="button" className="hb-btn hb-btn--danger" onClick={decline}>
+              {t(lang, 'decline')}
+            </button>
             <span className="hb-primary-slot">
-              {/* E-2 — the blocked control states its reason rather than going quiet. */}
-              {outcome === null && <span className="hb-hint">{t(lang, 'chooseAnOutcome')}</span>}
-              <button type="button" className="hb-btn hb-btn--primary" disabled={outcome === null} onClick={send}>
-                {outcome === 'accepted' ? t(lang, asTemplate ? 'sendAcceptTemplate' : 'sendAccept')
-                  : outcome === 'countered' ? t(lang, 'sendCounter')
-                    : outcome === 'declined' ? t(lang, 'sendDecline')
-                      : t(lang, 'sendResponse')}
+              {/* Secondary: it needs the price above it before it can mean anything. */}
+              <button
+                type="button" className="hb-btn hb-btn--outline"
+                disabled={counterPrice === null || !overrideOk}
+                title={counterPrice === null ? t(lang, 'counterNeedsPrice') : undefined}
+                onClick={counter}
+              >
+                {t(lang, 'counter')}
+              </button>
+              {/* Primary: §5's first move, and the one the seller most often wants. */}
+              <button
+                type="button" className="hb-btn hb-btn--primary"
+                disabled={line.askedPrice === null}
+                title={line.askedPrice === null ? t(lang, 'acceptDisabledOnPage') : undefined}
+                onClick={accept}
+              >
+                {t(lang, 'accept')}
               </button>
             </span>
           </div>
@@ -405,7 +378,7 @@ export function SellerRequestPage({ request, onBack }: {
       </div>
 
       {infoOpen && <InfoRequestDialog request={request} onClose={() => setInfoOpen(false)} onSent={onBack} />}
-      {templateOpen && <TemplateDialog request={request} decisions={decisions} onClose={() => setTemplateOpen(false)} onSaved={onBack} />}
+      {templateOpen && <TemplateDialog request={request} onClose={() => setTemplateOpen(false)} onSaved={onBack} />}
     </>
   )
 }
@@ -556,16 +529,15 @@ function InfoRequestDialog({ request, onClose, onSent }: { request: NegotiationR
 
 
 /** US-18 / FR-8 — write the accepted price into the buyer's price list. */
-function TemplateDialog({ request, decisions, onClose, onSaved }: {
+function TemplateDialog({ request, onClose, onSaved }: {
   request: NegotiationRequest
-  decisions: Record<string, Decision>
   onClose: () => void
   onSaved: () => void
 }) {
   const { state, dispatch, lang } = useRfq()
   const line = request.lines[0]
-  const decided = decisions[line.id]
-  const price = decided?.price ?? line.askedPrice ?? line.listPriceSnapshot
+  // §5 — this is the acceptance branch, so the price written forward is the ask as sent.
+  const price = line.askedPrice ?? line.listPriceSnapshot
 
   const [validFrom, setValidFrom] = useState(state.now.toISOString().slice(0, 10))
   const [validUntil, setValidUntil] = useState(addDays(state.now, 180).toISOString().slice(0, 10))

@@ -139,18 +139,22 @@ check('5.detail-is-a-page', await p.locator('.hb-overlay').count() === 0
 const readback = await txt('.hb-readback')
 check('5.buyer-form-read-back', /Asking for/i.test(readback) && /Quantity/i.test(readback)
   && /Supplier offering/i.test(readback) && /Attachment/i.test(readback), readback.slice(0, 220))
-const segments = await p.locator('.hb-segment-btn').allInnerTexts()
-check('5.one-outcome-selector', segments.join('|') === 'Accept|Counter|Decline', segments.join(' | '))
-// The primary is named after the decision, so the seller reads it back before committing.
-const primary = p.locator('.hb-modal-foot .hb-btn--primary')
-check('5.primary-blocked-until-chosen', await primary.isDisabled(), await txt('.hb-modal-foot'))
-await p.getByRole('button', { name: 'Accept', exact: true }).click(); await p.waitForTimeout(200)
-const acceptLabel = await primary.innerText()
-await p.locator('.hb-checkfield input').check(); await p.waitForTimeout(200)
-const templateLabel = await primary.innerText()
-check('5.accept-and-template', /Accept and reply/i.test(acceptLabel) && /save as template/i.test(templateLabel),
-  `${acceptLabel} -> ${templateLabel}`)
-await primary.click(); await p.waitForTimeout(250)
+const actions = await p.locator('.hb-modal-foot button').allInnerTexts()
+check('5.four-actions', actions.join('|') === 'Request more info|Decline|Counter|Accept', actions.join(' | '))
+// The four are not equals, and the button types say which is which.
+const types = await p.locator('.hb-modal-foot button').evaluateAll((els) => els.map((e) => e.className
+  .split(' ').find((c) => c.startsWith('hb-btn--')) ?? 'none'))
+check('5.button-types', types.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--outline|hb-btn--primary', types.join(' | '))
+// Counter is gated on the price it needs; Accept is gated on there being an ask.
+const counterBtn = p.locator('.hb-modal-foot').getByRole('button', { name: 'Counter' })
+check('5.counter-needs-price', await counterBtn.isDisabled(), await counterBtn.getAttribute('title') ?? '')
+await p.locator('.hb-card-body input[inputmode="decimal"]').first().fill('6.000')
+await p.waitForTimeout(250)
+check('5.counter-enabled-with-price', !(await counterBtn.isDisabled()), 'typed 6.000')
+// §5's write-forward rides on Accept rather than being a fifth button.
+await p.locator('.hb-checkfield input').check(); await p.waitForTimeout(150)
+await p.locator('.hb-modal-foot').getByRole('button', { name: 'Accept' }).click()
+await p.waitForTimeout(250)
 await p.locator('.hb-overlay').last().getByRole('button', { name: 'Accept & apply as template' }).click()
 await p.waitForTimeout(350)
 await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Sent' }).click(); await p.waitForTimeout(200)
