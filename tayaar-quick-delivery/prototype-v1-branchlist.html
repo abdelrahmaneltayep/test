@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سلة — تفعيل التوصيل السريع · التكامل مع طيّار (نموذج أولي)</title>
+<link rel="stylesheet" href="https://cdn.salla.network/fonts/pingarlt.css?v=0.2">
+<style>
+/* ============================================================
+   Salla merchant dashboard tokens — verbatim from Salla DS kit
+   ============================================================ */
+:root{
+  --primary:#004A57; --primary-100:#F1F8F9; --primary-400:#348D9D;
+  --secondary:#A3FFE5; --secondary-100:#F0FFFB;
+  --gray-100:#FCFCFC; --gray-200:#F7F7F7; --gray-400:#EDEDED; --gray-500:#DEDEDE;
+  --dark:#333333; --dark-100:#737373; --dark-200:#666666;
+  --danger:#F55157; --success:#00AD6B; --success-btn:#00AF6C;
+  --warning:#E8A33D; --warning-bg:#FFF8EC; --danger-bg:#FEF1F1; --info:#3D8FE8; --info-bg:#F0F7FF;
+  --radius-lg:8px; --radius-xl:12px;
+  --shadow-sm:0 2px 4px 0 rgba(0,0,0,.08);
+  --shadow-md:0 6px 20px 0 rgba(0,0,0,.10);
+  --font:'PingARLT','PT Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html{font-family:var(--font);font-size:14px;color:var(--dark)}
+body{margin:0;background:var(--gray-200);line-height:1.6}
+button{font-family:inherit}
+
+/* ---------- App shell ---------- */
+.topbar{background:var(--primary);color:#fff;padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:40}
+.topbar .logo{font-weight:700;font-size:16px;letter-spacing:.5px}
+.topbar .store{font-size:12px;opacity:.7;border-right:1px solid rgba(255,255,255,.2);padding-right:16px;margin-right:0}
+.topbar .spacer{flex:1}
+.plan-pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:3px 12px;font-size:11px}
+.tabbar{background:#fff;border-bottom:1px solid var(--gray-400);padding:0 24px;display:flex;gap:4px;overflow-x:auto}
+.tabbar a{padding:13px 14px;font-size:13px;color:var(--dark-100);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap}
+.tabbar a.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.page{max-width:920px;margin:0 auto;padding:24px 24px 96px}
+.crumbs{font-size:12px;color:var(--dark-100);margin-bottom:14px}
+.crumbs span{color:var(--dark-200)}
+.page-title{font-size:21px;font-weight:700;margin:0 0 4px}
+.page-sub{color:var(--dark-100);font-size:13px;margin:0 0 22px}
+
+/* ---------- Panel (s-panel) ---------- */
+.panel{background:#fff;border:1px solid var(--gray-400);border-radius:var(--radius-xl);box-shadow:var(--shadow-sm);margin-bottom:16px;overflow:hidden}
+.panel-head{padding:16px 20px;border-bottom:1px solid var(--gray-400);display:flex;align-items:center;gap:12px}
+.panel-head h3{margin:0;font-size:15px;font-weight:700}
+.panel-head .hint{font-size:12px;color:var(--dark-100);font-weight:400}
+.panel-body{padding:20px}
+.panel-body.tight{padding:0}
+
+/* ---------- Buttons (s-button) ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:var(--radius-xl);
+     padding:10px 16px;font-size:14px;font-weight:500;cursor:pointer;transition:.15s;line-height:20px;white-space:nowrap}
+.btn--default{background:var(--primary);color:#fff}
+.btn--default:hover{background:#003A45}
+.btn--outlined{background:#fff;color:var(--primary);border-color:var(--primary)}
+.btn--outlined:hover{background:var(--primary-100)}
+.btn--link{background:transparent;color:var(--primary);border:0;padding:6px 2px;text-decoration:underline}
+.btn--feature{background:linear-gradient(135deg,#7B4DD8,#5B34B0);color:#fff}
+.btn--white{background:var(--secondary);color:var(--primary)}
+.btn--danger{background:var(--danger);color:#fff}
+.btn--sm{padding:7px 12px;font-size:13px}
+.btn--lg{padding:13px 22px;font-size:15px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- Tag (s-tag) ---------- */
+.tag{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 11px;font-size:12px;font-weight:600;white-space:nowrap}
+.tag--info{background:var(--info-bg);color:#1F6FC4}
+.tag--warning{background:var(--warning-bg);color:#A96B12}
+.tag--danger{background:var(--danger-bg);color:#C9333A}
+.tag--success{background:#E9F9F1;color:#00794A}
+.tag--feature{background:#F3EEFC;color:#5B34B0}
+.tag--muted{background:var(--gray-200);color:var(--dark-100)}
+.tag--outlined{background:transparent;border:1px solid currentColor}
+
+/* ---------- AlertBox (s-alert-box) ---------- */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-xl);border:1px solid;margin-bottom:14px}
+.alert i{font-style:normal;font-size:17px;line-height:1.3;flex-shrink:0}
+.alert h4{margin:0 0 3px;font-size:14px;font-weight:700}
+.alert p{margin:0;font-size:13px;line-height:1.65}
+.alert .act{margin-top:11px;display:flex;gap:8px;flex-wrap:wrap}
+.alert--warning{background:var(--warning-bg);border-color:#F0D8AE;color:#7A4E0C}
+.alert--danger{background:var(--danger-bg);border-color:#F8C9CB;color:#9E272D}
+.alert--secondary{background:var(--secondary-100);border-color:#B6F2DF;color:#00654A}
+.alert--info{background:var(--info-bg);border-color:#C9E0F8;color:#1B5490}
+.alert--default{background:var(--primary-100);border-color:#CDE3E7;color:#003A45}
+
+/* ---------- Branch row ---------- */
+.branch{border-bottom:1px solid var(--gray-400)}
+.branch:last-child{border-bottom:0}
+.branch-head{padding:16px 20px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:background .15s}
+.branch-head:hover{background:var(--gray-100)}
+.branch-check{width:20px;height:20px;border:2px solid var(--gray-500);border-radius:6px;flex-shrink:0;display:grid;place-items:center;background:#fff;transition:.15s}
+.branch-check.on{background:var(--primary);border-color:var(--primary);color:#fff;font-size:12px}
+.branch-id{flex:1;min-width:0}
+.branch-name{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.branch-meta{font-size:12px;color:var(--dark-100);margin-top:2px}
+.branch-state{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.branch-body{padding:0 20px 20px;background:var(--gray-100);border-top:1px solid var(--gray-400)}
+
+/* ---------- Provider selector (s-radio) ---------- */
+.providers{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:16px}
+@media(max-width:640px){.providers{grid-template-columns:1fr}}
+.prov{display:flex;gap:11px;padding:13px 14px;border:1.5px solid var(--gray-500);border-radius:var(--radius-xl);background:#fff;cursor:pointer;transition:.15s;align-items:flex-start}
+.prov:hover{border-color:var(--primary-400)}
+.prov.on{border-color:var(--primary);background:var(--primary-100)}
+.prov .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--gray-500);flex-shrink:0;margin-top:2px;display:grid;place-items:center;background:#fff}
+.prov.on .dot{border-color:var(--primary)}
+.prov.on .dot::after{content:'';width:9px;height:9px;border-radius:50%;background:var(--primary)}
+.prov .t{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.prov .d{font-size:12px;color:var(--dark-100);margin-top:3px;line-height:1.55}
+
+/* ---------- Readiness check ---------- */
+.readiness{margin-top:16px;border:1px solid #F0D8AE;background:var(--warning-bg);border-radius:var(--radius-xl);overflow:hidden}
+.readiness.met{border-color:#B6F2DF;background:var(--secondary-100)}
+.readiness-head{padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.readiness-head i{font-style:normal;font-size:18px;flex-shrink:0}
+.readiness-head h4{margin:0 0 3px;font-size:14px;font-weight:700;color:#7A4E0C}
+.readiness.met .readiness-head h4{color:#00654A}
+.readiness-head p{margin:0;font-size:12.5px;color:#8A6224;line-height:1.6}
+.readiness.met .readiness-head p{color:#00794A}
+.reqs{list-style:none;margin:0;padding:0 16px 14px;display:grid;gap:9px}
+.req{display:flex;gap:10px;align-items:flex-start;font-size:13px;background:rgba(255,255,255,.65);border-radius:var(--radius-lg);padding:10px 12px}
+.req .ico{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:11px;flex-shrink:0;margin-top:1px;font-weight:700}
+.req.unmet .ico{background:#F5E0BC;color:#A96B12}
+.req.met .ico{background:#C7F3E1;color:#00794A}
+.req .rt{font-weight:600}
+.req .rd{font-size:12px;color:var(--dark-100);margin-top:1px;line-height:1.55}
+
+/* ---------- Tayaar card ---------- */
+.tayaar{margin:14px 16px 16px;background:#fff;border:1px solid var(--gray-400);border-radius:var(--radius-xl);padding:16px;box-shadow:var(--shadow-sm)}
+.tayaar-top{display:flex;gap:13px;align-items:flex-start;margin-bottom:13px}
+.tayaar-logo{width:44px;height:44px;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--primary),var(--primary-400));display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;flex-shrink:0}
+.tayaar-ttl{font-size:15px;font-weight:700;margin:0 0 3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tayaar-sub{font-size:12.5px;color:var(--dark-100);margin:0;line-height:1.6}
+.caps{list-style:none;margin:0 0 15px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:640px){.caps{grid-template-columns:1fr}}
+.caps li{display:flex;gap:8px;font-size:12.5px;align-items:flex-start;color:var(--dark-200)}
+.caps li .c{color:var(--success);flex-shrink:0;font-weight:700}
+.tayaar-cta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--gray-400)}
+.price-note{font-size:11.5px;color:var(--dark-100);margin:9px 0 0;line-height:1.6}
+
+/* ---------- First-run tasks ---------- */
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.task{display:flex;gap:11px;align-items:center;padding:12px 14px;border:1px solid var(--gray-400);border-radius:var(--radius-xl);background:#fff;cursor:pointer;transition:.15s}
+.task:hover{border-color:var(--primary-400);background:var(--primary-100)}
+.task.done{opacity:.6}
+.task.done .tt{text-decoration:line-through}
+.task .box{width:20px;height:20px;border:2px solid var(--gray-500);border-radius:6px;flex-shrink:0;display:grid;place-items:center;font-size:12px;background:#fff}
+.task.done .box{background:var(--success);border-color:var(--success);color:#fff}
+.task .tt{font-weight:600;font-size:13.5px}
+.task .td{font-size:12px;color:var(--dark-100);margin-top:1px}
+
+/* ---------- Summary ---------- */
+.summary{width:100%;border-collapse:collapse;font-size:13px}
+.summary th{text-align:right;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--dark-100);font-weight:600;padding:10px 14px;background:var(--gray-200);border-bottom:1px solid var(--gray-400)}
+.summary td{padding:13px 14px;border-bottom:1px solid var(--gray-400);vertical-align:middle}
+.summary tr:last-child td{border-bottom:0}
+
+/* ---------- Sticky footer ---------- */
+.footbar{position:fixed;bottom:0;right:0;left:0;background:#fff;border-top:1px solid var(--gray-400);padding:13px 24px;display:flex;align-items:center;gap:14px;box-shadow:0 -2px 10px rgba(0,0,0,.05);z-index:30}
+.footbar .inner{max-width:920px;margin:0 auto;width:100%;display:flex;align-items:center;gap:14px}
+.footbar .sum{flex:1;font-size:12.5px;color:var(--dark-100)}
+.footbar .sum b{color:var(--dark);font-weight:700}
+
+/* ---------- Modal (s-modal) ---------- */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.48);display:grid;place-items:center;z-index:100;padding:18px;animation:fade .18s}
+@keyframes fade{from{opacity:0}}
+.modal{background:#fff;border-radius:16px;max-width:520px;width:100%;box-shadow:var(--shadow-md);max-height:90vh;overflow-y:auto;animation:pop .2s}
+@keyframes pop{from{transform:translateY(14px);opacity:0}}
+.modal-head{padding:20px 22px 0;display:flex;gap:13px;align-items:flex-start}
+.modal-head h3{margin:0;font-size:17px;font-weight:700}
+.modal-head .x{margin-right:auto;background:transparent;border:0;font-size:22px;color:var(--dark-100);cursor:pointer;line-height:1;padding:0 4px}
+.modal-body{padding:16px 22px 20px}
+.modal-foot{padding:16px 22px;border-top:1px solid var(--gray-400);display:flex;gap:10px;background:var(--gray-100);border-radius:0 0 16px 16px}
+.kv{display:grid;gap:11px;margin:0 0 16px;padding:14px;background:var(--gray-200);border-radius:var(--radius-xl)}
+.kv div{display:flex;justify-content:space-between;gap:14px;font-size:13px}
+.kv .k{color:var(--dark-100)}
+.kv .v{font-weight:600;text-align:left}
+.consent{display:flex;gap:11px;padding:13px;border:1px solid var(--gray-400);border-radius:var(--radius-xl);font-size:12.5px;line-height:1.65;background:#fff;cursor:pointer;align-items:flex-start}
+.consent .box{width:19px;height:19px;border:2px solid var(--gray-500);border-radius:5px;flex-shrink:0;margin-top:2px;display:grid;place-items:center;font-size:12px;background:#fff}
+.consent.on .box{background:var(--primary);border-color:var(--primary);color:#fff}
+
+/* ---------- Progress ---------- */
+.prog{height:7px;background:var(--gray-400);border-radius:99px;overflow:hidden;margin:16px 0 9px}
+.prog i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .35s ease}
+
+/* ---------- Scenario switcher ---------- */
+.sw{position:fixed;top:74px;left:16px;width:246px;background:#fff;border:1px solid var(--gray-400);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);z-index:60;font-size:12px;max-height:calc(100vh - 96px);display:flex;flex-direction:column}
+.sw-head{padding:11px 13px;border-bottom:1px solid var(--gray-400);display:flex;align-items:center;gap:8px;background:var(--gray-200);border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+.sw-head b{font-size:12px;flex:1}
+.sw-head button{background:transparent;border:0;cursor:pointer;color:var(--dark-100);font-size:16px;line-height:1;padding:0 3px}
+.sw-body{padding:9px;overflow-y:auto}
+.sw-grp{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--dark-100);font-weight:700;padding:9px 5px 5px}
+.sw button.s{display:block;width:100%;text-align:right;padding:7px 9px;border:0;background:transparent;border-radius:var(--radius-lg);cursor:pointer;font-size:12px;color:var(--dark-200);line-height:1.5;transition:.12s}
+.sw button.s:hover{background:var(--gray-200)}
+.sw button.s.on{background:var(--primary);color:#fff;font-weight:600}
+.sw-toggle{position:fixed;top:74px;left:16px;z-index:60;background:var(--primary);color:#fff;border:0;border-radius:var(--radius-xl);padding:9px 13px;font-size:12px;cursor:pointer;box-shadow:var(--shadow-md);font-family:var(--font)}
+.note{font-size:11.5px;color:var(--dark-100);background:var(--gray-200);border-radius:var(--radius-lg);padding:9px 11px;margin:9px 5px 4px;line-height:1.6}
+.hidden{display:none!important}
+.muted{color:var(--dark-100)}
+.tiny{font-size:11.5px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<script>
+/* =============================================================
+   Quick Delivery Activation — Tayaar cross-sell prototype
+   PDV2-422 (ST1–ST5) · context from PDV2-466
+   State-driven. Every screen below is reachable from the switcher.
+   ============================================================= */
+
+const REQS = [
+  { id:'status',   t:'تحديث حالة الطلب',            d:'وصول حالة الطلب لسلة وللعميل لحظة بلحظة' },
+  { id:'verify',   t:'التحقق من الطلب قبل الخروج',   d:'التأكد أن الطلب الصحيح غادر الفرع قبل طباعة البوليصة' },
+  { id:'tracking', t:'التتبع المباشر للمندوب',        d:'يرى العميل مندوبه، ويرى التاجر أسطوله على الخريطة' },
+];
+
+const CAPS = [
+  'إسناد وإدارة مندوبيك الخاصين',
+  'التحقق من كل طلب بالباركود قبل طباعة البوليصة',
+  'إدارة عدة متاجر من حساب واحد',
+  'تحديثات حالة مباشرة على الطلب',
+  'تتبع كل مندوب على خريطة لحظية',
+  'بدون أي إعداد خارجي — كل شيء داخل سلة',
+];
+
+const BASE_BRANCHES = [
+  { id:'b1', name:'الفرع الرئيسي', city:'الرياض · العليا',   sel:true,  provider:'mrsool' },
+  { id:'b2', name:'فرع جدة',       city:'جدة · الروضة',      sel:true,  provider:'mrsool' },
+  { id:'b3', name:'فرع الدمام',    city:'الدمام · الشاطئ',   sel:false, provider:'mrsool' },
+];
+
+let S = {};
+
+function reset(over){
+  S = {
+    scenario:'default',
+    plan:'pro',                  // pro | basic
+    tayaar:'not_installed',      // not_installed | trial_active | trial_used | paid
+    trialDay:0,                  // 0..7, 8=grace, 9=lapsed
+    failNext:false,
+    step:'branches',             // branches | summary
+    branches: JSON.parse(JSON.stringify(BASE_BRANCHES)),
+    tasks:{courier:false, awb:false, track:false},
+    modal:null,
+    activating:false,
+    progress:0,
+    swOpen:true,
+    scaleMode:false,
+    toast:null,
+  };
+  Object.assign(S, over||{});
+}
+
+/* ---------- derived ---------- */
+const tayaarOn = () => S.tayaar==='trial_active' || S.tayaar==='paid';
+const inGrace  = () => S.tayaar==='trial_used' && S.trialDay===8;
+const lapsed   = () => S.tayaar==='trial_used' && S.trialDay>=9;
+const daysLeft = () => Math.max(0, 7 - S.trialDay);
+
+// Badge eligibility — the ST5 rule. Own-courier branches need the tooling.
+function badgeEligible(b){
+  if(!b.sel) return false;
+  if(b.provider==='mrsool') return true;
+  if(tayaarOn()) return true;
+  if(inGrace()) return true;      // 48h grace — badge stays on
+  return false;                    // declined or lapsed
+}
+function reqsMet(b){ return b.provider==='mrsool' || tayaarOn() || inGrace(); }
+
+/* ---------- scenarios ---------- */
+const SCENARIOS = {
+  'default':      { g:'التدفق الأساسي', n:'الحالة الافتراضية — مرسول (PDV2-466)', s:{} },
+  'st1':          { g:'ST1 — بطاقة طيّار', n:'اختيار «مندوبيني» → فحص الجاهزية', s:{ bset:{b1:'own'} } },
+  'st1-basic':    { g:'ST1 — بطاقة طيّار', n:'حالة حدية: باقة أساسية/بلس', s:{ bset:{b1:'own'}, plan:'basic' } },
+  'st1-installed':{ g:'ST1 — بطاقة طيّار', n:'حالة حدية: طيّار مفعّل مسبقًا', s:{ bset:{b1:'own'}, tayaar:'paid' } },
+  'st1-used':     { g:'ST1 — بطاقة طيّار', n:'حالة حدية: التجربة مُستخدمة سابقًا', s:{ bset:{b1:'own'}, tayaar:'trial_used', trialDay:9 } },
+  'st2':          { g:'ST2 — التفعيل', n:'ورقة الموافقة قبل بدء التجربة', s:{ bset:{b1:'own'}, modal:'consent' } },
+  'st2-fail':     { g:'ST2 — التفعيل', n:'حالة حدية: فشل التفعيل', s:{ bset:{b1:'own'}, modal:'consent', failNext:true } },
+  'st3':          { g:'ST3 — بعد التفعيل', n:'الفرع مطابق + مهام البداية', s:{ bset:{b1:'own'}, tayaar:'trial_active', trialDay:0 } },
+  'st3-summary':  { g:'ST3 — بعد التفعيل', n:'ملخّص التفعيل قبل الإنهاء', s:{ bset:{b1:'own'}, tayaar:'trial_active', trialDay:0, step:'summary' } },
+  'st4-early':    { g:'ST4 — دورة التجربة', n:'اليوم 2 — هادئ', s:{ bset:{b1:'own'}, tayaar:'trial_active', trialDay:2 } },
+  'st4-ending':   { g:'ST4 — دورة التجربة', n:'اليوم 6 — تنتهي قريبًا', s:{ bset:{b1:'own'}, tayaar:'trial_active', trialDay:6 } },
+  'st4-day7':     { g:'ST4 — دورة التجربة', n:'اليوم 7 — نقطة القرار', s:{ bset:{b1:'own'}, tayaar:'trial_active', trialDay:7 } },
+  'st4-grace':    { g:'ST4 — دورة التجربة', n:'مهلة 48 ساعة — الشارة تعمل', s:{ bset:{b1:'own'}, tayaar:'trial_used', trialDay:8 } },
+  'st4-lapsed':   { g:'ST4 — دورة التجربة', n:'انتهت المهلة — الشارة موقوفة', s:{ bset:{b1:'own'}, tayaar:'trial_used', trialDay:9 } },
+  'st4-paid':     { g:'ST4 — دورة التجربة', n:'تم التحويل لمدفوع', s:{ bset:{b1:'own'}, tayaar:'paid', trialDay:9 } },
+  'st5-declined': { g:'ST5 — حماية الوعد', n:'رفض طيّار — الشارة مطفأة', s:{ bset:{b1:'own'}, decline:['b1'] } },
+  'st5-mixed':    { g:'ST5 — حماية الوعد', n:'فروع مختلطة — مرسول + مندوبين', s:{ bset:{b1:'own',b2:'mrsool'}, decline:['b1'], step:'summary' } },
+  'scale':        { g:'حالات حدية', n:'مقياس المؤسسات — 200+ فرع', s:{ scaleMode:true } },
+};
+
+function loadScenario(key){
+  const sc = SCENARIOS[key]; if(!sc) return;
+  const o = Object.assign({}, sc.s); const bset=o.bset, dec=o.decline;
+  delete o.bset; delete o.decline;
+  reset(o); S.scenario = key;
+  if(bset) S.branches.forEach(b=>{ if(bset[b.id]){ b.provider=bset[b.id]; b.sel=true; }});
+  if(dec)  S.branches.forEach(b=>{ if(dec.includes(b.id)) b.declined=true; });
+  render();
+}
+
+/* =============================================================
+   RENDER
+   ============================================================= */
+function render(){
+  document.getElementById('app').innerHTML = shell();
+  document.getElementById('modal-root').innerHTML = S.modal ? modal() : '';
+  bind();
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function shell(){
+  return `
+  <div class="topbar">
+    <div class="logo">سلة</div>
+    <div class="store">متجر ورد الرياض</div>
+    <div class="spacer"></div>
+    <span class="plan-pill">${S.plan==='pro'?'باقة برو':'باقة أساسية'}</span>
+  </div>
+  <nav class="tabbar">
+    <a href="#">الطلبات</a><a href="#">المنتجات</a>
+    <a href="#" class="active">الشحن والتوصيل</a>
+    <a href="#">الفروع</a><a href="#">التطبيقات</a><a href="#">الإعدادات</a>
+  </nav>
+  ${switcher()}
+  <main class="page">
+    <div class="crumbs">الشحن والتوصيل <span>›</span> التوصيل السريع <span>›</span> التفعيل</div>
+    ${ S.step==='summary' ? summaryView() : activationView() }
+  </main>
+  ${ S.step==='summary' ? '' : footbar() }`;
+}
+
+/* ---------- Activation view ---------- */
+function activationView(){
+  const sel = S.branches.filter(b=>b.sel);
+  return `
+  <h1 class="page-title">تفعيل التوصيل السريع</h1>
+  <p class="page-sub">اختر الفروع التي تريد تفعيل التوصيل خلال ساعتين فيها، وحدّد طريقة التوصيل لكل فرع.</p>
+
+  ${lifecycleBanner()}
+
+  <div class="panel">
+    <div class="panel-head">
+      <h3>الفروع وطريقة التوصيل</h3>
+      <span class="hint">تُعرض فروع السعودية فقط</span>
+    </div>
+    <div class="panel-body tight">
+      ${S.branches.map(branchRow).join('')}
+      ${S.scaleMode ? scaleFooter() : ''}
+    </div>
+  </div>
+
+  ${ S.tayaar==='trial_active' && S.trialDay<=1 && anyOwn() ? firstRunPanel() : '' }`;
+}
+
+const anyOwn = () => S.branches.some(b=>b.sel && b.provider==='own');
+
+function scaleFooter(){
+  return `
+  <div style="padding:16px 20px;background:var(--gray-200);border-top:1px solid var(--gray-400);display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span class="tiny muted" style="flex:1">عرض 3 من 214 فرعًا · يتم فحص جاهزية كل فرع عند فتحه فقط</span>
+    <button class="btn btn--outlined btn--sm" data-act="bulk">تطبيق طيّار على كل فروع المندوبين (18)</button>
+  </div>`;
+}
+
+function branchRow(b){
+  const open = b.sel && b.provider==='own';
+  return `
+  <div class="branch">
+    <div class="branch-head" data-act="toggle-branch" data-id="${b.id}">
+      <div class="branch-check ${b.sel?'on':''}">${b.sel?'✓':''}</div>
+      <div class="branch-id">
+        <div class="branch-name">${esc(b.name)} ${providerTag(b)}</div>
+        <div class="branch-meta">${esc(b.city)}</div>
+      </div>
+      <div class="branch-state">${badgeTag(b)}</div>
+    </div>
+    ${ b.sel ? `<div class="branch-body">
+        <div class="providers">
+          ${provOption(b,'mrsool','مرسول','مزوّد شحن من سلة — تحديث الحالة والتتبع مضمّنان','موصى به')}
+          ${provOption(b,'own','مندوبيني','أوصّل الطلبات عبر مندوبي الخاصين','')}
+        </div>
+        ${ open ? ownCourierBlock(b) : '' }
+      </div>` : '' }
+  </div>`;
+}
+
+function providerTag(b){
+  if(!b.sel) return '';
+  if(b.provider==='mrsool') return `<span class="tag tag--muted">مرسول</span>`;
+  if(tayaarOn())  return `<span class="tag tag--success">مندوبيني · عبر طيّار</span>`;
+  if(inGrace())   return `<span class="tag tag--warning">مندوبيني · طيّار منتهية</span>`;
+  return `<span class="tag tag--muted">مندوبيني</span>`;
+}
+
+function badgeTag(b){
+  if(!b.sel) return `<span class="tag tag--muted">غير مفعّل</span>`;
+  if(badgeEligible(b)){
+    const grace = inGrace() && b.provider==='own';
+    return `<span class="tag tag--${grace?'warning':'success'}">${grace?'⏳':'✓'} شارة الساعتين ${grace?'(مهلة)':'مفعّلة'}</span>`;
+  }
+  if(b.provider==='own' && lapsed())   return `<span class="tag tag--danger">⏸ الشارة موقوفة</span>`;
+  if(b.provider==='own' && b.declined) return `<span class="tag tag--muted tag--outlined">بدون شارة الساعتين</span>`;
+  return `<span class="tag tag--warning">⚠ متطلبات ناقصة</span>`;
+}
+
+function provOption(b,val,title,desc,badge){
+  const on = b.provider===val;
+  return `
+  <div class="prov ${on?'on':''}" data-act="set-provider" data-id="${b.id}" data-v="${val}">
+    <div class="dot"></div>
+    <div>
+      <div class="t">${title} ${badge?`<span class="tag tag--info">${badge}</span>`:''}</div>
+      <div class="d">${desc}</div>
+    </div>
+  </div>`;
+}
+
+/* ---------- ST1: readiness check + Tayaar card ---------- */
+function ownCourierBlock(b){
+  const met = reqsMet(b);
+  return `
+  <div class="readiness ${met?'met':''}">
+    <div class="readiness-head">
+      <i>${met?'✅':'⚠️'}</i>
+      <div>
+        <h4>${met
+          ? 'هذا الفرع يستوفي متطلبات التوصيل خلال ساعتين'
+          : 'هذا الفرع لا يستوفي متطلبات التوصيل خلال ساعتين'}</h4>
+        <p>${met
+          ? 'المتطلبات الثلاثة مغطّاة عبر طيّار — يمكن عرض شارة الساعتين لهذا الفرع.'
+          : 'وعد التوصيل خلال ساعتين تعرضه سلة للعميل، ولذلك يحتاج كل فرع إلى هذه المتطلبات الثلاثة:'}</p>
+      </div>
+    </div>
+    <ul class="reqs">
+      ${REQS.map(r=>`
+        <li class="req ${met?'met':'unmet'}">
+          <span class="ico">${met?'✓':'!'}</span>
+          <div><div class="rt">${r.t}</div><div class="rd">${r.d}</div></div>
+        </li>`).join('')}
+    </ul>
+    ${ met ? '' : (b.declined ? declinedBlock(b) : tayaarCard(b)) }
+  </div>`;
+}
+
+function declinedBlock(b){
+  return `
+  <div class="tayaar">
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <i style="font-style:normal;font-size:17px">ℹ️</i>
+      <div style="flex:1">
+        <div style="font-weight:700;font-size:13.5px;margin-bottom:3px">سيُفعَّل هذا الفرع بدون شارة الساعتين</div>
+        <p class="tiny muted" style="margin:0;line-height:1.7">
+          يبقى الفرع ضمن التوصيل السريع للاستلام والتوصيل الاعتيادي، لكن لن تظهر شارة «التوصيل خلال ساعتين»
+          للعميل عند الدفع — لأننا لا نستطيع التحقق من الوفاء بها.
+        </p>
+        <div style="margin-top:11px">
+          <button class="btn btn--outlined btn--sm" data-act="undecline" data-id="${b.id}">العودة وتفعيل طيّار</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function tayaarCard(b){
+  // E4 — plan gate
+  if(S.plan!=='pro'){
+    return `
+    <div class="tayaar">
+      <div class="tayaar-top">
+        <div class="tayaar-logo" style="background:linear-gradient(135deg,#7B4DD8,#5B34B0)">ط</div>
+        <div style="flex:1">
+          <h4 class="tayaar-ttl">طيّار <span class="tag tag--feature">برو وخاص</span></h4>
+          <p class="tayaar-sub">التوصيل السريع عبر مندوبيك متاح في باقتَي برو والخاصة. رقِّ باقتك لتفعيل طيّار وتغطية المتطلبات الثلاثة.</p>
+        </div>
+      </div>
+      <div class="tayaar-cta">
+        <button class="btn btn--feature" data-act="upgrade">👑 ترقية الباقة</button>
+        <button class="btn btn--link" data-act="decline" data-id="${b.id}">المتابعة بدون شارة الساعتين</button>
+      </div>
+    </div>`;
+  }
+
+  // E1 — Tayaar already active store-wide is handled upstream:
+  // reqsMet() is true, so the readiness block renders "met" and this card never shows.
+
+  const used = S.tayaar==='trial_used';   // E2 — no second free trial
+  return `
+  <div class="tayaar">
+    <div class="tayaar-top">
+      <div class="tayaar-logo">ط</div>
+      <div style="flex:1">
+        <h4 class="tayaar-ttl">طيّار يوفّر هذه المتطلبات الثلاثة
+          ${used?'<span class="tag tag--muted">التجربة مُستخدمة</span>':'<span class="tag tag--success">أسبوع مجاني</span>'}</h4>
+        <p class="tayaar-sub">تطبيق من سلة لإدارة مندوبيك الخاصين — يعمل داخل لوحة تحكمك، بدون أي إعداد خارجي.</p>
+      </div>
+    </div>
+    <ul class="caps">${CAPS.map(c=>`<li><span class="c">✓</span><span>${c}</span></li>`).join('')}</ul>
+    <div class="tayaar-cta">
+      ${ used
+        ? `<button class="btn btn--default" data-act="subscribe" data-id="${b.id}">الاشتراك من 5 ر.س</button>`
+        : `<button class="btn btn--default" data-act="open-consent" data-id="${b.id}">ابدأ أسبوع مجاني</button>` }
+      <button class="btn btn--link" data-act="decline" data-id="${b.id}">المتابعة بدون طيّار</button>
+    </div>
+    <p class="price-note">
+      ${ used
+        ? 'استخدمت التجربة المجانية سابقًا على هذا المتجر. الاشتراك يبدأ من 5 ر.س شهريًا.'
+        : 'الأسبوع المجاني يشمل تجهيز الطلب والتوصيل. بعده يستمر طيّار من 5 ر.س شهريًا — بدون خصم تلقائي، القرار لك.' }
+    </p>
+  </div>`;
+}
+
+/* ---------- ST4: lifecycle banners ---------- */
+function lifecycleBanner(){
+  if(!anyOwn()) return '';
+  const d = S.trialDay;
+
+  if(S.tayaar==='trial_active' && d>=5 && d<7)
+    return alertBox('warning','⏳',`تنتهي تجربة طيّار خلال ${daysLeft()} أيام`,
+      'استمر من 5 ر.س شهريًا للحفاظ على شارة «التوصيل خلال ساعتين» على فروع مندوبيك.',
+      [['الاستمرار من 5 ر.س','subscribe','btn--default btn--sm']]);
+
+  if(S.tayaar==='trial_active' && d>=7)
+    return alertBox('warning','⏳','تنتهي تجربة طيّار اليوم',
+      'إذا لم تستمر، يبقى الفرع ضمن التوصيل السريع للاستلام والتوصيل الاعتيادي، وتتوقف شارة الساعتين بعد مهلة 48 ساعة.',
+      [['الاستمرار من 5 ر.س','subscribe','btn--default btn--sm'],['تذكيري لاحقًا','noop','btn--outlined btn--sm']]);
+
+  if(inGrace())
+    return alertBox('warning','🕐','انتهت التجربة — مهلة 48 ساعة',
+      'أبقينا شارة الساعتين مفعّلة 48 ساعة حتى تكتمل الطلبات التي وُعد عملاؤها بالتوصيل السريع. فعّل طيّار للحفاظ عليها.',
+      [['تفعيل طيّار من 5 ر.س','subscribe','btn--default btn--sm']]);
+
+  if(lapsed() && S.branches.some(b=>b.sel&&b.provider==='own'))
+    return alertBox('danger','⏸','شارة الساعتين موقوفة على فروع مندوبيك',
+      'الفروع ما زالت ضمن التوصيل السريع ولم يتغيّر أي إعداد — فقط شارة «خلال ساعتين» لا تظهر للعميل. تُستعاد بضغطة واحدة.',
+      [['إعادة تفعيل طيّار','subscribe','btn--default btn--sm']]);
+
+  if(S.tayaar==='paid')
+    return alertBox('secondary','✅','طيّار مفعّل',
+      'فروع مندوبيك تستوفي متطلبات التوصيل خلال ساعتين، وشارة الساعتين تظهر للعميل عند الدفع.',[]);
+
+  if(S.tayaar==='trial_active' && d>=1 && d<5)
+    return alertBox('secondary','✅',`تجربة طيّار فعّالة — تبقّى ${daysLeft()} أيام`,
+      'فروع مندوبيك تستوفي المتطلبات الثلاثة، وشارة الساعتين تعمل.',[]);
+
+  return '';
+}
+
+function alertBox(theme,icon,title,body,actions){
+  return `
+  <div class="alert alert--${theme}">
+    <i>${icon}</i>
+    <div style="flex:1">
+      <h4>${title}</h4><p>${body}</p>
+      ${actions&&actions.length?`<div class="act">${actions.map(a=>
+        `<button class="btn ${a[2]}" data-act="${a[1]}">${a[0]}</button>`).join('')}</div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ---------- ST3: first-run tasks ---------- */
+function firstRunPanel(){
+  const T = [
+    ['courier','أسنِد أول مندوب','اربط مندوبك بالفرع ليظهر على الخريطة'],
+    ['awb','اطبع أول بوليصة مُتحقَّقة','امسح باركود الطلب قبل الطباعة — يمنع خروج الطلب الخطأ'],
+    ['track','تابع أول توصيلة على الخريطة','شاهد المندوب لحظة بلحظة كما يراه عميلك'],
+  ];
+  const done = Object.values(S.tasks).filter(Boolean).length;
+  return `
+  <div class="panel">
+    <div class="panel-head">
+      <h3>ابدأ مع طيّار</h3>
+      <span class="hint">${done} من 3 · هذه الخطوات تجعل أسبوعك المجاني مفيدًا فعلًا</span>
+    </div>
+    <div class="panel-body">
+      <ul class="tasks">
+        ${T.map(([k,t,d])=>`
+          <li class="task ${S.tasks[k]?'done':''}" data-act="task" data-k="${k}">
+            <span class="box">${S.tasks[k]?'✓':''}</span>
+            <div><div class="tt">${t}</div><div class="td">${d}</div></div>
+          </li>`).join('')}
+      </ul>
+      ${done===3?`<div class="alert alert--secondary" style="margin:16px 0 0"><i>🎉</i><div>
+        <h4>فرعك جاهز تمامًا</h4>
+        <p>أول توصيلة خلال ساعتين تمّت بنجاح — وعميلك تابعها على الخريطة من لحظة الخروج.</p>
+      </div></div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ---------- ST2: consent sheet / activation ---------- */
+function modal(){
+  if(S.modal==='consent')  return consentModal();
+  if(S.modal==='progress') return progressModal();
+  if(S.modal==='fail')     return failModal();
+  if(S.modal==='success')  return successModal();
+  if(S.modal==='upgrade')  return upgradeModal();
+  return '';
+}
+
+function endDate(){
+  const d = new Date(2026,7,31);
+  return `${d.getDate()} سبتمبر 2026`;
+}
+
+function consentModal(){
+  return `<div class="overlay" data-act="close-overlay"><div class="modal" data-stop>
+    <div class="modal-head">
+      <div class="tayaar-logo">ط</div>
+      <div style="flex:1"><h3>بدء أسبوع طيّار المجاني</h3>
+        <p class="tiny muted" style="margin:3px 0 0">تفعيل مباشر داخل لوحة تحكمك — بدون تحويل لأي خدمة خارجية.</p></div>
+      <button class="x" data-act="close">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="kv">
+        <div><span class="k">ما الذي يشمله</span><span class="v">تجهيز الطلب + التوصيل</span></div>
+        <div><span class="k">المدة</span><span class="v">7 أيام كاملة</span></div>
+        <div><span class="k">تنتهي في</span><span class="v">${endDate()}</span></div>
+        <div><span class="k">وسيلة دفع الآن</span><span class="v">غير مطلوبة</span></div>
+        <div><span class="k">بعد التجربة</span><span class="v">من 5 ر.س شهريًا</span></div>
+      </div>
+      <div class="alert alert--info" style="margin-bottom:0"><i>ℹ️</i><div>
+        <h4>ماذا يحدث في اليوم السابع</h4>
+        <p>لن يُخصم أي مبلغ تلقائيًا. إن اخترت عدم الاستمرار، يبقى فرعك ضمن التوصيل السريع للاستلام
+        والتوصيل الاعتيادي، وتتوقف شارة «التوصيل خلال ساعتين» بعد مهلة 48 ساعة.</p>
+      </div></div>
+      <label class="consent ${S.consentOk?'on':''}" data-act="consent" style="margin-top:14px">
+        <span class="box">${S.consentOk?'✓':''}</span>
+        <span>أوافق على تفعيل تجربة طيّار المجانية لمدة أسبوع، وأفهم أن الاستمرار بعدها يبدأ من 5 ر.س شهريًا باختياري.</span>
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--default" data-act="activate" ${S.consentOk?'':'disabled'}>تفعيل التجربة الآن</button>
+      <button class="btn btn--outlined" data-act="close">إلغاء</button>
+    </div>
+  </div></div>`;
+}
+
+function progressModal(){
+  const steps=['تفعيل طيّار على متجرك','ربط الفرع بمندوبيك','تفعيل تحديث الحالة والتتبع'];
+  const cur = Math.min(2, Math.floor(S.progress/34));
+  return `<div class="overlay"><div class="modal" style="max-width:420px">
+    <div class="modal-body" style="padding:28px 24px;text-align:center">
+      <div class="tayaar-logo" style="margin:0 auto 14px;width:52px;height:52px;font-size:20px">ط</div>
+      <h3 style="margin:0 0 6px;font-size:16px">جارٍ تفعيل طيّار…</h3>
+      <p class="tiny muted" style="margin:0">${steps[cur]}</p>
+      <div class="prog"><i style="width:${S.progress}%"></i></div>
+      <p class="tiny muted" style="margin:0">${S.progress}%</p>
+    </div>
+  </div></div>`;
+}
+
+function failModal(){
+  return `<div class="overlay" data-act="close-overlay"><div class="modal" style="max-width:440px" data-stop>
+    <div class="modal-head"><div style="font-size:26px">⚠️</div>
+      <div style="flex:1"><h3>تعذّر تفعيل التجربة</h3></div>
+      <button class="x" data-act="close">×</button></div>
+    <div class="modal-body">
+      <p style="margin:0 0 12px;font-size:13.5px;line-height:1.75">
+        لم يكتمل التفعيل ولم يتغيّر أي شيء في فرعك. ما زال الفرع بحاجة للمتطلبات الثلاثة،
+        ولم نسجّل أي اشتراك أو تجربة على متجرك.</p>
+      <div class="alert alert--info" style="margin:0"><i>ℹ️</i><div>
+        <p>لن نُبقي فرعك في حالة نصف مفعّلة أبدًا — إمّا يكتمل التفعيل أو لا يبدأ.</p></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--default" data-act="retry">إعادة المحاولة</button>
+      <button class="btn btn--outlined" data-act="close">لاحقًا</button>
+    </div>
+  </div></div>`;
+}
+
+function successModal(){
+  return `<div class="overlay" data-act="close-overlay"><div class="modal" style="max-width:440px" data-stop>
+    <div class="modal-body" style="padding:28px 24px;text-align:center">
+      <div style="font-size:40px;line-height:1;margin-bottom:10px">🎉</div>
+      <h3 style="margin:0 0 7px;font-size:17px">تم تفعيل طيّار — أسبوعك المجاني بدأ</h3>
+      <p class="tiny muted" style="margin:0 0 4px">فرعك الآن يستوفي متطلبات التوصيل خلال ساعتين.</p>
+      <p class="tiny muted" style="margin:0">تنتهي التجربة في ${endDate()} — سنذكّرك قبلها.</p>
+    </div>
+    <div class="modal-foot" style="justify-content:center">
+      <button class="btn btn--default" data-act="close">ابدأ الإعداد</button>
+    </div>
+  </div></div>`;
+}
+
+function upgradeModal(){
+  return `<div class="overlay" data-act="close-overlay"><div class="modal" style="max-width:430px" data-stop>
+    <div class="modal-head"><div style="font-size:24px">👑</div>
+      <div style="flex:1"><h3>التوصيل السريع عبر مندوبيك</h3></div>
+      <button class="x" data-act="close">×</button></div>
+    <div class="modal-body">
+      <p style="margin:0;font-size:13.5px;line-height:1.75">
+        هذه الميزة متاحة في باقتَي <b>برو</b> و<b>الخاصة</b>، مثل بقية تجربة التوصيل السريع.
+        رقِّ باقتك لتفعيل طيّار وعرض شارة «التوصيل خلال ساعتين» على فروع مندوبيك.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn--feature" data-act="close">عرض الباقات</button>
+      <button class="btn btn--outlined" data-act="close">ليس الآن</button>
+    </div>
+  </div></div>`;
+}
+
+/* ---------- Summary (ST3) ---------- */
+function summaryView(){
+  const sel = S.branches.filter(b=>b.sel);
+  const withBadge = sel.filter(badgeEligible).length;
+  return `
+  <h1 class="page-title">مراجعة التفعيل</h1>
+  <p class="page-sub">هذه هي الحالة التي ستظهر لعملائك عند الدفع.</p>
+  <div class="panel">
+    <div class="panel-head"><h3>ملخّص الفروع</h3>
+      <span class="hint">${withBadge} من ${sel.length} فرع سيعرض شارة الساعتين</span></div>
+    <div class="panel-body tight">
+      <table class="summary">
+        <thead><tr><th>الفرع</th><th>طريقة التوصيل</th><th>شارة الساعتين</th></tr></thead>
+        <tbody>${sel.map(b=>`<tr>
+          <td><b>${esc(b.name)}</b><div class="tiny muted">${esc(b.city)}</div></td>
+          <td>${b.provider==='mrsool'?'مرسول':(tayaarOn()?'مندوبيني · عبر طيّار':'مندوبيني')}</td>
+          <td>${badgeTag(b)}</td></tr>`).join('')}</tbody>
+      </table>
+    </div>
+  </div>
+  ${ sel.some(b=>!badgeEligible(b)) ? alertBox('warning','⚠️','بعض الفروع لن تعرض شارة الساعتين',
+      'هذه الفروع تعمل ضمن التوصيل السريع للاستلام والتوصيل الاعتيادي. لعرض شارة الساعتين، تحتاج لتغطية المتطلبات الثلاثة.',
+      [['العودة وتفعيل طيّار','back','btn--outlined btn--sm']]) : '' }
+  <div style="display:flex;gap:10px;margin-top:18px">
+    <button class="btn btn--default btn--lg" data-act="noop">تأكيد وتفعيل التوصيل السريع</button>
+    <button class="btn btn--outlined btn--lg" data-act="back">رجوع</button>
+  </div>`;
+}
+
+function footbar(){
+  const sel = S.branches.filter(b=>b.sel);
+  const ok  = sel.filter(badgeEligible).length;
+  return `<div class="footbar"><div class="inner">
+    <div class="sum"><b>${sel.length}</b> فرع محدّد · <b>${ok}</b> بشارة الساعتين</div>
+    <button class="btn btn--outlined" data-act="noop">حفظ كمسودة</button>
+    <button class="btn btn--default" data-act="review" ${sel.length?'':'disabled'}>مراجعة التفعيل</button>
+  </div></div>`;
+}
+
+/* ---------- Scenario switcher ---------- */
+function switcher(){
+  if(!S.swOpen) return `<button class="sw-toggle" data-act="sw">☰ الحالات</button>`;
+  const groups={};
+  Object.entries(SCENARIOS).forEach(([k,v])=>{ (groups[v.g]=groups[v.g]||[]).push([k,v.n]); });
+  return `<div class="sw">
+    <div class="sw-head"><b>حالات النموذج الأولي</b><button data-act="sw">×</button></div>
+    <div class="sw-body">
+      ${Object.entries(groups).map(([g,items])=>`
+        <div class="sw-grp">${g}</div>
+        ${items.map(([k,n])=>`<button class="s ${S.scenario===k?'on':''}" data-act="scenario" data-k="${k}">${n}</button>`).join('')}
+      `).join('')}
+      <div class="note">النموذج تفاعلي بالكامل — بدّل مزوّد أي فرع بنفسك، أو اقفز لأي حالة من القائمة.</div>
+      <div class="note">PDV2-422 · ST1–ST5 · مبني على رموز نظام تصميم سلة الحقيقية.</div>
+    </div>
+  </div>`;
+}
+
+/* =============================================================
+   EVENTS
+   ============================================================= */
+function bind(){
+  document.querySelectorAll('[data-act]').forEach(el=>{
+    el.addEventListener('click', ev=>{
+      const act = el.dataset.act;
+      if(act==='close-overlay' && ev.target!==el) return;   // only bare overlay closes
+      ev.stopPropagation();
+      handle(act, el.dataset, ev);
+    });
+  });
+}
+
+function handle(act, d){
+  switch(act){
+    case 'sw': S.swOpen=!S.swOpen; break;
+
+    case 'scenario': loadScenario(d.k); return;
+
+    case 'toggle-branch': {
+      const b = S.branches.find(x=>x.id===d.id);
+      b.sel = !b.sel;
+      break;
+    }
+
+    case 'set-provider': {
+      const b = S.branches.find(x=>x.id===d.id);
+      if(b.provider!==d.v){ b.provider = d.v; b.declined = false; }
+      break;
+    }
+
+    case 'open-consent': S.modal='consent'; S.consentOk=false; S.activeBranch=d.id; break;
+    case 'consent':      S.consentOk=!S.consentOk; break;
+    case 'close':        S.modal=null; break;
+    case 'close-overlay':S.modal=null; break;
+
+    case 'activate': {
+      S.modal='progress'; S.progress=0;
+      render();
+      const t = setInterval(()=>{
+        S.progress = Math.min(100, S.progress+11);
+        if(S.progress>=100){
+          clearInterval(t);
+          if(S.failNext){ S.modal='fail'; S.failNext=false; }
+          else { S.tayaar='trial_active'; S.trialDay=0; S.modal='success'; }
+        }
+        render();
+      }, 190);
+      return;
+    }
+
+    case 'retry': S.modal='consent'; S.consentOk=true; break;
+
+    case 'decline': {
+      const b = S.branches.find(x=>x.id===d.id);
+      b.declined = true;
+      break;
+    }
+    case 'undecline': {
+      const b = S.branches.find(x=>x.id===d.id);
+      b.declined = false;
+      break;
+    }
+
+    case 'subscribe':      S.tayaar='paid'; S.trialDay=9; break;
+    case 'upgrade':        S.modal='upgrade'; break;
+
+    case 'bulk':
+      S.branches.forEach(b=>{ if(b.sel) b.provider='own'; });
+      S.modal='consent'; S.consentOk=false;
+      break;
+
+    case 'task':   S.tasks[d.k]=!S.tasks[d.k]; break;
+    case 'review': S.step='summary'; window.scrollTo(0,0); break;
+    case 'back':   S.step='branches'; window.scrollTo(0,0); break;
+    case 'noop':   break;
+  }
+  render();
+}
+
+/* ---------- init ---------- */
+reset();
+render();
+</script>
+</body>
+</html>

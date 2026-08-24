@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سلة — التوصيل السريع · التكامل مع طيّار (نموذج أولي)</title>
+<link rel="stylesheet" href="https://cdn.salla.network/fonts/pingarlt.css?v=0.2">
+<style>
+:root{
+  --primary:#004A57; --primary-100:#F1F8F9; --primary-400:#348D9D;
+  --secondary:#A3FFE5; --secondary-100:#F0FFFB;
+  --gray-100:#FCFCFC; --gray-200:#F7F7F7; --gray-400:#EDEDED; --gray-500:#DEDEDE;
+  --dark:#333333; --dark-100:#737373; --dark-200:#666666;
+  --danger:#F55157; --success:#00AD6B;
+  --warning:#E8A33D; --warning-bg:#FFF8EC; --danger-bg:#FEF1F1; --info-bg:#F0F7FF;
+  --radius-lg:8px; --radius-xl:12px;
+  --shadow-sm:0 2px 4px 0 rgba(0,0,0,.08); --shadow-md:0 8px 28px rgba(0,0,0,.12);
+  --font:'PingARLT','PT Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+html{font-family:var(--font);font-size:14px;color:var(--dark)}
+body{margin:0;background:#F4F6F6;line-height:1.6}
+button{font-family:inherit}
+
+/* ---- app shell (matches live s.salla.sa) ---- */
+.topbar{background:#00303A;color:#fff;padding:0 26px;height:64px;display:flex;align-items:center;gap:26px;position:sticky;top:0;z-index:40}
+.topbar .logo{font-weight:700;font-size:17px;display:flex;align-items:center;gap:7px}
+.topbar nav{display:flex;gap:22px;font-size:13.5px;flex:1}
+.topbar nav a{color:rgba(255,255,255,.88);text-decoration:none;display:flex;align-items:center;gap:6px}
+.topbar nav a:hover{color:#fff}
+.topbar .me{display:flex;align-items:center;gap:9px;font-size:12.5px}
+.topbar .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#4a6b74,#22505c);display:grid;place-items:center;font-size:13px}
+.subnav{background:#fff;border-bottom:1px solid var(--gray-400);padding:0 26px;height:52px;display:flex;align-items:center;gap:24px}
+.subnav .grp{display:flex;gap:24px;flex:1;font-size:13.5px;overflow-x:auto}
+.subnav a{color:var(--dark-200);text-decoration:none;padding:15px 0;border-bottom:2px solid transparent;white-space:nowrap}
+.subnav a.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:700}
+.helpchip{border:1px solid var(--gray-500);border-radius:var(--radius-lg);padding:5px 11px;font-size:12px;color:var(--dark-200);white-space:nowrap}
+.page{max-width:940px;margin:0 auto;padding:20px 26px 120px}
+.crumbs{font-size:12.5px;color:var(--dark-100);margin-bottom:16px;display:flex;gap:8px;justify-content:flex-end}
+.crumbs .cur{color:var(--primary);font-weight:600}
+
+/* ---- card ---- */
+.card{background:#fff;border-radius:16px;padding:28px 30px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.card h2{margin:0 0 5px;font-size:17px;font-weight:700}
+.card .lead{margin:0 0 22px;font-size:13px;color:var(--dark-100)}
+.field{margin-bottom:20px}
+.field:last-child{margin-bottom:0}
+.lbl{font-size:13px;font-weight:600;margin-bottom:7px;display:block}
+.lbl .req{color:var(--danger);margin-right:2px}
+.lbl .sub{font-weight:400;color:var(--dark-100);font-size:12.5px;display:block;margin-top:2px}
+
+/* ---- tags input ---- */
+.tagsin{border:1px solid var(--gray-500);border-radius:var(--radius-xl);padding:9px 12px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;min-height:46px;background:#fff}
+.tagsin .chip{background:var(--gray-200);border-radius:var(--radius-lg);padding:4px 9px;font-size:12.5px;display:flex;align-items:center;gap:7px}
+.tagsin .chip b{font-weight:500}
+.tagsin .chip .x{cursor:pointer;color:var(--dark-100);font-size:14px;line-height:1}
+.tagsin .clear{margin-right:auto;color:var(--dark-100);font-size:15px;cursor:pointer}
+.tagsin .add{border:1px dashed var(--gray-500);border-radius:var(--radius-lg);padding:4px 9px;font-size:12.5px;color:var(--dark-100);cursor:pointer;background:transparent}
+
+/* ---- radio provider cards ---- */
+.opt{border:1px solid var(--gray-500);border-radius:var(--radius-xl);padding:16px 18px;margin-bottom:11px;cursor:pointer;display:flex;gap:13px;transition:.15s;background:#fff}
+.opt:hover{border-color:var(--primary-400)}
+.opt.on{border-color:var(--primary);border-width:2px;padding:15px 17px}
+.opt .dot{width:19px;height:19px;border-radius:50%;border:2px solid var(--gray-500);flex-shrink:0;margin-top:2px;display:grid;place-items:center;background:#fff}
+.opt.on .dot{border-color:var(--primary)}
+.opt.on .dot::after{content:'';width:9px;height:9px;border-radius:50%;background:var(--primary)}
+.opt .ob{flex:1;min-width:0}
+.opt .ot{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.opt .od{font-size:12.5px;color:var(--dark-100);line-height:1.65}
+.feats{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.feat{border:1px solid var(--gray-400);border-radius:var(--radius-lg);padding:3px 9px;font-size:11.5px;color:var(--dark-200);display:flex;align-items:center;gap:5px;background:var(--gray-100)}
+
+/* ---- pills ---- */
+.pill{border-radius:999px;padding:2px 10px;font-size:11.5px;font-weight:600;display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.pill--mint{background:var(--secondary-100);color:#00785A;border:1px solid #B6F2DF}
+.pill--warn{background:var(--warning-bg);color:#A96B12;border:1px solid #F0D8AE}
+.pill--danger{background:var(--danger-bg);color:#C9333A;border:1px solid #F8C9CB}
+.pill--muted{background:var(--gray-200);color:var(--dark-100);border:1px solid var(--gray-400)}
+.pill--feature{background:#F3EEFC;color:#5B34B0;border:1px solid #E0D3F7}
+
+/* ---- toggle ---- */
+.tog{display:flex;align-items:flex-start;gap:12px;padding:2px 0;cursor:pointer}
+.tog .knob{width:38px;height:21px;border-radius:99px;background:var(--gray-500);position:relative;flex-shrink:0;transition:.18s;margin-top:2px}
+.tog .knob::after{content:'';position:absolute;top:2.5px;right:2.5px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.18s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.tog.on .knob{background:var(--primary)}
+.tog.on .knob::after{right:19.5px}
+.tog .tt{font-size:13px;font-weight:600}
+.tog .td{font-size:12px;color:var(--dark-100);margin-top:1px;line-height:1.6}
+
+/* ---- select / input ---- */
+.sel,.inp{width:100%;border:1px solid var(--gray-500);border-radius:var(--radius-xl);padding:12px 14px;font-size:13.5px;font-family:var(--font);background:#fff;color:var(--dark);appearance:none;cursor:pointer}
+.sel:focus,.inp:focus{outline:0;border-color:var(--primary)}
+.selwrap{position:relative}
+.selwrap::after{content:'⌄';position:absolute;left:14px;top:8px;color:var(--dark-100);font-size:16px;pointer-events:none}
+.sel.ph{color:var(--dark-100)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.row2{grid-template-columns:1fr}}
+.btngrp{display:flex;gap:9px}
+.btngrp button{border:1px solid var(--gray-500);background:#fff;border-radius:var(--radius-xl);padding:9px 18px;font-size:13px;cursor:pointer;color:var(--dark-200)}
+.btngrp button.on{background:var(--secondary);border-color:var(--secondary);color:#00404D;font-weight:700}
+
+/* ---- buttons ---- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid transparent;border-radius:var(--radius-xl);padding:11px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;line-height:20px;white-space:nowrap}
+.btn--mint{background:var(--secondary);color:#00404D}
+.btn--mint:hover{background:#8DF5D8}
+.btn--primary{background:var(--primary);color:#fff}
+.btn--primary:hover{background:#003A45}
+.btn--out{background:#fff;color:var(--primary);border-color:var(--gray-500)}
+.btn--out:hover{border-color:var(--primary);background:var(--primary-100)}
+.btn--link{background:transparent;color:var(--primary);border:0;text-decoration:underline;padding:6px 2px;font-weight:500}
+.btn--feature{background:linear-gradient(135deg,#7B4DD8,#5B34B0);color:#fff}
+.btn--sm{padding:8px 14px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+
+/* ---- readiness (the ST1 block) ---- */
+.ready{border-radius:var(--radius-xl);border:1px solid #F0D8AE;background:var(--warning-bg);margin-top:14px;overflow:hidden}
+.ready.met{border-color:#B6F2DF;background:var(--secondary-100)}
+.ready-h{padding:15px 17px;display:flex;gap:12px;align-items:flex-start}
+.ready-h .i{font-size:18px;flex-shrink:0;line-height:1.3}
+.ready-h h4{margin:0 0 4px;font-size:14px;font-weight:700;color:#7A4E0C}
+.ready.met .ready-h h4{color:#00654A}
+.ready-h p{margin:0;font-size:12.5px;line-height:1.7;color:#8A6224}
+.ready.met .ready-h p{color:#00794A}
+.reqs{list-style:none;margin:0;padding:0 17px 15px;display:grid;gap:8px}
+.req{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.7);border-radius:var(--radius-lg);padding:10px 12px;font-size:13px}
+.req .ic{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.req.unmet .ic{background:#F5E0BC;color:#A96B12}
+.req.met .ic{background:#C7F3E1;color:#00794A}
+.req .rt{font-weight:600}
+.req .rd{font-size:12px;color:var(--dark-100);margin-top:1px;line-height:1.55}
+
+/* ---- tayaar card ---- */
+.ty{margin:0 17px 17px;background:#fff;border:1px solid var(--gray-400);border-radius:var(--radius-xl);padding:17px;box-shadow:var(--shadow-sm)}
+.ty-h{display:flex;gap:13px;align-items:flex-start;margin-bottom:13px}
+.ty-logo{width:44px;height:44px;border-radius:var(--radius-xl);background:linear-gradient(135deg,var(--primary),var(--primary-400));display:grid;place-items:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0}
+.ty-t{font-size:15px;font-weight:700;margin:0 0 3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ty-s{font-size:12.5px;color:var(--dark-100);margin:0;line-height:1.65}
+.caps{list-style:none;margin:0 0 15px;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media(max-width:680px){.caps{grid-template-columns:1fr}}
+.caps li{display:flex;gap:8px;font-size:12.5px;color:var(--dark-200);align-items:flex-start;line-height:1.6}
+.caps .c{color:var(--success);font-weight:700;flex-shrink:0}
+.ty-cta{display:flex;gap:11px;align-items:center;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--gray-400)}
+.ty-note{font-size:11.5px;color:var(--dark-100);margin:10px 0 0;line-height:1.65}
+
+/* ---- alert ---- */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-xl);border:1px solid;margin-bottom:18px}
+.alert .i{font-size:17px;flex-shrink:0;line-height:1.3}
+.alert h4{margin:0 0 3px;font-size:14px;font-weight:700}
+.alert p{margin:0;font-size:12.5px;line-height:1.7}
+.alert .act{margin-top:11px;display:flex;gap:9px;flex-wrap:wrap}
+.alert--warning{background:var(--warning-bg);border-color:#F0D8AE;color:#7A4E0C}
+.alert--danger{background:var(--danger-bg);border-color:#F8C9CB;color:#9E272D}
+.alert--mint{background:var(--secondary-100);border-color:#B6F2DF;color:#00654A}
+.alert--info{background:var(--info-bg);border-color:#C9E0F8;color:#1B5490}
+
+/* ---- promise section note ---- */
+.promise-note{margin-top:14px;border-radius:var(--radius-xl);padding:13px 15px;font-size:12.5px;line-height:1.7;display:flex;gap:11px;border:1px solid}
+.promise-note.bad{background:var(--warning-bg);border-color:#F0D8AE;color:#7A4E0C}
+.promise-note.good{background:var(--secondary-100);border-color:#B6F2DF;color:#00654A}
+
+/* ---- launch bar ---- */
+.launch{background:#fff;border-radius:16px;padding:20px 30px;display:flex;align-items:center;gap:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.launch .t{flex:1;font-size:13px;color:var(--dark-100)}
+.launch .t b{color:var(--dark);display:block;font-size:14px;margin-bottom:2px}
+
+/* ---- per-branch table ---- */
+.pertab{border:1px solid var(--gray-400);border-radius:var(--radius-xl);overflow:hidden;margin-top:12px}
+.perrow{display:flex;align-items:center;gap:13px;padding:13px 15px;border-bottom:1px solid var(--gray-400);flex-wrap:wrap}
+.perrow:last-child{border-bottom:0}
+.perrow .nm{font-weight:600;font-size:13.5px;min-width:110px}
+.perrow .selwrap{flex:1;min-width:170px}
+.perrow .sel{padding:8px 12px;font-size:13px}
+
+/* ---- tasks ---- */
+.tasks{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.task{display:flex;gap:11px;align-items:center;padding:12px 14px;border:1px solid var(--gray-400);border-radius:var(--radius-xl);cursor:pointer;transition:.15s;background:#fff}
+.task:hover{border-color:var(--primary-400);background:var(--primary-100)}
+.task.done{opacity:.6}.task.done .tt{text-decoration:line-through}
+.task .bx{width:20px;height:20px;border:2px solid var(--gray-500);border-radius:6px;flex-shrink:0;display:grid;place-items:center;font-size:12px}
+.task.done .bx{background:var(--success);border-color:var(--success);color:#fff}
+.task .tt{font-weight:600;font-size:13.5px}
+.task .td{font-size:12px;color:var(--dark-100);margin-top:1px}
+
+/* ---- modal ---- */
+.overlay{position:fixed;inset:0;background:rgba(0,20,24,.5);display:grid;place-items:center;z-index:100;padding:18px}
+.modal{background:#fff;border-radius:18px;max-width:520px;width:100%;box-shadow:var(--shadow-md);max-height:90vh;overflow-y:auto}
+.modal-h{padding:22px 24px 0;display:flex;gap:13px;align-items:flex-start}
+.modal-h h3{margin:0;font-size:17px;font-weight:700}
+.modal-h .x{margin-right:auto;background:transparent;border:0;font-size:22px;color:var(--dark-100);cursor:pointer;line-height:1;padding:0 4px}
+.modal-b{padding:17px 24px 22px}
+.modal-f{padding:16px 24px;border-top:1px solid var(--gray-400);display:flex;gap:10px;background:var(--gray-100);border-radius:0 0 18px 18px}
+.kv{display:grid;gap:11px;margin:0 0 16px;padding:15px;background:var(--gray-200);border-radius:var(--radius-xl)}
+.kv div{display:flex;justify-content:space-between;gap:14px;font-size:13px}
+.kv .k{color:var(--dark-100)} .kv .v{font-weight:600;text-align:left}
+.consent{display:flex;gap:11px;padding:13px;border:1px solid var(--gray-400);border-radius:var(--radius-xl);font-size:12.5px;line-height:1.7;cursor:pointer;align-items:flex-start;margin-top:14px}
+.consent .bx{width:19px;height:19px;border:2px solid var(--gray-500);border-radius:5px;flex-shrink:0;margin-top:2px;display:grid;place-items:center;font-size:12px}
+.consent.on .bx{background:var(--primary);border-color:var(--primary);color:#fff}
+.prog{height:7px;background:var(--gray-400);border-radius:99px;overflow:hidden;margin:16px 0 9px}
+.prog i{display:block;height:100%;background:var(--primary);border-radius:99px;transition:width .3s}
+
+/* ---- switcher ---- */
+.sw{position:fixed;top:128px;left:18px;width:250px;background:#fff;border:1px solid var(--gray-400);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);z-index:60;max-height:calc(100vh - 150px);display:flex;flex-direction:column}
+.sw-h{padding:11px 13px;border-bottom:1px solid var(--gray-400);display:flex;align-items:center;background:var(--gray-200);border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+.sw-h b{font-size:12px;flex:1}
+.sw-h button{background:transparent;border:0;cursor:pointer;color:var(--dark-100);font-size:17px;line-height:1;padding:0 3px}
+.sw-b{padding:9px;overflow-y:auto}
+.sw-g{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--dark-100);font-weight:700;padding:9px 5px 5px}
+.sw button.s{display:block;width:100%;text-align:right;padding:7px 9px;border:0;background:transparent;border-radius:var(--radius-lg);cursor:pointer;font-size:12px;color:var(--dark-200);line-height:1.5}
+.sw button.s:hover{background:var(--gray-200)}
+.sw button.s.on{background:var(--primary);color:#fff;font-weight:600}
+.sw-toggle{position:fixed;top:128px;left:18px;z-index:60;background:var(--primary);color:#fff;border:0;border-radius:var(--radius-xl);padding:9px 13px;font-size:12px;cursor:pointer;box-shadow:var(--shadow-md);font-family:var(--font)}
+.note{font-size:11.5px;color:var(--dark-100);background:var(--gray-200);border-radius:var(--radius-lg);padding:9px 11px;margin:9px 5px 4px;line-height:1.65}
+.tiny{font-size:11.5px}.muted{color:var(--dark-100)}
+</style>
+</head>
+<body>
+<div id="app"></div><div id="modal-root"></div>
+<script>
+/* ============================================================
+   التوصيل السريع — تفعيل · التكامل مع طيّار
+   PDV2-422 (ST1–ST5) · مبني على شاشة التفعيل الفعلية (SI-311/SI-323)
+   ============================================================ */
+
+const REQS=[
+ {t:'تحديث حالة الطلب',           d:'تصل حالة الطلب لسلة وللعميل لحظة بلحظة'},
+ {t:'التحقق من الطلب قبل الخروج',  d:'التأكد أن الطلب الصحيح غادر الفرع قبل طباعة البوليصة'},
+ {t:'التتبع المباشر للمندوب',      d:'يرى العميل مندوبه، وترى أسطولك على الخريطة'},
+];
+const CAPS=['إسناد وإدارة مندوبيك الخاصين','التحقق من كل طلب بالباركود قبل الطباعة',
+ 'إدارة عدة متاجر من حساب واحد','تحديثات حالة مباشرة على الطلب',
+ 'تتبع كل مندوب على خريطة لحظية','بدون أي إعداد خارجي — كل شيء داخل سلة'];
+
+// المزوّد داخل «توصيل خاص»
+const SUBPROVIDERS=[
+ {v:'',        t:'اختر المزود'},
+ {v:'carrier', t:'شركة شحن خارجية'},
+ {v:'own',     t:'مناديب متجري'},
+ {v:'both',    t:'كلاهما معًا'},
+];
+const BRANCHES=[{id:'b1',n:'فرع الرياض'},{id:'b2',n:'فرع جدة'},{id:'b3',n:'فرع مكة المكرمة'}];
+
+let S={};
+function reset(o){
+  S={ scenario:'default', plan:'pro',
+      tayaar:'not_installed',     // not_installed | trial_active | trial_used | paid
+      trialDay:0,                 // 0..7 · 8=مهلة · 9=منتهية
+      failNext:false, declined:false,
+      branches:BRANCHES.map(b=>b.id),
+      provider:'salla',           // salla | private
+      sub:'',                     // '' | carrier | own | both
+      perBranch:false, perBranchSub:{b1:'own',b2:'carrier',b3:'own'},
+      perZone:false, zone:25, prep:'30-60', deliver:'60-120',
+      from:'9:00 ص', to:'11:00 م', days:'all',
+      tasks:{c:false,a:false,t:false},
+      modal:null, consentOk:false, progress:0, swOpen:true };
+  Object.assign(S,o||{});
+}
+
+/* ---------- derived ---------- */
+const tayaarOn = ()=> S.tayaar==='trial_active'||S.tayaar==='paid';
+const inGrace  = ()=> S.tayaar==='trial_used'&&S.trialDay===8;
+const lapsed   = ()=> S.tayaar==='trial_used'&&S.trialDay>=9;
+const daysLeft = ()=> Math.max(0,7-S.trialDay);
+// هل يستخدم التاجر مناديبه؟ (سواء موحّد أو لكل فرع)
+const usesOwn  = ()=> S.provider==='private' && (
+   S.perBranch ? Object.values(S.perBranchSub).some(v=>v==='own'||v==='both')
+               : (S.sub==='own'||S.sub==='both'));
+const covered  = ()=> tayaarOn()||inGrace();
+const showReadiness = ()=> usesOwn() && !S.declined;
+const badgeOn  = ()=> !usesOwn() || covered();
+
+/* ---------- scenarios ---------- */
+const SC={
+ 'default':      {g:'التدفق الأساسي', n:'الحالة الافتراضية — بوليصات سلة', s:{}},
+ 'private':      {g:'التدفق الأساسي', n:'توصيل خاص — قبل اختيار المزود', s:{provider:'private'}},
+ 'st1':          {g:'ST1 — بطاقة طيّار', n:'اختيار «مناديب متجري» → فحص الجاهزية', s:{provider:'private',sub:'own'}},
+ 'st1-both':     {g:'ST1 — بطاقة طيّار', n:'«كلاهما معًا» — يظهر أيضًا', s:{provider:'private',sub:'both'}},
+ 'st1-per':      {g:'ST1 — بطاقة طيّار', n:'تخصيص المزود لكل فرع', s:{provider:'private',sub:'own',perBranch:true}},
+ 'st1-carrier':  {g:'ST1 — بطاقة طيّار', n:'شركة شحن خارجية — لا تظهر البطاقة', s:{provider:'private',sub:'carrier'}},
+ 'st1-basic':    {g:'ST1 — بطاقة طيّار', n:'حالة حدية: باقة أساسية', s:{provider:'private',sub:'own',plan:'basic'}},
+ 'st1-used':     {g:'ST1 — بطاقة طيّار', n:'حالة حدية: التجربة مُستخدمة', s:{provider:'private',sub:'own',tayaar:'trial_used',trialDay:9}},
+ 'st1-paid':     {g:'ST1 — بطاقة طيّار', n:'حالة حدية: طيّار مفعّل مسبقًا', s:{provider:'private',sub:'own',tayaar:'paid'}},
+ 'st2':          {g:'ST2 — التفعيل', n:'ورقة الموافقة', s:{provider:'private',sub:'own',modal:'consent'}},
+ 'st2-fail':     {g:'ST2 — التفعيل', n:'حالة حدية: فشل التفعيل', s:{provider:'private',sub:'own',modal:'consent',failNext:true}},
+ 'st3':          {g:'ST3 — بعد التفعيل', n:'الفرع مطابق + مهام البداية', s:{provider:'private',sub:'own',tayaar:'trial_active',trialDay:0}},
+ 'st4-early':    {g:'ST4 — دورة التجربة', n:'اليوم 2 — هادئ', s:{provider:'private',sub:'own',tayaar:'trial_active',trialDay:2}},
+ 'st4-ending':   {g:'ST4 — دورة التجربة', n:'اليوم 6 — تنتهي قريبًا', s:{provider:'private',sub:'own',tayaar:'trial_active',trialDay:6}},
+ 'st4-day7':     {g:'ST4 — دورة التجربة', n:'اليوم 7 — نقطة القرار', s:{provider:'private',sub:'own',tayaar:'trial_active',trialDay:7}},
+ 'st4-grace':    {g:'ST4 — دورة التجربة', n:'مهلة 48 ساعة — الوعد محمي', s:{provider:'private',sub:'own',tayaar:'trial_used',trialDay:8}},
+ 'st4-lapsed':   {g:'ST4 — دورة التجربة', n:'انتهت المهلة — الوعد موقوف', s:{provider:'private',sub:'own',tayaar:'trial_used',trialDay:9}},
+ 'st4-paid':     {g:'ST4 — دورة التجربة', n:'تم التحويل لمدفوع', s:{provider:'private',sub:'own',tayaar:'paid',trialDay:9}},
+ 'st5-declined': {g:'ST5 — حماية الوعد', n:'رفض طيّار — بدون وعد الساعتين', s:{provider:'private',sub:'own',declined:true}},
+};
+function loadScenario(k){ const sc=SC[k]; if(!sc)return; reset(Object.assign({},sc.s)); S.scenario=k; render(); }
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  document.getElementById('app').innerHTML=shell();
+  document.getElementById('modal-root').innerHTML=S.modal?modalView():'';
+  document.querySelectorAll('[data-act]').forEach(el=>el.addEventListener('click',ev=>{
+    if(el.dataset.act==='overlay'&&ev.target!==el)return;
+    ev.stopPropagation(); handle(el.dataset.act,el.dataset);
+  }));
+  document.querySelectorAll('select[data-ch]').forEach(el=>el.addEventListener('change',ev=>{
+    handleChange(el.dataset.ch, ev.target.value, el.dataset);
+  }));
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function shell(){return `
+<div class="topbar">
+  <div class="logo">🛍 سلة</div>
+  <nav>
+    <a href="#">☰ الكل</a><a href="#">الرئيسية</a><a href="#">الطلبات</a>
+    <a href="#">المنتجات</a><a href="#">التسويق</a><a href="#">المتجر وقنوات البيع</a><a href="#">التقارير</a>
+  </nav>
+  <div class="me"><div class="av">و</div><div>وليد عيسى<div class="tiny" style="opacity:.6">سبيشل</div></div></div>
+</div>
+<div class="subnav">
+  <div class="grp">
+    <a href="#">الشحن والتوصيل</a><a href="#">إدارة التشغيل</a>
+    <a href="#" class="active">التوصيل السريع</a><a href="#">التقارير</a>
+    <a href="#">المسارات</a><a href="#">جاهزية الشحن الدولي</a><a href="#">••• المزيد</a>
+  </div>
+  <span class="helpchip">؟ مركز المساعدة</span>
+</div>
+${switcher()}
+<main class="page">
+  <div class="crumbs"><span class="cur">التوصيل السريع</span><span>›</span><span>الشحن</span></div>
+  ${lifecycleBanner()}
+  ${sectionOrigin()}
+  ${sectionCoverage()}
+  ${sectionPromise()}
+  ${ S.tayaar==='trial_active'&&S.trialDay<=1&&usesOwn() ? firstRun() : '' }
+  ${launchBar()}
+</main>`;}
+
+/* ---------- القسم 1: من أين ستنطلق شحناتك؟ ---------- */
+function sectionOrigin(){return `
+<div class="card">
+  <h2>من أين ستنطلق شحناتك؟</h2>
+  <p class="lead">اختر الفروع والمستودعات، ثم حدّد مزود التوصيل السريع.</p>
+
+  <div class="field">
+    <label class="lbl"><span class="req">*</span> الفرع أو المستودع</label>
+    <div class="tagsin">
+      ${BRANCHES.filter(b=>S.branches.includes(b.id)).map(b=>
+        `<span class="chip"><b>${b.n}</b><span class="x" data-act="rm-branch" data-id="${b.id}">×</span></span>`).join('')}
+      ${S.branches.length<BRANCHES.length?`<button class="add" data-act="add-branch">+ إضافة فرع</button>`:''}
+      <span class="clear" data-act="clear-branches">⊗</span>
+    </div>
+  </div>
+
+  <div class="field">
+    <label class="lbl">مزود التوصيل السريع</label>
+
+    <div class="opt ${S.provider==='salla'?'on':''}" data-act="provider" data-v="salla">
+      <div class="dot"></div>
+      <div class="ob">
+        <div class="ot">بوليصات سلة
+          <span class="pill pill--mint">✓ موصى به</span>
+          <span class="pill pill--mint">✓ جاهز فورًا</span></div>
+        <div class="od">وصّل طلبات عملائك خلال ساعتين في 23 مدينة — تختار سلة أفضل مزود لكل طلب تلقائيًا.</div>
+        <div class="feats">
+          <span class="feat">⏱ بدون عقود أو إعداد إضافي</span>
+          <span class="feat">🗺 تغطي 43 مدينة</span>
+          <span class="feat">⏱ متوسط التوصيل 60 دقيقة</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="opt ${S.provider==='private'?'on':''}" data-act="provider" data-v="private">
+      <div class="dot"></div>
+      <div class="ob">
+        <div class="ot">توصيل خاص</div>
+        <div class="od">اختر شركات شحن خارجية أو مناديب متجرك، أو كليهما معًا.</div>
+        ${ S.provider==='private' ? privateBody() : '' }
+      </div>
+    </div>
+  </div>
+</div>`;}
+
+function privateBody(){return `
+  <div style="margin-top:16px">
+    <div class="tog ${S.perBranch?'on':''}" data-act="per-branch" style="margin-bottom:16px">
+      <div class="knob"></div>
+      <div><div class="tt">تخصيص المزود لكل فرع</div>
+      <div class="td">فقط إذا كانت فروعك تعتمد على شركات شحن أو مناديب مختلفين.</div></div>
+    </div>
+
+    ${ S.perBranch ? perBranchTable() : `
+    <label class="lbl"><span class="req">*</span> مزود التوصيل السريع
+      <span class="sub">اختر شركات شحن خارجية أو مناديب متجرك، أو كليهما معًا.</span></label>
+    <div class="selwrap">
+      <select class="sel ${S.sub?'':'ph'}" data-ch="sub">
+        ${SUBPROVIDERS.map(p=>`<option value="${p.v}" ${S.sub===p.v?'selected':''}>${p.t}</option>`).join('')}
+      </select>
+    </div>`}
+
+    ${ showReadiness() ? readinessBlock() : (S.declined&&usesOwn() ? declinedBlock() : '') }
+  </div>`;}
+
+function perBranchTable(){return `
+  <label class="lbl"><span class="req">*</span> المزود لكل فرع</label>
+  <div class="pertab">
+    ${BRANCHES.filter(b=>S.branches.includes(b.id)).map(b=>`
+      <div class="perrow">
+        <span class="nm">${b.n}</span>
+        <div class="selwrap">
+          <select class="sel" data-ch="per-sub" data-id="${b.id}">
+            ${SUBPROVIDERS.filter(p=>p.v).map(p=>
+              `<option value="${p.v}" ${S.perBranchSub[b.id]===p.v?'selected':''}>${p.t}</option>`).join('')}
+          </select>
+        </div>
+        ${ (S.perBranchSub[b.id]==='own'||S.perBranchSub[b.id]==='both')
+            ? (covered()? `<span class="pill pill--mint">✓ عبر طيّار</span>`
+                        : `<span class="pill pill--warn">⚠ متطلبات ناقصة</span>`)
+            : `<span class="pill pill--muted">لا ينطبق</span>` }
+      </div>`).join('')}
+  </div>`;}
+
+/* ---------- ST1: فحص الجاهزية + بطاقة طيّار ---------- */
+function readinessBlock(){
+  const met=covered();
+  const n = S.perBranch
+    ? Object.entries(S.perBranchSub).filter(([id,v])=>S.branches.includes(id)&&(v==='own'||v==='both')).length
+    : S.branches.length;
+  return `
+  <div class="ready ${met?'met':''}">
+    <div class="ready-h">
+      <span class="i">${met?'✅':'⚠️'}</span>
+      <div>
+        <h4>${met
+          ? `مناديبك يستوفون متطلبات وعد الساعتين${S.perBranch?` (${n} فرع)`:''}`
+          : `مناديبك لا يستوفون متطلبات وعد الساعتين${S.perBranch?` (${n} فرع)`:''}`}</h4>
+        <p>${met
+          ? 'المتطلبات الثلاثة مغطّاة عبر طيّار — يظهر وعد التوصيل خلال ساعتين لعملائك.'
+          : 'وعد التوصيل تعرضه سلة للعميل عند الدفع، ولذلك نحتاج أن نتحقّق منه. مناديبك يحتاجون:'}</p>
+      </div>
+    </div>
+    <ul class="reqs">${REQS.map(r=>`
+      <li class="req ${met?'met':'unmet'}">
+        <span class="ic">${met?'✓':'!'}</span>
+        <div><div class="rt">${r.t}</div><div class="rd">${r.d}</div></div>
+      </li>`).join('')}</ul>
+    ${met?'':tayaarCard()}
+  </div>`;
+}
+
+function declinedBlock(){return `
+  <div class="promise-note bad" style="margin-top:14px">
+    <span>ℹ️</span>
+    <div>
+      <b>سيُفعَّل التوصيل السريع بدون وعد الساعتين</b>
+      <p style="margin:4px 0 0">تبقى فروعك ضمن التوصيل السريع للاستلام والتوصيل الاعتيادي، لكن لن يظهر وعد
+      «التوصيل خلال ساعتين» لعميلك عند الدفع — لأننا لا نستطيع التحقق من الوفاء به.</p>
+      <div style="margin-top:11px"><button class="btn btn--out btn--sm" data-act="undecline">العودة وتفعيل طيّار</button></div>
+    </div>
+  </div>`;}
+
+function tayaarCard(){
+  if(S.plan!=='pro') return `
+  <div class="ty">
+    <div class="ty-h">
+      <div class="ty-logo" style="background:linear-gradient(135deg,#7B4DD8,#5B34B0)">ط</div>
+      <div style="flex:1"><h4 class="ty-t">طيّار <span class="pill pill--feature">برو والخاصة</span></h4>
+      <p class="ty-s">التوصيل السريع عبر مناديبك متاح في باقتَي برو والخاصة، مثل بقية تجربة التوصيل السريع.</p></div>
+    </div>
+    <div class="ty-cta">
+      <button class="btn btn--feature" data-act="upgrade">👑 ترقية الباقة</button>
+      <button class="btn btn--link" data-act="decline">المتابعة بدون وعد الساعتين</button>
+    </div>
+  </div>`;
+
+  const used=S.tayaar==='trial_used';
+  return `
+  <div class="ty">
+    <div class="ty-h">
+      <div class="ty-logo">ط</div>
+      <div style="flex:1">
+        <h4 class="ty-t">طيّار يوفّر هذه المتطلبات الثلاثة
+          ${used?'<span class="pill pill--muted">التجربة مُستخدمة</span>'
+                :'<span class="pill pill--mint">أسبوع مجاني</span>'}</h4>
+        <p class="ty-s">تطبيق من سلة لإدارة مناديبك — يعمل داخل لوحة تحكمك، بدون أي إعداد خارجي.</p>
+      </div>
+    </div>
+    <ul class="caps">${CAPS.map(c=>`<li><span class="c">✓</span><span>${c}</span></li>`).join('')}</ul>
+    <div class="ty-cta">
+      ${used?`<button class="btn btn--mint" data-act="subscribe">الاشتراك من 5 ر.س</button>`
+            :`<button class="btn btn--mint" data-act="consent-open">ابدأ أسبوع مجاني</button>`}
+      <button class="btn btn--link" data-act="decline">المتابعة بدون طيّار</button>
+    </div>
+    <p class="ty-note">${used
+      ? 'استخدمت التجربة المجانية سابقًا على هذا المتجر. الاشتراك يبدأ من 5 ر.س شهريًا.'
+      : 'الأسبوع المجاني يشمل تجهيز الطلب والتوصيل. بعده يستمر طيّار من 5 ر.س شهريًا — بدون خصم تلقائي، القرار لك.'}</p>
+  </div>`;
+}
+
+/* ---------- القسم 2: التغطية ---------- */
+function sectionCoverage(){return `
+<div class="card">
+  <h2>إلى أي مدى تصل خدمتك؟</h2>
+  <p class="lead">حدّد نطاق التوصيل السريع حول الفرع — يمكنك تعديله لاحقًا.</p>
+  <div class="tog ${S.perZone?'on':''}" data-act="per-zone" style="margin-bottom:18px">
+    <div class="knob"></div>
+    <div><div class="tt">تخصيص النطاق لكل فرع</div>
+    <div class="td">فقط إذا كانت فروعك تخدم مسافات مختلفة.</div></div>
+  </div>
+  <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+    <span style="font-size:20px">🗺</span>
+    <div style="flex:1;min-width:200px">
+      <div style="font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px">
+        النطاق الحالي: ${S.zone} كم <span class="pill pill--mint">✓ موصى به</span></div>
+      <div class="tiny muted">توصي سلة بنطاق 25 كم لتحقيق أفضل أداء للتوصيل السريع.</div>
+    </div>
+    <div style="position:relative;width:170px">
+      <input class="inp" value="${S.zone}" data-act="noop" style="padding-left:44px">
+      <span style="position:absolute;left:14px;top:12px;font-size:12.5px;color:var(--dark-100)">كم</span>
+    </div>
+  </div>
+</div>`;}
+
+/* ---------- القسم 3: وعد التوصيل ---------- */
+function sectionPromise(){
+  const risky = usesOwn() && !covered();
+  return `
+<div class="card">
+  <h2>وعد التوصيل لعملائك</h2>
+  <p class="lead">اضبط وعد التوصيل بما يناسب سرعة تجهيز طلباتك وأوقات عملك.</p>
+  <div class="row2">
+    <div class="field"><label class="lbl"><span class="req">*</span> مدة تجهيز الطلب</label>
+      <div class="selwrap"><select class="sel" data-ch="prep">
+        ${['15-30','30-60','60-90'].map(v=>`<option ${S.prep===v?'selected':''}>${v} دقيقة</option>`).join('')}
+      </select></div></div>
+    <div class="field"><label class="lbl"><span class="req">*</span> مدة التوصيل</label>
+      <div class="selwrap"><select class="sel" data-ch="deliver">
+        ${['30-60','60-120','120-180'].map(v=>`<option ${S.deliver===v?'selected':''}>${v} دقيقة</option>`).join('')}
+      </select></div></div>
+  </div>
+  <div class="field">
+    <label class="lbl">متى يتوفر التوصيل السريع
+      <span class="sub">حدّد الأوقات التي يظهر خلالها وعد التوصيل للعملاء خلال اليوم.</span></label>
+    <div class="row2">
+      <div><div class="tiny muted" style="margin-bottom:5px">من <span style="color:var(--danger)">*</span></div>
+        <input class="inp" value="${S.from}" data-act="noop"></div>
+      <div><div class="tiny muted" style="margin-bottom:5px">إلى <span style="color:var(--danger)">*</span></div>
+        <input class="inp" value="${S.to}" data-act="noop"></div>
+    </div>
+  </div>
+  <div class="field">
+    <label class="lbl"><span class="req">*</span> أيام التوصيل السريع</label>
+    <div class="btngrp">
+      <button class="${S.days==='all'?'on':''}" data-act="days" data-v="all">كل أيام الاسبوع</button>
+      <button class="${S.days==='custom'?'on':''}" data-act="days" data-v="custom">تخصيص الأيام</button>
+    </div>
+  </div>
+  ${ risky ? `
+  <div class="promise-note bad">
+    <span>⚠️</span>
+    <div><b>هذا الوعد لن يظهر لعملائك على فروع مناديبك</b>
+    <p style="margin:4px 0 0">تعرض سلة هذا الوعد عند الدفع نيابةً عنك، ولذلك نعرضه فقط حيث نستطيع التحقق منه.
+    فعّل طيّار في القسم الأول ليظهر الوعد على مناديبك أيضًا.</p></div>
+  </div>` : (usesOwn()&&covered() ? `
+  <div class="promise-note good">
+    <span>✅</span>
+    <div><b>هذا الوعد سيظهر لعملائك على كل فروعك</b>
+    <p style="margin:4px 0 0">مناديبك مغطّون عبر طيّار — تحديث الحالة، التحقق قبل الخروج، والتتبع المباشر.</p></div>
+  </div>`:'') }
+</div>`;}
+
+/* ---------- ST4: رسائل دورة التجربة ---------- */
+function lifecycleBanner(){
+  if(!usesOwn()) return '';
+  const d=S.trialDay;
+  const A=(th,i,t,b,acts)=>`<div class="alert alert--${th}"><span class="i">${i}</span><div style="flex:1">
+    <h4>${t}</h4><p>${b}</p>${acts&&acts.length?`<div class="act">${acts.map(a=>
+    `<button class="btn ${a[2]}" data-act="${a[1]}">${a[0]}</button>`).join('')}</div>`:''}</div></div>`;
+
+  if(S.tayaar==='trial_active'&&d>=5&&d<7)
+    return A('warning','⏳',`تنتهي تجربة طيّار خلال ${daysLeft()} أيام`,
+      'استمر من 5 ر.س شهريًا للحفاظ على ظهور وعد الساعتين على فروع مناديبك.',
+      [['الاستمرار من 5 ر.س','subscribe','btn--mint btn--sm']]);
+  if(S.tayaar==='trial_active'&&d>=7)
+    return A('warning','⏳','تنتهي تجربة طيّار اليوم',
+      'إن لم تستمر، تبقى فروعك ضمن التوصيل السريع للاستلام والتوصيل الاعتيادي، ويتوقف وعد الساعتين بعد مهلة 48 ساعة.',
+      [['الاستمرار من 5 ر.س','subscribe','btn--mint btn--sm'],['تذكيري لاحقًا','noop','btn--out btn--sm']]);
+  if(inGrace())
+    return A('warning','🕐','انتهت التجربة — مهلة 48 ساعة',
+      'أبقينا وعد الساعتين ظاهرًا 48 ساعة حتى تكتمل الطلبات التي وُعد عملاؤها بالتوصيل السريع. فعّل طيّار للحفاظ عليه.',
+      [['تفعيل طيّار من 5 ر.س','subscribe','btn--mint btn--sm']]);
+  if(lapsed())
+    return A('danger','⏸','وعد الساعتين موقوف على فروع مناديبك',
+      'فروعك ما زالت ضمن التوصيل السريع ولم يتغيّر أي إعداد — فقط وعد «خلال ساعتين» لا يظهر لعميلك. يُستعاد بضغطة واحدة.',
+      [['إعادة تفعيل طيّار','subscribe','btn--mint btn--sm']]);
+  if(S.tayaar==='paid')
+    return A('mint','✅','طيّار مفعّل','مناديبك يستوفون متطلبات وعد الساعتين، والوعد يظهر لعميلك عند الدفع.',[]);
+  if(S.tayaar==='trial_active'&&d>=1&&d<5)
+    return A('mint','✅',`تجربة طيّار فعّالة — تبقّى ${daysLeft()} أيام`,
+      'مناديبك يستوفون المتطلبات الثلاثة، ووعد الساعتين يظهر لعملائك.',[]);
+  return '';
+}
+
+/* ---------- ST3: مهام البداية ---------- */
+function firstRun(){
+  const T=[['c','أسنِد أول مندوب','اربط مندوبك بالفرع ليظهر على الخريطة'],
+           ['a','اطبع أول بوليصة مُتحقَّقة','امسح باركود الطلب قبل الطباعة — يمنع خروج الطلب الخطأ'],
+           ['t','تابع أول توصيلة على الخريطة','شاهد المندوب لحظة بلحظة كما يراه عميلك']];
+  const done=Object.values(S.tasks).filter(Boolean).length;
+  return `
+  <div class="card">
+    <h2>ابدأ مع طيّار</h2>
+    <p class="lead">${done} من 3 · هذه الخطوات تجعل أسبوعك المجاني مفيدًا فعلًا.</p>
+    <ul class="tasks">${T.map(([k,t,d])=>`
+      <li class="task ${S.tasks[k]?'done':''}" data-act="task" data-k="${k}">
+        <span class="bx">${S.tasks[k]?'✓':''}</span>
+        <div><div class="tt">${t}</div><div class="td">${d}</div></div></li>`).join('')}</ul>
+    ${done===3?`<div class="promise-note good" style="margin-top:16px"><span>🎉</span>
+      <div><b>فرعك جاهز تمامًا</b><p style="margin:4px 0 0">أول توصيلة خلال ساعتين تمّت — وعميلك تابعها على الخريطة من لحظة الخروج.</p></div></div>`:''}
+  </div>`;
+}
+
+/* ---------- شريط الإطلاق ---------- */
+function launchBar(){
+  const n=S.branches.length;
+  return `<div class="launch">
+    <div class="t"><b>جاهز للانطلاق؟</b>
+      ${n} فرع · ${badgeOn()?'وعد الساعتين سيظهر لعملائك':'بدون وعد الساعتين على فروع مناديبك'}
+      · يمكنك تعديل الإعدادات لاحقًا.</div>
+    <button class="btn btn--mint" data-act="noop">🚀 إطلاق الخدمة</button>
+  </div>`;
+}
+
+/* ---------- ST2: ورقة الموافقة والتفعيل ---------- */
+function modalView(){
+  const M=S.modal;
+  if(M==='consent') return `<div class="overlay" data-act="overlay"><div class="modal">
+    <div class="modal-h"><div class="ty-logo">ط</div>
+      <div style="flex:1"><h3>بدء أسبوع طيّار المجاني</h3>
+      <p class="tiny muted" style="margin:3px 0 0">تفعيل مباشر داخل لوحة تحكمك — بدون تحويل لأي خدمة خارجية.</p></div>
+      <button class="x" data-act="close">×</button></div>
+    <div class="modal-b">
+      <div class="kv">
+        <div><span class="k">ما الذي يشمله</span><span class="v">تجهيز الطلب + التوصيل</span></div>
+        <div><span class="k">المدة</span><span class="v">7 أيام كاملة</span></div>
+        <div><span class="k">تنتهي في</span><span class="v">31 أغسطس 2026</span></div>
+        <div><span class="k">وسيلة دفع الآن</span><span class="v">غير مطلوبة</span></div>
+        <div><span class="k">بعد التجربة</span><span class="v">من 5 ر.س شهريًا</span></div>
+      </div>
+      <div class="alert alert--info" style="margin-bottom:0"><span class="i">ℹ️</span><div>
+        <h4>ماذا يحدث في اليوم السابع</h4>
+        <p>لن يُخصم أي مبلغ تلقائيًا. إن اخترت عدم الاستمرار، تبقى فروعك ضمن التوصيل السريع للاستلام
+        والتوصيل الاعتيادي، ويتوقف وعد «التوصيل خلال ساعتين» بعد مهلة 48 ساعة.</p></div></div>
+      <label class="consent ${S.consentOk?'on':''}" data-act="consent">
+        <span class="bx">${S.consentOk?'✓':''}</span>
+        <span>أوافق على تفعيل تجربة طيّار المجانية لمدة أسبوع، وأفهم أن الاستمرار بعدها يبدأ من 5 ر.س شهريًا باختياري.</span>
+      </label>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn--mint" data-act="activate" ${S.consentOk?'':'disabled'}>تفعيل التجربة الآن</button>
+      <button class="btn btn--out" data-act="close">إلغاء</button>
+    </div></div></div>`;
+
+  if(M==='progress'){
+    const st=['تفعيل طيّار على متجرك','ربط فروعك بمناديبك','تفعيل تحديث الحالة والتتبع'];
+    return `<div class="overlay"><div class="modal" style="max-width:420px"><div class="modal-b" style="padding:30px 26px;text-align:center">
+      <div class="ty-logo" style="margin:0 auto 14px;width:52px;height:52px;font-size:20px">ط</div>
+      <h3 style="margin:0 0 6px;font-size:16px">جارٍ تفعيل طيّار…</h3>
+      <p class="tiny muted" style="margin:0">${st[Math.min(2,Math.floor(S.progress/34))]}</p>
+      <div class="prog"><i style="width:${S.progress}%"></i></div>
+      <p class="tiny muted" style="margin:0">${S.progress}%</p></div></div></div>`;
+  }
+
+  if(M==='fail') return `<div class="overlay" data-act="overlay"><div class="modal" style="max-width:440px">
+    <div class="modal-h"><span style="font-size:25px">⚠️</span><div style="flex:1"><h3>تعذّر تفعيل التجربة</h3></div>
+      <button class="x" data-act="close">×</button></div>
+    <div class="modal-b">
+      <p style="margin:0 0 13px;font-size:13.5px;line-height:1.75">لم يكتمل التفعيل ولم يتغيّر أي شيء في إعداداتك.
+      ما زالت فروعك بحاجة للمتطلبات الثلاثة، ولم نسجّل أي اشتراك أو تجربة على متجرك.</p>
+      <div class="alert alert--info" style="margin:0"><span class="i">ℹ️</span><div>
+      <p>لن نُبقي متجرك في حالة نصف مفعّلة أبدًا — إمّا يكتمل التفعيل أو لا يبدأ.</p></div></div></div>
+    <div class="modal-f"><button class="btn btn--mint" data-act="retry">إعادة المحاولة</button>
+      <button class="btn btn--out" data-act="close">لاحقًا</button></div></div></div>`;
+
+  if(M==='success') return `<div class="overlay" data-act="overlay"><div class="modal" style="max-width:440px">
+    <div class="modal-b" style="padding:30px 26px;text-align:center">
+      <div style="font-size:40px;line-height:1;margin-bottom:10px">🎉</div>
+      <h3 style="margin:0 0 7px;font-size:17px">تم تفعيل طيّار — أسبوعك المجاني بدأ</h3>
+      <p class="tiny muted" style="margin:0 0 4px">مناديبك الآن يستوفون متطلبات وعد الساعتين.</p>
+      <p class="tiny muted" style="margin:0">تنتهي التجربة في 31 أغسطس 2026 — سنذكّرك قبلها.</p></div>
+    <div class="modal-f" style="justify-content:center">
+      <button class="btn btn--mint" data-act="close">ابدأ الإعداد</button></div></div></div>`;
+
+  if(M==='upgrade') return `<div class="overlay" data-act="overlay"><div class="modal" style="max-width:430px">
+    <div class="modal-h"><span style="font-size:24px">👑</span><div style="flex:1"><h3>التوصيل السريع عبر مناديبك</h3></div>
+      <button class="x" data-act="close">×</button></div>
+    <div class="modal-b"><p style="margin:0;font-size:13.5px;line-height:1.75">
+      هذه الميزة متاحة في باقتَي <b>برو</b> و<b>الخاصة</b>، مثل بقية تجربة التوصيل السريع.
+      رقِّ باقتك لتفعيل طيّار وإظهار وعد «التوصيل خلال ساعتين» على فروع مناديبك.</p></div>
+    <div class="modal-f"><button class="btn btn--feature" data-act="close">عرض الباقات</button>
+      <button class="btn btn--out" data-act="close">ليس الآن</button></div></div></div>`;
+  return '';
+}
+
+/* ---------- مبدّل الحالات ---------- */
+function switcher(){
+  if(!S.swOpen) return `<button class="sw-toggle" data-act="sw">☰ الحالات</button>`;
+  const g={}; Object.entries(SC).forEach(([k,v])=>{(g[v.g]=g[v.g]||[]).push([k,v.n]);});
+  return `<div class="sw"><div class="sw-h"><b>حالات النموذج الأولي</b><button data-act="sw">×</button></div>
+  <div class="sw-b">${Object.entries(g).map(([grp,items])=>`<div class="sw-g">${grp}</div>
+    ${items.map(([k,n])=>`<button class="s ${S.scenario===k?'on':''}" data-act="scenario" data-k="${k}">${n}</button>`).join('')}
+  `).join('')}
+  <div class="note">النموذج تفاعلي بالكامل — غيّر المزوّد بنفسك، أو اقفز لأي حالة.</div>
+  <div class="note">PDV2-422 · ST1–ST5 · رموز نظام تصميم سلة الحقيقية.</div></div></div>`;
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function handleChange(kind,val,d){
+  if(kind==='sub'){ S.sub=val; S.declined=false; }
+  if(kind==='per-sub'){ S.perBranchSub[d.id]=val; S.declined=false; }
+  if(kind==='prep')    S.prep=val.replace(' دقيقة','');
+  if(kind==='deliver') S.deliver=val.replace(' دقيقة','');
+  render();
+}
+
+function handle(a,d){
+  switch(a){
+    case 'sw': S.swOpen=!S.swOpen; break;
+    case 'scenario': loadScenario(d.k); return;
+    case 'provider':
+      if(S.provider!==d.v){ S.provider=d.v; S.declined=false; if(d.v==='salla'){S.sub='';} }
+      break;
+    case 'rm-branch': S.branches=S.branches.filter(x=>x!==d.id); break;
+    case 'add-branch': {
+      const miss=BRANCHES.find(b=>!S.branches.includes(b.id));
+      if(miss) S.branches.push(miss.id);
+      break; }
+    case 'clear-branches': S.branches=[]; break;
+    case 'per-branch': S.perBranch=!S.perBranch; S.declined=false; break;
+    case 'per-zone': S.perZone=!S.perZone; break;
+    case 'days': S.days=d.v; break;
+    case 'consent-open': S.modal='consent'; S.consentOk=false; break;
+    case 'consent': S.consentOk=!S.consentOk; break;
+    case 'close': case 'overlay': S.modal=null; break;
+    case 'activate': {
+      S.modal='progress'; S.progress=0; render();
+      const t=setInterval(()=>{
+        S.progress=Math.min(100,S.progress+11);
+        if(S.progress>=100){ clearInterval(t);
+          if(S.failNext){ S.modal='fail'; S.failNext=false; }
+          else { S.tayaar='trial_active'; S.trialDay=0; S.modal='success'; } }
+        render();
+      },180);
+      return; }
+    case 'retry': S.modal='consent'; S.consentOk=true; break;
+    case 'decline': S.declined=true; break;
+    case 'undecline': S.declined=false; break;
+    case 'subscribe': S.tayaar='paid'; S.trialDay=9; S.declined=false; break;
+    case 'upgrade': S.modal='upgrade'; break;
+    case 'task': S.tasks[d.k]=!S.tasks[d.k]; break;
+    case 'noop': break;
+  }
+  render();
+}
+
+reset(); render();
+</script>
+</body>
+</html>
