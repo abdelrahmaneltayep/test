@@ -1,0 +1,2011 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HIGHBASE — Auth Pattern Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================================
+   styles/tokens.css — §3 Design tokens (sampled from production)
+   ========================================================================= */
+:root{
+  /* brand */
+  --hb-blue:      #0B5CA3;
+  --hb-blue-ink:  #08497F;
+  --hb-navy:      #0E2E4F;
+  --hb-tint:      #F0F9FF;
+  --hb-amber:     #F2B705;
+  --hb-amber-bg:  #FFF9E6;
+  --hb-red:       #C8102E;
+  /* neutrals — cool-biased toward the brand blue */
+  --hb-paper:     #FFFFFF;
+  --hb-mist:      #F6F8FB;
+  --hb-line:      #E3E9F0;
+  --hb-ink:       #16222E;
+  --hb-ink-soft:  #67788A;
+  /* auth level semantics */
+  --level-0:      #8496A8;
+  --level-1:      #0B5CA3;
+  --level-2:      #1E9E63;
+  /* console rail */
+  --con-bg:       #0B1620;
+  --con-bg-2:     #101E2A;
+  --con-line:     #1E3348;
+  --con-ink:      #B9CBDA;
+  --con-client:   #7DD3A0;
+  --con-server:   #6FB3F0;
+  --con-auto:     #F2B705;
+  --con-error:    #FF7A7A;
+  --radius-pill:  999px;
+  --radius-input: 9px;
+  --radius-card:  12px;
+  --radius-box:   10px;
+  --focus:        0 0 0 3px rgba(11,92,163,.13);
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{
+  font-family:'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size:13.5px; line-height:1.5; color:var(--hb-ink); background:var(--con-bg);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0;font-weight:800;color:var(--hb-navy);text-wrap:balance}
+p{margin:0}
+button{font-family:inherit;font-size:inherit;color:inherit}
+a{color:var(--hb-blue);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:none;box-shadow:var(--focus);border-color:var(--hb-blue)}
+.rail :focus-visible{box-shadow:0 0 0 3px rgba(111,179,240,.28)}
+
+/* ============================================================================
+   App shell — simulated browser (left) + console rail (right)   §10.5
+   ========================================================================= */
+.app{display:grid;grid-template-columns:minmax(0,1fr) 392px;height:100vh;overflow:hidden}
+@media (max-width:1040px){ .app{grid-template-columns:1fr;grid-template-rows:1fr 46vh} }
+
+.browser{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--con-bg-2);padding:12px;gap:10px}
+.chrome{
+  display:flex;align-items:center;gap:8px;background:#16283A;border:1px solid var(--con-line);
+  border-radius:11px;padding:7px 9px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;flex-wrap:wrap;
+}
+.navbtn{
+  width:26px;height:26px;flex:0 0 26px;border-radius:var(--radius-pill);border:1px solid var(--con-line);
+  background:#0E1D2A;color:#9FB6C9;cursor:pointer;display:grid;place-items:center;font-size:12.5px;padding:0;
+}
+.navbtn:hover:not(:disabled){background:#1B3247;color:#fff}
+.navbtn:disabled{opacity:.32;cursor:not-allowed}
+.urlbar{
+  flex:1 1 320px;min-width:180px;background:#0B1620;border:1px solid var(--con-line);border-radius:var(--radius-pill);
+  padding:5px 12px;color:#8FA6BA;overflow-x:auto;white-space:nowrap;font-size:11.5px;
+}
+.urlbar .u-path{color:#E6EEF6}
+.urlbar .u-key{color:var(--con-auto)}
+.urlbar .u-val{color:var(--con-client)}
+.urlbar .u-sep{color:#5A7A96}
+.chip{
+  border:1px solid var(--con-line);background:#0E1D2A;color:#9FB6C9;border-radius:var(--radius-pill);
+  padding:4px 10px;cursor:pointer;font-family:inherit;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;
+}
+.chip[aria-pressed="true"],.chip.on{background:var(--hb-blue);border-color:var(--hb-blue);color:#fff}
+.chip:hover{color:#fff}
+
+.stagewrap{flex:1;min-height:0;min-width:0;display:flex;justify-content:center;overflow:hidden}
+.stage{
+  position:relative;flex:1;min-width:0;background:var(--hb-paper);border-radius:var(--radius-card);
+  overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);
+}
+/* the page scrolls, the stage does not — so the overlay stays centred and the
+   inert background cannot be scrolled behind it */
+#pagearea{height:100%;overflow-y:auto;overflow-x:hidden}
+.stage.mobile{flex:0 0 390px;max-width:390px}
+.stage[data-hard="1"]{animation:hardpaint .45s ease}
+@keyframes hardpaint{from{opacity:.25}to{opacity:1}}
+
+/* ============================================================================
+   storefront/ — PromoBar, Header, Footer, pages
+   ========================================================================= */
+.hb-logo{display:inline-flex;flex-direction:column;line-height:1;text-decoration:none}
+.hb-logo b{font-size:19px;font-weight:700;letter-spacing:.13em;color:var(--hb-blue)}
+.hb-logo span{font-size:5.5px;letter-spacing:.42em;color:var(--hb-ink-soft);margin-top:4px;font-weight:600}
+.hb-logo.lg b{font-size:23px}
+a.hb-logo:hover{text-decoration:none}
+
+.promobar{background:var(--hb-navy);color:#DCE8F3;font-size:11.5px;padding:7px 18px;display:flex;gap:16px;align-items:center;justify-content:center;flex-wrap:wrap}
+.promobar b{color:var(--hb-amber)}
+
+.header{
+  position:sticky;top:0;z-index:5;background:var(--hb-paper);border-bottom:1px solid var(--hb-line);
+  padding:12px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.header .search{
+  flex:1 1 200px;min-width:120px;background:var(--hb-mist);border:1px solid var(--hb-line);border-radius:var(--radius-pill);
+  padding:8px 14px;font-size:12.5px;color:var(--hb-ink-soft);
+}
+.header nav{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+.hlink{background:none;border:none;padding:7px 10px;font-size:12.5px;font-weight:600;color:var(--hb-ink);cursor:pointer;border-radius:var(--radius-pill)}
+.hlink:hover{background:var(--hb-mist)}
+.cartbtn{position:relative}
+.cartbtn .count{
+  position:absolute;top:0;inset-inline-end:0;background:var(--hb-red);color:#fff;font-size:9.5px;font-weight:700;
+  min-width:15px;height:15px;border-radius:var(--radius-pill);display:grid;place-items:center;padding:0 3px;
+}
+.levelpill{
+  display:inline-flex;align-items:center;gap:5px;border-radius:var(--radius-pill);padding:4px 10px;
+  font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#fff;background:var(--level-0);
+}
+.levelpill[data-l="L1"]{background:var(--level-1)}
+.levelpill[data-l="L2"]{background:var(--level-2)}
+
+.page{padding:18px}
+.crumbs{font-size:11.5px;color:var(--hb-ink-soft);margin-bottom:12px}
+.hero{
+  background:linear-gradient(135deg,var(--hb-tint),#fff);border:1px solid var(--hb-line);border-radius:14px;
+  padding:22px;margin-bottom:18px;
+}
+.hero h1{font-size:23px;margin-bottom:6px}
+.hero p{font-size:13.5px;color:var(--hb-ink-soft);max-width:52ch}
+.sechead{display:flex;align-items:baseline;gap:10px;margin:18px 0 10px}
+.sechead h2{font-size:17px}
+.sechead span{font-size:11.5px;color:var(--hb-ink-soft)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px}
+.card{border:1px solid var(--hb-line);border-radius:var(--radius-card);overflow:hidden;background:var(--hb-paper);display:flex;flex-direction:column}
+.card .thumb{background:var(--hb-mist);height:104px;display:grid;place-items:center;font-size:40px;cursor:pointer;border:none;width:100%}
+.card .body{padding:11px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card .sup{font-size:10.5px;color:var(--hb-ink-soft);font-weight:600;letter-spacing:.03em;text-transform:uppercase}
+.card .nm{font-size:12.5px;font-weight:700;color:var(--hb-navy);text-align:start;background:none;border:none;padding:0;cursor:pointer;line-height:1.35}
+.card .nm:hover{color:var(--hb-blue)}
+.card .meta{font-size:11.5px;color:var(--hb-ink-soft)}
+.card .foot{margin-top:auto;display:flex;flex-direction:column;gap:7px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;border-radius:var(--radius-pill);padding:3px 8px}
+.badge.coupon{background:var(--hb-amber-bg);color:#7A5B00;border:1px solid #F0DFA6}
+.badge.eta{background:var(--hb-mist);color:var(--hb-ink-soft)}
+
+/* PriceDisplay — the gate */
+.price{font-size:19px;font-weight:800;color:var(--hb-navy);letter-spacing:-.01em}
+.price small{font-size:11.5px;font-weight:700;color:var(--hb-ink-soft);margin-inline-start:4px}
+.price.reveal{animation:reveal .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes reveal{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+.gate{
+  width:100%;display:flex;align-items:center;justify-content:center;gap:7px;background:var(--hb-tint);
+  border:1px dashed #BBD9F0;color:var(--hb-blue);font-weight:700;font-size:12.5px;border-radius:var(--radius-pill);
+  padding:9px 12px;cursor:pointer;text-align:center;line-height:1.25;
+}
+.gate:hover{background:#E4F2FE;border-color:var(--hb-blue)}
+.gate.sm{font-size:11.5px;padding:8px 10px}
+
+.btn{
+  border:1px solid transparent;border-radius:var(--radius-pill);padding:10px 18px;font-weight:700;font-size:13.5px;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:background .15s,border-color .15s;
+}
+.btn.primary{background:var(--hb-blue);color:#fff}
+.btn.primary:hover{background:var(--hb-blue-ink)}
+.btn.ghost{background:var(--hb-paper);border-color:var(--hb-line);color:var(--hb-ink)}
+.btn.ghost:hover{border-color:var(--hb-blue);color:var(--hb-blue)}
+.btn.block{width:100%}
+.btn.sm{padding:7px 13px;font-size:12.5px}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.btn .spin{width:13px;height:13px;border-radius:50%;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .7s linear infinite}
+.btn.ghost .spin{border-color:rgba(11,92,163,.25);border-top-color:var(--hb-blue)}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pdp{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:20px}
+.stage.mobile .pdp{grid-template-columns:1fr}
+.pdp .shot{background:var(--hb-mist);border:1px solid var(--hb-line);border-radius:14px;height:230px;display:grid;place-items:center;font-size:86px}
+.pdp h1{font-size:23px;margin:10px 0 4px}
+.pdp .sup{font-size:12.5px;color:var(--hb-ink-soft);font-weight:600}
+.speclist{list-style:none;padding:0;margin:14px 0;display:grid;gap:8px}
+.speclist li{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;border-bottom:1px dashed var(--hb-line);padding-bottom:7px}
+.speclist li span:first-child{color:var(--hb-ink-soft)}
+.speclist li span:last-child{font-weight:700}
+.buybox{border:1px solid var(--hb-line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:11px;align-self:start;position:sticky;top:70px}
+.infobox{background:var(--hb-tint);border:1px solid #D6EAFA;border-radius:var(--radius-box);padding:12px;font-size:12.5px;color:var(--hb-navy)}
+.infobox.warn{background:var(--hb-amber-bg);border-color:#F0DFA6;color:#7A5B00}
+.infobox.err{background:#FDECEF;border-color:#F3C7CF;color:var(--hb-red)}
+
+.footer{background:var(--hb-navy);color:#B9CEE2;padding:22px 18px;margin-top:26px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.footer h4{color:#fff;font-size:12.5px;margin-bottom:8px;letter-spacing:.04em;text-transform:uppercase}
+.footer .fl{display:block;background:none;border:none;padding:3px 0;color:#B9CEE2;font-size:12.5px;cursor:pointer;text-align:start}
+.footer .fl:hover{color:#fff;text-decoration:underline}
+.footer .hb-logo b{color:#fff}
+.footer .hb-logo span{color:#7E9CB8}
+
+.cartrow{display:flex;align-items:center;gap:12px;border:1px solid var(--hb-line);border-radius:var(--radius-box);padding:10px;margin-bottom:8px}
+.cartrow .e{font-size:28px;width:44px;height:44px;background:var(--hb-mist);border-radius:9px;display:grid;place-items:center}
+.cartrow .g{flex:1;min-width:0}
+.cartrow .n{font-size:12.5px;font-weight:700;color:var(--hb-navy)}
+.cartrow .m{font-size:11.5px;color:var(--hb-ink-soft)}
+.empty{border:1px dashed var(--hb-line);border-radius:var(--radius-box);padding:26px;text-align:center;color:var(--hb-ink-soft);font-size:12.5px}
+
+/* toasts */
+.toasts{position:absolute;inset-inline:0;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;z-index:60}
+.toast{
+  background:var(--hb-navy);color:#fff;border-radius:var(--radius-pill);padding:9px 16px;font-size:12.5px;font-weight:600;
+  box-shadow:0 8px 24px rgba(14,46,79,.32);animation:toastin .3s cubic-bezier(.2,.8,.2,1);max-width:86%;
+}
+.toast.warn{background:#7A5B00}
+.toast.err{background:var(--hb-red)}
+@keyframes toastin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ============================================================================
+   auth/ — AuthSurface: overlay | sheet | page      §5.3, §8
+   ========================================================================= */
+dialog.authdlg{
+  position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;
+  border:none;background:transparent;overflow:visible;z-index:50;
+}
+dialog.authdlg[data-native="1"]{position:fixed}
+dialog.authdlg::backdrop{background:rgba(14,46,79,.42)}
+dialog.authdlg:not([data-native="1"])::backdrop{background:transparent}
+.scrim{position:absolute;inset:0;background:rgba(14,46,79,.42);border:none;padding:0;width:100%;cursor:pointer;animation:fade .2s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+.authpanel{
+  position:absolute;background:var(--hb-paper);border-radius:14px;box-shadow:0 24px 64px rgba(14,46,79,.3);
+  width:min(408px,calc(100% - 32px));left:50%;top:50%;transform:translate(-50%,-50%);
+  max-height:calc(100% - 32px);overflow-y:auto;animation:pop .22s cubic-bezier(.2,.8,.2,1);
+}
+[dir="rtl"] .authpanel{left:auto;right:50%;transform:translate(50%,-50%)}
+@keyframes pop{from{opacity:0;transform:translate(-50%,-46%) scale(.97)}}
+.authdlg[data-pres="sheet"] .authpanel{
+  width:100%;left:0;right:auto;top:auto;bottom:0;transform:none;border-radius:18px 18px 0 0;
+  height:92%;max-height:92%;animation:slideup .26s cubic-bezier(.2,.8,.2,1);
+}
+[dir="rtl"] .authdlg[data-pres="sheet"] .authpanel{right:0}
+@keyframes slideup{from{transform:translateY(14%)}}
+.sheetgrip{width:38px;height:4px;border-radius:var(--radius-pill);background:var(--hb-line);margin:9px auto 0}
+
+.authpage{min-height:100%;display:flex;flex-direction:column;align-items:center;background:var(--hb-mist);padding:20px 16px 40px}
+.authpage .authcard{background:var(--hb-paper);border:1px solid var(--hb-line);border-radius:14px;width:min(430px,100%);margin-top:8px}
+.authpage .authcard .authhead{padding-top:10px}
+dialog.authdlg[data-native="1"] .scrim{background:transparent}
+.backlink{
+  align-self:flex-start;background:none;border:none;color:var(--hb-blue);font-weight:700;font-size:12.5px;
+  cursor:pointer;padding:8px 4px;display:inline-flex;gap:6px;align-items:center;
+}
+.authhead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 0;min-height:34px}
+.iconbtn{
+  width:30px;height:30px;border-radius:var(--radius-pill);border:1px solid var(--hb-line);background:var(--hb-paper);
+  color:var(--hb-ink-soft);cursor:pointer;display:grid;place-items:center;font-size:14px;padding:0;
+}
+.iconbtn:hover{border-color:var(--hb-blue);color:var(--hb-blue)}
+[dir="rtl"] .iconbtn.back{transform:scaleX(-1)}
+.authbody{padding:6px 22px 22px}
+.authhero{
+  width:82px;height:82px;border-radius:var(--radius-box);background:var(--hb-mist);display:grid;place-items:center;
+  font-size:42px;margin:6px auto 12px;border:1px solid var(--hb-line);
+}
+.authhero.logo{width:auto;height:auto;background:none;border:none;margin-bottom:14px}
+#authTitle{font-size:19px;text-align:center;margin-bottom:4px}
+.authsub{font-size:12.5px;color:var(--hb-ink-soft);text-align:center;margin-bottom:14px}
+
+.tabs{display:flex;background:var(--hb-mist);border-radius:var(--radius-pill);padding:3px;margin-bottom:16px}
+.tabs button{
+  flex:1;border:none;background:none;border-radius:var(--radius-pill);padding:8px 6px;font-size:12.5px;font-weight:700;
+  color:var(--hb-ink-soft);cursor:pointer;
+}
+.tabs button[aria-selected="true"]{background:var(--hb-paper);color:var(--hb-blue);box-shadow:0 1px 3px rgba(14,46,79,.12)}
+
+.field{margin-bottom:12px}
+.field>label,.lblrow{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--hb-ink);margin-bottom:5px}
+.optchip{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--hb-mist);color:var(--hb-ink-soft);border-radius:var(--radius-pill);padding:2px 7px;border:1px solid var(--hb-line)}
+input[type="tel"],input[type="text"],input[type="email"],input[type="password"],select{
+  width:100%;border:1px solid var(--hb-line);border-radius:var(--radius-input);padding:11px 12px;font-size:15px;
+  font-family:inherit;color:var(--hb-ink);background:var(--hb-paper);
+}
+input::placeholder{color:var(--hb-ink-soft);opacity:.75}
+input:focus,select:focus{outline:none;border-color:var(--hb-blue);box-shadow:var(--focus)}
+.phonewrap{display:flex;border:1px solid var(--hb-line);border-radius:var(--radius-input);overflow:hidden;background:var(--hb-paper)}
+.phonewrap:focus-within{border-color:var(--hb-blue);box-shadow:var(--focus)}
+.phonewrap .cc{
+  background:var(--hb-mist);border-inline-end:1px solid var(--hb-line);padding:11px 12px;font-size:13.5px;font-weight:700;
+  color:var(--hb-ink);display:flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.phonewrap input{border:none;border-radius:0;box-shadow:none!important;letter-spacing:.04em}
+.phonewrap input:focus{box-shadow:none}
+.pwwrap{position:relative}
+.pwwrap input{padding-inline-end:64px}
+.pwtoggle{
+  position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);background:none;border:none;
+  color:var(--hb-blue);font-weight:700;font-size:11.5px;cursor:pointer;padding:6px 8px;border-radius:var(--radius-pill);
+}
+.fielderr{color:var(--hb-red);font-size:11.5px;font-weight:600;margin-top:5px;display:flex;gap:5px;align-items:flex-start}
+.checkrow{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:2px 0 12px}
+.checkrow input{width:auto}
+.linkbtn{background:none;border:none;color:var(--hb-blue);font-weight:700;font-size:12.5px;cursor:pointer;padding:4px 2px;text-decoration:underline}
+.linkbtn.muted{color:var(--hb-ink-soft);font-weight:600}
+.center{text-align:center}
+.mt{margin-top:12px}
+
+.rule{display:flex;align-items:center;gap:10px;color:var(--hb-ink-soft);font-size:10.5px;font-weight:700;letter-spacing:.1em;margin:16px 0}
+.rule::before,.rule::after{content:"";height:1px;background:var(--hb-line);flex:1}
+.supplierfork{
+  width:100%;border:1px solid var(--hb-line);background:var(--hb-paper);border-radius:var(--radius-pill);padding:10px 14px;
+  font-weight:700;font-size:12.5px;color:var(--hb-navy);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.supplierfork:hover{border-color:var(--hb-blue);color:var(--hb-blue)}
+[dir="rtl"] .supplierfork .arw{transform:scaleX(-1)}
+.valuelist{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:7px}
+.valuelist li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--hb-ink)}
+.valuelist .tick{color:var(--level-2);font-weight:800}
+.legal{font-size:10.5px;color:var(--hb-ink-soft);text-align:center;margin-top:14px;line-height:1.55}
+.crosslink{font-size:12.5px;color:var(--hb-ink-soft);text-align:center;margin-top:12px}
+
+/* OTP */
+.otpwrap{display:flex;gap:8px;justify-content:center;margin:6px 0 12px;direction:ltr}
+.otpwrap input{
+  width:44px;height:52px;text-align:center;font-size:19px;font-weight:800;padding:0;border-radius:var(--radius-input);
+}
+.otpwrap.shake{animation:shake .38s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+.hintbox{
+  border:1px dashed #BBD9F0;background:var(--hb-tint);border-radius:var(--radius-box);padding:9px 12px;font-size:11.5px;
+  color:var(--hb-navy);text-align:center;margin-bottom:12px;
+}
+.hintbox b{font-family:'JetBrains Mono',monospace;letter-spacing:.16em;font-size:12.5px}
+.resendrow{display:flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;color:var(--hb-ink-soft);margin-top:10px}
+
+/* Business + CR */
+.reassure{
+  background:var(--hb-tint);border:1px solid #D6EAFA;border-radius:var(--radius-box);padding:12px 14px;margin:14px 0;
+}
+.reassure b{display:block;font-size:12.5px;color:var(--hb-navy);line-height:1.45}
+.reassure span{display:block;font-size:11.5px;color:var(--hb-ink-soft);margin-top:4px;direction:rtl;text-align:start}
+[dir="rtl"] .reassure span{direction:ltr}
+.buyerbox{
+  background:var(--hb-tint);border:1px solid #D6EAFA;border-radius:var(--radius-box);padding:14px;text-align:center;margin:14px 0;
+}
+.buyerbox .ic{font-size:24px}
+.buyerbox b{display:block;font-size:13.5px;color:var(--hb-navy);margin-top:4px}
+.buyerbox span{display:block;font-size:10.5px;color:var(--hb-ink-soft);margin-top:3px}
+.helptext{font-size:11.5px;color:var(--hb-ink-soft);margin-top:5px}
+.stepdots{display:flex;gap:5px;justify-content:center;margin-bottom:12px}
+.stepdots i{width:16px;height:3px;border-radius:var(--radius-pill);background:var(--hb-line)}
+.stepdots i.on{background:var(--hb-blue);width:24px}
+
+/* ============================================================================
+   analytics/EventStream.tsx — the console rail   §10.5
+   ========================================================================= */
+.rail{
+  background:var(--con-bg);border-inline-start:1px solid var(--con-line);display:flex;flex-direction:column;min-height:0;
+  font-family:'JetBrains Mono',ui-monospace,monospace;color:var(--con-ink);font-size:11.5px;
+}
+.railhead{padding:11px 12px 0;border-bottom:1px solid var(--con-line)}
+.railtitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
+.railtitle b{color:#fff;font-size:12.5px;letter-spacing:.08em}
+.railtabs{display:flex;gap:4px}
+.railtabs button{
+  background:none;border:none;border-bottom:2px solid transparent;color:#7E9CB8;padding:6px 10px;cursor:pointer;
+  font-family:inherit;font-size:11.5px;font-weight:700;letter-spacing:.08em;
+}
+.railtabs button[aria-selected="true"]{color:#fff;border-bottom-color:var(--con-auto)}
+.railbody{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 24px}
+
+.state{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:10px}
+.state div{display:flex;justify-content:space-between;gap:6px;border-bottom:1px dotted #1C3145;padding-bottom:3px;min-width:0}
+.state k{color:#6E8BA5;font-size:10.5px}
+.state v{color:#E6EEF6;font-weight:700;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.state v.l0{color:var(--level-0)} .state v.l1{color:#6FB3F0} .state v.l2{color:#7DD3A0}
+
+.ev{border-inline-start:2px solid var(--con-line);padding:6px 0 6px 9px;margin-bottom:6px}
+[dir] .ev{padding-inline-start:9px;padding-inline-end:0}
+.ev.client{border-color:var(--con-client)} .ev.server{border-color:var(--con-server)}
+.ev.auto{border-color:var(--con-auto)} .ev.error{border-color:var(--con-error)}
+.ev .top{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
+.ev .nm{font-weight:700;color:#E6EEF6}
+.ev.client .nm{color:var(--con-client)} .ev.server .nm{color:var(--con-server)}
+.ev.auto .nm{color:var(--con-auto)} .ev.error .nm{color:var(--con-error)}
+.ev .src{font-size:9.5px;letter-spacing:.08em;border:1px solid var(--con-line);border-radius:3px;padding:0 4px;color:#7E9CB8}
+.ev .ts{font-size:9.5px;color:#5A7A96;margin-inline-start:auto}
+.ev .props{margin-top:4px;display:grid;gap:1px}
+.ev .props div{display:flex;gap:6px;font-size:10.5px}
+
+.ev .props k{color:#5F809A;min-width:92px}
+.ev .props v{color:#AFC6D8;overflow-wrap:anywhere}
+.emptyev{color:#5A7A96;text-align:center;padding:22px 0}
+
+.fstep{margin-bottom:9px}
+.fstep .lbl{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;margin-bottom:3px}
+.fstep .lbl b{color:#E6EEF6;font-weight:700}
+.fstep .lbl i{color:#7E9CB8;font-style:normal}
+.fbar{height:15px;border-radius:3px;background:#12232F;overflow:hidden}
+.fbar>i{display:block;height:100%;background:linear-gradient(90deg,#1E5C8F,#6FB3F0)}
+.drop{font-size:9.5px;color:#C98A8A;text-align:end;margin-top:2px}
+.brk{margin-top:12px;border-top:1px solid var(--con-line);padding-top:9px}
+.brk h5{margin:0 0 6px;color:#fff;font-size:10.5px;letter-spacing:.08em;font-weight:700}
+.brkrow{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;padding:2px 0;border-bottom:1px dotted #1C3145}
+.brkrow span:last-child{color:#E6EEF6;font-weight:700}
+
+.casegrp{margin-bottom:14px}
+.casegrp h5{margin:0 0 6px;color:var(--con-auto);font-size:10.5px;letter-spacing:.1em;font-weight:700;text-transform:uppercase}
+.case{
+  display:block;width:100%;text-align:start;background:#101E2A;border:1px solid var(--con-line);border-radius:6px;
+  color:#C8D6E2;padding:7px 9px;margin-bottom:4px;cursor:pointer;font-family:inherit;font-size:10.5px;line-height:1.4;
+}
+.case:hover{border-color:#3C5F80;background:#152838;color:#fff}
+.case em{display:block;font-style:normal;color:#6E8BA5;font-size:9.5px;margin-top:2px;overflow-wrap:anywhere}
+.case.on{border-color:var(--con-client);color:#fff}
+.railnote{color:#5A7A96;font-size:9.5px;line-height:1.5;margin-top:10px;border-top:1px solid var(--con-line);padding-top:8px}
+
+/* a11y + motion */
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+[inert]{pointer-events:none;user-select:none}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="browser">
+    <div class="chrome" id="chrome"></div>
+    <div class="stagewrap"><div class="stage" id="stage" dir="ltr" lang="en"></div></div>
+  </div>
+  <aside class="rail" id="rail"></aside>
+</div>
+<div class="sr" id="live" role="status" aria-live="polite"></div>
+<script>
+(function(){
+'use strict';
+
+/* ===========================================================================
+   0. tiny helpers
+   ======================================================================== */
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+const esc = (v) => String(v == null ? '' : v)
+  .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9);
+
+/* ===========================================================================
+   mocks/products.ts — §9 seed data. BHD to 3 decimal places.
+   ======================================================================== */
+const PRODUCTS = [
+  { id:'p_mou_pch', emoji:'🥛', nameEn:'Mouhalabia Dessert Mix — 1kg Pouch', nameAr:'خليط مهلبية — كيس ١ كجم',
+    supplier:'Bahrain Foods Co.', pack:'Carton of 12', packAr:'كرتون ١٢', moq:2, priceBhd:12.400,
+    deliveryEta:'24 hours', deliveryEtaAr:'٢٤ ساعة',
+    coupon:{ code:'FIRST10', label:'10% off your first order', labelAr:'خصم ١٠٪ على أول طلب' } },
+  { id:'p_bas_rice', emoji:'🍚', nameEn:'Basmati Rice — 5kg Sack', nameAr:'أرز بسمتي — كيس ٥ كجم',
+    supplier:'Al Fanar Trading', pack:'Carton of 4', packAr:'كرتون ٤', moq:1, priceBhd:28.750,
+    deliveryEta:'24 hours', deliveryEtaAr:'٢٤ ساعة', coupon:null },
+  { id:'p_ara_cof', emoji:'☕', nameEn:'Arabic Coffee Beans — 500g', nameAr:'حبوب قهوة عربية — ٥٠٠ جم',
+    supplier:'Gulf Roastery', pack:'Carton of 20', packAr:'كرتون ٢٠', moq:1, priceBhd:44.900,
+    deliveryEta:'48 hours', deliveryEtaAr:'٤٨ ساعة',
+    coupon:{ code:'BREW15', label:'15% off cartons of 20', labelAr:'خصم ١٥٪ على كرتون ٢٠' } },
+  { id:'p_dat_box', emoji:'🌴', nameEn:'Premium Khalas Dates — 1kg Box', nameAr:'تمر خلاص فاخر — علبة ١ كجم',
+    supplier:'Manama Dates House', pack:'Carton of 10', packAr:'كرتون ١٠', moq:2, priceBhd:19.200,
+    deliveryEta:'24 hours', deliveryEtaAr:'٢٤ ساعة', coupon:null },
+  { id:'p_wtr_500', emoji:'💧', nameEn:'Still Water — 500ml', nameAr:'مياه — ٥٠٠ مل',
+    supplier:'Awal Beverages', pack:'Shrink of 24', packAr:'شرنك ٢٤', moq:10, priceBhd:1.850,
+    deliveryEta:'24 hours', deliveryEtaAr:'٢٤ ساعة', coupon:null },
+  { id:'p_oil_5l', emoji:'🫒', nameEn:'Sunflower Oil — 5L', nameAr:'زيت دوار الشمس — ٥ لتر',
+    supplier:'Delmon Oils', pack:'Carton of 4', packAr:'كرتون ٤', moq:1, priceBhd:15.600,
+    deliveryEta:'72 hours', deliveryEtaAr:'٧٢ ساعة',
+    coupon:{ code:'OIL5', label:'5% off 4+ cartons', labelAr:'خصم ٥٪ على ٤ كراتين فأكثر' } }
+];
+const productById = (id) => PRODUCTS.filter(p => p.id === id)[0] || null;
+/* locale-aware accessors + bidi isolation, so Latin strings never reflow in RTL */
+const pname = (p) => S.locale === 'ar' ? p.nameAr : p.nameEn;
+const ppack = (p) => S.locale === 'ar' ? p.packAr : p.pack;
+const peta  = (p) => S.locale === 'ar' ? p.deliveryEtaAr : p.deliveryEta;
+const pcoup = (p) => S.locale === 'ar' ? p.coupon.labelAr : p.coupon.label;
+const bdi   = (v) => '<bdi>' + esc(v) + '</bdi>';
+const bhd = (n) => n.toFixed(3) + ' BHD';
+
+/* ===========================================================================
+   mocks/api.ts — §9. Artificial latency. No network. No backend.
+   ======================================================================== */
+const testHooks = { forceNetworkFailure:false, forceOtpExpired:false, forceCrRejected:false };
+const OTP_CODE = '482913';
+function netCheck(){
+  if (testHooks.forceNetworkFailure){ testHooks.forceNetworkFailure = false;
+    const e = new Error('network'); e.code = 'network'; throw e; }
+}
+const mockApi = {
+  async sendOtp(phone){ await sleep(700); netCheck(); return { ok:true }; },              // never reveals if known
+  async verifyOtp(phone, code){
+    await sleep(500); netCheck();
+    if (testHooks.forceOtpExpired){ testHooks.forceOtpExpired = false;
+      const e = new Error('expired'); e.code = 'expired'; throw e; }
+    if (code !== OTP_CODE){ const e = new Error('mismatch'); e.code = 'mismatch'; throw e; }
+    return { isNewUser: KNOWN_PHONES.indexOf(phone) === -1 };
+  },
+  async createAccount(p){ await sleep(600); netCheck(); return { level:'L1' }; },
+  async submitCr(cr, onResolve){
+    await sleep(300); netCheck();
+    setTimeout(function(){
+      const rejected = testHooks.forceCrRejected; testHooks.forceCrRejected = false;
+      onResolve(rejected ? 'rejected' : 'verified');
+    }, 6000);
+    return { status:'pending' };
+  },
+  async signInWithEmail(email, password){
+    await sleep(500); netCheck();
+    if (password !== 'highbase'){ const e = new Error('badcreds'); e.code = 'badcreds'; throw e; }
+    return { isNewUser:false };
+  }
+};
+const KNOWN_PHONES = ['33000833'];   // "already registered" — handled silently (§8.5)
+
+/* ===========================================================================
+   auth/copy.ts — §6.1 trigger headlines + §6.2 one label per concept
+   ======================================================================== */
+const TRIGGERS = ['header_signin','header_register','footer_signin','footer_register',
+  'price_gate_pdp','price_gate_card','add_to_cart','save_product','apply_coupon',
+  'checkout','order_history','deep_link','session_expired','email_link','supplier_cta'];
+
+const TRIGGER_COPY = {
+  price_gate_pdp:  { en:'Sign in to see wholesale price',        ar:'سجّل الدخول لعرض سعر الجملة' },
+  price_gate_card: { en:'Sign in to see wholesale price',        ar:'سجّل الدخول لعرض سعر الجملة' },
+  add_to_cart:     { en:'Sign in to add to your order',          ar:'سجّل الدخول لإضافة المنتج لطلبك' },
+  save_product:    { en:'Sign in to save this product',          ar:'سجّل الدخول لحفظ المنتج' },
+  apply_coupon:    { en:'Sign in to use this coupon',            ar:'سجّل الدخول لاستخدام القسيمة' },
+  checkout:        { en:'Verify your business to place orders',  ar:'وثّق نشاطك التجاري لإتمام الطلب' },
+  order_history:   { en:'Sign in to see your orders',            ar:'سجّل الدخول لعرض طلباتك' },
+  session_expired: { en:'Your session ended. Sign in to continue.', ar:'انتهت الجلسة. سجّل الدخول للمتابعة' },
+  supplier_cta:    { en:'Sell on HIGHBASE',                      ar:'بِع على هايبيس' },
+  email_link:      { en:'Welcome back',                          ar:'مرحباً بعودتك' },
+  header_signin:   { en:'Welcome to HIGHBASE',                   ar:'مرحباً بك في هايبيس' },
+  header_register: { en:'Welcome to HIGHBASE',                   ar:'مرحباً بك في هايبيس' },
+  footer_signin:   { en:'Welcome to HIGHBASE',                   ar:'مرحباً بك في هايبيس' },
+  footer_register: { en:'Welcome to HIGHBASE',                   ar:'مرحباً بك في هايبيس' },
+  deep_link:       { en:'Welcome to HIGHBASE',                   ar:'مرحباً بك في هايبيس' }
+};
+
+const T = {
+  signIn:        { en:'Sign in',                           ar:'تسجيل الدخول' },
+  createAccount: { en:'Create account',                     ar:'إنشاء حساب' },
+  priceGate:     { en:'Sign in to see wholesale price',     ar:'سجّل الدخول لعرض سعر الجملة' },
+  supplierFork:  { en:"I'm a supplier",                     ar:'أنا مورّد' },
+  sendCode:      { en:'Send code',                          ar:'إرسال الرمز' },
+  continue:      { en:'Continue',                           ar:'متابعة' },
+  startShopping: { en:'Start shopping',                     ar:'ابدأ التسوق' },
+  skipForNow:    { en:'Skip for now',                       ar:'تخطّي الآن' },
+  backToStore:   { en:'Back to HIGHBASE',                   ar:'العودة إلى هايبيس' },
+  phone:         { en:'Mobile number',                      ar:'رقم الجوال' },
+  email:         { en:'Email address',                      ar:'البريد الإلكتروني' },
+  password:      { en:'Password',                           ar:'كلمة المرور' },
+  useEmail:      { en:'Use email and password instead',     ar:'استخدم البريد الإلكتروني وكلمة المرور' },
+  usePhone:      { en:'Use your mobile number instead',     ar:'استخدم رقم جوالك بدلاً من ذلك' },
+  show:          { en:'Show',                               ar:'إظهار' },
+  hide:          { en:'Hide',                               ar:'إخفاء' },
+  remember:      { en:'Remember me',                        ar:'تذكّرني' },
+  forgot:        { en:'Forgot your password?',              ar:'نسيت كلمة المرور؟' },
+  or:            { en:'OR',                                 ar:'أو' },
+  v1:            { en:'Wholesale prices from 150+ brands',  ar:'أسعار الجملة من أكثر من ١٥٠ علامة تجارية' },
+  v2:            { en:'Delivery within 24 hours',           ar:'توصيل خلال ٢٤ ساعة' },
+  v3:            { en:'Your business data is protected',    ar:'بيانات نشاطك التجاري محمية' },
+  legal:         { en:'By continuing you agree to our Terms and Privacy Policy.',
+                   ar:'بالمتابعة فإنك توافق على الشروط وسياسة الخصوصية.' },
+  haveAccount:   { en:'Already have an account?',           ar:'لديك حساب بالفعل؟' },
+  noAccount:     { en:'New to HIGHBASE?',                   ar:'جديد على هايبيس؟' },
+  verifyTitle:   { en:'Enter the 6-digit code',             ar:'أدخل الرمز المكوّن من ٦ أرقام' },
+  sentTo:        { en:'Sent to',                            ar:'أُرسل إلى' },
+  change:        { en:'Change',                             ar:'تغيير' },
+  resend:        { en:'Resend code',                        ar:'إعادة إرسال الرمز' },
+  resendIn:      { en:'Resend in',                          ar:'إعادة الإرسال خلال' },
+  bizTitle:      { en:'Tell us about your business',        ar:'أخبرنا عن نشاطك التجاري' },
+  bizSub:        { en:'Your account is ready. This takes 20 seconds.', ar:'حسابك جاهز. لن يستغرق هذا سوى ٢٠ ثانية.' },
+  bizName:       { en:'Business name',                      ar:'اسم النشاط التجاري' },
+  bizType:       { en:'Business type',                      ar:'نوع النشاط' },
+  crNumber:      { en:'CR number',                          ar:'رقم السجل التجاري' },
+  optional:      { en:'Optional',                           ar:'اختياري' },
+  crHelp:        { en:'Needed before your first order. You can browse prices while we verify it.',
+                   ar:'مطلوب قبل طلبك الأول. يمكنك تصفح الأسعار أثناء التحقق.' },
+  buyerBox:      { en:'You will be registered as a Buyer',  ar:'سيتم تسجيلك كمشترٍ' },
+  buyerTypes:    { en:'Business type: Grocery, Restaurant, Cafe, or Hotel',
+                   ar:'نوع النشاط: بقالة، مطعم، مقهى، أو فندق' },
+  reassureEn:    'Verification happens in the background — you can browse prices straight away.',
+  reassureAr:    'التحقق يتم في الخلفية — يمكنك تصفح الأسعار فوراً',
+  crTitle:       { en:'Verify your business',               ar:'وثّق نشاطك التجاري' },
+  crSub:         { en:'Checkout needs a verified CR number.', ar:'إتمام الطلب يتطلب رقم سجل تجاري موثّق.' },
+  crSubmit:      { en:'Submit for verification',            ar:'إرسال للتحقق' },
+  errPhone:      { en:'Enter a valid Bahrain mobile number', ar:'أدخل رقم جوال بحريني صحيح' },
+  errEmail:      { en:'Enter a valid email address',        ar:'أدخل بريداً إلكترونياً صحيحاً' },
+  errCode:       { en:"That code doesn't match. Try again.", ar:'الرمز غير مطابق. حاول مرة أخرى.' },
+  errExpired:    { en:"That code expired. We'll send a new one.", ar:'انتهت صلاحية الرمز. سنرسل رمزاً جديداً.' },
+  errNet:        { en:"Couldn't connect. Try again.",       ar:'تعذّر الاتصال. حاول مرة أخرى.' },
+  errCreds:      { en:"That email or password doesn't match.", ar:'البريد أو كلمة المرور غير صحيحة.' },
+  errCr:         { en:'Enter your CR number',               ar:'أدخل رقم السجل التجاري' },
+  otpFallback:   { en:'Trouble receiving the code? Sign in with email instead',
+                   ar:'لم يصلك الرمز؟ سجّل الدخول بالبريد الإلكتروني' },
+  toastWelcome:  { en:"Welcome — you're seeing wholesale prices.", ar:'أهلاً بك — الأسعار ظاهرة الآن.' },
+  toastCart:     { en:'We kept the {n} items in your cart.', ar:'احتفظنا بالمنتجات ({n}) في سلتك.' },
+  toastCr:       { en:"We're verifying your business — usually within 24 hours.",
+                   ar:'نتحقق من نشاطك التجاري — عادةً خلال ٢٤ ساعة.' },
+  crPending:     { en:"We're verifying your business — usually within 24 hours.",
+                   ar:'نتحقق من نشاطك التجاري — عادةً خلال ٢٤ ساعة.' },
+  crRejected:    { en:"We couldn't verify CR {cr}. Upload a copy or contact support.",
+                   ar:'تعذّر التحقق من السجل {cr}. أرفق نسخة أو تواصل مع الدعم.' }
+};
+const t = (k) => { const v = T[k]; return typeof v === 'string' ? v : (v ? v[S.locale] : k); };
+const BIZ_TYPES = [
+  { v:'grocery',    en:'Grocery',    ar:'بقالة' },
+  { v:'restaurant', en:'Restaurant', ar:'مطعم' },
+  { v:'cafe',       en:'Café',       ar:'مقهى' },
+  { v:'hotel',      en:'Hotel',      ar:'فندق' },
+  { v:'other',      en:'Other',      ar:'أخرى' }
+];
+
+/* ===========================================================================
+   §4.1 action → level matrix
+   ======================================================================== */
+const ACTION_LEVELS = {
+  browse:'L0', search:'L0', view_pdp:'L0', switch_locale:'L0',
+  view_price:'L1', add_to_cart:'L1', save_product:'L1',
+  apply_coupon:'L1', order_history:'L1', track_order:'L1',
+  checkout:'L2', credit_terms:'L2', request_quote:'L2'
+};
+const LEVEL_RANK = { L0:0, L1:1, L2:2 };
+const hasLevel = (need) => LEVEL_RANK[S.level] >= LEVEL_RANK[need];
+
+/* ===========================================================================
+   state/session.ts
+   ======================================================================== */
+const S = {
+  sessionId: uid('sess'),
+  level: 'L0',
+  phone: null, email: null,
+  bizName: null, bizType: null,
+  cr: null, crStatus: 'none',            // none | pending | verified | rejected
+  cart: [], anonCart: [], saved: [], coupons: [],
+  locale: 'en',
+  isNewUser: null,
+  lastTrigger: null,
+  device: 'desktop',                      // desktop | mobile  (drives viewportWidth)
+  nativeModal: false                      // dev toggle: real <dialog>.showModal()
+};
+const viewportWidth = () => (S.device === 'mobile' ? 390 : 1280);
+
+/* state/intent.ts */
+let pendingIntent = null;
+let lastIntent = null;                    // kept only so the CASES panel can demonstrate the guard
+let intentSeq = 0;
+const replayed = Object.create(null);     // idempotency guard — §7.3 rule 4
+
+/* ===========================================================================
+   analytics/events.ts — §10. One event per funnel step; placement is a property.
+   ======================================================================== */
+const EVENTS = [];
+let LAST_PRESENTATION = 'none';
+
+function baseProps(){
+  const u = URL_NOW;
+  return {
+    trigger_source: u.trigger || S.lastTrigger || null,
+    presentation:   u.authOpen ? resolvePresentation({ trigger:u.trigger, navigationType:NAV_TYPE, viewportWidth:viewportWidth() }) : LAST_PRESENTATION,
+    mode:           u.mode || null,
+    auth_method:    u.method || 'phone_otp',
+    auth_level:     S.level,
+    is_new_user:    S.isNewUser,
+    locale:         S.locale,
+    product_id:     u.product || null,
+    intent_type:    pendingIntent ? pendingIntent.type : 'none',
+    session_id:     S.sessionId
+  };
+}
+function emit(name, props, source){
+  const ev = {
+    id: EVENTS.length + 1,
+    name: name,
+    source: source || 'client',
+    ts: new Date(),
+    props: Object.assign(baseProps(), props || {})
+  };
+  EVENTS.unshift(ev);
+  const tag = '%c' + ev.source.toUpperCase() + '%c ' + name;
+  const col = { client:'#1E9E63', server:'#0B5CA3', auto:'#B8860B', error:'#C8102E' }[ev.source];
+  try { console.log(tag, 'background:' + col + ';color:#fff;padding:1px 4px;border-radius:3px', '', ev.props); } catch(e){}
+  renderRail();
+  return ev;
+}
+/* GA4 recommended events, emitted alongside our own (§10.2) */
+const emitGa4 = (name, method) => emit(name, { method: method }, 'server');
+
+/* ===========================================================================
+   router/history.ts — an in-memory history stack driving the simulated chrome.
+   push / replace / back / forward / reload, with navigationType tracking.
+   ======================================================================== */
+const HISTORY = { stack:['/'], index:0 };
+const SCROLL = [0];                       // scroll offset per history entry
+let NAV_TYPE = 'hard';                    // first paint is always 'hard' (§5.3)
+let URL_NOW = null;                       // parsed current URL
+
+function currentUrl(){ return HISTORY.stack[HISTORY.index]; }
+
+function saveScroll(){ const n = $('#pagearea'); if (n) SCROLL[HISTORY.index] = n.scrollTop; }
+function restoreScroll(){ const n = $('#pagearea'); if (n) n.scrollTop = SCROLL[HISTORY.index] || 0; }
+function navigate(url, kind){
+  saveScroll();
+  const keep = SCROLL[HISTORY.index] || 0;
+  if (kind === 'replace'){ HISTORY.stack[HISTORY.index] = url; }
+  else {
+    HISTORY.stack = HISTORY.stack.slice(0, HISTORY.index + 1); HISTORY.stack.push(url); HISTORY.index++;
+    SCROLL.length = HISTORY.index; SCROLL.push(keep);   // an overlay opens without moving the page behind it
+  }
+  NAV_TYPE = 'soft';
+  try { window.history[kind === 'replace' ? 'replaceState' : 'pushState']({}, '', '#' + url); } catch(e){}
+  render();
+}
+function goBack(){ if (HISTORY.index > 0){ saveScroll(); HISTORY.index--; NAV_TYPE = 'soft'; render(); } }
+function goForward(){ if (HISTORY.index < HISTORY.stack.length - 1){ saveScroll(); HISTORY.index++; NAV_TYPE = 'soft'; render(); } }
+function reload(){ NAV_TYPE = 'hard'; render(); }
+
+/* ===========================================================================
+   router/useUrlState.ts — the URL is the single source of truth (§2, §5.1)
+   ======================================================================== */
+function parseUrl(url){
+  const qi = url.indexOf('?');
+  const path = qi === -1 ? url : url.slice(0, qi);
+  const q = {};
+  if (qi !== -1) url.slice(qi + 1).split('&').forEach(function(pair){
+    if (!pair) return;
+    const i = pair.indexOf('='); const k = i === -1 ? pair : pair.slice(0, i);
+    q[decodeURIComponent(k)] = i === -1 ? '' : decodeURIComponent(pair.slice(i + 1));
+  });
+  const isRoute = (path === '/login' || path === '/register');
+  const authParam = q.auth === 'signin' || q.auth === 'signup' ? q.auth : null;
+  const mode = isRoute ? (path === '/login' ? 'signin' : 'signup') : authParam;
+  const authOpen = !!mode;
+  let step = q.step;
+  if (['identify','otp','business','cr'].indexOf(step) === -1) step = 'identify';
+  return {
+    raw: url, path: path, query: q, isRoute: isRoute, authOpen: authOpen, mode: mode, step: step,
+    trigger: TRIGGERS.indexOf(q.trigger) !== -1 ? q.trigger : (q.trigger ? 'deep_link' : null),
+    product: q.product || null,
+    method: q.method === 'email_password' ? 'email_password' : 'phone_otp',
+    returnTo: safeReturnTo(q.return_to)
+  };
+}
+function buildUrl(path, params){
+  const parts = [];
+  Object.keys(params).forEach(function(k){
+    const v = params[k];
+    if (v === null || v === undefined || v === '') return;
+    parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+  });
+  return parts.length ? path + '?' + parts.join('&') : path;
+}
+/* §7.3 rule 1 — validate return_to against an allowlist of same-origin paths */
+const ALLOWED_PATHS = ['/','/checkout','/orders','/cart','/suppliers/apply'];
+function safeReturnTo(v){
+  if (!v) return null;
+  if (v.charAt(0) !== '/' || v.charAt(1) === '/') return null;      // no scheme, no protocol-relative
+  const path = v.split('?')[0];
+  if (ALLOWED_PATHS.indexOf(path) !== -1) return v;
+  if (/^\/product\/[a-z0-9_]+$/.test(path)) return v;
+  return null;
+}
+/* strip every auth param — this is the "close" for the query-param form */
+function urlWithoutAuth(url){
+  const u = parseUrl(url);
+  if (u.isRoute) return u.returnTo || '/';
+  const q = {};
+  Object.keys(u.query).forEach(function(k){
+    if (['auth','trigger','step','product','method','return_to'].indexOf(k) === -1) q[k] = u.query[k];
+  });
+  return buildUrl(u.path, q);
+}
+
+/* §5.3 presentation resolution */
+function resolvePresentation(a){
+  if (a.trigger === 'checkout')   return 'page';
+  if (a.navigationType === 'hard') return 'page';
+  if (a.viewportWidth < 768)       return 'sheet';
+  return 'overlay';
+}
+
+/* ===========================================================================
+   auth/requireAuth.ts — THE only way to open the auth surface (§7.2)
+   No component outside auth/ may render AuthSurface directly; see
+   assertNoDirectSurfaceRender() at the bottom of this file.
+   ======================================================================== */
+/* Focus must return to the element that opened the surface. The storefront is
+   re-rendered while the surface is open, so keeping the node is not enough —
+   we keep a selector that identifies it after the re-render too. */
+let invoker = null, invokerSel = null;
+function invokerKeyOf(el){
+  if (!el || !el.getAttribute) return null;
+  if (el.id) return '#' + el.id;
+  const act = el.getAttribute('data-act');
+  if (!act) return null;
+  let sel = '[data-act="' + act + '"]';
+  ['id','trigger','to','placement','code','level','step'].forEach(function(k){
+    const v = el.getAttribute('data-' + k);
+    if (v !== null) sel += '[data-' + k + '="' + v + '"]';
+  });
+  return sel;
+}
+
+function requireAuth(args){
+  const level   = args.level || 'L1';
+  const trigger = args.trigger;
+  if (TRIGGERS.indexOf(trigger) === -1) throw new Error('Unknown trigger: ' + trigger + ' — add it to TriggerSource, never build a new surface.');
+  const mode    = args.mode || (S.level === 'L0' ? 'signup' : 'signin');
+  const step    = args.step || 'identify';
+  invoker       = args.invoker || document.activeElement;
+  invokerSel    = invokerKeyOf(invoker);
+
+  if (args.intent && args.intent.type !== 'none'){
+    pendingIntent = Object.assign({}, args.intent, { __id: ++intentSeq });
+  } else { pendingIntent = null; }
+
+  S.lastTrigger = trigger;
+  /* requireAuth IS the gate activation — emitting here (rather than at each
+     call site) guarantees exactly one gate_click per opening, so funnel step 1
+     can never exceed step 2. Headless entry points have no gate to click. */
+  if (HEADLESS_TRIGGERS.indexOf(trigger) === -1){
+    emit('auth:gate_click', { gate_kind:INTENT_GATE[args.intent ? args.intent.type : 'none'] || 'view_price',
+                              product_id:args.intent && args.intent.productId ? args.intent.productId : null,
+                              required_level:level });
+  }
+  resetForm(step);
+
+  const here = currentUrl();
+  const hereClean = urlWithoutAuth(here);
+
+  if (args.useRoute || trigger === 'checkout' || trigger === 'email_link' || trigger === 'deep_link'){
+    // canonical route form — return_to is explicit and allowlisted
+    const path = mode === 'signin' ? '/login' : '/register';
+    navigate(buildUrl(path, {
+      trigger: trigger, step: step,
+      product: args.intent && args.intent.productId ? args.intent.productId : null,
+      return_to: safeReturnTo(hereClean)
+    }), 'push');
+  } else {
+    // query-param form on the current route — return_to is implicit
+    const u = parseUrl(hereClean);
+    const q = Object.assign({}, u.query, {
+      auth: mode, trigger: trigger, step: step,
+      product: args.intent && args.intent.productId ? args.intent.productId : null
+    });
+    navigate(buildUrl(u.path, q), 'push');
+  }
+}
+
+/* every gated element announces itself once per render (§10.2 auth:gate_view) */
+let gateSeen = Object.create(null);
+function gateView(kind, productId){
+  const k = kind + ':' + (productId || '-');
+  if (gateSeen[k]) return; gateSeen[k] = 1;
+  emit('auth:gate_view', { gate_kind:kind, product_id:productId || null, required_level:ACTION_LEVELS[kind] || 'L1' });
+}
+const INTENT_GATE = { reveal_price:'view_price', add_to_cart:'add_to_cart', save_product:'save_product',
+                      apply_coupon:'apply_coupon', goto_checkout:'checkout', goto_orders:'order_history', none:'view_price' };
+
+/* ===========================================================================
+   auth/AuthFlow.tsx — form state survives every re-render (§11 form mechanics)
+   ======================================================================== */
+const F  = { phone:'', code:['','','','','',''], email:'', password:'', showPw:false,
+             remember:true, bizName:'', bizType:'grocery', cr:'' };
+const UI = { busy:false, error:null, errorField:null, otpFails:0, sends:0,
+             cooldown:0, timer:null, shake:false, emailFallback:false };
+
+function resetForm(step){
+  UI.error = null; UI.errorField = null; UI.busy = false; UI.shake = false;
+  if (step !== 'cr'){ UI.otpFails = 0; UI.sends = 0; UI.emailFallback = false; F.code = ['','','','','','']; }
+  stopCooldown();
+}
+function stopCooldown(){ if (UI.timer){ clearInterval(UI.timer); UI.timer = null; } UI.cooldown = 0; }
+function startCooldown(){
+  stopCooldown(); UI.cooldown = 60;
+  UI.timer = setInterval(function(){
+    UI.cooldown--;
+    const n = $('#resendrow'); if (n) n.innerHTML = resendRowHtml();
+    if (UI.cooldown <= 0) stopCooldown();
+  }, 1000);
+}
+const prettyPhone = () => '+973 ' + F.phone.replace(/(\d{4})(\d{0,4})/, '$1 $2').trim();
+const validPhone  = () => /^3\d{7}$/.test(F.phone);
+const validEmail  = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+
+const SIGNIN_TRIGGERS = ['header_signin','footer_signin','order_history','session_expired','email_link'];
+const SIGNUP_TRIGGERS = ['header_register','footer_register','price_gate_pdp','price_gate_card',
+                         'add_to_cart','save_product','apply_coupon'];
+function defaultMode(trigger){
+  if (S.level !== 'L0') return 'signin';
+  if (SIGNIN_TRIGGERS.indexOf(trigger) !== -1) return 'signin';
+  if (SIGNUP_TRIGGERS.indexOf(trigger) !== -1) return 'signup';
+  return 'signup';
+}
+
+/* ---------- shared bits ------------------------------------------------- */
+function errHtml(field){
+  if (!UI.error || UI.errorField !== field) return '';
+  return '<div class="fielderr" role="alert"><span aria-hidden="true">⚠</span><span>' + esc(UI.error) + '</span></div>';
+}
+function spinner(label){ return UI.busy ? '<span class="spin" aria-hidden="true"></span>' + esc(label) : esc(label); }
+function heroHtml(u){
+  const p = u.product ? productById(u.product) : null;
+  if (p) return '<div class="authhero" aria-hidden="true">' + p.emoji + '</div>';
+  return '<div class="authhero logo"><span class="hb-logo lg"><b>HIGHBASE</b><span>WHERE YOU GROW</span></span></div>';
+}
+function dotsHtml(step, mode){
+  if (mode !== 'signup') return '';
+  const order = ['identify','otp','business'];
+  const i = order.indexOf(step); if (i === -1) return '';
+  return '<div class="stepdots" aria-hidden="true">' +
+    order.map(function(_, n){ return '<i class="' + (n <= i ? 'on' : '') + '"></i>'; }).join('') + '</div>';
+}
+
+/* ---------- screens/IdentifyScreen.tsx — §8.1 --------------------------- */
+function screenIdentify(u){
+  const p = u.product ? productById(u.product) : null;
+  const copy = TRIGGER_COPY[u.trigger] || TRIGGER_COPY.deep_link;
+  const isSignup = u.mode === 'signup';
+  const emailMode = u.method === 'email_password';
+  const h = [];
+  h.push(dotsHtml('identify', u.mode));
+  h.push(heroHtml(u));
+  h.push('<h1 id="authTitle">' + esc(copy[S.locale]) + '</h1>');
+  if (p) h.push('<p class="authsub">' + esc(pname(p)) + '</p>');
+
+  h.push('<div class="tabs" role="tablist" aria-label="' + esc(t('signIn')) + ' / ' + esc(t('createAccount')) + '">' +
+    '<button type="button" role="tab" id="tab-signin"  aria-selected="' + (!isSignup) + '" data-act="mode" data-mode="signin">'  + esc(t('signIn')) + '</button>' +
+    '<button type="button" role="tab" id="tab-signup" aria-selected="' + (isSignup)  + '" data-act="mode" data-mode="signup">' + esc(t('createAccount')) + '</button>' +
+    '</div>');
+
+  h.push('<form data-form="identify" novalidate>');
+  if (!emailMode){
+    h.push('<div class="field">' +
+      '<label for="phone">' + esc(t('phone')) + '</label>' +
+      '<div class="phonewrap">' +
+        '<span class="cc" aria-hidden="true">🇧🇭 +973</span>' +
+        '<input type="tel" name="phone" id="phone" autocomplete="tel username webauthn" inputmode="numeric" ' +
+               'maxlength="9" placeholder="3300 0833" required value="' + esc(F.phone) + '" ' +
+               'aria-describedby="phonehelp" data-bind="phone">' +
+      '</div>' + errHtml('phone') +
+      '<div class="helptext" id="phonehelp">' + esc(S.locale === 'ar' ? 'سنرسل رمزاً لمرة واحدة.' : "We'll text you a one-time code.") + '</div>' +
+    '</div>');
+    h.push('<button type="submit" class="btn primary block">' + spinner(t('sendCode')) + '</button>');
+    h.push('<div class="center mt"><button type="button" class="linkbtn" data-act="method" data-method="email_password">' + esc(t('useEmail')) + '</button></div>');
+  } else {
+    h.push('<div class="field"><label for="email">' + esc(t('email')) + '</label>' +
+      '<input type="email" name="email" id="email" autocomplete="username webauthn" placeholder="you@business.bh" ' +
+      'required value="' + esc(F.email) + '" data-bind="email">' + errHtml('email') + '</div>');
+    h.push('<div class="field"><label for="password">' + esc(t('password')) + '</label>' +
+      '<div class="pwwrap"><input type="' + (F.showPw ? 'text' : 'password') + '" name="password" id="password" ' +
+      'autocomplete="' + (isSignup ? 'new-password' : 'current-password') + '" required value="' + esc(F.password) + '" data-bind="password">' +
+      '<button type="button" class="pwtoggle" data-act="showpw" aria-pressed="' + (F.showPw) + '">' + esc(F.showPw ? t('hide') : t('show')) + '</button>' +
+      '</div>' + errHtml('password') +
+      '<div class="helptext">' + esc(S.locale === 'ar' ? 'كلمة المرور التجريبية: highbase' : 'Prototype password: highbase') + '</div></div>');
+    h.push('<div class="checkrow"><input type="checkbox" name="remember" id="remember" ' + (F.remember ? 'checked' : '') + ' data-bind="remember">' +
+      '<label for="remember" style="margin:0;font-weight:600">' + esc(t('remember')) + '</label>' +
+      '<button type="button" class="linkbtn muted" data-act="noop" style="margin-inline-start:auto">' + esc(t('forgot')) + '</button></div>');
+    h.push('<button type="submit" class="btn primary block">' + spinner(isSignup ? t('createAccount') : t('signIn')) + '</button>');
+    h.push('<div class="center mt"><button type="button" class="linkbtn" data-act="method" data-method="phone_otp">' + esc(t('usePhone')) + '</button></div>');
+  }
+  h.push('</form>');
+
+  h.push('<div class="rule">' + esc(t('or')) + '</div>');
+  h.push('<button type="button" class="supplierfork" data-act="supplier">' +
+    '<span aria-hidden="true">🏭</span>' + esc(t('supplierFork')) + '<span class="arw" aria-hidden="true">→</span></button>');
+  h.push('<ul class="valuelist">' +
+    ['v1','v2','v3'].map(function(k){ return '<li><span class="tick" aria-hidden="true">✓</span><span>' + esc(t(k)) + '</span></li>'; }).join('') +
+    '</ul>');
+  h.push('<p class="legal">' + esc(t('legal')) + '</p>');
+  h.push('<p class="crosslink">' + esc(isSignup ? t('haveAccount') : t('noAccount')) + ' ' +
+    '<button type="button" class="linkbtn" data-act="mode" data-mode="' + (isSignup ? 'signin' : 'signup') + '">' +
+    esc(isSignup ? t('signIn') : t('createAccount')) + '</button></p>');
+  return h.join('');
+}
+
+/* ---------- screens/OtpScreen.tsx — §8.2 -------------------------------- */
+function resendRowHtml(){
+  if (UI.sends >= 3) return '<span>' + esc(S.locale === 'ar' ? 'تم الوصول للحد الأقصى للإرسال.' : 'Resend limit reached.') + '</span>';
+  if (UI.cooldown > 0) return '<span>' + esc(t('resendIn')) + ' ' + UI.cooldown + 's</span>';
+  return '<button type="button" class="linkbtn" data-act="resend">' + esc(t('resend')) + '</button>';
+}
+function screenOtp(u){
+  const h = [];
+  h.push(dotsHtml('otp', u.mode));
+  h.push('<h1 id="authTitle">' + esc(t('verifyTitle')) + '</h1>');
+  h.push('<p class="authsub">' + esc(t('sentTo')) + ' ' + esc(prettyPhone()) +
+    ' · <button type="button" class="linkbtn" data-act="changephone">' + esc(t('change')) + '</button></p>');
+  h.push('<div class="hintbox">' + esc(S.locale === 'ar' ? 'رمز النموذج التجريبي:' : 'Prototype code:') + ' <b>' + OTP_CODE + '</b></div>');
+  h.push('<form data-form="otp" novalidate>');
+  h.push('<div class="otpwrap' + (UI.shake ? ' shake' : '') + '" id="otpwrap">' +
+    F.code.map(function(v, i){
+      return '<input type="text" inputmode="numeric" maxlength="1" name="otp' + (i + 1) + '" id="otp' + (i + 1) + '" ' +
+        (i === 0 ? 'autocomplete="one-time-code" ' : 'autocomplete="off" ') +
+        'aria-label="' + esc((S.locale === 'ar' ? 'الرقم ' : 'Digit ') + (i + 1)) + '" value="' + esc(v) + '" data-otp="' + i + '">';
+    }).join('') + '</div>');
+  h.push(errHtml('code'));
+  h.push('<button type="submit" class="btn primary block">' + spinner(t('continue')) + '</button>');
+  h.push('</form>');
+  h.push('<div class="resendrow" id="resendrow">' + resendRowHtml() + '</div>');
+  if (UI.emailFallback){
+    h.push('<div class="mt center"><button type="button" class="btn ghost block" data-act="method" data-method="email_password">' +
+      esc(t('otpFallback')) + '</button></div>');
+  }
+  return h.join('');
+}
+
+/* ---------- screens/BusinessScreen.tsx — §8.3 --------------------------- */
+function reassureHtml(){
+  return '<div class="reassure"><b>' + esc(T.reassureEn) + '</b><span>' + esc(T.reassureAr) + '</span></div>';
+}
+function screenBusiness(u){
+  const h = [];
+  h.push(dotsHtml('business', u.mode));
+  h.push('<h1 id="authTitle">' + esc(t('bizTitle')) + '</h1>');
+  h.push('<p class="authsub">' + esc(t('bizSub')) + '</p>');
+  h.push('<form data-form="business" novalidate>');
+  h.push('<div class="field"><label for="bizName">' + esc(t('bizName')) + '</label>' +
+    '<input type="text" name="bizName" id="bizName" autocomplete="organization" placeholder="' +
+    esc(S.locale === 'ar' ? 'بقالة المنامة' : 'Manama Grocery') + '" value="' + esc(F.bizName) + '" data-bind="bizName"></div>');
+  h.push('<div class="field"><label for="bizType">' + esc(t('bizType')) + '</label>' +
+    '<select name="bizType" id="bizType" data-bind="bizType">' +
+    BIZ_TYPES.map(function(b){ return '<option value="' + b.v + '"' + (F.bizType === b.v ? ' selected' : '') + '>' + esc(b[S.locale]) + '</option>'; }).join('') +
+    '</select></div>');
+  h.push('<div class="field"><span class="lblrow"><label for="cr" style="margin:0">' + esc(t('crNumber')) +
+    '</label><span class="optchip">' + esc(t('optional')) + '</span></span>' +
+    '<input type="text" name="cr" id="cr" inputmode="numeric" placeholder="1234-1" value="' + esc(F.cr) + '" data-bind="cr">' +
+    '<div class="helptext">' + esc(t('crHelp')) + '</div></div>');
+  h.push('<div class="buyerbox"><div class="ic" aria-hidden="true">🏪</div><b>' + esc(t('buyerBox')) + '</b><span>' + esc(t('buyerTypes')) + '</span></div>');
+  h.push(reassureHtml());
+  h.push('<button type="submit" class="btn primary block">' + spinner(t('startShopping')) + '</button>');
+  h.push('</form>');
+  h.push('<div class="center mt"><button type="button" class="linkbtn muted" data-act="skipbiz">' + esc(t('skipForNow')) + '</button></div>');
+  return h.join('');
+}
+
+/* ---------- screens/CrScreen.tsx — §8.4 --------------------------------- */
+function screenCr(u){
+  const h = [];
+  h.push('<h1 id="authTitle">' + esc(t('crTitle')) + '</h1>');
+  h.push('<p class="authsub">' + esc(t('crSub')) + '</p>');
+  h.push('<form data-form="cr" novalidate>');
+  h.push('<div class="field"><label for="cr">' + esc(t('crNumber')) + '</label>' +
+    '<input type="text" name="cr" id="cr" inputmode="numeric" placeholder="1234-1" required value="' + esc(F.cr) + '" data-bind="cr">' +
+    errHtml('cr') + '</div>');
+  h.push(reassureHtml());
+  h.push('<button type="submit" class="btn primary block">' + spinner(t('crSubmit')) + '</button>');
+  h.push('</form>');
+  h.push('<div class="center mt"><button type="button" class="linkbtn muted" data-act="skipcr">' + esc(t('skipForNow')) + '</button></div>');
+  return h.join('');
+}
+
+function screenFor(u){
+  if (u.step === 'otp')      return screenOtp(u);
+  if (u.step === 'business') return screenBusiness(u);
+  if (u.step === 'cr')       return screenCr(u);
+  return screenIdentify(u);
+}
+
+/* ===========================================================================
+   auth/AuthDialog.tsx + AuthSurface.tsx — §7.1
+   Overlay / sheet use a real <dialog>. The background is made inert *in code*
+   (the `inert` attribute), not merely dimmed in CSS.
+   The dev rail can switch to native showModal() to prove the native path; it
+   is off by default only because showModal() would also inert the simulated
+   browser chrome, which the reviewer needs in order to press Reload.
+   ======================================================================== */
+function shellHtml(u, pres){
+  const canBack = u.step !== 'identify' && u.step !== 'cr';
+  const head =
+    '<div class="authhead">' +
+      (canBack
+        ? '<button type="button" class="iconbtn back" data-act="back" aria-label="' + esc(S.locale==='ar'?'رجوع':'Back') + '">←</button>'
+        : '<span></span>') +
+      (pres === 'page'
+        ? '<span></span>'
+        : '<button type="button" class="iconbtn" data-act="close" data-reason="close_button" aria-label="' + esc(S.locale==='ar'?'إغلاق':'Close') + '">✕</button>') +
+    '</div>';
+  return head + '<div class="authbody">' + screenFor(u) + '</div>';
+}
+
+let dialogEl = null;
+function ensureDialog(){
+  if (dialogEl && dialogEl.isConnected) return dialogEl;
+  dialogEl = document.createElement('dialog');
+  dialogEl.id = 'authDialog';
+  dialogEl.className = 'authdlg';
+  dialogEl.setAttribute('role','dialog');
+  dialogEl.setAttribute('aria-modal','true');
+  dialogEl.setAttribute('aria-labelledby','authTitle');
+  dialogEl.addEventListener('cancel', function(e){ e.preventDefault(); closeSurface('escape'); });
+  dialogEl.addEventListener('keydown', trapTab);
+  /* in native showModal() mode a click on ::backdrop targets the dialog itself */
+  dialogEl.addEventListener('click', function(e){ if (e.target === dialogEl) closeSurface('scrim'); });
+  $('#stage').appendChild(dialogEl);
+  return dialogEl;
+}
+function closeDialog(){
+  if (!dialogEl) return;
+  try { if (dialogEl.open) dialogEl.close(); } catch(e){}
+  if (dialogEl.parentNode) dialogEl.parentNode.removeChild(dialogEl);
+  dialogEl = null;
+  const pa = $('#pagearea'); if (pa) pa.removeAttribute('inert');
+}
+function trapTab(e){
+  if (e.key !== 'Tab' || !dialogEl) return;
+  const f = $$('a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])', dialogEl)
+    .filter(function(n){ return n.offsetParent !== null || n === document.activeElement; });
+  if (!f.length) return;
+  const first = f[0], last = f[f.length - 1];
+  if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+}
+
+/* ===========================================================================
+   Flow actions
+   ======================================================================== */
+function setStep(step, kind){
+  const u = URL_NOW;
+  const q = Object.assign({}, u.query, { step: step });
+  if (u.isRoute) navigate(buildUrl(u.path, q), kind || 'push');
+  else navigate(buildUrl(u.path, q), kind || 'push');
+}
+function setParam(k, v, kind){
+  const u = URL_NOW;
+  let path = u.path;
+  const q = Object.assign({}, u.query);
+  if (k === 'mode'){
+    if (u.isRoute) path = v === 'signin' ? '/login' : '/register';
+    else q.auth = v;
+  } else { q[k] = v; }
+  navigate(buildUrl(path, q), kind || 'replace');
+}
+
+function showError(field, msg, code){
+  UI.error = msg; UI.errorField = field; UI.busy = false;
+  emit('auth:error', { error_field:field, error_code:code || 'validation', error_message:msg }, 'error');
+  paint();
+}
+
+async function submitIdentify(){
+  const u = URL_NOW;
+  UI.error = null; UI.errorField = null;
+  if (u.method === 'email_password'){
+    if (!validEmail(F.email)) return showError('email', t('errEmail'), 'invalid_email');
+    if (!F.password) return showError('password', t('errCreds'), 'invalid_password');
+    emit('auth:identifier_submit', { identifier_type:'email' });
+    UI.busy = true; paint();
+    try {
+      const r = await mockApi.signInWithEmail(F.email, F.password);
+      S.email = F.email; S.isNewUser = u.mode === 'signup' ? true : r.isNewUser;
+      UI.busy = false;
+      if (u.mode === 'signup'){
+        S.level = 'L1'; mergeCart();
+        emit('auth:signup_success', { auth_method:'email_password' }, 'server'); emitGa4('sign_up','email_password');
+        setStep('business','push');
+      } else {
+        S.level = S.level === 'L0' ? 'L1' : S.level; mergeCart();
+        emit('auth:login_success', { auth_method:'email_password' }, 'server'); emitGa4('login','email_password');
+        completeAuth();
+      }
+    } catch(err){
+      if (err.code === 'network') return showError('password', t('errNet'), 'network');
+      return showError('password', t('errCreds'), 'badcreds');
+    }
+    return;
+  }
+  if (!validPhone()) return showError('phone', t('errPhone'), 'invalid_phone');
+  emit('auth:identifier_submit', { identifier_type:'phone' });
+  UI.busy = true; paint();
+  try {
+    await mockApi.sendOtp(F.phone);
+    S.phone = F.phone; UI.busy = false; UI.sends++;
+    emit('auth:otp_send', { send_count:UI.sends }, 'server');   // never reveals whether the phone is known
+    setStep('otp','push');
+    startCooldown();
+  } catch(err){ showError('phone', t('errNet'), 'network'); }
+}
+
+async function resendOtp(){
+  if (UI.cooldown > 0 || UI.sends >= 3) return;
+  try {
+    await mockApi.sendOtp(F.phone);
+    UI.sends++; UI.error = null; UI.errorField = null;
+    emit('auth:otp_send', { send_count:UI.sends, resend:true }, 'server');
+    startCooldown(); paint();
+    announce(S.locale === 'ar' ? 'تم إرسال رمز جديد' : 'A new code has been sent');
+  } catch(err){ showError('code', t('errNet'), 'network'); }
+}
+
+async function submitOtp(){
+  const u = URL_NOW;
+  const code = F.code.join('');
+  if (code.length < 6) return showError('code', t('errCode'), 'incomplete');
+  emit('auth:otp_submit', { code_length:code.length });
+  UI.busy = true; UI.error = null; paint();
+  let r;
+  try { r = await mockApi.verifyOtp(F.phone, code); }
+  catch(err){
+    UI.busy = false;
+    if (err.code === 'network'){ return showError('code', t('errNet'), 'network'); }
+    if (err.code === 'expired'){
+      F.code = ['','','','','',''];
+      emit('auth:otp_fail', { reason:'expired' }, 'server');
+      startCooldown();
+      return showError('code', t('errExpired'), 'expired');
+    }
+    UI.otpFails++;
+    UI.shake = true; setTimeout(function(){ UI.shake = false; }, 420);
+    emit('auth:otp_fail', { reason:'mismatch', attempt:UI.otpFails }, 'server');
+    if (UI.otpFails >= 3) UI.emailFallback = true;
+    return showError('code', t('errCode'), 'mismatch');    // digits are kept
+  }
+  UI.busy = false;
+  /* §4 — the account exists at L1 HERE, before the business-details screen */
+  S.level = 'L1'; S.phone = F.phone; S.isNewUser = r.isNewUser;
+  mergeCart();
+  if (r.isNewUser){ emit('auth:signup_success', { auth_method:'phone_otp' }, 'server'); emitGa4('sign_up','phone_otp'); }
+  else            { emit('auth:login_success',  { auth_method:'phone_otp' }, 'server'); emitGa4('login','phone_otp'); }
+  if (u.mode === 'signup' && r.isNewUser) setStep('business','push');
+  else completeAuth();
+}
+
+async function submitBusiness(){
+  UI.busy = true; UI.error = null; paint();
+  const name = F.bizName.trim() || (S.locale === 'ar' ? 'نشاط تجاري' : 'My business');
+  try {
+    await mockApi.createAccount({ phone:F.phone, bizName:name, bizType:F.bizType });
+    S.bizName = name; S.bizType = F.bizType; UI.busy = false;
+    emit('auth:business_submit', { business_type:F.bizType, cr_provided:!!F.cr.trim() }, 'server');
+    if (F.cr.trim()) startCrVerification(F.cr.trim());
+    completeAuth();
+  } catch(err){ showError('bizName', t('errNet'), 'network'); }   // never clears the form
+}
+function skipBusiness(){
+  emit('auth:business_skip', {});
+  completeAuth();
+}
+async function submitCr(){
+  if (!F.cr.trim()) return showError('cr', t('errCr'), 'invalid_cr');
+  UI.busy = true; UI.error = null; paint();
+  try {
+    await mockApi.submitCr(F.cr.trim(), onCrResolved);
+    UI.busy = false;
+    S.cr = F.cr.trim(); S.crStatus = 'pending';
+    emit('auth:cr_submit', { cr_number:S.cr }, 'server');
+    closeSurface('cr_submitted', true);
+    toast(t('toastCr'));
+  } catch(err){ showError('cr', t('errNet'), 'network'); }
+}
+function startCrVerification(cr){
+  S.cr = cr; S.crStatus = 'pending';
+  emit('auth:cr_submit', { cr_number:cr }, 'server');
+  mockApi.submitCr(cr, onCrResolved);
+}
+function onCrResolved(status){
+  S.crStatus = status;
+  if (status === 'verified'){ S.level = 'L2'; emit('auth:cr_verified', { cr_number:S.cr }, 'server'); toast(S.locale === 'ar' ? 'تم توثيق نشاطك التجاري.' : 'Your business is verified.'); }
+  else { emit('auth:cr_rejected', { cr_number:S.cr }, 'server'); toast(t('crRejected').replace('{cr}', S.cr), 'err'); }
+  paint();
+}
+function skipCr(){ emit('auth:business_skip', { screen:'cr' }); closeSurface('skip_cr', true); }
+
+/* §7.3 return-to-intent */
+function replayIntent(){
+  const i = pendingIntent;
+  if (!i) return { dest:null };
+  const key = 'i' + i.__id;
+  if (replayed[key]){ emit('auth:intent_replay', { intent_type:i.type, duplicate:true, applied:false }); return { dest:null }; }
+  replayed[key] = true;
+  let dest = null;
+  try {
+    if (i.type === 'add_to_cart')      addToCart(i.productId, i.qty || 1);
+    else if (i.type === 'save_product'){ if (S.saved.indexOf(i.productId) === -1) S.saved.push(i.productId); }
+    else if (i.type === 'apply_coupon'){ if (S.coupons.indexOf(i.code) === -1) S.coupons.push(i.code); }
+    else if (i.type === 'goto_checkout') dest = '/checkout';
+    else if (i.type === 'goto_orders')   dest = '/orders';
+  } catch(err){
+    toast(S.locale === 'ar' ? 'تعذّر إكمال الإجراء. حاول مرة أخرى.' : "We couldn't finish that. Try again.", 'err');
+    emit('auth:error', { error_field:'intent', error_code:'replay_failed' }, 'error');
+    return { dest:null };
+  }
+  return { dest:dest, replayed:i };
+}
+function completeAuth(){
+  const u = URL_NOW;
+  const r = replayIntent();
+  const back = u.isRoute ? (u.returnTo || '/') : urlWithoutAuth(currentUrl());
+  const dest = r.dest || back;
+  const done = r.replayed;
+  if (done) lastIntent = done;
+  pendingIntent = null;
+  navigate(dest, 'replace');                                     // Back never reopens a completed surface
+  if (done) emit('auth:intent_replay', { intent_type:done.type, duplicate:false, applied:true, product_id:done.productId || null });
+  restoreFocus();
+  toast(t('toastWelcome'));
+}
+function closeSurface(reason, silent){
+  const u = URL_NOW;
+  if (!u.authOpen) return;
+  if (!silent) emit('auth:dismiss', { reason:reason, step:u.step });
+  pendingIntent = null;                                           // §8.5 — intent discarded
+  const clean = u.isRoute ? (u.returnTo || '/') : urlWithoutAuth(currentUrl());
+  if (HISTORY.index > 0 && HISTORY.stack[HISTORY.index - 1] === clean) goBack();
+  else navigate(clean, 'replace');
+  restoreFocus();
+}
+function restoreFocus(){
+  const el = invoker, sel = invokerSel;
+  invoker = null; invokerSel = null;
+  setTimeout(function(){
+    let target = el && el.isConnected ? el : null;
+    if (!target && sel){ try { target = $('#stage').querySelector(sel); } catch(e){} }
+    if (target) try { target.focus(); } catch(e){}
+  }, 30);
+}
+
+/* ===========================================================================
+   storefront/ — every gate below calls requireAuth(); none renders the
+   auth surface itself (§7.2).
+   ======================================================================== */
+function addToCart(id, qty){
+  const line = S.cart.filter(function(c){ return c.productId === id; })[0];
+  if (line) line.qty += qty; else S.cart.push({ productId:id, qty:qty });
+}
+/* §7.4 anonymous cart merge — union by product id, take the higher quantity */
+function mergeCart(){
+  if (!S.anonCart.length) return;
+  const merged = S.cart.slice();
+  S.anonCart.forEach(function(a){
+    const ex = merged.filter(function(c){ return c.productId === a.productId; })[0];
+    if (ex) ex.qty = Math.max(ex.qty, a.qty); else merged.push({ productId:a.productId, qty:a.qty });
+  });
+  const n = S.anonCart.length;                    // line items, as in "the 3 items in your cart"
+  S.cart = merged; S.anonCart = [];
+  emit('auth:cart_merge', { merged_items:n });
+  toast(t('toastCart').replace('{n}', n));
+}
+function cartCount(){
+  const a = S.level === 'L0' ? S.anonCart : [];
+  return S.cart.concat(a).reduce(function(n, c){ return n + c.qty; }, 0);
+}
+function cartLines(){ return S.level === 'L0' ? S.anonCart : S.cart; }
+function cartTotal(){ return cartLines().reduce(function(n, c){ const p = productById(c.productId); return n + (p ? p.priceBhd * c.qty : 0); }, 0); }
+
+function toast(msg, kind){
+  const wrap = $('#toasts'); if (!wrap) return;
+  const n = document.createElement('div');
+  n.className = 'toast' + (kind ? ' ' + kind : '');
+  n.setAttribute('dir','auto');        // an EN sentence inside an RTL page keeps its own direction
+  n.textContent = msg;
+  wrap.appendChild(n);
+  announce(msg);
+  setTimeout(function(){ if (n.parentNode) n.parentNode.removeChild(n); }, 4200);
+}
+function announce(msg){ const l = $('#live'); if (l) l.textContent = msg; }
+
+function promoBarHtml(){
+  return '<div class="promobar"><span>🚚 ' + esc(S.locale === 'ar' ? 'توصيل خلال ٢٤ ساعة في البحرين' : 'Delivery within 24 hours across Bahrain') + '</span>' +
+    '<span><bdi><b>FIRST10</b></bdi> — ' + esc(S.locale === 'ar' ? 'خصم ١٠٪ على أول طلب' : '10% off your first order') + '</span></div>';
+}
+function headerHtml(){
+  const signedIn = S.level !== 'L0';
+  return '<header class="header">' +
+    '<button class="hb-logo" data-act="go" data-to="/" aria-label="HIGHBASE"><b>HIGHBASE</b><span>WHERE YOU GROW</span></button>' +
+    '<div class="search" aria-hidden="true">🔍 ' + esc(S.locale === 'ar' ? 'ابحث عن منتجات أو موردين' : 'Search products or suppliers') + '</div>' +
+    '<nav>' +
+      '<span class="levelpill" data-l="' + S.level + '" title="Auth level">' + S.level + '</span>' +
+      '<button class="hlink" data-act="locale">' + (S.locale === 'ar' ? 'EN' : 'ع') + '</button>' +
+      '<button class="hlink" data-act="orders">' + esc(S.locale === 'ar' ? 'طلباتي' : 'Orders') + '</button>' +
+      (signedIn
+        ? '<button class="hlink" data-act="signout">' + esc(S.locale === 'ar' ? 'خروج' : 'Sign out') + '</button>'
+        : '<button class="hlink" data-act="auth" data-trigger="header_signin">' + esc(t('signIn')) + '</button>' +
+          '<button class="btn primary sm" data-act="auth" data-trigger="header_register">' + esc(t('createAccount')) + '</button>') +
+      '<button class="hlink cartbtn" data-act="go" data-to="/checkout" aria-label="Cart">🛒' +
+        (cartCount() ? '<span class="count">' + cartCount() + '</span>' : '') + '</button>' +
+    '</nav></header>';
+}
+function footerHtml(){
+  return '<footer class="footer">' +
+    '<div><span class="hb-logo"><b>HIGHBASE</b><span>WHERE YOU GROW</span></span>' +
+      '<p style="font-size:11.5px;margin-top:8px">' + esc(S.locale === 'ar' ? 'سوق الجملة بين الشركات في مملكة البحرين' : 'B2B wholesale marketplace, Kingdom of Bahrain') + '</p></div>' +
+    '<div><h4>' + esc(S.locale === 'ar' ? 'الحساب' : 'Account') + '</h4>' +
+      '<button class="fl" data-act="auth" data-trigger="footer_signin">' + esc(t('signIn')) + '</button>' +
+      '<button class="fl" data-act="auth" data-trigger="footer_register">' + esc(t('createAccount')) + '</button>' +
+      '<button class="fl" data-act="orders">' + esc(S.locale === 'ar' ? 'طلباتي' : 'Orders') + '</button></div>' +
+    '<div><h4>' + esc(S.locale === 'ar' ? 'الموردون' : 'Suppliers') + '</h4>' +
+      '<button class="fl" data-act="supplier">' + esc(t('supplierFork')) + ' →</button></div>' +
+    '<div><h4>' + esc(S.locale === 'ar' ? 'الدعم' : 'Support') + '</h4>' +
+      '<button class="fl" data-act="noop">' + esc(S.locale === 'ar' ? 'مركز المساعدة' : 'Help centre') + '</button>' +
+      '<button class="fl" data-act="noop">' + esc(S.locale === 'ar' ? 'الشروط' : 'Terms') + '</button></div>' +
+    '</footer>';
+}
+
+/* PriceDisplay — the price gate. L0 sees a CTA, L1+ sees the price. */
+function priceHtml(p, placement){
+  if (hasLevel('L1')) return '<div class="price reveal">' + bdi(bhd(p.priceBhd)) + '<small>/ ' + esc(ppack(p)) + '</small></div>';
+  gateView('view_price', p.id);
+  return '<button class="gate' + (placement === 'card' ? ' sm' : '') + '" data-act="pricegate" data-id="' + p.id + '" data-placement="' + placement + '">' +
+    '<span aria-hidden="true">🔒</span>' + esc(t('priceGate')) + '</button>';
+}
+function cardHtml(p){
+  const nm = pname(p);
+  return '<article class="card">' +
+    '<button class="thumb" data-act="go" data-to="/product/' + p.id + '" aria-label="' + esc(nm) + '">' + p.emoji + '</button>' +
+    '<div class="body">' +
+      '<div class="sup">' + bdi(p.supplier) + '</div>' +
+      '<button class="nm" data-act="go" data-to="/product/' + p.id + '">' + esc(nm) + '</button>' +
+      '<div class="meta">' + esc(ppack(p)) + ' · ' + esc(S.locale === 'ar' ? 'الحد الأدنى' : 'MOQ') + ' ' + p.moq + '</div>' +
+      '<div class="foot">' +
+        (p.coupon ? '<span class="badge coupon">🎟 ' + bdi(p.coupon.code) + '</span>' : '') +
+        priceHtml(p, 'card') +
+      '</div>' +
+    '</div></article>';
+}
+function homeHtml(){
+  return promoBarHtml() + headerHtml() + '<div class="page">' +
+    '<section class="hero"><h1>' + esc(S.locale === 'ar' ? 'اشترِ بالجملة لنشاطك التجاري' : 'Buy wholesale for your business') + '</h1>' +
+    '<p>' + esc(S.locale === 'ar' ? 'أكثر من ١٥٠ علامة تجارية، توصيل خلال ٢٤ ساعة، وأسعار جملة تظهر فور التسجيل.' :
+      'More than 150 brands, delivery within 24 hours, and wholesale prices the moment you have an account.') + '</p></section>' +
+    '<div class="sechead"><h2>' + esc(S.locale === 'ar' ? 'الأكثر طلباً' : 'Most ordered') + '</h2>' +
+      '<span>' + PRODUCTS.length + ' ' + esc(S.locale === 'ar' ? 'منتج' : 'products') + '</span></div>' +
+    '<div class="grid">' + PRODUCTS.map(cardHtml).join('') + '</div>' +
+    '</div>' + footerHtml();
+}
+function pdpHtml(id){
+  const p = productById(id);
+  if (!p) return headerHtml() + '<div class="page"><div class="empty">Product not found.</div></div>' + footerHtml();
+  const nm = pname(p);
+  const saved = S.saved.indexOf(p.id) !== -1;
+  const couponOn = p.coupon && S.coupons.indexOf(p.coupon.code) !== -1;
+  return promoBarHtml() + headerHtml() + '<div class="page">' +
+    '<div class="crumbs"><button class="linkbtn muted" data-act="go" data-to="/">' + esc(S.locale === 'ar' ? 'الرئيسية' : 'Home') + '</button> / ' + bdi(p.supplier) + '</div>' +
+    '<div class="pdp"><div>' +
+      '<div class="shot" aria-hidden="true">' + p.emoji + '</div>' +
+      '<h1>' + esc(nm) + '</h1><div class="sup">' + bdi(p.supplier) + '</div>' +
+      '<ul class="speclist">' +
+        '<li><span>' + esc(S.locale === 'ar' ? 'حجم العبوة' : 'Pack size') + '</span><span>' + esc(ppack(p)) + '</span></li>' +
+        '<li><span>' + esc(S.locale === 'ar' ? 'الحد الأدنى للطلب' : 'Minimum order') + '</span><span>' + p.moq + '</span></li>' +
+        '<li><span>' + esc(S.locale === 'ar' ? 'التوصيل' : 'Delivery') + '</span><span>' + esc(peta(p)) + '</span></li>' +
+        '<li><span>' + esc(S.locale === 'ar' ? 'المورّد' : 'Supplier') + '</span><span>' + bdi(p.supplier) + '</span></li>' +
+      '</ul></div>' +
+      '<aside class="buybox">' + priceHtml(p, 'pdp') +
+        '<button class="btn primary block" data-act="addcart" data-id="' + p.id + '">🛒 ' + esc(S.locale === 'ar' ? 'أضف إلى الطلب' : 'Add to order') + '</button>' +
+        '<button class="btn ghost block" data-act="save" data-id="' + p.id + '">' + (saved ? '★ ' : '☆ ') + esc(S.locale === 'ar' ? 'حفظ' : 'Save') + '</button>' +
+        (p.coupon
+          ? '<div class="infobox warn">🎟 <b>' + bdi(p.coupon.code) + '</b> — ' + esc(pcoup(p)) + '<br>' +
+            (couponOn
+              ? '<b>' + esc(S.locale === 'ar' ? 'تم التطبيق' : 'Applied') + '</b>'
+              : '<button class="linkbtn" data-act="coupon" data-id="' + p.id + '" data-code="' + esc(p.coupon.code) + '">' + esc(S.locale === 'ar' ? 'استخدم القسيمة' : 'Use this coupon') + '</button>') + '</div>'
+          : '') +
+        '<div class="badge eta">🚚 ' + esc(peta(p)) + '</div>' +
+      '</aside></div></div>' + footerHtml();
+}
+function checkoutHtml(){
+  const lines = cartLines();
+  let panel = '';
+  if (!hasLevel('L1')){
+    panel = '<div class="infobox">🔒 ' + esc(TRIGGER_COPY.checkout[S.locale]) + '</div>' +
+      '<button class="btn primary block mt" data-act="auth" data-trigger="checkout" data-level="L2">' + esc(t('signIn')) + '</button>';
+  } else if (S.crStatus === 'pending'){
+    panel = '<div class="infobox">⏳ <b>' + esc(t('crPending')) + '</b><br>CR ' + esc(S.cr) + '</div>';
+  } else if (S.crStatus === 'rejected'){
+    panel = '<div class="infobox err">⚠ ' + esc(t('crRejected').replace('{cr}', S.cr)) + '</div>' +
+      '<button class="btn primary block mt" data-act="auth" data-trigger="checkout" data-level="L2" data-step="cr">' + esc(t('crSubmit')) + '</button>';
+  } else if (S.level !== 'L2'){
+    panel = '<div class="infobox">' + esc(TRIGGER_COPY.checkout[S.locale]) + '</div>' +
+      '<button class="btn primary block mt" data-act="auth" data-trigger="checkout" data-level="L2" data-step="cr">' + esc(t('crSubmit')) + '</button>';
+  } else {
+    panel = '<div class="infobox">✅ ' + esc(S.locale === 'ar' ? 'نشاطك التجاري موثّق. يمكنك إتمام الطلب.' : 'Your business is verified. You can place this order.') + '</div>' +
+      '<button class="btn primary block mt" data-act="placeorder">' + esc(S.locale === 'ar' ? 'إتمام الطلب' : 'Place order') + '</button>';
+  }
+  return promoBarHtml() + headerHtml() + '<div class="page">' +
+    '<h1 style="font-size:23px;margin-bottom:12px">' + esc(S.locale === 'ar' ? 'إتمام الطلب' : 'Checkout') + '</h1>' +
+    (lines.length
+      ? lines.map(function(c){ const p = productById(c.productId); return '<div class="cartrow"><div class="e">' + p.emoji + '</div>' +
+          '<div class="g"><div class="n">' + esc(pname(p)) + '</div>' +
+          '<div class="m">' + esc(ppack(p)) + ' × ' + c.qty + '</div></div>' +
+          '<div>' + (hasLevel('L1') ? bdi(bhd(p.priceBhd * c.qty)) : '🔒') + '</div></div>'; }).join('') +
+        '<div class="cartrow" style="border-style:dashed"><div class="g"><div class="n">' + esc(S.locale === 'ar' ? 'الإجمالي' : 'Total') + '</div></div>' +
+        '<div class="price">' + (hasLevel('L1') ? bdi(bhd(cartTotal())) : '🔒') + '</div></div>'
+      : '<div class="empty">' + esc(S.locale === 'ar' ? 'سلتك فارغة.' : 'Your cart is empty.') + '</div>') +
+    '<div style="max-width:420px;margin-top:14px">' + panel + '</div></div>' + footerHtml();
+}
+function ordersHtml(){
+  return promoBarHtml() + headerHtml() + '<div class="page">' +
+    '<h1 style="font-size:23px;margin-bottom:12px">' + esc(S.locale === 'ar' ? 'طلباتي' : 'Orders') + '</h1>' +
+    (hasLevel('L1')
+      ? '<div class="empty">' + esc(S.locale === 'ar' ? 'لا توجد طلبات بعد.' : 'No orders yet.') + '</div>'
+      : '<div style="max-width:420px"><div class="infobox">🔒 ' + esc(TRIGGER_COPY.order_history[S.locale]) + '</div>' +
+        '<button class="btn primary block mt" data-act="auth" data-trigger="order_history">' + esc(t('signIn')) + '</button></div>') +
+    '</div>' + footerHtml();
+}
+function supplierHtml(){
+  return promoBarHtml() + headerHtml() + '<div class="page">' +
+    '<section class="hero"><h1>' + esc(TRIGGER_COPY.supplier_cta[S.locale]) + '</h1>' +
+    '<p>' + esc(S.locale === 'ar' ? 'هذا المسار يخرج من قمع تسجيل المشترين تماماً.' : 'This fork leaves the buyer registration funnel entirely.') + '</p>' +
+    '<button class="btn primary mt" data-act="go" data-to="/">' + esc(t('backToStore')) + '</button></section></div>' + footerHtml();
+}
+function storefrontHtml(u){
+  if (u.path === '/')                    return homeHtml();
+  if (u.path.indexOf('/product/') === 0) return pdpHtml(u.path.slice(9));
+  if (u.path === '/checkout')            return checkoutHtml();
+  if (u.path === '/orders')              return ordersHtml();
+  if (u.path === '/suppliers/apply')     return supplierHtml();
+  if (u.isRoute)                         return homeHtml();
+  return homeHtml();
+}
+
+/* ===========================================================================
+   App.tsx — render pipeline. The URL renders the component; nothing else.
+   ======================================================================== */
+let CUR_PRES = 'none', prevAuthOpen = false, FLOW_PRES = null, surfaceSig = null;
+let AUTH_INTERNAL = false;                 // §7.2 guard — see selfTest()
+
+function computePres(){
+  const u = URL_NOW;
+  if (!u.authOpen){ FLOW_PRES = null; return 'none'; }
+  if (NAV_TYPE === 'hard' || !prevAuthOpen || !FLOW_PRES){
+    FLOW_PRES = resolvePresentation({ trigger:u.trigger, navigationType:NAV_TYPE, viewportWidth:viewportWidth() });
+  }
+  return FLOW_PRES;                        // presentation sticks for the life of one flow
+}
+function render(){
+  URL_NOW = parseUrl(currentUrl());
+  CUR_PRES = computePres();
+  if (URL_NOW.authOpen) LAST_PRESENTATION = CUR_PRES;
+  gateSeen = Object.create(null);
+  emit('page_view', {
+    page_path: URL_NOW.path,
+    page_location: 'https://highbase.bh' + URL_NOW.raw,
+    navigation_type: NAV_TYPE,
+    presentation: CUR_PRES
+  }, 'auto');
+  paint();
+  if (URL_NOW.authOpen && (!prevAuthOpen || NAV_TYPE === 'hard')){
+    emit('auth:open', { step:URL_NOW.step, url_form: URL_NOW.isRoute ? 'route' : 'query_param' });
+  }
+  prevAuthOpen = URL_NOW.authOpen;
+  restoreScroll();
+}
+function paint(){
+  const u = URL_NOW, pres = CUR_PRES;
+  const stage = $('#stage');
+  stage.setAttribute('dir', S.locale === 'ar' ? 'rtl' : 'ltr');
+  stage.setAttribute('lang', S.locale);
+  stage.className = 'stage' + (S.device === 'mobile' ? ' mobile' : '');
+  stage.setAttribute('data-hard', NAV_TYPE === 'hard' ? '1' : '0');
+  const pa = $('#pagearea');
+  AUTH_INTERNAL = true;
+  if (u.authOpen && pres === 'page'){
+    closeDialog();
+    pa.innerHTML = pageAuthHtml(u);
+    syncFocus(pa, u, pres);
+  } else {
+    pa.innerHTML = storefrontHtml(u);
+    if (u.authOpen) openSurface(u, pres); else { closeDialog(); surfaceSig = null; }
+  }
+  AUTH_INTERNAL = false;
+  renderChrome();
+  renderRail();
+}
+function pageAuthHtml(u){
+  return '<div class="authpage">' +
+    '<button type="button" class="backlink" data-act="close" data-reason="back_to_store">' +
+      '<span aria-hidden="true">←</span>' + esc(t('backToStore')) + '</button>' +
+    '<div class="authcard" role="region" aria-labelledby="authTitle">' + shellHtml(u, 'page') + '</div>' +
+  '</div>';
+}
+function openSurface(u, pres){
+  const d = ensureDialog();
+  d.setAttribute('data-pres', pres);
+  d.setAttribute('data-native', S.nativeModal ? '1' : '0');
+  d.innerHTML =
+    '<div class="scrim" data-act="close" data-reason="scrim" aria-hidden="true"></div>' +
+    '<div class="authpanel">' + (pres === 'sheet' ? '<div class="sheetgrip" aria-hidden="true"></div>' : '') +
+      shellHtml(u, pres) + '</div>';
+  if (!d.open){ try { S.nativeModal ? d.showModal() : d.show(); } catch(e){ d.show(); } }
+  $('#pagearea').setAttribute('inert', '');       // inert in code, not merely dimmed
+  syncFocus(d, u, pres);
+}
+function syncFocus(root, u, pres){
+  const sig = pres + '|' + u.mode + '|' + u.step + '|' + u.method + '|' + u.trigger + '|' + u.product + '|' + S.locale;
+  const active = document.activeElement;
+  const keepId = active && active.id && root.contains(active) ? active.id : null;
+  if (sig !== surfaceSig){
+    surfaceSig = sig;
+    const first = root.querySelector('input:not([type=checkbox]),select,button.btn');
+    if (first) setTimeout(function(){ try { first.focus(); } catch(e){} }, 20);
+  } else if (keepId){
+    const n = root.querySelector('#' + keepId.replace(/([^\w-])/g, '\\$1'));
+    if (n) try { n.focus(); } catch(e){}
+  }
+}
+
+/* simulated browser chrome — §10.5 */
+function urlHtml(url){
+  const qi = url.indexOf('?');
+  const path = qi === -1 ? url : url.slice(0, qi);
+  let out = '<span style="color:#5A7A96">highbase.bh</span><span class="u-path">' + esc(path) + '</span>';
+  if (qi !== -1){
+    out += '<span class="u-sep">?</span>' + url.slice(qi + 1).split('&').map(function(p){
+      const i = p.indexOf('=');
+      return '<span class="u-key">' + esc(i === -1 ? p : p.slice(0, i)) + '</span><span class="u-sep">=</span><span class="u-val">' + esc(i === -1 ? '' : p.slice(i + 1)) + '</span>';
+    }).join('<span class="u-sep">&amp;</span>');
+  }
+  return out;
+}
+function renderChrome(){
+  $('#chrome').innerHTML =
+    '<button class="navbtn" data-act="hback" aria-label="Back"' + (HISTORY.index === 0 ? ' disabled' : '') + '>←</button>' +
+    '<button class="navbtn" data-act="hfwd" aria-label="Forward"' + (HISTORY.index >= HISTORY.stack.length - 1 ? ' disabled' : '') + '>→</button>' +
+    '<button class="navbtn" data-act="hreload" aria-label="Reload" title="Reload — navigationType becomes hard">⟳</button>' +
+    '<div class="urlbar">' + urlHtml(currentUrl()) + '</div>' +
+    '<button class="chip" data-act="device" aria-pressed="' + (S.device === 'mobile') + '">' + (S.device === 'mobile' ? '390px' : '1280px') + '</button>' +
+    '<button class="chip" data-act="locale" aria-pressed="' + (S.locale === 'ar') + '">' + (S.locale === 'ar' ? 'AR·RTL' : 'EN') + '</button>' +
+    '<button class="chip" data-act="nativemodal" aria-pressed="' + S.nativeModal + '" title="Use native dialog.showModal()">showModal</button>';
+}
+
+/* ===========================================================================
+   analytics/EventStream.tsx — the dev rail (§10.5)
+   ======================================================================== */
+let railTab = 'events';
+const HEADLESS_TRIGGERS = ['header_signin','header_register','footer_signin','footer_register','deep_link','email_link','session_expired','supplier_cta'];
+const FUNNEL = [
+  { n:'1 · gate_click / open', m:function(e){ return e.name === 'auth:gate_click' || (e.name === 'auth:open' && HEADLESS_TRIGGERS.indexOf(e.props.trigger_source) !== -1); } },
+  { n:'2 · auth:open',          m:function(e){ return e.name === 'auth:open'; } },
+  { n:'3 · identifier_submit',  m:function(e){ return e.name === 'auth:identifier_submit'; } },
+  { n:'4 · otp_send',           m:function(e){ return e.name === 'auth:otp_send'; } },
+  { n:'5 · otp_submit',         m:function(e){ return e.name === 'auth:otp_submit'; } },
+  { n:'6 · signup/login_success', m:function(e){ return e.name === 'auth:signup_success' || e.name === 'auth:login_success'; } },
+  { n:'7 · business submit/skip', m:function(e){ return e.name === 'auth:business_submit' || e.name === 'auth:business_skip'; } },
+  { n:'8 · intent_replay',      m:function(e){ return e.name === 'auth:intent_replay' && e.props.applied; } }
+];
+function stateRow(k, v, cls){ return '<div><k>' + esc(k) + '</k><v class="' + (cls || '') + '">' + esc(v) + '</v></div>'; }
+function railStateHtml(){
+  const u = URL_NOW || parseUrl('/');
+  return '<div class="state">' +
+    stateRow('auth_level', S.level, S.level.toLowerCase()) +
+    stateRow('presentation', CUR_PRES) +
+    stateRow('trigger', u.trigger || '—') +
+    stateRow('step', u.authOpen ? u.step : '—') +
+    stateRow('method', u.authOpen ? u.method : '—') +
+    stateRow('cr_status', S.crStatus) +
+    stateRow('cart', cartCount() + ' items') +
+    stateRow('locale', S.locale + (S.locale === 'ar' ? ' / rtl' : '')) +
+    stateRow('history', (HISTORY.index + 1) + ' / ' + HISTORY.stack.length) +
+    stateRow('nav_type', NAV_TYPE) +
+    stateRow('intent', pendingIntent ? pendingIntent.type : 'none') +
+    stateRow('events', String(EVENTS.length)) +
+    '</div>';
+}
+function evHtml(e){
+  const ts = e.ts.toTimeString().slice(0, 8) + '.' + String(e.ts.getMilliseconds()).padStart(3, '0');
+  const props = Object.keys(e.props).filter(function(k){ return e.props[k] !== null && e.props[k] !== undefined; });
+  return '<div class="ev ' + e.source + '"><div class="top">' +
+    '<span class="nm">' + esc(e.name) + '</span>' +
+    '<span class="src">' + e.source.toUpperCase() + '</span>' +
+    '<span class="ts">' + ts + '</span></div>' +
+    '<div class="props">' + props.map(function(k){
+      return '<div><k>' + esc(k) + '</k><v>' + esc(String(e.props[k])) + '</v></div>'; }).join('') + '</div></div>';
+}
+function funnelHtml(){
+  const counts = FUNNEL.map(function(f){ return EVENTS.filter(f.m).length; });
+  const top = Math.max.apply(null, counts.concat([1]));
+  let h = '<div>' + FUNNEL.map(function(f, i){
+    const c = counts[i];
+    const conv = counts[0] ? Math.round(c / counts[0] * 100) : 0;
+    const prev = i > 0 ? counts[i - 1] : null;
+    const drop = prev !== null && prev > 0 ? prev - c : null;
+    return '<div class="fstep"><div class="lbl"><b>' + esc(f.n) + '</b><i>' + c + ' · ' + conv + '%</i></div>' +
+      '<div class="fbar"><i style="width:' + Math.round(c / top * 100) + '%"></i></div>' +
+      (drop > 0 ? '<div class="drop">−' + drop + ' drop-off</div>' : '') + '</div>';
+  }).join('') + '</div>';
+
+  h += breakdown('by trigger_source', 'trigger_source');
+  h += breakdown('by presentation', 'presentation');
+  h += '<div class="railnote">One funnel, broken down by property — not one funnel per entry point (§10.4). ' +
+       'Social / passkey paths would be modelled as an OR\'d step, never an optional one.</div>';
+  return h;
+}
+function breakdown(title, prop){
+  const opens = EVENTS.filter(function(e){ return e.name === 'auth:open'; });
+  const wins  = EVENTS.filter(function(e){ return e.name === 'auth:signup_success' || e.name === 'auth:login_success'; });
+  const keys = {};
+  opens.concat(wins).forEach(function(e){ keys[e.props[prop] || '—'] = 1; });
+  const rows = Object.keys(keys).map(function(k){
+    const o = opens.filter(function(e){ return (e.props[prop] || '—') === k; }).length;
+    const w = wins.filter(function(e){ return (e.props[prop] || '—') === k; }).length;
+    return '<div class="brkrow"><span>' + esc(k) + '</span><span>' + o + ' → ' + w + ' · ' + (o ? Math.round(w / o * 100) : 0) + '%</span></div>';
+  }).join('');
+  return '<div class="brk"><h5>' + esc(title) + '</h5>' + (rows || '<div class="brkrow"><span>no data yet</span><span></span></div>') + '</div>';
+}
+function renderRail(){
+  const body = railTab === 'events'
+      ? railStateHtml() + (EVENTS.length ? EVENTS.slice(0, 120).map(evHtml).join('') : '<div class="emptyev">no events yet</div>')
+    : railTab === 'funnel' ? funnelHtml()
+    : casesHtml();
+  $('#rail').innerHTML =
+    '<div class="railhead"><div class="railtitle"><b>HIGHBASE · EVENT STREAM</b>' +
+      '<button class="chip" data-act="clearev">clear</button></div>' +
+      '<div class="railtabs" role="tablist">' +
+      ['events','funnel','cases'].map(function(k){
+        return '<button role="tab" aria-selected="' + (railTab === k) + '" data-act="railtab" data-tab="' + k + '">' + k.toUpperCase() + '</button>';
+      }).join('') + '</div></div>' +
+    '<div class="railbody">' + body + '</div>';
+}
+
+/* ===========================================================================
+   CASES — §11 acceptance criteria launcher. Every button only changes the
+   URL (plus a test hook where an error path needs arming). Nothing here is a
+   special screen.
+   ======================================================================== */
+function hardGo(url){
+  saveScroll();
+  HISTORY.stack = HISTORY.stack.slice(0, HISTORY.index + 1);
+  HISTORY.stack.push(url); HISTORY.index++;
+  SCROLL.length = HISTORY.index; SCROLL.push(0);
+  NAV_TYPE = 'hard'; FLOW_PRES = null; render();
+}
+function openAt(step, o){
+  o = o || {};
+  const q = Object.assign({ auth:o.mode || 'signup', trigger:o.trigger || 'header_register', step:step }, o.extra || {});
+  S.lastTrigger = q.trigger;
+  UI.error = null; UI.errorField = null; UI.busy = false;
+  navigate(buildUrl(o.path || '/', q), 'push');
+}
+function ensureL1(){
+  S.level = 'L1'; S.phone = S.phone || '33001122'; F.phone = S.phone;
+  S.bizName = S.bizName || 'Manama Grocery'; S.isNewUser = S.isNewUser === null ? true : S.isNewUser;
+}
+function resetSession(){
+  S.level = 'L0'; S.phone = null; S.email = null; S.bizName = null; S.bizType = null;
+  S.cr = null; S.crStatus = 'none'; S.cart = []; S.anonCart = []; S.saved = []; S.coupons = [];
+  S.isNewUser = null; S.lastTrigger = null;
+  F.phone = ''; F.code = ['','','','','','']; F.email = ''; F.password = ''; F.bizName = ''; F.cr = '';
+  pendingIntent = null; resetForm('identify');
+  if (URL_NOW && URL_NOW.authOpen) emit('auth:dismiss', { reason:'session_reset', step:URL_NOW.step });
+  navigate('/', 'replace');
+}
+
+const CASES = [
+  { g:'Presentations', k:'ov',   l:'In-context gate on desktop → overlay',
+    h:'/product/p_mou_pch?auth=signup&trigger=price_gate_pdp&step=identify&product=p_mou_pch',
+    f:function(){ S.device = 'desktop'; navigate('/product/p_mou_pch','push');
+      requireAuth({ level:'L1', trigger:'price_gate_pdp', intent:{ type:'reveal_price', productId:'p_mou_pch' } }); } },
+  { g:'Presentations', k:'sh',   l:'Same gate under 768px → bottom sheet', h:'device=390px, same URL',
+    f:function(){ S.device = 'mobile'; FLOW_PRES = null; navigate('/product/p_mou_pch','push');
+      requireAuth({ level:'L1', trigger:'price_gate_card', intent:{ type:'reveal_price', productId:'p_mou_pch' } }); } },
+  { g:'Presentations', k:'pg',   l:'Direct navigation to /register → full page', h:'/register?trigger=deep_link&step=identify',
+    f:function(){ resetForm('identify'); S.lastTrigger = 'deep_link'; hardGo('/register?trigger=deep_link&step=identify'); } },
+  { g:'Presentations', k:'em',   l:'/login?trigger=email_link → full page', h:'hard navigation from an email',
+    f:function(){ resetForm('identify'); S.lastTrigger = 'email_link'; hardGo('/login?trigger=email_link&step=identify&return_to=%2Forders'); } },
+  { g:'Presentations', k:'ck',   l:'Checkout trigger → page, never an overlay', h:'/login?trigger=checkout — soft nav, still a page',
+    f:function(){ ensureL1(); navigate('/checkout','push');
+      requireAuth({ level:'L2', trigger:'checkout', step:'cr', intent:{ type:'goto_checkout' } }); } },
+
+  { g:'Behaviour contract', k:'bk', l:'Back closes the surface', h:'history.back() — restores the URL underneath', f:function(){ goBack(); } },
+  { g:'Behaviour contract', k:'rl', l:'Reload on an overlay URL → page presentation', h:'same URL, navigationType flips to hard', f:function(){ reload(); } },
+  { g:'Behaviour contract', k:'fw', l:'Forward re-opens the surface', h:'history.forward()', f:function(){ goForward(); } },
+  { g:'Behaviour contract', k:'ri', l:'Return-to-intent: add to cart from a PDP', h:'intent replays before the page is seen',
+    f:function(){ S.device = 'desktop'; navigate('/product/p_ara_cof','push');
+      requireAuth({ level:'L1', trigger:'add_to_cart', intent:{ type:'add_to_cart', productId:'p_ara_cof', qty:2 } }); } },
+  { g:'Behaviour contract', k:'rp', l:'Replay the same intent twice → no duplicate', h:'idempotency guard (§7.3 rule 4)',
+    f:function(){
+      if (!lastIntent) return toast('Complete an intent flow first (try “Return-to-intent”).', 'warn');
+      const before = cartCount();
+      pendingIntent = lastIntent; replayIntent(); pendingIntent = null; paint();
+      toast('Replayed ' + lastIntent.type + ' again — cart ' + before + ' → ' + cartCount() + ' (unchanged)');
+    } },
+  { g:'Behaviour contract', k:'cm', l:'Seed an anonymous cart, then sign in → merge', h:'auth:cart_merge with merged_items',
+    f:function(){ S.anonCart = [{ productId:'p_wtr_500', qty:2 },{ productId:'p_dat_box', qty:1 },{ productId:'p_oil_5l', qty:1 }];
+      paint(); requireAuth({ level:'L1', trigger:'header_signin', mode:'signin' }); } },
+  { g:'Behaviour contract', k:'rs', l:'Reset session to L0', h:'clears level, cart, CR', f:resetSession },
+
+  { g:'Errors & edges', k:'e1', l:'Wrong OTP — inline error, digits kept', h:'auth:otp_fail · reason=mismatch',
+    f:function(){ ensurePhone(); F.code = '111111'.split(''); openAt('otp',{}); setTimeout(submitOtp, 60); } },
+  { g:'Errors & edges', k:'e2', l:'Expired OTP — digits cleared, timer restarts', h:'testHooks.forceOtpExpired',
+    f:function(){ ensurePhone(); testHooks.forceOtpExpired = true; F.code = OTP_CODE.split(''); openAt('otp',{}); setTimeout(submitOtp, 60); } },
+  { g:'Errors & edges', k:'e3', l:'3 failed attempts → email fallback appears', h:'reveals “Sign in with email instead”',
+    f:function(){ ensurePhone(); UI.otpFails = 2; F.code = '111111'.split(''); openAt('otp',{}); setTimeout(submitOtp, 60); } },
+  { g:'Errors & edges', k:'e4', l:'Network failure on submit — form is kept', h:'testHooks.forceNetworkFailure',
+    f:function(){ ensurePhone(); testHooks.forceNetworkFailure = true; openAt('identify',{}); setTimeout(submitIdentify, 60); } },
+  { g:'Errors & edges', k:'e5', l:'CR rejected after verification', h:'testHooks.forceCrRejected · resolves in 6s',
+    f:function(){ ensureL1(); testHooks.forceCrRejected = true; F.cr = '1234-1'; navigate('/checkout','push');
+      requireAuth({ level:'L2', trigger:'checkout', step:'cr' }); setTimeout(submitCr, 80); } },
+  { g:'Errors & edges', k:'e6', l:'CR pending at checkout — blocking panel', h:'crStatus = pending',
+    f:function(){ ensureL1(); S.cr = '9911-2'; S.crStatus = 'pending'; if (!S.cart.length) addToCart('p_bas_rice', 2); navigate('/checkout','push'); } },
+  { g:'Errors & edges', k:'e7', l:'Session expired mid-action', h:'trigger=session_expired · intent preserved',
+    f:function(){ S.level = 'L0'; S.crStatus = 'none'; navigate('/checkout','push');
+      requireAuth({ level:'L1', trigger:'session_expired', mode:'signin', intent:{ type:'goto_checkout' } }); } },
+
+  { g:'Content · a11y · RTL', k:'ar', l:'Toggle Arabic / RTL', h:'mirrors layout, input group order, back arrow', f:function(){ toggleLocale(); } },
+  { g:'Content · a11y · RTL', k:'dv', l:'Toggle 390px viewport', h:'drives resolvePresentation()', f:function(){ toggleDevice(); } },
+  { g:'Content · a11y · RTL', k:'nm', l:'Toggle native <dialog>.showModal()', h:'true native modality — inerts the whole document, chrome included', f:function(){ toggleNativeModal(); } },
+  { g:'Content · a11y · RTL', k:'st', l:'Run the contract self-test', h:'logs a pass/fail table to the console', f:function(){ toast(selfTest() ? 'Contract self-test passed — see console' : 'Self-test FAILED — see console', selfTest() ? '' : 'err'); } }
+];
+function ensurePhone(){ if (!/^3\d{7}$/.test(F.phone)) F.phone = '33001122'; S.phone = F.phone; }
+function casesHtml(){
+  const groups = [];
+  CASES.forEach(function(c){ if (groups.indexOf(c.g) === -1) groups.push(c.g); });
+  return groups.map(function(g){
+    return '<div class="casegrp"><h5>' + esc(g) + '</h5>' +
+      CASES.filter(function(c){ return c.g === g; }).map(function(c){
+        return '<button class="case" data-act="case" data-case="' + c.k + '">' + esc(c.l) + '<em>' + esc(c.h) + '</em></button>';
+      }).join('') + '</div>';
+  }).join('') +
+  '<div class="railnote">Every case changes the URL and lets the component render from it. ' +
+  'Reload while an overlay is open — the URL does not change, the presentation does.</div>';
+}
+function toggleLocale(){
+  S.locale = S.locale === 'en' ? 'ar' : 'en';
+  emit('locale_switch', { locale:S.locale }, 'client');
+  surfaceSig = null; paint();
+}
+function toggleDevice(){ S.device = S.device === 'desktop' ? 'mobile' : 'desktop'; FLOW_PRES = null; CUR_PRES = computePres(); surfaceSig = null; paint(); }
+function toggleNativeModal(){ S.nativeModal = !S.nativeModal; closeDialog(); surfaceSig = null; paint(); }
+
+/* ===========================================================================
+   Event delegation — one listener per event type for the whole app
+   ======================================================================== */
+document.addEventListener('click', function(e){
+  const el = e.target.closest('[data-act]');
+  if (!el) return;
+  const a = el.getAttribute('data-act');
+  const d = el.dataset;
+  switch(a){
+    case 'go':        navigate(d.to, 'push'); break;
+    case 'hback':     goBack(); break;
+    case 'hfwd':      goForward(); break;
+    case 'hreload':   reload(); break;
+    case 'railtab':   railTab = d.tab; renderRail(); break;
+    case 'clearev':   EVENTS.length = 0; renderRail(); break;
+    case 'case':      { const c = CASES.filter(function(x){ return x.k === d.case; })[0]; if (c) c.f(); break; }
+    case 'locale':    toggleLocale(); break;
+    case 'device':    toggleDevice(); break;
+    case 'nativemodal': toggleNativeModal(); break;
+    case 'auth':      requireAuth({ level:d.level || 'L1', trigger:d.trigger, step:d.step,
+                        mode: d.mode || defaultMode(d.trigger), invoker:el,
+                        intent: d.trigger === 'checkout' ? { type:'goto_checkout' } : (d.trigger === 'order_history' ? { type:'goto_orders' } : null) }); break;
+    case 'pricegate': requireAuth({ level:'L1', trigger:d.placement === 'pdp' ? 'price_gate_pdp' : 'price_gate_card',
+                        intent:{ type:'reveal_price', productId:d.id }, invoker:el }); break;
+    case 'addcart':   if (hasLevel('L1')){ addToCart(d.id, 1); toast(S.locale === 'ar' ? 'أُضيف إلى الطلب' : 'Added to your order'); paint(); }
+                      else { requireAuth({ level:'L1', trigger:'add_to_cart', intent:{ type:'add_to_cart', productId:d.id, qty:1 }, invoker:el }); } break;
+    case 'save':      if (hasLevel('L1')){ const i = S.saved.indexOf(d.id); i === -1 ? S.saved.push(d.id) : S.saved.splice(i, 1); paint(); }
+                      else { requireAuth({ level:'L1', trigger:'save_product', intent:{ type:'save_product', productId:d.id }, invoker:el }); } break;
+    case 'coupon':    if (hasLevel('L1')){ if (S.coupons.indexOf(d.code) === -1) S.coupons.push(d.code); paint(); }
+                      else { requireAuth({ level:'L1', trigger:'apply_coupon', intent:{ type:'apply_coupon', code:d.code, productId:d.id }, invoker:el }); } break;
+    case 'orders':    if (hasLevel('L1')) navigate('/orders','push');
+                      else { requireAuth({ level:'L1', trigger:'order_history', mode:'signin', intent:{ type:'goto_orders' }, invoker:el }); } break;
+    case 'supplier':  emit('auth:supplier_fork', { from:URL_NOW.authOpen ? 'auth_surface' : 'storefront' });
+                      if (URL_NOW.authOpen) closeSurface('supplier_fork', true);
+                      navigate('/suppliers/apply','push'); break;
+    case 'signout':   resetSession(); break;
+    case 'placeorder': toast(S.locale === 'ar' ? 'تم استلام طلبك.' : 'Order placed.'); break;
+    case 'close':     closeSurface(d.reason || 'close_button'); break;
+    case 'back':      goBack(); break;
+    case 'mode':      if (URL_NOW.mode !== d.mode){ emit('auth:tab_switch', { to:d.mode }); setParam('mode', d.mode, 'replace'); } break;
+    case 'method':    emit('auth:method_select', { to:d.method });
+                      UI.error = null; UI.errorField = null;
+                      { const u = URL_NOW; const q = Object.assign({}, u.query, { method:d.method, step:'identify' });
+                        navigate(buildUrl(u.path, q), 'replace'); } break;
+    case 'showpw':    F.showPw = !F.showPw; paint(); break;
+    case 'resend':    resendOtp(); break;
+    case 'changephone': UI.error = null; UI.errorField = null; setStep('identify','push'); break;
+    case 'skipbiz':   skipBusiness(); break;
+    case 'skipcr':    skipCr(); break;
+    case 'noop':      break;
+  }
+});
+document.addEventListener('submit', function(e){
+  const f = e.target.closest('[data-form]');
+  if (!f) return;
+  e.preventDefault();
+  if (UI.busy) return;
+  const kind = f.getAttribute('data-form');
+  if (kind === 'identify') submitIdentify();
+  else if (kind === 'otp') submitOtp();
+  else if (kind === 'business') submitBusiness();
+  else if (kind === 'cr') submitCr();
+});
+document.addEventListener('input', function(e){
+  const n = e.target;
+  if (n.dataset && n.dataset.bind){
+    const k = n.dataset.bind;
+    if (k === 'phone'){ F.phone = n.value.replace(/\D/g,'').slice(0,8); if (n.value !== F.phone && !/\s/.test(n.value)) n.value = F.phone; }
+    else if (n.type === 'checkbox') F[k] = n.checked;
+    else F[k] = n.value;
+    return;
+  }
+  if (n.dataset && n.dataset.otp !== undefined){
+    const i = +n.dataset.otp;
+    const v = n.value.replace(/\D/g,'').slice(-1);
+    n.value = v; F.code[i] = v;
+    if (v && i < 5){ const nx = $('#otp' + (i + 2)); if (nx) nx.focus(); }
+    if (F.code.join('').length === 6 && !UI.busy) submitOtp();      // auto-submit, Continue stays functional
+  }
+});
+document.addEventListener('keydown', function(e){
+  const n = e.target;
+  if (n.dataset && n.dataset.otp !== undefined){
+    const i = +n.dataset.otp;
+    if (e.key === 'Backspace' && !n.value && i > 0){ const pv = $('#otp' + i); if (pv){ pv.focus(); pv.value = ''; F.code[i - 1] = ''; } }
+    if (e.key === 'ArrowLeft'  && i > 0){ const pv = $('#otp' + i); if (pv) pv.focus(); }
+    if (e.key === 'ArrowRight' && i < 5){ const nx = $('#otp' + (i + 2)); if (nx) nx.focus(); }
+    return;
+  }
+  if (e.key === 'Escape' && URL_NOW && URL_NOW.authOpen && CUR_PRES !== 'page' && !S.nativeModal){
+    e.preventDefault(); closeSurface('escape');
+  }
+});
+/* WCAG 2.2 SC 3.3.8 — pasting a full code into any box must fill all six */
+document.addEventListener('paste', function(e){
+  const n = e.target;
+  if (!n.dataset || n.dataset.otp === undefined) return;
+  const txt = (e.clipboardData || window.clipboardData).getData('text') || '';
+  const digits = txt.replace(/\D/g,'').slice(0,6);
+  if (!digits) return;
+  e.preventDefault();
+  F.code = ['','','','','',''];
+  digits.split('').forEach(function(c, i){ F.code[i] = c; const b = $('#otp' + (i + 1)); if (b) b.value = c; });
+  emit('auth:otp_paste', { pasted_length:digits.length });
+  const last = $('#otp' + Math.min(digits.length, 6)); if (last) last.focus();
+  if (digits.length === 6) submitOtp();
+});
+
+/* ===========================================================================
+   Contract self-test — stands in for the lint rule in §7.2 and checks the
+   invariants the acceptance criteria depend on.
+   ======================================================================== */
+function selfTest(){
+  const R = [];
+  const ok = function(name, cond){ R.push({ test:name, pass:!!cond }); return !!cond; };
+
+  ok('checkout always resolves to a page',
+     resolvePresentation({ trigger:'checkout', navigationType:'soft', viewportWidth:1280 }) === 'page');
+  ok('hard navigation always resolves to a page',
+     resolvePresentation({ trigger:'price_gate_pdp', navigationType:'hard', viewportWidth:1280 }) === 'page');
+  ok('narrow viewport resolves to a sheet',
+     resolvePresentation({ trigger:'price_gate_pdp', navigationType:'soft', viewportWidth:390 }) === 'sheet');
+  ok('otherwise an overlay',
+     resolvePresentation({ trigger:'price_gate_pdp', navigationType:'soft', viewportWidth:1280 }) === 'overlay');
+
+  ok('return_to rejects absolute URLs',        safeReturnTo('https://evil.example/x') === null);
+  ok('return_to rejects protocol-relative',    safeReturnTo('//evil.example') === null);
+  ok('return_to rejects unlisted paths',       safeReturnTo('/admin') === null);
+  ok('return_to allows a product path',        safeReturnTo('/product/p_mou_pch') === '/product/p_mou_pch');
+
+  ok('closing strips every auth param',
+     urlWithoutAuth('/product/p_mou_pch?auth=signup&trigger=price_gate_pdp&step=identify&product=p_mou_pch') === '/product/p_mou_pch');
+  ok('a hash fragment is never used for auth state', currentUrl().indexOf('#') === -1);
+
+  ok('every trigger has EN and AR copy',
+     TRIGGERS.every(function(k){ return TRIGGER_COPY[k] && TRIGGER_COPY[k].en && TRIGGER_COPY[k].ar; }));
+  ok('an unknown trigger is rejected by requireAuth', (function(){
+     try { requireAuth({ level:'L1', trigger:'newsletter_popup' }); return false; } catch(e){ return true; } })());
+
+  const doc = [$('#stage'), $('#rail'), $('#chrome')].map(function(n){ return n ? n.innerHTML : ''; }).join(' ');
+  ok('“I\'m not a Buyer” appears nowhere',   doc.indexOf("not a Buyer") === -1);
+  ok('“Join & View Price” appears nowhere',  doc.indexOf('Join &amp; View Price') === -1 && doc.indexOf('Join & View Price') === -1);
+  ok('“Login” is never used as a label',     doc.indexOf('>Login<') === -1);
+  ok('no auth surface outside auth/ — guarded', (function(){
+     const saved = AUTH_INTERNAL; AUTH_INTERNAL = false;
+     let threw = false; try { ensureDialogGuarded(); } catch(e){ threw = true; }
+     AUTH_INTERNAL = saved; return threw; })());
+  ok('primary CTA is never disabled on first paint',
+     $$('button[type="submit"]').every(function(b){ return !b.disabled; }));
+
+  const pass = R.every(function(r){ return r.pass; });
+  try { console.table(R); console.log('%cHIGHBASE contract self-test: ' + (pass ? 'PASS' : 'FAIL'),
+    'background:' + (pass ? '#1E9E63' : '#C8102E') + ';color:#fff;padding:2px 6px;border-radius:3px'); } catch(e){}
+  return pass;
+}
+function ensureDialogGuarded(){
+  if (!AUTH_INTERNAL) throw new Error('AuthSurface may only be rendered from auth/ — call requireAuth() instead.');
+  return ensureDialog();
+}
+
+/* ===========================================================================
+   Boot
+   ======================================================================== */
+$('#stage').innerHTML = '<div id="pagearea"></div><div class="toasts" id="toasts"></div>';
+window.addEventListener('popstate', function(){ /* the simulated chrome owns history */ });
+window.HIGHBASE = { S:S, EVENTS:EVENTS, HISTORY:HISTORY, requireAuth:requireAuth, testHooks:testHooks,
+                    mockApi:mockApi, selfTest:selfTest, PRODUCTS:PRODUCTS };
+render();                      /* first paint is a hard navigation (§5.3) */
+setTimeout(selfTest, 300);
+})();
+</script>
+</body>
+</html>
