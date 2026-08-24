@@ -201,7 +201,9 @@ check('7.reject-original-price', /No change/i.test(rejRow), rejRow)
 
 // ── §10 order page provenance, log, admin view ───────────────────────────────
 const pills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
-check('10.negotiation-and-invoice-flags', pills.some((x) => /Special price negotiation/i.test(x))
+// The provenance pill now names the outcome rather than just the fact of a negotiation.
+check('10.negotiation-and-invoice-flags',
+  pills.some((x) => /Special price (accepted|rejected|under negotiation)/i.test(x))
   && pills.some((x) => /document/i.test(x)), pills.join(' | '))
 const logCount = await p.locator('.hb-overlay .hb-log li').count()
 check('9.full-log-on-order', logCount >= 2, `${logCount} entries`)
@@ -224,7 +226,7 @@ await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 // ── §9 standard orders sit in the same Final Orders list ─────────────────────
 const finalRefs = await p.locator('tbody tr').allInnerTexts()
 check('9.standard-plus-negotiated', finalRefs.some((r) => /Standard order/i.test(r))
-  && finalRefs.some((r) => /Special price negotiation/i.test(r)),
+  && finalRefs.some((r) => /Special price (accepted|rejected)/i.test(r)),
   finalRefs.map((r) => r.split('\n')[1]).join(' | '))
 
 // ── §6 the buyer's request detail is a page, with the same ranked actions ────
@@ -258,6 +260,33 @@ check('6.no-history-tab-on-request', await p.locator('.hb-content > .hb-tabs').c
 const buyerCompare = await txt('.hb-content table')
 check('6.buyer-three-prices', /Original/i.test(buyerCompare) && /You asked/i.test(buyerCompare)
   && /Supplier offers/i.test(buyerCompare), buyerCompare.slice(0, 160))
+
+// ── §5/§9 Final Orders name the outcome, for both roles ──────────────────────
+for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashboard', 'seller']]) {
+  await reset()
+  await p.getByRole('button', { name: surface }).click(); await p.waitForTimeout(250)
+  await p.locator('.hb-navitem', { hasText: 'Final Orders' }).click(); await p.waitForTimeout(250)
+  await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Final Orders' }).click(); await p.waitForTimeout(220)
+  const rows = await p.locator('tbody tr').allInnerTexts()
+  const flat = rows.join(' | ')
+  check(`9.final-orders-outcomes-${who}`,
+    /Special price accepted/i.test(flat) && /Special price rejected/i.test(flat)
+    && /Standard order/i.test(flat),
+    rows.map((r) => r.split('\n')[1]).join(' · '))
+}
+// The rejected one is final at the original price: bought, but at no saving.
+const rejectedFinal = p.locator('tbody tr', { hasText: 'Special price rejected' })
+await rejectedFinal.click(); await p.waitForTimeout(300)
+const rejPills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
+const rejFoot = await txt('.hb-overlay tfoot')
+check('9.rejected-final-at-original', rejPills.some((x) => /Special price rejected/i.test(x))
+  && /No change/i.test(rejFoot), `${rejPills.join(' | ')} :: ${rejFoot}`)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('tbody tr', { hasText: 'Special price accepted' }).first().click(); await p.waitForTimeout(300)
+const accPills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
+check('9.accepted-final-shows-saving', accPills.some((x) => /Special price accepted/i.test(x))
+  && /%/.test(await txt('.hb-overlay tfoot')), accPills.join(' | '))
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 
 // ── §8 Inbox, three categories, both roles ───────────────────────────────────
 for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashboard', 'seller']]) {

@@ -69,7 +69,9 @@ the sidebar:
   the other side and the three tabs partition the log rather than overlapping it. The
   sidebar badge and the bell count the same unread number.
 - **Final Orders** — standard orders and negotiated ones in one list, split into Pending,
-  Final Orders and Cancelled, each row carrying the old price against the agreed price. The
+  Final Orders and Cancelled, each row carrying the old price against the agreed price and
+  naming how the price question was settled: special price **accepted**, or **rejected** and
+  the order placed at the original price anyway. The
   order page states whether the order went through a negotiation and whether an invoice was
   submitted, and holds the whole back-and-forth; an HB Admin view names the document on
   record.

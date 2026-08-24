@@ -335,6 +335,11 @@ export const STRINGS: Dict = {
   priceChange: { en: 'Change', ar: 'الفرق' },
   noPriceChange: { en: 'No change', ar: 'لا تغيير' },
   negotiatedBadge: { en: 'Special price negotiation', ar: 'مفاوضة سعر خاص' },
+  // §5/§9 — a Final Order says how the price question was settled, not just that it was.
+  negotiationAccepted: { en: 'Special price accepted', ar: 'تم قبول السعر الخاص' },
+  negotiationRejected: { en: 'Special price rejected', ar: 'تم رفض السعر الخاص' },
+  negotiationOpen: { en: 'Special price under negotiation', ar: 'السعر الخاص قيد التفاوض' },
+  rejectedAtListPrice: { en: 'at the original price', ar: 'بالسعر الأصلي' },
   standardOrder: { en: 'Standard order', ar: 'طلب عادي' },
   invoiceSubmitted: { en: 'Invoice / quote submitted', ar: 'أُرفقت فاتورة أو عرض سعر' },
   noInvoiceSubmitted: { en: 'No document submitted', ar: 'لم يُرفق مستند' },

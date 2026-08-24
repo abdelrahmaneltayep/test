@@ -12,7 +12,7 @@ import { addDays, addHours, dueForExpiry } from './domain/clocks'
 import { GATING, GUARDRAILS, guardrailValue } from './domain/guardrails'
 import { lineTotal, sumMinor } from './domain/money'
 import { hasFailedCheck, runAutoChecks } from './domain/proof'
-import { makeOrderId, orderLinesFrom, viewOrder, type Order } from './domain/orders'
+import { makeOrderId, orderLinesFrom, viewOrder, type Order, type OrderResolution } from './domain/orders'
 import { makeRef } from './domain/reference'
 import { evaluateAutoRules } from './domain/rules'
 import { attemptTransition, type RequestState } from './domain/states'
@@ -824,6 +824,23 @@ export function initialState(now: Date): RfqState {
       ],
     }),
 
+    /*
+     * §5 MVP taken to its end: the seller rejected, the order went back to Pending at the
+     * original price, and the buyer confirmed it anyway. It belongs in Final Orders as
+     * much as an accepted one does — the goods were bought, the price just did not move
+     * (§9). Without it the list only ever shows one of the two outcomes.
+     */
+    base('SPR-2607-0052', 'declined', [
+      mkLine('HB-2210', 25, 'case_1', 13_000, 14_800, 'declined'),
+    ], {
+      slaDueAt: null, submittedAt: addHours(now, -220).toISOString(),
+      history: [
+        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -220), { lines: 1 }),
+        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -214)),
+        event('RequestDeclined', 'seller', SELLER.name.en, addHours(now, -212)),
+      ],
+    }),
+
     // A closed one, so the buyer list is not all live rows (AC-22.1).
     base('SPR-2607-0044', 'declined', [
       mkLine('HB-7788', 100, 'case_1', 1_600, 1_950, 'declined'),
@@ -852,6 +869,18 @@ export function initialState(now: Date): RfqState {
     requestRef: null, resolution: null,
   })
 
+  /**
+   * The buyer's own decisions on the seeded orders. Only two of them have taken one: the
+   * rejected request they went ahead with anyway, at the original price (§5 MVP, §9).
+   */
+  const SEEDED_RESOLUTIONS: Record<string, OrderResolution> = {
+    'SPR-2607-0052': {
+      kind: 'confirmed',
+      at: addHours(now, -210).toISOString(),
+      prices: { 'HB-2210': productBySku('HB-2210').listPrice },
+    },
+  }
+
   const orders: Order[] = [
     ...seeded.map((r, i) => ({
       id: makeOrderId(now, 900 + i),
@@ -860,14 +889,14 @@ export function initialState(now: Date): RfqState {
       placedAt: r.submittedAt ?? now.toISOString(),
       lines: orderLinesFrom(r.lines),
       requestRef: r.ref,
-      resolution: null,
+      resolution: SEEDED_RESOLUTIONS[r.ref] ?? null,
     })),
     standard('ORD-2608-0912', -20, [['HB-7788', 60], ['HB-9032', 12]]),
     standard('ORD-2608-0908', -52, [['HB-2210', 18]]),
   ]
 
   return {
-    now, seq: 8, requests: seeded, orders, orderSeq: 20, priceList: [],
+    now, seq: 9, requests: seeded, orders, orderSeq: 20, priceList: [],
     draft: null, submittedDrafts: {},
     phase: 'p1_p2', autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
     canOverrideFloor: true, canCreateTemplate: true, cardCta: 'stacked', opsAlerts: [],

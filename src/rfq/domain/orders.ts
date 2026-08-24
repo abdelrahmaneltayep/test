@@ -27,6 +27,18 @@ export type OrderStatus = 'pending' | 'final' | 'cancelled'
 /** §6 / §7 — the buttons the buyer is offered on the order, and only these. */
 export type OrderAction = 'confirm' | 'cancel'
 
+/**
+ * §5/§9 — how the price question was settled, which is what a Final Order has to state.
+ *
+ *  - `accepted`  the order stands at a negotiated price: the seller took the ask, or
+ *                countered and the buyer took that
+ *  - `rejected`  the price never moved. The seller declined, or the clock ran out, and the
+ *                order stands at the original price — §5's MVP path
+ *  - `open`      still under negotiation, so neither yet
+ *  - `null`      a standard order; there was no negotiation to settle
+ */
+export type NegotiationOutcome = 'accepted' | 'rejected' | 'open' | null
+
 export interface OrderLine {
   sku: string
   productName: { en: string; ar: string }
@@ -79,6 +91,8 @@ export interface OrderView {
   hadProof: boolean
   /** §10 — did this order go through a negotiation at all. */
   negotiated: boolean
+  /** §5/§9 — accepted, rejected, or still open. Null on a standard order. */
+  negotiation: NegotiationOutcome
 }
 
 /**
@@ -101,6 +115,7 @@ function standardView(order: Order): OrderView {
     inFinalOrders: !cancelled,
     hadProof: false,
     negotiated: false,
+    negotiation: null,
   }
 }
 
@@ -122,10 +137,22 @@ export function viewOrder(order: Order, request: NegotiationRequest | null): Ord
     if (l.offeredPrice !== null && l.outcome !== 'declined') negotiated[l.sku] = l.offeredPrice
   }
 
+  /*
+   * The outcome is a fact about the negotiation, not about the order's status, so it is
+   * read off the request the same way whether the order is pending, final or cancelled: a
+   * buyer who cancelled after a rejection still cancelled after a rejection.
+   */
+  const negotiation: NegotiationOutcome = settled ? 'accepted'
+    : request.state === 'declined' || request.state === 'expired' ? 'rejected'
+      // A counter the buyer confirmed is an acceptance — theirs rather than the seller's.
+      : request.state === 'countered_by_seller' && order.resolution?.kind === 'confirmed' ? 'accepted'
+        : 'open'
+
   const base = {
     revertedToOriginal: false,
     hadProof,
     negotiated: true,
+    negotiation,
   }
 
   // The buyer's own decision wins over everything: a cancelled order is cancelled even if

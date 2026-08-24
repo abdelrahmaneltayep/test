@@ -171,7 +171,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Forty checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Forty-four checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -182,7 +182,7 @@ Forty checks, exit non-zero on any failure. Current run: all pass. What each cov
 | §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |
 | §6 | A modified price gives the buyer Accept and Cancel on the order; an acceptance as-is asks nothing of them; original and agreed sit side by side; the buyer's request detail is a page carrying the same four ranked actions the seller's has, and §6's three prices |
 | §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |
-| §9 | Standard and negotiated orders in one Final Orders list; the old-versus-accepted indicator; the full log on the order |
+| §9 | Standard and negotiated orders in one Final Orders list, each naming its outcome — special price accepted or rejected; the old-versus-accepted indicator; the full log on the order |
 | §10 | The negotiation and invoice flags on the order page, and the HB Admin view |
 | §11 | Special credit offered, captured and shown to the seller; both readings of the phase cut are walkable |
 

@@ -14,13 +14,22 @@ import { useState } from 'react'
 import { t, renderHistory, type Lang } from '../domain/i18n'
 import { formatMoney, percentOff } from '../domain/money'
 import {
-  orderOriginalTotal, orderSaving, orderTotal, viewOrder, type Order, type OrderView,
+  orderOriginalTotal, orderSaving, orderTotal, viewOrder,
+  type NegotiationOutcome, type Order, type OrderView,
 } from '../domain/orders'
 import type { NegotiationRequest } from '../domain/types'
 import { useRfq } from '../store'
 import { Empty, Modal, Money } from './ui'
 
 type OrdersTab = 'pending' | 'final' | 'cancelled'
+
+/** §5/§9 — the outcome, named and toned. A rejection is not a failure of the order. */
+const OUTCOME_KEY: Record<Exclude<NegotiationOutcome, null>, string> = {
+  accepted: 'negotiationAccepted', rejected: 'negotiationRejected', open: 'negotiationOpen',
+}
+const OUTCOME_TONE: Record<Exclude<NegotiationOutcome, null>, string> = {
+  accepted: 'good', rejected: 'bad', open: 'info',
+}
 
 const TABS: { key: OrdersTab; label: string }[] = [
   { key: 'pending', label: 'tabPendingOrders' },
@@ -79,8 +88,15 @@ export function Orders({ viewer, lang }: { viewer: 'buyer' | 'seller'; lang: Lan
                     <td>
                       <span className="hb-ref">{order.id}</span>
                       <div className="hb-hint">
-                        {/* §10 — the row already says the order went through a negotiation. */}
-                        {view.negotiated ? `${t(lang, 'negotiatedBadge')} · ${order.requestRef}` : t(lang, 'standardOrder')}
+                        {/*
+                          §9/§10 — the row says the order went through a negotiation and how
+                          it came out. Two final orders at the same total mean different
+                          things depending on whether the price moved, and "negotiation" on
+                          its own does not distinguish them.
+                        */}
+                        {view.negotiation
+                          ? <>{t(lang, OUTCOME_KEY[view.negotiation])} · {order.requestRef}</>
+                          : t(lang, 'standardOrder')}
                       </div>
                     </td>
                     <td>{viewer === 'buyer' ? order.sellerName : order.buyerName}</td>
@@ -198,8 +214,8 @@ function OrderPage({ order, request, view, viewer, lang, onClose }: {
 
       {/* §10 — provenance, on the order itself, whichever way it went. */}
       <div className="hb-row" style={{ marginBottom: 14, flexWrap: 'wrap' }}>
-        <span className={`hb-pill hb-pill--${view.negotiated ? 'info' : 'neutral'}`}>
-          {view.negotiated ? t(lang, 'negotiatedBadge') : t(lang, 'standardOrder')}
+        <span className={`hb-pill hb-pill--${view.negotiation ? OUTCOME_TONE[view.negotiation] : 'neutral'}`}>
+          {view.negotiation ? t(lang, OUTCOME_KEY[view.negotiation]) : t(lang, 'standardOrder')}
         </span>
         {view.negotiated && (
           <span className={`hb-pill hb-pill--${view.hadProof ? 'good' : 'neutral'}`}>

@@ -215,3 +215,51 @@ describe('the order reference', () => {
     expect(makeOrderId(new Date('2026-08-20T09:00:00Z'), 7)).toBe('ORD-2608-0007')
   })
 })
+
+describe('§5/§9 — a Final Order says how the price question was settled', () => {
+  it('reads accepted where the seller took the ask', () => {
+    const r = request('accepted', [line({ outcome: 'accepted', offeredPrice: 9_000 })])
+    expect(viewOrder(order(r), r).negotiation).toBe('accepted')
+  })
+
+  it('reads accepted where the seller countered and the buyer took that', () => {
+    const r = request('countered_by_seller', [line({ outcome: 'countered', offeredPrice: 9_600 })])
+    const view = viewOrder(order(r, { kind: 'confirmed', at: 'x', prices: { 'HB-4471': 9_600 } }), r)
+    expect(view.negotiation).toBe('accepted')
+    expect(view.inFinalOrders).toBe(true)
+  })
+
+  it('reads rejected where the seller declined, whether or not the buyer has answered', () => {
+    const r = request('declined', [line({ outcome: 'declined', offeredPrice: 10_000 })])
+    expect(viewOrder(order(r), r).negotiation).toBe('rejected')
+    const confirmed = order(r, { kind: 'confirmed', at: 'x', prices: { 'HB-4471': 10_000 } })
+    const view = viewOrder(confirmed, r)
+    // §9 — the goods were bought. It belongs in Final Orders; the price simply did not move.
+    expect(view.negotiation).toBe('rejected')
+    expect(view.inFinalOrders).toBe(true)
+    expect(orderSaving(confirmed, view)).toBe(0)
+  })
+
+  it('reads rejected where the clock ran out — the price never moved either', () => {
+    const r = request('expired')
+    expect(viewOrder(order(r), r).negotiation).toBe('rejected')
+  })
+
+  it('still reads rejected on an order the buyer cancelled after the rejection', () => {
+    // The outcome is a fact about the negotiation, not about what the buyer did next.
+    const r = request('declined', [line({ outcome: 'declined', offeredPrice: 10_000 })])
+    const view = viewOrder(order(r, { kind: 'cancelled', at: 'x', prices: {} }), r)
+    expect(view.negotiation).toBe('rejected')
+    expect(view.status).toBe('cancelled')
+  })
+
+  it('reads open while the negotiation is still live', () => {
+    for (const state of ['submitted', 'viewed', 'countered_by_buyer', 'info_requested', 'countered_by_seller'] as const) {
+      expect(viewOrder(order(request(state)), request(state)).negotiation).toBe('open')
+    }
+  })
+
+  it('reads null on a standard order — there was nothing to settle', () => {
+    expect(viewOrder(order(null), null).negotiation).toBeNull()
+  })
+})
