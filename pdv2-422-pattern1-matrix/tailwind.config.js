@@ -1,0 +1,25 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./index.html', './index.artifact.html', './src/**/*.{ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        salla: {
+          primary: 'var(--salla-primary)', 'primary-50': 'var(--salla-primary-50)',
+          'primary-300': 'var(--salla-primary-300)', 'primary-700': 'var(--salla-primary-700)',
+          'success-50': 'var(--salla-success-50)', 'success-500': 'var(--salla-success-500)', 'success-700': 'var(--salla-success-700)',
+          'info-50': 'var(--salla-info-50)', 'info-500': 'var(--salla-info-500)', 'info-700': 'var(--salla-info-700)',
+          'warning-50': 'var(--salla-warning-50)', 'warning-500': 'var(--salla-warning-500)', 'warning-700': 'var(--salla-warning-700)',
+          'danger-50': 'var(--salla-danger-50)', 'danger-500': 'var(--salla-danger-500)', 'danger-700': 'var(--salla-danger-700)',
+          text: 'var(--salla-text-primary)', 'text-2': 'var(--salla-text-secondary)', 'text-3': 'var(--salla-text-tertiary)',
+          surface: 'var(--salla-surface)', soft: 'var(--salla-surface-soft)', border: 'var(--salla-border)',
+          mint: 'var(--salla-mint)', 'mint-soft': 'var(--salla-mint-soft)', topbar: 'var(--salla-topbar)',
+        },
+      },
+      borderRadius: { sm: '4px', md: '8px', lg: '12px', full: '9999px' },
+      boxShadow: { sm: '0 1px 3px rgba(0,0,0,.08)', md: '0 2px 8px rgba(0,0,0,.10)', lg: '0 8px 24px rgba(0,0,0,.12)' },
+      fontFamily: { sans: ['PingARLT', 'IBM Plex Sans Arabic', 'PT Sans', 'system-ui', 'sans-serif'] },
+    },
+  },
+  plugins: [],
+}

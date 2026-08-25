@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { font-family: 'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,sans-serif; color: var(--salla-text-primary); }
+  body { margin: 0; background: var(--salla-surface-soft); line-height: 1.6; }
+  :focus-visible { outline: 2px solid var(--salla-primary-300); outline-offset: 2px; border-radius: 6px; }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
+}
+@layer components {
+  .salla-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23626B79' stroke-width='1.6' d='M1 1.5l5 5 5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-size: 12px; background-position: left 14px center; padding-left: 36px;
+  }
+}
