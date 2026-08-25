@@ -97,6 +97,17 @@ through `n()`.
 - **Routing is hash-based** (`/#/pattern-1`) so the build runs from `file://` or any static host
   with no server rewrites.
 
+## Single-file artifact build
+
+```bash
+npx vite build --config vite.artifact.config.ts
+node -e "require('./scripts/inline.cjs')"   # or the inline step in the README history
+```
+
+Produces `artifact.html`: one self-contained file with all CSS and JS inlined, no
+code-split chunks, and `MemoryRouter` instead of `HashRouter` so navigation never touches
+`location`. Used for sharing a live preview link; the dev/prod builds are unaffected.
+
 ## Verification
 
 `npm run test:smoke` covers the brief's 10 success criteria: all 5 routes render, the Pattern 1
