@@ -15,25 +15,42 @@ xdg-open highbase/index.html      # Linux
 
 ## What you are looking at
 
-| Region | What it is |
-|---|---|
-| **Left, dark chrome** | A *simulated* browser — back / forward / reload wired to the app's own history stack, and a URL bar that highlights the query string as it changes. |
-| **Left, white stage** | The HIGHBASE storefront and the auth surface. |
-| **Right, console rail** | `EVENTS` (live session state + the event stream), `FUNNEL` (the eight steps with breakdowns), `CASES` (a launcher for every acceptance criterion). |
+A *simulated* browser — back / forward / reload wired to the app's own history stack,
+a URL bar that highlights the query string as it changes, and a bookmarks bar of the
+common flows. Below it, the HIGHBASE storefront and the auth surface.
 
-The contrast is the argument: the product surface on the left, what it emits on the right.
+The bookmarks are the point: every one of them is only a URL. Nothing on that bar is
+a special screen, and nothing on it does anything the storefront's own buttons don't.
+
+| Bookmark | What it demonstrates |
+|---|---|
+| **Price gate** | The in-context gate on a PDP → overlay, `?auth=signup&trigger=price_gate_pdp…` |
+| **Add to cart** | The same component with a different trigger, and return-to-intent |
+| **On mobile** | The same URL at 390px → full-height bottom sheet |
+| **Create account** | Direct navigation to `/register` → full page, no header |
+| **Sign in** | `/login?trigger=email_link` → full page, `return_to` honoured |
+| **Checkout** | The one trigger that is never an overlay, and CR verification |
+| **Reset to L0** | Back to a signed-out visitor |
+
+Three chips at the right of the URL bar toggle the **viewport** (1280px / 390px, which
+drives `resolvePresentation`), the **locale** (EN / AR·RTL), and **native
+`showModal()`**.
 
 ### The 30-second demo
 
-1. `CASES → In-context gate on desktop → overlay`. The URL gains
-   `?auth=signup&trigger=price_gate_pdp&step=identify&product=p_mou_pch`; an overlay
-   renders over the PDP; `auth:gate_click` and `auth:open` appear in the rail with
-   `presentation: overlay`.
+1. **Price gate.** The URL gains
+   `?auth=signup&trigger=price_gate_pdp&step=identify&product=p_mou_pch` and an overlay
+   renders over the PDP.
 2. Press **⟳ Reload**. The URL does not change. The presentation does — the same
-   component renders as a full page, and the new `auth:open` carries
-   `presentation: page` from the same `page_view`.
-3. Complete the flow with the prototype code **`482913`**. Watch the eight funnel
-   steps fill in, then land back on the product with the price animating in.
+   component renders as a full page.
+3. Complete the flow with the prototype code **`482913`**. You land back on the
+   product, price animating in, cart intent already replayed.
+
+Every step of that is in the console: open dev tools and watch `page_view`,
+`auth:gate_click`, `auth:open`, `auth:identifier_submit`, `auth:otp_send`,
+`auth:otp_submit`, `auth:signup_success`, `auth:business_submit`, `auth:intent_replay`
+fire in order, each colour-tagged by source, each carrying `trigger_source` and
+`presentation`. `HIGHBASE.EVENTS` holds the whole stream.
 
 ---
 
@@ -56,7 +73,20 @@ The contrast is the argument: the product surface on the left, what it emits on 
   Abandon business details and you are still registered. Watch the level pill flip to
   `L1` while the business screen is still open.
 - **CR verification is asynchronous.** An L1 user browses prices and builds a cart
-  while the CR is pending, and is stopped only at checkout.
+  while the CR is pending, and is stopped only at checkout. It resolves on its own a
+  few seconds after submission.
+
+## Scope
+
+This build covers the **common paths only** — sign in, create account, the price gate,
+add to cart, and checkout with CR verification. The error and edge-case flows from
+§8.5 (network failure, expired code, the three-failure email fallback, CR rejected,
+session expired) are deliberately **not** implemented, and neither is the dev event
+panel from §10.5. Ordinary inline validation is still there — an invalid phone or
+email, and a wrong six-digit code, all give inline feedback and keep what was typed.
+
+The analytics module is untouched: every event in §10.2 that the remaining flows can
+produce still fires, tagged by source, and is inspectable from the console.
 
 ## Architecture map
 
@@ -66,7 +96,7 @@ The PRD's §7 module layout is preserved as labelled sections inside the single 
 | §7 path | Section in `index.html` |
 |---|---|
 | `styles/tokens.css` | `:root` custom properties — the exact §3 values |
-| `mocks/products.ts`, `mocks/api.ts` | `PRODUCTS`, `mockApi`, `testHooks` |
+| `mocks/products.ts`, `mocks/api.ts` | `PRODUCTS`, `mockApi` |
 | `auth/copy.ts` | `TRIGGER_COPY`, `T` (en/ar), `BIZ_TYPES` |
 | `state/session.ts`, `state/intent.ts` | `S`, `pendingIntent`, `replayed` |
 | `analytics/events.ts` | `EVENTS`, `emit()`, `emitGa4()` |
@@ -76,7 +106,6 @@ The PRD's §7 module layout is preserved as labelled sections inside the single 
 | `auth/AuthSurface/AuthDialog/AuthFlow` | `openSurface`, `ensureDialog`, `shellHtml`, `paint` |
 | `auth/screens/*` | `screenIdentify`, `screenOtp`, `screenBusiness`, `screenCr` |
 | `storefront/*` | `homeHtml`, `pdpHtml`, `checkoutHtml`, `ordersHtml`, `supplierHtml`, `priceHtml` |
-| `analytics/EventStream.tsx` | `renderRail`, `funnelHtml`, `casesHtml` |
 
 ### Console API
 
@@ -84,7 +113,6 @@ The PRD's §7 module layout is preserved as labelled sections inside the single 
 HIGHBASE.S              // live session state
 HIGHBASE.EVENTS         // the event stream, newest first
 HIGHBASE.HISTORY        // the simulated history stack
-HIGHBASE.testHooks      // forceNetworkFailure · forceOtpExpired · forceCrRejected
 HIGHBASE.selfTest()     // the contract self-test — logs a pass/fail table
 ```
 
@@ -110,10 +138,10 @@ rejects absolute and protocol-relative URLs, and that none of the banned labels
    behind it, not `showModal()`, by default.** `showModal()` inerts the entire
    document — including the simulated browser chrome the reviewer needs in order to
    press Reload. The background is still inert *in code*, which is the actual
-   requirement. The **showModal** chip in the chrome switches to the genuine native
-   path (verified: the dialog matches `:modal`, Escape closes it, a backdrop click
-   dismisses it) so the native behaviour can be inspected. In a real SPA, where the
-   document and the page are the same thing, `showModal()` is the correct default.
+   requirement. The **showModal** chip switches to the genuine native path (the dialog
+   matches `:modal`, Escape closes it, a backdrop click dismisses it) so the native
+   behaviour can be inspected. In a real SPA, where the document and the page are the
+   same thing, `showModal()` is the correct default.
 4. **Presentation is resolved once per flow and then sticks.** `resolvePresentation`
    is exactly as specified, but a flow entered by hard navigation would otherwise flip
    from page to overlay on its next (soft) step. It is re-resolved whenever the
@@ -124,16 +152,17 @@ rejects absolute and protocol-relative URLs, and that none of the banned labels
 6. **`merged_items` counts line items**, matching the §7.4 copy ("We kept the 3 items
    in your cart").
 
-## Verified against §11
+## Verified
 
-Every acceptance criterion in §11 is reachable from the `CASES` tab and was exercised
-headlessly (Chromium) before commit: the three presentations; back / reload / forward;
-return-to-intent and its idempotency guard; anonymous cart merge; L1 immediately after
-OTP; Escape, ✕ and scrim each emitting `auth:dismiss` with a distinct `reason`; focus
-moving into the surface on open and returning to the invoking element on close; a Tab
-trap that wraps in both directions; scroll position restored on Back; six-digit paste
-filling all six boxes and auto-submitting; every error state; and the full event
-schema including GA4's `login` and `sign_up`.
+Exercised headlessly (Chromium) before commit: the three presentations; back / reload
+/ forward; scroll position restored on Back; the full phone→OTP→business→replay funnel
+in §10.4 order; L1 set immediately after OTP; return-to-intent replaying once, with a
+second replay logged as `duplicate: true, applied: false` and the cart unchanged;
+anonymous cart merge; CR pending → verified; wrong code keeping its digits; email sign
+in, including a wrong password; Escape, ✕ and scrim each emitting `auth:dismiss` with a
+distinct `reason`; focus moving into the surface on open and returning to the invoking
+element on close; a Tab trap that wraps in both directions; six-digit paste filling all
+six boxes and auto-submitting (WCAG 2.2 SC 3.3.8); and EN / AR·RTL parity.
 
 ---
 
@@ -161,6 +190,6 @@ These affect production but not the prototype. It is built exactly to the spec a
 
 One more that surfaced while building: **`auth:otp_send`, `auth:otp_fail`,
 `auth:login_success`, `auth:signup_success`, `auth:business_submit`, `auth:cr_*` are
-tagged `source: 'server'` in this prototype and rendered in blue.** In production they
+tagged `source: 'server'` in this prototype and logged in blue.** In production they
 must genuinely be emitted server-side — client events are dropped by ad blockers and
 flaky networks, and these are precisely the numbers the business will quote.

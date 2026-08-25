@@ -63,10 +63,9 @@ a:hover{text-decoration:underline}
 /* ============================================================================
    App shell — simulated browser (left) + console rail (right)   §10.5
    ========================================================================= */
-.app{display:grid;grid-template-columns:minmax(0,1fr) 392px;height:100vh;overflow:hidden}
-@media (max-width:1040px){ .app{grid-template-columns:1fr;grid-template-rows:1fr 46vh} }
+.app{display:flex;height:100vh;overflow:hidden}
 
-.browser{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--con-bg-2);padding:12px;gap:10px}
+.browser{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--con-bg-2);padding:12px;gap:9px}
 .chrome{
   display:flex;align-items:center;gap:8px;background:#16283A;border:1px solid var(--con-line);
   border-radius:11px;padding:7px 9px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11.5px;flex-wrap:wrap;
@@ -93,6 +92,16 @@ a:hover{text-decoration:underline}
 .chip:hover{color:#fff}
 
 .stagewrap{flex:1;min-height:0;min-width:0;display:flex;justify-content:center;overflow:hidden}
+/* a bookmarks bar, because every one of these really is just a URL */
+.bookmarks{display:flex;align-items:center;gap:6px;padding:0 4px;flex-wrap:wrap;font-family:'JetBrains Mono',ui-monospace,monospace}
+.bookmarks .bmlabel{font-size:10.5px;letter-spacing:.1em;color:#5A7A96;text-transform:uppercase;font-weight:700;padding-inline-end:2px}
+.bm{
+  background:none;border:1px solid transparent;border-radius:6px;color:#9FB6C9;padding:4px 9px;cursor:pointer;
+  font-family:inherit;font-size:11.5px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+}
+.bm:hover{background:#16283A;border-color:var(--con-line);color:#fff}
+.bm i{font-style:normal;color:var(--con-auto);font-size:10px}
+.bm.end{margin-inline-start:auto;color:#6E8BA5}
 .stage{
   position:relative;flex:1;min-width:0;background:var(--hb-paper);border-radius:var(--radius-card);
   overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.35);
@@ -100,6 +109,7 @@ a:hover{text-decoration:underline}
 /* the page scrolls, the stage does not — so the overlay stays centred and the
    inert background cannot be scrolled behind it */
 #pagearea{height:100%;overflow-y:auto;overflow-x:hidden}
+.stage{max-width:1240px}
 .stage.mobile{flex:0 0 390px;max-width:390px}
 .stage[data-hard="1"]{animation:hardpaint .45s ease}
 @keyframes hardpaint{from{opacity:.25}to{opacity:1}}
@@ -366,70 +376,6 @@ input:focus,select:focus{outline:none;border-color:var(--hb-blue);box-shadow:var
 .stepdots i{width:16px;height:3px;border-radius:var(--radius-pill);background:var(--hb-line)}
 .stepdots i.on{background:var(--hb-blue);width:24px}
 
-/* ============================================================================
-   analytics/EventStream.tsx — the console rail   §10.5
-   ========================================================================= */
-.rail{
-  background:var(--con-bg);border-inline-start:1px solid var(--con-line);display:flex;flex-direction:column;min-height:0;
-  font-family:'JetBrains Mono',ui-monospace,monospace;color:var(--con-ink);font-size:11.5px;
-}
-.railhead{padding:11px 12px 0;border-bottom:1px solid var(--con-line)}
-.railtitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px}
-.railtitle b{color:#fff;font-size:12.5px;letter-spacing:.08em}
-.railtabs{display:flex;gap:4px}
-.railtabs button{
-  background:none;border:none;border-bottom:2px solid transparent;color:#7E9CB8;padding:6px 10px;cursor:pointer;
-  font-family:inherit;font-size:11.5px;font-weight:700;letter-spacing:.08em;
-}
-.railtabs button[aria-selected="true"]{color:#fff;border-bottom-color:var(--con-auto)}
-.railbody{flex:1;min-height:0;overflow-y:auto;padding:10px 12px 24px}
-
-.state{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:10px}
-.state div{display:flex;justify-content:space-between;gap:6px;border-bottom:1px dotted #1C3145;padding-bottom:3px;min-width:0}
-.state k{color:#6E8BA5;font-size:10.5px}
-.state v{color:#E6EEF6;font-weight:700;font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.state v.l0{color:var(--level-0)} .state v.l1{color:#6FB3F0} .state v.l2{color:#7DD3A0}
-
-.ev{border-inline-start:2px solid var(--con-line);padding:6px 0 6px 9px;margin-bottom:6px}
-[dir] .ev{padding-inline-start:9px;padding-inline-end:0}
-.ev.client{border-color:var(--con-client)} .ev.server{border-color:var(--con-server)}
-.ev.auto{border-color:var(--con-auto)} .ev.error{border-color:var(--con-error)}
-.ev .top{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap}
-.ev .nm{font-weight:700;color:#E6EEF6}
-.ev.client .nm{color:var(--con-client)} .ev.server .nm{color:var(--con-server)}
-.ev.auto .nm{color:var(--con-auto)} .ev.error .nm{color:var(--con-error)}
-.ev .src{font-size:9.5px;letter-spacing:.08em;border:1px solid var(--con-line);border-radius:3px;padding:0 4px;color:#7E9CB8}
-.ev .ts{font-size:9.5px;color:#5A7A96;margin-inline-start:auto}
-.ev .props{margin-top:4px;display:grid;gap:1px}
-.ev .props div{display:flex;gap:6px;font-size:10.5px}
-
-.ev .props k{color:#5F809A;min-width:92px}
-.ev .props v{color:#AFC6D8;overflow-wrap:anywhere}
-.emptyev{color:#5A7A96;text-align:center;padding:22px 0}
-
-.fstep{margin-bottom:9px}
-.fstep .lbl{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;margin-bottom:3px}
-.fstep .lbl b{color:#E6EEF6;font-weight:700}
-.fstep .lbl i{color:#7E9CB8;font-style:normal}
-.fbar{height:15px;border-radius:3px;background:#12232F;overflow:hidden}
-.fbar>i{display:block;height:100%;background:linear-gradient(90deg,#1E5C8F,#6FB3F0)}
-.drop{font-size:9.5px;color:#C98A8A;text-align:end;margin-top:2px}
-.brk{margin-top:12px;border-top:1px solid var(--con-line);padding-top:9px}
-.brk h5{margin:0 0 6px;color:#fff;font-size:10.5px;letter-spacing:.08em;font-weight:700}
-.brkrow{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;padding:2px 0;border-bottom:1px dotted #1C3145}
-.brkrow span:last-child{color:#E6EEF6;font-weight:700}
-
-.casegrp{margin-bottom:14px}
-.casegrp h5{margin:0 0 6px;color:var(--con-auto);font-size:10.5px;letter-spacing:.1em;font-weight:700;text-transform:uppercase}
-.case{
-  display:block;width:100%;text-align:start;background:#101E2A;border:1px solid var(--con-line);border-radius:6px;
-  color:#C8D6E2;padding:7px 9px;margin-bottom:4px;cursor:pointer;font-family:inherit;font-size:10.5px;line-height:1.4;
-}
-.case:hover{border-color:#3C5F80;background:#152838;color:#fff}
-.case em{display:block;font-style:normal;color:#6E8BA5;font-size:9.5px;margin-top:2px;overflow-wrap:anywhere}
-.case.on{border-color:var(--con-client);color:#fff}
-.railnote{color:#5A7A96;font-size:9.5px;line-height:1.5;margin-top:10px;border-top:1px solid var(--con-line);padding-top:8px}
-
 /* a11y + motion */
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 [inert]{pointer-events:none;user-select:none}
@@ -442,9 +388,9 @@ input:focus,select:focus{outline:none;border-color:var(--hb-blue);box-shadow:var
 <div class="app" id="app">
   <div class="browser">
     <div class="chrome" id="chrome"></div>
+    <div class="bookmarks" id="bookmarks"></div>
     <div class="stagewrap"><div class="stage" id="stage" dir="ltr" lang="en"></div></div>
   </div>
-  <aside class="rail" id="rail"></aside>
 </div>
 <div class="sr" id="live" role="status" aria-live="polite"></div>
 <script>
@@ -499,34 +445,26 @@ const bhd = (n) => n.toFixed(3) + ' BHD';
 /* ===========================================================================
    mocks/api.ts — §9. Artificial latency. No network. No backend.
    ======================================================================== */
-const testHooks = { forceNetworkFailure:false, forceOtpExpired:false, forceCrRejected:false };
 const OTP_CODE = '482913';
-function netCheck(){
-  if (testHooks.forceNetworkFailure){ testHooks.forceNetworkFailure = false;
-    const e = new Error('network'); e.code = 'network'; throw e; }
-}
 const mockApi = {
-  async sendOtp(phone){ await sleep(700); netCheck(); return { ok:true }; },              // never reveals if known
+  async sendOtp(phone){ await sleep(700); return { ok:true }; },          // never reveals whether the phone is known
   async verifyOtp(phone, code){
-    await sleep(500); netCheck();
-    if (testHooks.forceOtpExpired){ testHooks.forceOtpExpired = false;
-      const e = new Error('expired'); e.code = 'expired'; throw e; }
+    await sleep(500);
     if (code !== OTP_CODE){ const e = new Error('mismatch'); e.code = 'mismatch'; throw e; }
     return { isNewUser: KNOWN_PHONES.indexOf(phone) === -1 };
   },
-  async createAccount(p){ await sleep(600); netCheck(); return { level:'L1' }; },
-  async submitCr(cr, onResolve){
-    await sleep(300); netCheck();
-    setTimeout(function(){
-      const rejected = testHooks.forceCrRejected; testHooks.forceCrRejected = false;
-      onResolve(rejected ? 'rejected' : 'verified');
-    }, 6000);
-    return { status:'pending' };
-  },
+  async createAccount(p){ await sleep(600); return { level:'L1' }; },
+  async registerWithEmail(email, password){ await sleep(500); return { isNewUser:true }; },
   async signInWithEmail(email, password){
-    await sleep(500); netCheck();
+    await sleep(500);
     if (password !== 'highbase'){ const e = new Error('badcreds'); e.code = 'badcreds'; throw e; }
     return { isNewUser:false };
+  },
+  /* CR verification is asynchronous: pending now, resolved a few seconds later */
+  async submitCr(cr, onResolve){
+    await sleep(300);
+    setTimeout(function(){ onResolve('verified'); }, 6000);
+    return { status:'pending' };
   }
 };
 const KNOWN_PHONES = ['33000833'];   // "already registered" — handled silently (§8.5)
@@ -536,7 +474,9 @@ const KNOWN_PHONES = ['33000833'];   // "already registered" — handled silentl
    ======================================================================== */
 const TRIGGERS = ['header_signin','header_register','footer_signin','footer_register',
   'price_gate_pdp','price_gate_card','add_to_cart','save_product','apply_coupon',
-  'checkout','order_history','deep_link','session_expired','email_link','supplier_cta'];
+  'checkout','order_history','deep_link','email_link','supplier_cta'];
+const HEADLESS_TRIGGERS = ['header_signin','header_register','footer_signin','footer_register',
+                           'deep_link','email_link','supplier_cta'];
 
 const TRIGGER_COPY = {
   price_gate_pdp:  { en:'Sign in to see wholesale price',        ar:'سجّل الدخول لعرض سعر الجملة' },
@@ -546,7 +486,6 @@ const TRIGGER_COPY = {
   apply_coupon:    { en:'Sign in to use this coupon',            ar:'سجّل الدخول لاستخدام القسيمة' },
   checkout:        { en:'Verify your business to place orders',  ar:'وثّق نشاطك التجاري لإتمام الطلب' },
   order_history:   { en:'Sign in to see your orders',            ar:'سجّل الدخول لعرض طلباتك' },
-  session_expired: { en:'Your session ended. Sign in to continue.', ar:'انتهت الجلسة. سجّل الدخول للمتابعة' },
   supplier_cta:    { en:'Sell on HIGHBASE',                      ar:'بِع على هايبيس' },
   email_link:      { en:'Welcome back',                          ar:'مرحباً بعودتك' },
   header_signin:   { en:'Welcome to HIGHBASE',                   ar:'مرحباً بك في هايبيس' },
@@ -607,20 +546,16 @@ const T = {
   errPhone:      { en:'Enter a valid Bahrain mobile number', ar:'أدخل رقم جوال بحريني صحيح' },
   errEmail:      { en:'Enter a valid email address',        ar:'أدخل بريداً إلكترونياً صحيحاً' },
   errCode:       { en:"That code doesn't match. Try again.", ar:'الرمز غير مطابق. حاول مرة أخرى.' },
-  errExpired:    { en:"That code expired. We'll send a new one.", ar:'انتهت صلاحية الرمز. سنرسل رمزاً جديداً.' },
-  errNet:        { en:"Couldn't connect. Try again.",       ar:'تعذّر الاتصال. حاول مرة أخرى.' },
   errCreds:      { en:"That email or password doesn't match.", ar:'البريد أو كلمة المرور غير صحيحة.' },
   errCr:         { en:'Enter your CR number',               ar:'أدخل رقم السجل التجاري' },
-  otpFallback:   { en:'Trouble receiving the code? Sign in with email instead',
-                   ar:'لم يصلك الرمز؟ سجّل الدخول بالبريد الإلكتروني' },
   toastWelcome:  { en:"Welcome — you're seeing wholesale prices.", ar:'أهلاً بك — الأسعار ظاهرة الآن.' },
   toastCart:     { en:'We kept the {n} items in your cart.', ar:'احتفظنا بالمنتجات ({n}) في سلتك.' },
   toastCr:       { en:"We're verifying your business — usually within 24 hours.",
                    ar:'نتحقق من نشاطك التجاري — عادةً خلال ٢٤ ساعة.' },
   crPending:     { en:"We're verifying your business — usually within 24 hours.",
                    ar:'نتحقق من نشاطك التجاري — عادةً خلال ٢٤ ساعة.' },
-  crRejected:    { en:"We couldn't verify CR {cr}. Upload a copy or contact support.",
-                   ar:'تعذّر التحقق من السجل {cr}. أرفق نسخة أو تواصل مع الدعم.' }
+  crVerified:    { en:'Your business is verified — you can place orders.',
+                   ar:'تم توثيق نشاطك التجاري — يمكنك إتمام الطلبات.' }
 };
 const t = (k) => { const v = T[k]; return typeof v === 'string' ? v : (v ? v[S.locale] : k); };
 const BIZ_TYPES = [
@@ -663,7 +598,7 @@ const viewportWidth = () => (S.device === 'mobile' ? 390 : 1280);
 
 /* state/intent.ts */
 let pendingIntent = null;
-let lastIntent = null;                    // kept only so the CASES panel can demonstrate the guard
+let lastIntent = null;                    // the last replayed intent, for the idempotency guard
 let intentSeq = 0;
 const replayed = Object.create(null);     // idempotency guard — §7.3 rule 4
 
@@ -700,7 +635,6 @@ function emit(name, props, source){
   const tag = '%c' + ev.source.toUpperCase() + '%c ' + name;
   const col = { client:'#1E9E63', server:'#0B5CA3', auto:'#B8860B', error:'#C8102E' }[ev.source];
   try { console.log(tag, 'background:' + col + ';color:#fff;padding:1px 4px;border-radius:3px', '', ev.props); } catch(e){}
-  renderRail();
   return ev;
 }
 /* GA4 recommended events, emitted alongside our own (§10.2) */
@@ -883,11 +817,11 @@ const INTENT_GATE = { reveal_price:'view_price', add_to_cart:'add_to_cart', save
 const F  = { phone:'', code:['','','','','',''], email:'', password:'', showPw:false,
              remember:true, bizName:'', bizType:'grocery', cr:'' };
 const UI = { busy:false, error:null, errorField:null, otpFails:0, sends:0,
-             cooldown:0, timer:null, shake:false, emailFallback:false };
+             cooldown:0, timer:null, shake:false };
 
 function resetForm(step){
   UI.error = null; UI.errorField = null; UI.busy = false; UI.shake = false;
-  if (step !== 'cr'){ UI.otpFails = 0; UI.sends = 0; UI.emailFallback = false; F.code = ['','','','','','']; }
+  if (step !== 'cr'){ UI.otpFails = 0; UI.sends = 0; F.code = ['','','','','','']; }
   stopCooldown();
 }
 function stopCooldown(){ if (UI.timer){ clearInterval(UI.timer); UI.timer = null; } UI.cooldown = 0; }
@@ -903,7 +837,7 @@ const prettyPhone = () => '+973 ' + F.phone.replace(/(\d{4})(\d{0,4})/, '$1 $2')
 const validPhone  = () => /^3\d{7}$/.test(F.phone);
 const validEmail  = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
 
-const SIGNIN_TRIGGERS = ['header_signin','footer_signin','order_history','session_expired','email_link'];
+const SIGNIN_TRIGGERS = ['header_signin','footer_signin','order_history','email_link'];
 const SIGNUP_TRIGGERS = ['header_register','footer_register','price_gate_pdp','price_gate_card',
                          'add_to_cart','save_product','apply_coupon'];
 function defaultMode(trigger){
@@ -1018,10 +952,6 @@ function screenOtp(u){
   h.push('<button type="submit" class="btn primary block">' + spinner(t('continue')) + '</button>');
   h.push('</form>');
   h.push('<div class="resendrow" id="resendrow">' + resendRowHtml() + '</div>');
-  if (UI.emailFallback){
-    h.push('<div class="mt center"><button type="button" class="btn ghost block" data-act="method" data-method="email_password">' +
-      esc(t('otpFallback')) + '</button></div>');
-  }
   return h.join('');
 }
 
@@ -1166,46 +1096,37 @@ async function submitIdentify(){
     if (!F.password) return showError('password', t('errCreds'), 'invalid_password');
     emit('auth:identifier_submit', { identifier_type:'email' });
     UI.busy = true; paint();
-    try {
-      const r = await mockApi.signInWithEmail(F.email, F.password);
-      S.email = F.email; S.isNewUser = u.mode === 'signup' ? true : r.isNewUser;
-      UI.busy = false;
-      if (u.mode === 'signup'){
-        S.level = 'L1'; mergeCart();
-        emit('auth:signup_success', { auth_method:'email_password' }, 'server'); emitGa4('sign_up','email_password');
-        setStep('business','push');
-      } else {
-        S.level = S.level === 'L0' ? 'L1' : S.level; mergeCart();
-        emit('auth:login_success', { auth_method:'email_password' }, 'server'); emitGa4('login','email_password');
-        completeAuth();
-      }
-    } catch(err){
-      if (err.code === 'network') return showError('password', t('errNet'), 'network');
-      return showError('password', t('errCreds'), 'badcreds');
+    if (u.mode === 'signup'){
+      await mockApi.registerWithEmail(F.email, F.password);
+      S.email = F.email; S.isNewUser = true; S.level = 'L1'; UI.busy = false;
+      mergeCart();
+      emit('auth:signup_success', { auth_method:'email_password' }, 'server'); emitGa4('sign_up','email_password');
+      return setStep('business','push');
     }
-    return;
+    try { await mockApi.signInWithEmail(F.email, F.password); }
+    catch(err){ return showError('password', t('errCreds'), 'badcreds'); }
+    S.email = F.email; S.isNewUser = false; S.level = S.level === 'L0' ? 'L1' : S.level; UI.busy = false;
+    mergeCart();
+    emit('auth:login_success', { auth_method:'email_password' }, 'server'); emitGa4('login','email_password');
+    return completeAuth();
   }
   if (!validPhone()) return showError('phone', t('errPhone'), 'invalid_phone');
   emit('auth:identifier_submit', { identifier_type:'phone' });
   UI.busy = true; paint();
-  try {
-    await mockApi.sendOtp(F.phone);
-    S.phone = F.phone; UI.busy = false; UI.sends++;
-    emit('auth:otp_send', { send_count:UI.sends }, 'server');   // never reveals whether the phone is known
-    setStep('otp','push');
-    startCooldown();
-  } catch(err){ showError('phone', t('errNet'), 'network'); }
+  await mockApi.sendOtp(F.phone);
+  S.phone = F.phone; UI.busy = false; UI.sends++;
+  emit('auth:otp_send', { send_count:UI.sends }, 'server');  // fires whether or not the phone is already registered
+  setStep('otp','push');
+  startCooldown();
 }
 
 async function resendOtp(){
   if (UI.cooldown > 0 || UI.sends >= 3) return;
-  try {
-    await mockApi.sendOtp(F.phone);
-    UI.sends++; UI.error = null; UI.errorField = null;
-    emit('auth:otp_send', { send_count:UI.sends, resend:true }, 'server');
-    startCooldown(); paint();
-    announce(S.locale === 'ar' ? 'تم إرسال رمز جديد' : 'A new code has been sent');
-  } catch(err){ showError('code', t('errNet'), 'network'); }
+  await mockApi.sendOtp(F.phone);
+  UI.sends++; UI.error = null; UI.errorField = null;
+  emit('auth:otp_send', { send_count:UI.sends, resend:true }, 'server');
+  startCooldown(); paint();
+  announce(S.locale === 'ar' ? 'تم إرسال رمز جديد' : 'A new code has been sent');
 }
 
 async function submitOtp(){
@@ -1217,18 +1138,9 @@ async function submitOtp(){
   let r;
   try { r = await mockApi.verifyOtp(F.phone, code); }
   catch(err){
-    UI.busy = false;
-    if (err.code === 'network'){ return showError('code', t('errNet'), 'network'); }
-    if (err.code === 'expired'){
-      F.code = ['','','','','',''];
-      emit('auth:otp_fail', { reason:'expired' }, 'server');
-      startCooldown();
-      return showError('code', t('errExpired'), 'expired');
-    }
-    UI.otpFails++;
+    UI.busy = false; UI.otpFails++;
     UI.shake = true; setTimeout(function(){ UI.shake = false; }, 420);
     emit('auth:otp_fail', { reason:'mismatch', attempt:UI.otpFails }, 'server');
-    if (UI.otpFails >= 3) UI.emailFallback = true;
     return showError('code', t('errCode'), 'mismatch');    // digits are kept
   }
   UI.busy = false;
@@ -1244,13 +1156,11 @@ async function submitOtp(){
 async function submitBusiness(){
   UI.busy = true; UI.error = null; paint();
   const name = F.bizName.trim() || (S.locale === 'ar' ? 'نشاط تجاري' : 'My business');
-  try {
-    await mockApi.createAccount({ phone:F.phone, bizName:name, bizType:F.bizType });
-    S.bizName = name; S.bizType = F.bizType; UI.busy = false;
-    emit('auth:business_submit', { business_type:F.bizType, cr_provided:!!F.cr.trim() }, 'server');
-    if (F.cr.trim()) startCrVerification(F.cr.trim());
-    completeAuth();
-  } catch(err){ showError('bizName', t('errNet'), 'network'); }   // never clears the form
+  await mockApi.createAccount({ phone:F.phone, bizName:name, bizType:F.bizType });
+  S.bizName = name; S.bizType = F.bizType; UI.busy = false;
+  emit('auth:business_submit', { business_type:F.bizType, cr_provided:!!F.cr.trim() }, 'server');
+  if (F.cr.trim()) startCrVerification(F.cr.trim());
+  completeAuth();
 }
 function skipBusiness(){
   emit('auth:business_skip', {});
@@ -1259,24 +1169,22 @@ function skipBusiness(){
 async function submitCr(){
   if (!F.cr.trim()) return showError('cr', t('errCr'), 'invalid_cr');
   UI.busy = true; UI.error = null; paint();
-  try {
-    await mockApi.submitCr(F.cr.trim(), onCrResolved);
-    UI.busy = false;
-    S.cr = F.cr.trim(); S.crStatus = 'pending';
-    emit('auth:cr_submit', { cr_number:S.cr }, 'server');
-    closeSurface('cr_submitted', true);
-    toast(t('toastCr'));
-  } catch(err){ showError('cr', t('errNet'), 'network'); }
+  await mockApi.submitCr(F.cr.trim(), onCrResolved);
+  UI.busy = false;
+  S.cr = F.cr.trim(); S.crStatus = 'pending';
+  emit('auth:cr_submit', { cr_number:S.cr }, 'server');
+  closeSurface('cr_submitted', true);
+  toast(t('toastCr'));
 }
 function startCrVerification(cr){
   S.cr = cr; S.crStatus = 'pending';
   emit('auth:cr_submit', { cr_number:cr }, 'server');
   mockApi.submitCr(cr, onCrResolved);
 }
-function onCrResolved(status){
-  S.crStatus = status;
-  if (status === 'verified'){ S.level = 'L2'; emit('auth:cr_verified', { cr_number:S.cr }, 'server'); toast(S.locale === 'ar' ? 'تم توثيق نشاطك التجاري.' : 'Your business is verified.'); }
-  else { emit('auth:cr_rejected', { cr_number:S.cr }, 'server'); toast(t('crRejected').replace('{cr}', S.cr), 'err'); }
+function onCrResolved(){
+  S.crStatus = 'verified'; S.level = 'L2';
+  emit('auth:cr_verified', { cr_number:S.cr }, 'server');
+  toast(t('crVerified'));
   paint();
 }
 function skipCr(){ emit('auth:business_skip', { screen:'cr' }); closeSurface('skip_cr', true); }
@@ -1480,9 +1388,6 @@ function checkoutHtml(){
       '<button class="btn primary block mt" data-act="auth" data-trigger="checkout" data-level="L2">' + esc(t('signIn')) + '</button>';
   } else if (S.crStatus === 'pending'){
     panel = '<div class="infobox">⏳ <b>' + esc(t('crPending')) + '</b><br>CR ' + esc(S.cr) + '</div>';
-  } else if (S.crStatus === 'rejected'){
-    panel = '<div class="infobox err">⚠ ' + esc(t('crRejected').replace('{cr}', S.cr)) + '</div>' +
-      '<button class="btn primary block mt" data-act="auth" data-trigger="checkout" data-level="L2" data-step="cr">' + esc(t('crSubmit')) + '</button>';
   } else if (S.level !== 'L2'){
     panel = '<div class="infobox">' + esc(TRIGGER_COPY.checkout[S.locale]) + '</div>' +
       '<button class="btn primary block mt" data-act="auth" data-trigger="checkout" data-level="L2" data-step="cr">' + esc(t('crSubmit')) + '</button>';
@@ -1578,7 +1483,7 @@ function paint(){
   }
   AUTH_INTERNAL = false;
   renderChrome();
-  renderRail();
+  renderBookmarks();
 }
 function pageAuthHtml(u){
   return '<div class="authpage">' +
@@ -1638,98 +1543,8 @@ function renderChrome(){
 }
 
 /* ===========================================================================
-   analytics/EventStream.tsx — the dev rail (§10.5)
-   ======================================================================== */
-let railTab = 'events';
-const HEADLESS_TRIGGERS = ['header_signin','header_register','footer_signin','footer_register','deep_link','email_link','session_expired','supplier_cta'];
-const FUNNEL = [
-  { n:'1 · gate_click / open', m:function(e){ return e.name === 'auth:gate_click' || (e.name === 'auth:open' && HEADLESS_TRIGGERS.indexOf(e.props.trigger_source) !== -1); } },
-  { n:'2 · auth:open',          m:function(e){ return e.name === 'auth:open'; } },
-  { n:'3 · identifier_submit',  m:function(e){ return e.name === 'auth:identifier_submit'; } },
-  { n:'4 · otp_send',           m:function(e){ return e.name === 'auth:otp_send'; } },
-  { n:'5 · otp_submit',         m:function(e){ return e.name === 'auth:otp_submit'; } },
-  { n:'6 · signup/login_success', m:function(e){ return e.name === 'auth:signup_success' || e.name === 'auth:login_success'; } },
-  { n:'7 · business submit/skip', m:function(e){ return e.name === 'auth:business_submit' || e.name === 'auth:business_skip'; } },
-  { n:'8 · intent_replay',      m:function(e){ return e.name === 'auth:intent_replay' && e.props.applied; } }
-];
-function stateRow(k, v, cls){ return '<div><k>' + esc(k) + '</k><v class="' + (cls || '') + '">' + esc(v) + '</v></div>'; }
-function railStateHtml(){
-  const u = URL_NOW || parseUrl('/');
-  return '<div class="state">' +
-    stateRow('auth_level', S.level, S.level.toLowerCase()) +
-    stateRow('presentation', CUR_PRES) +
-    stateRow('trigger', u.trigger || '—') +
-    stateRow('step', u.authOpen ? u.step : '—') +
-    stateRow('method', u.authOpen ? u.method : '—') +
-    stateRow('cr_status', S.crStatus) +
-    stateRow('cart', cartCount() + ' items') +
-    stateRow('locale', S.locale + (S.locale === 'ar' ? ' / rtl' : '')) +
-    stateRow('history', (HISTORY.index + 1) + ' / ' + HISTORY.stack.length) +
-    stateRow('nav_type', NAV_TYPE) +
-    stateRow('intent', pendingIntent ? pendingIntent.type : 'none') +
-    stateRow('events', String(EVENTS.length)) +
-    '</div>';
-}
-function evHtml(e){
-  const ts = e.ts.toTimeString().slice(0, 8) + '.' + String(e.ts.getMilliseconds()).padStart(3, '0');
-  const props = Object.keys(e.props).filter(function(k){ return e.props[k] !== null && e.props[k] !== undefined; });
-  return '<div class="ev ' + e.source + '"><div class="top">' +
-    '<span class="nm">' + esc(e.name) + '</span>' +
-    '<span class="src">' + e.source.toUpperCase() + '</span>' +
-    '<span class="ts">' + ts + '</span></div>' +
-    '<div class="props">' + props.map(function(k){
-      return '<div><k>' + esc(k) + '</k><v>' + esc(String(e.props[k])) + '</v></div>'; }).join('') + '</div></div>';
-}
-function funnelHtml(){
-  const counts = FUNNEL.map(function(f){ return EVENTS.filter(f.m).length; });
-  const top = Math.max.apply(null, counts.concat([1]));
-  let h = '<div>' + FUNNEL.map(function(f, i){
-    const c = counts[i];
-    const conv = counts[0] ? Math.round(c / counts[0] * 100) : 0;
-    const prev = i > 0 ? counts[i - 1] : null;
-    const drop = prev !== null && prev > 0 ? prev - c : null;
-    return '<div class="fstep"><div class="lbl"><b>' + esc(f.n) + '</b><i>' + c + ' · ' + conv + '%</i></div>' +
-      '<div class="fbar"><i style="width:' + Math.round(c / top * 100) + '%"></i></div>' +
-      (drop > 0 ? '<div class="drop">−' + drop + ' drop-off</div>' : '') + '</div>';
-  }).join('') + '</div>';
-
-  h += breakdown('by trigger_source', 'trigger_source');
-  h += breakdown('by presentation', 'presentation');
-  h += '<div class="railnote">One funnel, broken down by property — not one funnel per entry point (§10.4). ' +
-       'Social / passkey paths would be modelled as an OR\'d step, never an optional one.</div>';
-  return h;
-}
-function breakdown(title, prop){
-  const opens = EVENTS.filter(function(e){ return e.name === 'auth:open'; });
-  const wins  = EVENTS.filter(function(e){ return e.name === 'auth:signup_success' || e.name === 'auth:login_success'; });
-  const keys = {};
-  opens.concat(wins).forEach(function(e){ keys[e.props[prop] || '—'] = 1; });
-  const rows = Object.keys(keys).map(function(k){
-    const o = opens.filter(function(e){ return (e.props[prop] || '—') === k; }).length;
-    const w = wins.filter(function(e){ return (e.props[prop] || '—') === k; }).length;
-    return '<div class="brkrow"><span>' + esc(k) + '</span><span>' + o + ' → ' + w + ' · ' + (o ? Math.round(w / o * 100) : 0) + '%</span></div>';
-  }).join('');
-  return '<div class="brk"><h5>' + esc(title) + '</h5>' + (rows || '<div class="brkrow"><span>no data yet</span><span></span></div>') + '</div>';
-}
-function renderRail(){
-  const body = railTab === 'events'
-      ? railStateHtml() + (EVENTS.length ? EVENTS.slice(0, 120).map(evHtml).join('') : '<div class="emptyev">no events yet</div>')
-    : railTab === 'funnel' ? funnelHtml()
-    : casesHtml();
-  $('#rail').innerHTML =
-    '<div class="railhead"><div class="railtitle"><b>HIGHBASE · EVENT STREAM</b>' +
-      '<button class="chip" data-act="clearev">clear</button></div>' +
-      '<div class="railtabs" role="tablist">' +
-      ['events','funnel','cases'].map(function(k){
-        return '<button role="tab" aria-selected="' + (railTab === k) + '" data-act="railtab" data-tab="' + k + '">' + k.toUpperCase() + '</button>';
-      }).join('') + '</div></div>' +
-    '<div class="railbody">' + body + '</div>';
-}
-
-/* ===========================================================================
-   CASES — §11 acceptance criteria launcher. Every button only changes the
-   URL (plus a test hook where an error path needs arming). Nothing here is a
-   special screen.
+   The bookmarks bar — the common flows, and nothing else. Every entry only
+   changes the URL; none of them is a special screen.
    ======================================================================== */
 function hardGo(url){
   saveScroll();
@@ -1738,95 +1553,46 @@ function hardGo(url){
   SCROLL.length = HISTORY.index; SCROLL.push(0);
   NAV_TYPE = 'hard'; FLOW_PRES = null; render();
 }
-function openAt(step, o){
-  o = o || {};
-  const q = Object.assign({ auth:o.mode || 'signup', trigger:o.trigger || 'header_register', step:step }, o.extra || {});
-  S.lastTrigger = q.trigger;
-  UI.error = null; UI.errorField = null; UI.busy = false;
-  navigate(buildUrl(o.path || '/', q), 'push');
-}
-function ensureL1(){
-  S.level = 'L1'; S.phone = S.phone || '33001122'; F.phone = S.phone;
-  S.bizName = S.bizName || 'Manama Grocery'; S.isNewUser = S.isNewUser === null ? true : S.isNewUser;
-}
 function resetSession(){
   S.level = 'L0'; S.phone = null; S.email = null; S.bizName = null; S.bizType = null;
   S.cr = null; S.crStatus = 'none'; S.cart = []; S.anonCart = []; S.saved = []; S.coupons = [];
   S.isNewUser = null; S.lastTrigger = null;
   F.phone = ''; F.code = ['','','','','','']; F.email = ''; F.password = ''; F.bizName = ''; F.cr = '';
-  pendingIntent = null; resetForm('identify');
+  pendingIntent = null; lastIntent = null; resetForm('identify');
   if (URL_NOW && URL_NOW.authOpen) emit('auth:dismiss', { reason:'session_reset', step:URL_NOW.step });
   navigate('/', 'replace');
 }
 
-const CASES = [
-  { g:'Presentations', k:'ov',   l:'In-context gate on desktop → overlay',
-    h:'/product/p_mou_pch?auth=signup&trigger=price_gate_pdp&step=identify&product=p_mou_pch',
-    f:function(){ S.device = 'desktop'; navigate('/product/p_mou_pch','push');
+/* the gate flows demonstrate what an L0 visitor sees, so they start from L0 */
+function asVisitor(){ if (S.level !== 'L0') resetSession(); }
+
+const FLOWS = [
+  { k:'price', l:'Price gate', u:'/product/p_mou_pch?auth=signup&trigger=price_gate_pdp… (starts signed out)',
+    f:function(){ asVisitor(); S.device = 'desktop'; FLOW_PRES = null; navigate('/product/p_mou_pch','push');
       requireAuth({ level:'L1', trigger:'price_gate_pdp', intent:{ type:'reveal_price', productId:'p_mou_pch' } }); } },
-  { g:'Presentations', k:'sh',   l:'Same gate under 768px → bottom sheet', h:'device=390px, same URL',
-    f:function(){ S.device = 'mobile'; FLOW_PRES = null; navigate('/product/p_mou_pch','push');
-      requireAuth({ level:'L1', trigger:'price_gate_card', intent:{ type:'reveal_price', productId:'p_mou_pch' } }); } },
-  { g:'Presentations', k:'pg',   l:'Direct navigation to /register → full page', h:'/register?trigger=deep_link&step=identify',
-    f:function(){ resetForm('identify'); S.lastTrigger = 'deep_link'; hardGo('/register?trigger=deep_link&step=identify'); } },
-  { g:'Presentations', k:'em',   l:'/login?trigger=email_link → full page', h:'hard navigation from an email',
-    f:function(){ resetForm('identify'); S.lastTrigger = 'email_link'; hardGo('/login?trigger=email_link&step=identify&return_to=%2Forders'); } },
-  { g:'Presentations', k:'ck',   l:'Checkout trigger → page, never an overlay', h:'/login?trigger=checkout — soft nav, still a page',
-    f:function(){ ensureL1(); navigate('/checkout','push');
-      requireAuth({ level:'L2', trigger:'checkout', step:'cr', intent:{ type:'goto_checkout' } }); } },
-
-  { g:'Behaviour contract', k:'bk', l:'Back closes the surface', h:'history.back() — restores the URL underneath', f:function(){ goBack(); } },
-  { g:'Behaviour contract', k:'rl', l:'Reload on an overlay URL → page presentation', h:'same URL, navigationType flips to hard', f:function(){ reload(); } },
-  { g:'Behaviour contract', k:'fw', l:'Forward re-opens the surface', h:'history.forward()', f:function(){ goForward(); } },
-  { g:'Behaviour contract', k:'ri', l:'Return-to-intent: add to cart from a PDP', h:'intent replays before the page is seen',
-    f:function(){ S.device = 'desktop'; navigate('/product/p_ara_cof','push');
+  { k:'cart', l:'Add to cart', u:'?auth=signup&trigger=add_to_cart… (starts signed out)',
+    f:function(){ asVisitor(); S.device = 'desktop'; FLOW_PRES = null; navigate('/product/p_ara_cof','push');
       requireAuth({ level:'L1', trigger:'add_to_cart', intent:{ type:'add_to_cart', productId:'p_ara_cof', qty:2 } }); } },
-  { g:'Behaviour contract', k:'rp', l:'Replay the same intent twice → no duplicate', h:'idempotency guard (§7.3 rule 4)',
-    f:function(){
-      if (!lastIntent) return toast('Complete an intent flow first (try “Return-to-intent”).', 'warn');
-      const before = cartCount();
-      pendingIntent = lastIntent; replayIntent(); pendingIntent = null; paint();
-      toast('Replayed ' + lastIntent.type + ' again — cart ' + before + ' → ' + cartCount() + ' (unchanged)');
-    } },
-  { g:'Behaviour contract', k:'cm', l:'Seed an anonymous cart, then sign in → merge', h:'auth:cart_merge with merged_items',
-    f:function(){ S.anonCart = [{ productId:'p_wtr_500', qty:2 },{ productId:'p_dat_box', qty:1 },{ productId:'p_oil_5l', qty:1 }];
-      paint(); requireAuth({ level:'L1', trigger:'header_signin', mode:'signin' }); } },
-  { g:'Behaviour contract', k:'rs', l:'Reset session to L0', h:'clears level, cart, CR', f:resetSession },
-
-  { g:'Errors & edges', k:'e1', l:'Wrong OTP — inline error, digits kept', h:'auth:otp_fail · reason=mismatch',
-    f:function(){ ensurePhone(); F.code = '111111'.split(''); openAt('otp',{}); setTimeout(submitOtp, 60); } },
-  { g:'Errors & edges', k:'e2', l:'Expired OTP — digits cleared, timer restarts', h:'testHooks.forceOtpExpired',
-    f:function(){ ensurePhone(); testHooks.forceOtpExpired = true; F.code = OTP_CODE.split(''); openAt('otp',{}); setTimeout(submitOtp, 60); } },
-  { g:'Errors & edges', k:'e3', l:'3 failed attempts → email fallback appears', h:'reveals “Sign in with email instead”',
-    f:function(){ ensurePhone(); UI.otpFails = 2; F.code = '111111'.split(''); openAt('otp',{}); setTimeout(submitOtp, 60); } },
-  { g:'Errors & edges', k:'e4', l:'Network failure on submit — form is kept', h:'testHooks.forceNetworkFailure',
-    f:function(){ ensurePhone(); testHooks.forceNetworkFailure = true; openAt('identify',{}); setTimeout(submitIdentify, 60); } },
-  { g:'Errors & edges', k:'e5', l:'CR rejected after verification', h:'testHooks.forceCrRejected · resolves in 6s',
-    f:function(){ ensureL1(); testHooks.forceCrRejected = true; F.cr = '1234-1'; navigate('/checkout','push');
-      requireAuth({ level:'L2', trigger:'checkout', step:'cr' }); setTimeout(submitCr, 80); } },
-  { g:'Errors & edges', k:'e6', l:'CR pending at checkout — blocking panel', h:'crStatus = pending',
-    f:function(){ ensureL1(); S.cr = '9911-2'; S.crStatus = 'pending'; if (!S.cart.length) addToCart('p_bas_rice', 2); navigate('/checkout','push'); } },
-  { g:'Errors & edges', k:'e7', l:'Session expired mid-action', h:'trigger=session_expired · intent preserved',
-    f:function(){ S.level = 'L0'; S.crStatus = 'none'; navigate('/checkout','push');
-      requireAuth({ level:'L1', trigger:'session_expired', mode:'signin', intent:{ type:'goto_checkout' } }); } },
-
-  { g:'Content · a11y · RTL', k:'ar', l:'Toggle Arabic / RTL', h:'mirrors layout, input group order, back arrow', f:function(){ toggleLocale(); } },
-  { g:'Content · a11y · RTL', k:'dv', l:'Toggle 390px viewport', h:'drives resolvePresentation()', f:function(){ toggleDevice(); } },
-  { g:'Content · a11y · RTL', k:'nm', l:'Toggle native <dialog>.showModal()', h:'true native modality — inerts the whole document, chrome included', f:function(){ toggleNativeModal(); } },
-  { g:'Content · a11y · RTL', k:'st', l:'Run the contract self-test', h:'logs a pass/fail table to the console', f:function(){ toast(selfTest() ? 'Contract self-test passed — see console' : 'Self-test FAILED — see console', selfTest() ? '' : 'err'); } }
+  { k:'sheet', l:'On mobile', u:'same URL, 390px viewport → bottom sheet (starts signed out)',
+    f:function(){ asVisitor(); S.device = 'mobile'; FLOW_PRES = null; navigate('/product/p_mou_pch','push');
+      requireAuth({ level:'L1', trigger:'price_gate_card', intent:{ type:'reveal_price', productId:'p_mou_pch' } }); } },
+  { k:'register', l:'Create account', u:'/register?trigger=deep_link&step=identify',
+    f:function(){ resetForm('identify'); S.lastTrigger = 'deep_link'; hardGo('/register?trigger=deep_link&step=identify'); } },
+  { k:'signin', l:'Sign in', u:'/login?trigger=email_link&step=identify',
+    f:function(){ resetForm('identify'); S.lastTrigger = 'email_link'; hardGo('/login?trigger=email_link&step=identify&return_to=%2Forders'); } },
+  { k:'checkout', l:'Checkout', u:'/login?trigger=checkout&step=cr — a page, never an overlay',
+    f:function(){ S.level = 'L1'; S.phone = S.phone || '33001122'; S.bizName = S.bizName || 'Manama Grocery';
+      if (!S.cart.length) addToCart('p_bas_rice', 2);
+      navigate('/checkout','push');
+      requireAuth({ level:'L2', trigger:'checkout', step:'cr', intent:{ type:'goto_checkout' } }); } }
 ];
-function ensurePhone(){ if (!/^3\d{7}$/.test(F.phone)) F.phone = '33001122'; S.phone = F.phone; }
-function casesHtml(){
-  const groups = [];
-  CASES.forEach(function(c){ if (groups.indexOf(c.g) === -1) groups.push(c.g); });
-  return groups.map(function(g){
-    return '<div class="casegrp"><h5>' + esc(g) + '</h5>' +
-      CASES.filter(function(c){ return c.g === g; }).map(function(c){
-        return '<button class="case" data-act="case" data-case="' + c.k + '">' + esc(c.l) + '<em>' + esc(c.h) + '</em></button>';
-      }).join('') + '</div>';
-  }).join('') +
-  '<div class="railnote">Every case changes the URL and lets the component render from it. ' +
-  'Reload while an overlay is open — the URL does not change, the presentation does.</div>';
+function renderBookmarks(){
+  $('#bookmarks').innerHTML =
+    '<span class="bmlabel">Try</span>' +
+    FLOWS.map(function(f){
+      return '<button class="bm" data-act="flow" data-flow="' + f.k + '" title="' + esc(f.u) + '"><i>★</i>' + esc(f.l) + '</button>';
+    }).join('') +
+    '<button class="bm end" data-act="signout" title="Back to a signed-out visitor">Reset to L0</button>';
 }
 function toggleLocale(){
   S.locale = S.locale === 'en' ? 'ar' : 'en';
@@ -1849,9 +1615,7 @@ document.addEventListener('click', function(e){
     case 'hback':     goBack(); break;
     case 'hfwd':      goForward(); break;
     case 'hreload':   reload(); break;
-    case 'railtab':   railTab = d.tab; renderRail(); break;
-    case 'clearev':   EVENTS.length = 0; renderRail(); break;
-    case 'case':      { const c = CASES.filter(function(x){ return x.k === d.case; })[0]; if (c) c.f(); break; }
+    case 'flow':      { const c = FLOWS.filter(function(x){ return x.k === d.flow; })[0]; if (c) c.f(); break; }
     case 'locale':    toggleLocale(); break;
     case 'device':    toggleDevice(); break;
     case 'nativemodal': toggleNativeModal(); break;
@@ -1975,7 +1739,7 @@ function selfTest(){
   ok('an unknown trigger is rejected by requireAuth', (function(){
      try { requireAuth({ level:'L1', trigger:'newsletter_popup' }); return false; } catch(e){ return true; } })());
 
-  const doc = [$('#stage'), $('#rail'), $('#chrome')].map(function(n){ return n ? n.innerHTML : ''; }).join(' ');
+  const doc = [$('#stage'), $('#chrome'), $('#bookmarks')].map(function(n){ return n ? n.innerHTML : ''; }).join(' ');
   ok('“I\'m not a Buyer” appears nowhere',   doc.indexOf("not a Buyer") === -1);
   ok('“Join & View Price” appears nowhere',  doc.indexOf('Join &amp; View Price') === -1 && doc.indexOf('Join & View Price') === -1);
   ok('“Login” is never used as a label',     doc.indexOf('>Login<') === -1);
@@ -2001,7 +1765,7 @@ function ensureDialogGuarded(){
    ======================================================================== */
 $('#stage').innerHTML = '<div id="pagearea"></div><div class="toasts" id="toasts"></div>';
 window.addEventListener('popstate', function(){ /* the simulated chrome owns history */ });
-window.HIGHBASE = { S:S, EVENTS:EVENTS, HISTORY:HISTORY, requireAuth:requireAuth, testHooks:testHooks,
+window.HIGHBASE = { S:S, EVENTS:EVENTS, HISTORY:HISTORY, requireAuth:requireAuth,
                     mockApi:mockApi, selfTest:selfTest, PRODUCTS:PRODUCTS };
 render();                      /* first paint is a hard navigation (§5.3) */
 setTimeout(selfTest, 300);
