@@ -1,0 +1,40 @@
+/* =============================================================================
+   Salla Design System tokens.
+
+   VALUES ARE FROM THE REAL SALLA DS COMPONENT KIT (abdelrahmaneltayep/salla-ds),
+   not the approximations in the build brief. See README → "Known deviations".
+   To revert to the brief's values, edit only this block.
+   ============================================================================= */
+:root {
+  /* Brand ------------------------------------------------------------------ */
+  --salla-primary:      #004A57;  /* brief said #004D40 (Material teal-900) */
+  --salla-primary-50:   #F1F8F9;
+  --salla-primary-300:  #348D9D;  /* focus ring */
+  --salla-primary-700:  #003A45;
+  --salla-secondary:    #A3FFE5;  /* the mint CTA used by إطلاق الخدمة */
+  --salla-secondary-50: #F0FFFB;
+
+  /* Semantic --------------------------------------------------------------- */
+  --salla-success-50:  #E9F9F1;
+  --salla-success-500: #00AD6B;
+  --salla-success-700: #00794A;
+  --salla-info-50:     #F0F7FF;
+  --salla-info-500:    #3D8FE8;
+  --salla-info-700:    #1B5490;
+  --salla-warning-50:  #FFF8EC;
+  --salla-warning-500: #E8A33D;
+  --salla-warning-700: #9A6210;  /* darkened from #A96B12 — that failed AA (4.14) on warning-50 */
+  --salla-danger-50:   #FEF1F1;
+  --salla-danger-500:  #F55157;  /* brief said #E53E3E (Chakra red-500) */
+  --salla-danger-700:  #C9333A;
+
+  /* Neutrals --------------------------------------------------------------- */
+  --salla-text-primary:   #333333;
+  --salla-text-secondary: #4F4F4F;
+  --salla-text-tertiary:  #666666;  /* Salla --dark-200. --dark-100 (#737373) fails AA (4.37) on the soft surface */
+  --salla-surface:        #FFFFFF;
+  --salla-surface-soft:   #F4F6F6;
+  --salla-border:         #EDEDED;
+  --salla-border-strong:  #DEDEDE;
+  --salla-topbar:         #00303A;
+}
