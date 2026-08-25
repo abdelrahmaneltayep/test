@@ -151,6 +151,13 @@ rejects absolute and protocol-relative URLs, and that none of the banned labels
    per opening and makes it impossible for funnel step 1 to exceed step 2.
 6. **`merged_items` counts line items**, matching the §7.4 copy ("We kept the 3 items
    in your cart").
+7. **No Sign in / Create account tab pair on the identify screen** (§8.1 item 4). The
+   entry point already picks the mode, and on the phone path the two modes are the
+   same form submitting to the same endpoint — the tabs asked the user to answer a
+   question the system does not need answered. The single cross-link at the foot
+   ("Already have an account? Sign in" / "New to HIGHBASE? Create account") is now the
+   only switch. It still replaces history rather than pushing it, and still emits
+   `auth:tab_switch` with the destination mode, so nothing in §10 changes.
 
 ## Verified
 

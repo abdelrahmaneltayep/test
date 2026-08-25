@@ -292,13 +292,6 @@ dialog.authdlg[data-native="1"] .scrim{background:transparent}
 #authTitle{font-size:19px;text-align:center;margin-bottom:4px}
 .authsub{font-size:12.5px;color:var(--hb-ink-soft);text-align:center;margin-bottom:14px}
 
-.tabs{display:flex;background:var(--hb-mist);border-radius:var(--radius-pill);padding:3px;margin-bottom:16px}
-.tabs button{
-  flex:1;border:none;background:none;border-radius:var(--radius-pill);padding:8px 6px;font-size:12.5px;font-weight:700;
-  color:var(--hb-ink-soft);cursor:pointer;
-}
-.tabs button[aria-selected="true"]{background:var(--hb-paper);color:var(--hb-blue);box-shadow:0 1px 3px rgba(14,46,79,.12)}
-
 .field{margin-bottom:12px}
 .field>label,.lblrow{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--hb-ink);margin-bottom:5px}
 .optchip{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;background:var(--hb-mist);color:var(--hb-ink-soft);border-radius:var(--radius-pill);padding:2px 7px;border:1px solid var(--hb-line)}
@@ -342,7 +335,11 @@ input:focus,select:focus{outline:none;border-color:var(--hb-blue);box-shadow:var
 .valuelist li{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--hb-ink)}
 .valuelist .tick{color:var(--level-2);font-weight:800}
 .legal{font-size:10.5px;color:var(--hb-ink-soft);text-align:center;margin-top:14px;line-height:1.55}
-.crosslink{font-size:12.5px;color:var(--hb-ink-soft);text-align:center;margin-top:12px}
+.crosslink{
+  font-size:12.5px;color:var(--hb-ink-soft);text-align:center;margin-top:14px;
+  border-top:1px solid var(--hb-line);padding-top:14px;
+}
+.crosslink .linkbtn{font-size:12.5px}
 
 /* OTP */
 .otpwrap{display:flex;gap:8px;justify-content:center;margin:6px 0 12px;direction:ltr}
@@ -878,11 +875,8 @@ function screenIdentify(u){
   h.push('<h1 id="authTitle">' + esc(copy[S.locale]) + '</h1>');
   if (p) h.push('<p class="authsub">' + esc(pname(p)) + '</p>');
 
-  h.push('<div class="tabs" role="tablist" aria-label="' + esc(t('signIn')) + ' / ' + esc(t('createAccount')) + '">' +
-    '<button type="button" role="tab" id="tab-signin"  aria-selected="' + (!isSignup) + '" data-act="mode" data-mode="signin">'  + esc(t('signIn')) + '</button>' +
-    '<button type="button" role="tab" id="tab-signup" aria-selected="' + (isSignup)  + '" data-act="mode" data-mode="signup">' + esc(t('createAccount')) + '</button>' +
-    '</div>');
-
+  /* No tab pair. The entry point already chose the mode (§8.1.4) and the phone
+     path is identical either way — the cross-link at the foot is the only switch. */
   h.push('<form data-form="identify" novalidate>');
   if (!emailMode){
     h.push('<div class="field">' +
