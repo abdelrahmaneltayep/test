@@ -32,6 +32,35 @@ because there was nothing to carry it from.
 
 ---
 
+## Built on the live screen — corrected
+
+A first pass invented its own layout. The live screenshots showed two mistakes,
+both now fixed:
+
+1. **It replaced the activation screen instead of extending it.** The three cards —
+   *من أين ستنطلق شحناتك؟* · *إلى أي مدى تصل خدمتك؟* · *وعد التوصيل لعملائك* — belong to
+   SI-311/SI-323 and are transcribed as-is in `ActivationScreen.tsx`. PDV2-466 adds
+   exactly four things, each marked `⟨466⟩` in that file.
+2. **It front-loaded a numbered 4-step plan.** A step list open on the page turns the
+   merchant back into a configurer, which is the opposite of what this screen is for.
+   The plan now sits behind *ماذا سنجهّز نيابةً عنك؟*, collapsed.
+
+**But not everything can be collapsed.** Enabling the Multi-Branch tool on their store,
+or linking their branches to a market, are changes a merchant would object to discovering
+afterwards. Those are named in the **collapsed** state; only routine steps are hidden.
+That distinction — routine steps collapse, store-level consequences don't — is the design
+decision worth reviewing.
+
+### The provider naming conflict, now with visual proof
+
+The live card is labelled **بوليصات سلة** and reads *"تختار سلة أفضل مزود لكل طلب تلقائيًا"* —
+an abstraction over carriers. PDV2-466 is written around **Mrsool** by name.
+
+This build keeps the label and **discloses Mrsool as what sits behind it**, inside the
+selected provider card, with its status. That is the minimal-change reading. The
+alternative — renaming the option to "مرسول" — is a visible change to a screen this
+ticket is not supposed to touch, and needs Idris's decision before either is estimated.
+
 ## The state model in plain language
 
 **One input.** `QuickDeliveryActivation` takes a single prop: `MerchantState`. Seven fields:

@@ -36,41 +36,59 @@ await check('mrsool active · activation step dropped', async () =>
 await pick('بدون تعدّد الأسواق');
 await check('no Multi-Markets · enable-multi-branch replaces link-market', async () => {
   const p = await plan(); return p.includes('enable-multi-branch') && !p.includes('link-market'); });
-await check('no Multi-Markets · notice explains the swap', async () =>
-  (await main()).includes('سنفعّل أداة تعدّد الفروع'));
+await check('no Multi-Markets · consequence named WITHOUT expanding', async () =>
+  (await main()).includes('سنفعّل أداة تعدّد الفروع لمتجرك'));
 await pick('الفروع مرتبطة مسبقاً');
 await check('already linked · link step dropped', async () => !(await plan()).includes('link-market'));
 await pick('فرع سعودي واحد');
 await check('single branch · fulfilment NOT auto-enabled', async () => {
-  const p = await plan(); return !p.includes('enable-fulfilment') && (await main()).includes('فرع واحد محدّد'); });
+  const p = await plan(); return !p.includes('enable-fulfilment'); });
 await pick('فروع مختلطة');
 await check('mixed · non-KSA branches excluded and named', async () => {
-  const t = await main(); return t.includes('استُبعد') && t.includes('فرع دبي'); });
+  const t = await main(); return t.includes('لا تظهر') && t.includes('فرع دبي'); });
 
 console.log('\n--- blockers ---');
 await pick('لا فروع سعودية');
 await check('0 KSA branches · empty state + CTA blocked', async () => {
   const t = await main();
-  const cta = page.getByRole('button', { name: /تأكيد وتفعيل/ });
+  const cta = page.getByRole('button', { name: /إطلاق الخدمة/ });
   return t.includes('لا توجد فروع داخل السعودية') && await cta.isDisabled(); });
 await pick('مسارات متعارضة');
 await check('route conflict · CTA blocked until resolved', async () =>
-  await page.getByRole('button', { name: /تأكيد وتفعيل/ }).isDisabled());
+  await page.getByRole('button', { name: /إطلاق الخدمة/ }).isDisabled());
 await page.getByRole('button', { name: /استبدال المسارات/ }).click(); await page.waitForTimeout(300);
 await check('route conflict · resolving unblocks the CTA', async () =>
-  await page.getByRole('button', { name: /تأكيد وتفعيل/ }).isEnabled());
+  await page.getByRole('button', { name: /إطلاق الخدمة/ }).isEnabled());
 await pick('رسوم تتطلّب موافقة');
 await check('fees variant · blocked, and cost left blank as a gap', async () => {
   const t = await main();
   return t.includes('قيمة الرسوم غير محدّدة بعد')
-    && await page.getByRole('button', { name: /تأكيد وتفعيل/ }).isDisabled(); });
-await page.getByRole('switch').click(); await page.waitForTimeout(300);
+    && await page.getByRole('button', { name: /إطلاق الخدمة/ }).isDisabled(); });
+await page.locator('#fees').check(); await page.waitForTimeout(300);
 await check('fees variant · consent unblocks', async () =>
-  await page.getByRole('button', { name: /تأكيد وتفعيل/ }).isEnabled());
+  await page.getByRole('button', { name: /إطلاق الخدمة/ }).isEnabled());
+
+console.log('\n--- live screen fidelity ---');
+await pick('الحالة الأساسية');
+await check('setup disclosure is COLLAPSED by default (confirm, not configure)', async () => {
+  const t = await main();
+  // scope past the dev harness, which prints the derived plan by design
+  return !t.includes('تفعيل مرسول على متجرك') && t.includes('ماذا سنجهّز نيابةً عنك'); });
+await check('disclosure opens on demand', async () => {
+  await page.getByRole('button', { name: /ماذا سنجهّز نيابةً عنك/ }).click(); await page.waitForTimeout(250);
+  const t = await main();
+  const ok = t.includes('تفعيل مرسول على متجرك');
+  await page.getByRole('button', { name: /ماذا سنجهّز نيابةً عنك/ }).click(); await page.waitForTimeout(200);
+  return ok; });
+await check('live screen: three cards present', async () => {
+  const t = await main();
+  return t.includes('من أين ستنطلق شحناتك') && t.includes('إلى أي مدى تصل خدمتك') && t.includes('وعد التوصيل لعملائك'); });
+await check('live screen: provider label is بوليصات سلة, not Mrsool', async () => {
+  const t = await main();
+  return t.includes('بوليصات سلة') && t.includes('المزوّد الحالي لهذه المدن: مرسول'); });
 
 console.log('\n--- async activation ---');
-await pick('الحالة الأساسية');
-await page.getByRole('button', { name: /تأكيد وتفعيل/ }).click(); await page.waitForTimeout(400);
+await page.getByRole('button', { name: /إطلاق الخدمة/ }).click(); await page.waitForTimeout(400);
 await check('progress bar appears with a live value', async () =>
   (await page.locator('[role="progressbar"]').count()) === 1);
 await check('per-branch items are listed', async () => (await main()).includes('فرع الرياض'));
@@ -79,7 +97,7 @@ await check('success · all steps done', async () => (await main()).includes('م
 
 console.log('\n--- partial failure + retry ---');
 await pick('فشل جزئي');
-await page.getByRole('button', { name: /تأكيد وتفعيل/ }).click(); await page.waitForTimeout(7000);
+await page.getByRole('button', { name: /إطلاق الخدمة/ }).click(); await page.waitForTimeout(7000);
 await check('partial · result names it partial, not failed', async () =>
   (await main()).includes('اكتمل التفعيل جزئياً'));
 await check('partial · the failed ITEM is named', async () => (await main()).includes('تعذّر تحديث هذا الفرع'));

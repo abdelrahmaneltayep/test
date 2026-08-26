@@ -27,7 +27,10 @@ Wrappers live in `src/components/twilight/index.tsx` — swapping their bodies f
 | 12 | Market-linking notice | `<s-alert-box>` | `theme="info"` (will link) · `theme="secondary"` (already linked) |
 | 13 | Multi-Branch enablement notice | `<s-alert-box>` | `theme="info"` |
 | 14 | **Fees consent** (variant) | `<s-alert-box>` + `<s-toggle>` | alert `theme="warning"`; toggle `layout="start"` `wide` |
-| 15 | Plan preview list | `<s-panel>` | composed — see §4 |
+| 15 | Branch/warehouse picker | `<s-tags-input>` | chips use `--secondary` / `--secondary-100` |
+| 15b | Setup disclosure | `<s-accordion>` | collapsed by default; header carries an `<s-tag>` count |
+| 15c | Coverage radius | `<s-input>` | trailing unit at the inline-**end** (left in RTL) |
+| 15d | Days selector | `<s-buttons-group>` | active item uses `--secondary` fill |
 | 16 | Primary CTA | `<s-button>` | `theme="secondary"` `size="lg"` (the mint CTA) |
 | 17 | Blocker message | plain `<p role="status">` | — |
 | 18 | Activation progress bar | `<s-progress-bar>` | `label` `desc` `percentage` `show-percentage="true"` `size="md"` |
@@ -89,6 +92,20 @@ Retry semantics: `POST` the same step with **only the failed ids**. Every call m
 idempotent — a retry may re-send an id that actually succeeded on a network-dropped response.
 
 ---
+
+## 2b. What PDV2-466 adds to the live screen
+
+The three cards are SI-311/SI-323's. This ticket adds four things and nothing else:
+
+| ⟨466⟩ | Addition | Where |
+|---|---|---|
+| 1 | Provider disclosure — which carrier is behind `بوليصات سلة`, and its state | inside the selected provider radio card |
+| 2 | KSA-only branch filter, with excluded branches named | under the branch picker |
+| 3 | On-demand setup disclosure; store-level consequences named while collapsed | above the launch bar |
+| 4 | The auto-setup run triggered by `إطلاق الخدمة` | replaces the screen |
+
+**Do not rename `بوليصات سلة`.** See the README section on the naming conflict — that is
+an open decision, not something this implementation settles.
 
 ## 3. Component tree
 
