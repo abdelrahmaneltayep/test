@@ -1,0 +1,33 @@
+/* Salla Twilight tokens — real values only. See src/tokens/twilight.ts.
+   No --warning / --info here on purpose: the kit publishes no hex for them,
+   and the Twilight runtime resolves those themes itself. */
+:root {
+  --primary: #004956;          /* confirmed by Abdelrahman; kit runtime ships #004A57 */
+  --primary-100: #F1F8F9;
+  --primary-400: #348D9D;
+  --secondary: #A3FFE5;
+  --secondary-100: #F0FFFB;
+  --gray-100: #FCFCFC;
+  --gray-200: #F7F7F7;
+  --gray-400: #EDEDED;
+  --gray-500: #DEDEDE;
+  --dark: #333333;
+  --dark-100: #737373;
+  --dark-200: #666666;
+  --danger: #F55157;
+  --success: #00AD6B;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --shadow-sm: 0 2px 4px 0 rgba(0,0,0,.08);
+  --font: 'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+
+  /* Runtime-themed surfaces. Values below are LOCAL FALLBACKS used only because
+     this prototype does not load the Twilight runtime. Production must pass
+     theme="warning" / theme="info" and use NO hex. Marked so they are greppable. */
+  --xx-fallback-warning-bg: #FFF8EC;
+  --xx-fallback-warning-fg: #8A6300;
+  --xx-fallback-warning-bd: #F0D8AE;
+  --xx-fallback-info-bg: #F0F7FF;
+  --xx-fallback-info-fg: #1B5490;
+  --xx-fallback-info-bd: #C9E0F8;
+}
