@@ -250,7 +250,11 @@ body {
 /* The band gives up its horizontal padding and lets its label take two lines before the
    row is allowed to wrap — at the narrowest card the point of this layout is that the
    button stays next to the number, and a two-line "List price" costs less than losing that. */
-.hb-priceband-row > .hb-priceband { flex: 1 1 110px; min-width: 0; padding: 7px 10px; gap: 6px; }
+.hb-priceband-row > .hb-priceband { flex: 1 1 110px; padding: 7px 10px; gap: 6px; }
+/* The amount never shrinks: below the width the pair needs, the row wraps and the
+   button drops to its own line. Letting the band shrink instead pushed the price
+   out past the tinted edge at the narrow end of the grid track. */
+.hb-priceband-row .hb-priceband-value { flex: 0 0 auto; }
 .hb-priceband-row .hb-priceband-label { white-space: normal; }
 .hb-priceband-row > .hb-btn { flex: 0 0 auto; white-space: nowrap; padding-inline: 10px; gap: 6px; }
 
