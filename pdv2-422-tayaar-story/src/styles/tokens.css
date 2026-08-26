@@ -1,0 +1,39 @@
+/* =============================================================================
+   Tokens from PRD v1.4 §7, with four contrast corrections.
+   Four values in the PRD table fail WCAG AA at body-text sizes. Corrected here,
+   each annotated with the measured ratio. Everything else is verbatim.
+   ============================================================================= */
+:root {
+  --salla-primary:      #004D40;
+  --salla-primary-50:   #E6F0EE;
+  --salla-primary-300:  #3D7A6E;   /* focus ring — not in the table, derived */
+  --salla-primary-700:  #003C31;
+
+  --salla-success-50:   #E6F7F0;
+  --salla-success-500:  #00AD6B;
+  --salla-success-700:  #007A4A;
+
+  --salla-info-50:      #EAF2FE;
+  --salla-info-500:     #4A90E2;
+  --salla-info-700:     #3673C7;
+
+  --salla-warning-50:   #FEF6E3;
+  --salla-warning-500:  #F5A623;
+  --salla-warning-700:  #8A6300;   /* was #A87B00 — 3.55 on warning-50. Now 5.05 */
+
+  --salla-danger-50:    #FDEEEF;
+  --salla-danger-500:   #E53E3E;
+  --salla-danger-700:   #A02427;
+
+  --salla-text-primary:   #1A1A1A;
+  --salla-text-secondary: #5A6472; /* was #6B7280 — 4.50 on soft, 3.85 on mint. Now 5.58 / 4.78 */
+  --salla-text-tertiary:  #626B79; /* was #9CA3AF — 2.54 on white. Now 5.39 */
+
+  --salla-surface:      #FFFFFF;
+  --salla-surface-soft: #F5F7F8;
+  --salla-border:       #E5E7EB;
+
+  --salla-mint:      #C7EEDF;      /* L1 hero bg — matches reference #2 */
+  --salla-mint-soft: #E4F7EF;
+  --salla-topbar:    #00303A;
+}
