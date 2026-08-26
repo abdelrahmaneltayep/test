@@ -1,4 +1,4 @@
-<title>One Slot, Two States</title>
+<title>Twenty Ways to Ask</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap">
@@ -95,6 +95,8 @@ body {
   font-size: 13px; color: var(--ink-2);
 }
 .legend span { display: inline-flex; align-items: center; gap: 8px; }
+.jump { color: var(--accent); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; }
+.jump:hover { color: var(--ink); }
 .swatch { width: 12px; height: 12px; border-radius: 3px; flex: 0 0 auto; }
 .swatch--delta { background: var(--delta); }
 .swatch--ship { background: var(--good); }
@@ -282,6 +284,67 @@ body {
 .pc-strip--done { background: #edf7fe; border-top-color: #cfe6f8; color: #085da0; font-variant-numeric: tabular-nums; }
 .pc-strip--done b { color: #024d86; }
 
+/* ── Part two: icon-only ────────────────────────────────────── */
+.partbreak { padding: 64px 0 8px; margin-top: 46px; border-top: 2px solid var(--ink); }
+.partbreak h2 {
+  font-family: 'Jost', sans-serif; font-weight: 300; font-size: clamp(30px, 4.4vw, 46px);
+  line-height: 1.06; letter-spacing: -.015em; margin: 0 0 18px; color: var(--ink); text-wrap: balance;
+}
+.partbreak h2 b { font-weight: 600; color: var(--accent); }
+.partbreak .lede + .lede { margin-top: 12px; }
+.index-h2 {
+  font-family: 'Jost', sans-serif; font-size: 12px; font-weight: 500; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--ink-3); margin: 20px 0 14px;
+  padding-top: 18px; border-top: 1px solid var(--rule-soft);
+}
+
+/* The mark at 26px, before judging it at 17px in the card. */
+.glyphrow {
+  display: flex; gap: 20px; margin-bottom: 22px; padding-bottom: 20px;
+  border-bottom: 1px solid var(--rule-soft); min-width: min-content;
+}
+.glyphcell { display: flex; align-items: center; gap: 12px; flex: 0 0 auto; }
+.glyphbig .pc-split-seg {
+  width: 52px; height: 52px; border-radius: 12px; position: relative;
+  background: #fff; color: #026dbd; border: 1.5px solid #026dbd; border-left-width: 1.5px;
+}
+.glyphbig .pc-split-seg--solid { background: #026dbd; color: #fff; border-color: #026dbd; }
+.glyphbig .pc-split-seg--done { background: #fff; color: #026dbd; border-color: #026dbd; }
+.glyphbig .pc-dot { top: 8px; right: 9px; width: 9px; height: 9px; }
+.glyphcap { font-size: 13px; color: var(--ink-2); font-style: italic; max-width: 16ch; line-height: 1.35; }
+.glyphcap--after { color: var(--delta); font-style: normal; font-weight: 600; }
+
+/* Segment variants used only in part two. */
+.pc-split-seg--solid { background: #026dbd; color: #fff; border: 1.5px solid #026dbd; border-left: 1px solid rgba(255,255,255,.3); }
+.pc-split-seg svg { display: block; }
+
+/* 19 — the tooltip, drawn in its shown state. */
+.pc-tip {
+  position: relative; align-self: flex-end; margin-top: 9px; background: var(--navy); color: #fff;
+  font-size: 11.5px; font-weight: 600; line-height: 1.35; border-radius: 7px; padding: 6px 10px;
+  max-width: 100%; text-align: center; font-variant-numeric: tabular-nums;
+}
+.pc-nb { white-space: nowrap; font-weight: 700; }
+.pc-tip-arrow {
+  position: absolute; top: -4px; right: 16px; width: 8px; height: 8px;
+  background: var(--navy); transform: rotate(45deg);
+}
+/* 20 — the first-run coach mark, shown once. */
+.pc-coach {
+  position: relative; margin-top: 9px; background: var(--orange-wash); border: 1px solid #ffd699;
+  color: #8a4f00; font-size: 11.5px; font-weight: 600; line-height: 1.4; border-radius: 8px; padding: 8px 10px;
+}
+.pc-coach b {
+  display: inline-block; background: var(--orange); color: #fff; font-size: 9.5px; letter-spacing: .06em;
+  text-transform: uppercase; border-radius: 4px; padding: 1px 5px; margin-inline-end: 5px; vertical-align: 1px;
+}
+.pc-coach-arrow {
+  position: absolute; top: -5px; right: 16px; width: 8px; height: 8px; background: var(--orange-wash);
+  border-left: 1px solid #ffd699; border-top: 1px solid #ffd699; transform: rotate(45deg);
+}
+
+.close--two { border-top-width: 1px; }
+
 /* ── Comparison table ───────────────────────────────────────── */
 .close { padding-top: 56px; border-top: 2px solid var(--ink); margin-top: 46px; }
 .close h2 {
@@ -331,12 +394,13 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
   <header class="mast">
     <p class="eyebrow">HIGHBASE · Special Price Request &amp; RFQ</p>
     <h1>One slot,<br><b>two states</b>.</h1>
-    <p class="lede">The entry point on the product card is not one control — it is a control with a life. Before, it invites the buyer to ask. After, the same slot has to say a request is open, and give them the way back to it (AC-1.5). Ten placements, each drawn in both states.</p>
-    <p class="lede">What separates them is not where the button sits. It is whether the placement can still carry <b>SPR-2608-0001</b> once the buyer has asked — because the reference is the one thing that says <em>which</em> request is open, and half of these layouts have nowhere to put it.</p>
+    <p class="lede">The entry point on the product card is not one control — it is a control with a life. Before, it invites the buyer to ask. After, the same slot has to say a request is open, and give them the way back to it (AC-1.5). Twenty options, each drawn in both states — ten placements first, then ten icon-only marks that have to do the same job without a word.</p>
+    <p class="lede">What separates them is not where the button sits. It is whether the placement can still carry <b>SPR-2608-0001</b> once the buyer has asked — because the reference is the one thing that says <em>which</em> request is open, and most of these have nowhere to put it.</p>
     <div class="legend">
       <span><i class="swatch swatch--delta"></i> Amber marks the requested state</span>
       <span><i class="swatch swatch--ship"></i> Already switchable in the prototype</span>
       <span>Both states drawn at the 246px grid track</span>
+      <span><a class="jump" href="#icon-only">Jump to the icon-only ten ↓</a></span>
     </div>
   </header>
 
@@ -353,6 +417,19 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <li><a href="#o8"><em>08</em> Quiet invitation</a></li>
       <li><a href="#o9"><em>09</em> Split primary</a></li>
       <li><a href="#o10"><em>10</em> Reason strip</a></li>
+    </ol>
+    <h2 class="index-h2">Icon only</h2>
+    <ol>
+      <li><a href="#i11"><em>11</em> Bare tag</a></li>
+      <li><a href="#i12"><em>12</em> Tag with a down arrow</a></li>
+      <li><a href="#i13"><em>13</em> Percent</a></li>
+      <li><a href="#i14"><em>14</em> Tag with a percent inside</a></li>
+      <li><a href="#i15"><em>15</em> Scissors</a></li>
+      <li><a href="#i16"><em>16</em> Two-way arrows</a></li>
+      <li><a href="#i17"><em>17</em> Bubble with a falling price</a></li>
+      <li><a href="#i18"><em>18</em> Coin with a down arrow</a></li>
+      <li><a href="#i19"><em>19</em> Tag with a tooltip</a></li>
+      <li><a href="#i20"><em>20</em> Tag with a first-run coach mark</a></li>
     </ol>
   </nav>
 
@@ -1076,6 +1153,837 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <p class="foot">Options 01–04 are live in the prototype and switchable from the demo bar; their requested states are the real ones. 05–10 are drawn here against the shipped tokens and need no new components — each is a rearrangement of the button, the band and the media chip the card already owns.</p>
+  </section>
+
+
+  <section class="partbreak" id="icon-only">
+    <p class="eyebrow">Part two · 11–20</p>
+    <h2>Ten marks, <b>no words</b></h2>
+    <p class="lede">Option 09 asked whether one glyph welded to Add to cart could carry the whole feature. These ten answer it. The placement is fixed — every one uses 09’s segment — so the only variable is the mark itself, and whether it survives losing its label.</p>
+    <p class="lede">Each is drawn twice: the ask, and what the same segment becomes once a request is open. The large pair at the top of each plate is the mark at 26px so you can judge the drawing; the cards below are at true size, which is where it actually has to work.</p>
+  </section>
+
+  <section class="opt" id="i11">
+    <div class="opt-head">
+      <span class="opt-no">11</span>
+      <h3>Bare tag</h3>
+      <p class="opt-where">Outline mark · nothing else</p>
+      <p>The literal object, drawn once and left to speak for itself. This is the control the other nine have to beat.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>The tag is already the mark for “price” across the card — the Wholesale chip uses it, and the request flow uses it. Nothing new to learn.</span></div>
+        <div class="con"><span class="k">−</span><span>A tag says <em>price</em>. It does not say <em>ask for a better one</em>. Filled versus outline is a weak way to carry the whole state change.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button></div><span class="glyphcap">A price tag</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--solid" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.3" fill="#fff" stroke="none"/></svg></button></div><span class="glyphcap glyphcap--after">The same tag, filled in</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="11-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="11-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--solid" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.3" fill="#fff" stroke="none"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i12">
+    <div class="opt-head">
+      <span class="opt-no">12</span>
+      <h3>Tag with a down arrow</h3>
+      <p class="opt-where">Compound mark · direction</p>
+      <p>The tag keeps the subject and the arrow supplies the verb. Requested, the arrow becomes a tick.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>The only mark here that states a direction. Buyers do not have to infer what kind of request this is — it is a request for <em>less</em>.</span></div>
+        <div class="con"><span class="k">−</span><span>Two marks in an 18px box. The arrow is the first thing to go illegible on a low-resolution screen, and without it the glyph collapses back into 11.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="M18.6 14.4v6.2"/><path d="m15.9 18 2.7 2.7 2.7-2.7"/></svg></button></div><span class="glyphcap">Move this price down</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="m15.6 18.3 2.2 2.2 3.6-3.9"/></svg></button></div><span class="glyphcap glyphcap--after">Tag with a tick</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="12-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="M18.6 14.4v6.2"/><path d="m15.9 18 2.7 2.7 2.7-2.7"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="12-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="m15.6 18.3 2.2 2.2 3.6-3.9"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i13">
+    <div class="opt-head">
+      <span class="opt-no">13</span>
+      <h3>Percent</h3>
+      <p class="opt-where">Discount language</p>
+      <p>Borrowed from the vocabulary buyers already use for promotions, then swapped for an eye once a request is open.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>Instantly readable at any size, and every buyer on the platform already knows what it means.</span></div>
+        <div class="con"><span class="k">−</span><span>It promises a discount rather than an ask, which is the wrong expectation to set for a request a supplier can decline. It also collides with real promotional badging.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4"/><path d="M15.6 8.4 8.4 15.6"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></button></div><span class="glyphcap">A discount</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg><i class="pc-dot"></i></button></div><span class="glyphcap glyphcap--after">Swaps to an eye</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="13-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4"/><path d="M15.6 8.4 8.4 15.6"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="13-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg><i class="pc-dot"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i14">
+    <div class="opt-head">
+      <span class="opt-no">14</span>
+      <h3>Tag with a percent inside</h3>
+      <p class="opt-where">Compound mark · subject + kind</p>
+      <p>The tag holds the subject and the percent inside it names what is being asked about.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>Reads as one object rather than two marks, so it survives being small better than 12 does.</span></div>
+        <div class="con"><span class="k">−</span><span>At 17px the percent inside the tag is three dots and a stroke. Squint and it is a bare tag with noise in it.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/><path d="M14.6 9.4 10 14"/><circle cx="10.5" cy="9.9" r=".95"/><circle cx="14.1" cy="13.5" r=".95"/></svg></button></div><span class="glyphcap">A price, negotiable</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--solid" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/><path d="M14.6 9.4 10 14"/><circle cx="10.5" cy="9.9" r=".95"/><circle cx="14.1" cy="13.5" r=".95"/></svg><i class="pc-dot"></i></button></div><span class="glyphcap glyphcap--after">Filled, with a dot</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="14-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/><path d="M14.6 9.4 10 14"/><circle cx="10.5" cy="9.9" r=".95"/><circle cx="14.1" cy="13.5" r=".95"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="14-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--solid" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/><path d="M14.6 9.4 10 14"/><circle cx="10.5" cy="9.9" r=".95"/><circle cx="14.1" cy="13.5" r=".95"/></svg><i class="pc-dot"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i15">
+    <div class="opt-head">
+      <span class="opt-no">15</span>
+      <h3>Scissors</h3>
+      <p class="opt-where">Cut the price</p>
+      <p>The oldest discount metaphor there is — the coupon being clipped.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>Unmistakable in outline and never confused with any other control on a commerce page.</span></div>
+        <div class="con"><span class="k">−</span><span>It says the price is being cut, when in fact the buyer is only asking. On a B2B platform where the supplier decides, that is a promise the card cannot keep.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.2" cy="6.2" r="2.6"/><circle cx="6.2" cy="17.8" r="2.6"/><path d="M8.3 7.9 20.4 19.4"/><path d="M20.4 4.6 8.3 16.1"/></svg></button></div><span class="glyphcap">Cut this price</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button></div><span class="glyphcap glyphcap--after">Swaps to an eye</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="15-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.2" cy="6.2" r="2.6"/><circle cx="6.2" cy="17.8" r="2.6"/><path d="M8.3 7.9 20.4 19.4"/><path d="M20.4 4.6 8.3 16.1"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="15-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i16">
+    <div class="opt-head">
+      <span class="opt-no">16</span>
+      <h3>Two-way arrows</h3>
+      <p class="opt-where">Negotiation as exchange</p>
+      <p>Not the price and not the discount — the <em>process</em>. Two arrows passing in opposite directions.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>The most accurate mark on the board: this feature is a counter-offer loop, and that is exactly what the glyph draws.</span></div>
+        <div class="con"><span class="k">−</span><span>It is also the mark for sort, swap, transfer and sync. Accurate and ambiguous at the same time, which is the worst combination for an unlabelled control.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h15.1"/><path d="m14.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/></svg></button></div><span class="glyphcap">Back and forth</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h15.1"/><path d="m14.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/></svg><i class="pc-dot"></i></button></div><span class="glyphcap glyphcap--after">Same mark, with a dot</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="16-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h15.1"/><path d="m14.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="16-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h15.1"/><path d="m14.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/></svg><i class="pc-dot"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i17">
+    <div class="opt-head">
+      <span class="opt-no">17</span>
+      <h3>Bubble with a falling price</h3>
+      <p class="opt-where">Ask about the price</p>
+      <p>A speech bubble containing a downward arrow: the buyer is opening a conversation, not pressing a discount button.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>The only mark whose requested state is genuinely self-explanatory — a bubble with a dot is the universal “there is a thread here, unread”.</span></div>
+        <div class="con"><span class="k">−</span><span>Softer than the rest: it reads as messaging rather than commerce, and a buyer scanning for a price control may not look at it twice.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.4v6.8"/><path d="m9 11.4 3 3 3-3"/></svg></button></div><span class="glyphcap">Talk about this price</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button></div><span class="glyphcap glyphcap--after">Bubble with a dot</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="17-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.4v6.8"/><path d="m9 11.4 3 3 3-3"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="17-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i18">
+    <div class="opt-head">
+      <span class="opt-no">18</span>
+      <h3>Coin with a down arrow</h3>
+      <p class="opt-where">Money, lowered</p>
+      <p>The money itself rather than its label, with the same directional arrow as 12.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>Holds together at small sizes better than any other compound mark here — one circle, one arrow, nothing crossing.</span></div>
+        <div class="con"><span class="k">−</span><span>A coin is a poor fit for BHD, where prices are quoted to three decimals per case. It also reads as “download” to anyone moving fast.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Glyph</span>
+        <span class="chip chip--h">No height cost</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.1"/><path d="M12 7.2v9.2"/><path d="m8.6 13 3.4 3.4 3.4-3.4"/></svg></button></div><span class="glyphcap">Lower the amount</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button></div><span class="glyphcap glyphcap--after">Swaps to an eye</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="18-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.1"/><path d="M12 7.2v9.2"/><path d="m8.6 13 3.4 3.4 3.4-3.4"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="18-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i19">
+    <div class="opt-head">
+      <span class="opt-no">19</span>
+      <h3>Tag with a tooltip</h3>
+      <p class="opt-where">Treatment · on hover and focus</p>
+      <p>The bare tag from 11, rescued by a tooltip that appears on hover and on keyboard focus — and that carries the reference in the requested state.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>The only option in part two that can show <b>SPR-2608-0001</b> at all. It also gives the icon a real accessible name rather than relying on the glyph.</span></div>
+        <div class="con"><span class="k">−</span><span>Hover does not exist on a phone, and the reference the tooltip carries is exactly what a touch buyer never sees. It rescues the desktop case only.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Treatment</span>
+        <span class="chip chip--h">Floats · +45px while shown</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button></div><span class="glyphcap">Tag, plus the words on hover</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button></div><span class="glyphcap glyphcap--after">Eye, plus the reference on hover</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="19-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button>
+            </div>
+            <div class="pc-tip" role="tooltip">Request special price<i class="pc-tip-arrow"></i></div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="19-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button>
+            </div>
+            <div class="pc-tip" role="tooltip">View my request<br><b class="pc-nb">SPR-2608-0001</b><i class="pc-tip-arrow"></i></div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="opt" id="i20">
+    <div class="opt-head">
+      <span class="opt-no">20</span>
+      <h3>Tag with a first-run coach mark</h3>
+      <p class="opt-where">Treatment · once, then never</p>
+      <p>The words appear once, on the first card a buyer sees, and then retire. After that the glyph is on its own.</p>
+      <div class="tradeoff">
+        <div class="pro"><span class="k">+</span><span>Teaches the mark in the buyer’s own context and costs nothing thereafter — the grid stays as clean as option 11.</span></div>
+        <div class="con"><span class="k">−</span><span>It only teaches whoever was there on day one. Everybody onboarded afterwards meets a bare tag, which puts the whole feature’s discoverability in a dismissable bubble.</span></div>
+      </div>
+      <div class="meta">
+        <span class="chip chip--new">Treatment</span>
+        <span class="chip chip--h">+67px, first run only</span>
+      </div>
+    </div>
+
+    <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button></div><span class="glyphcap">Tag, taught once in words</span></div>
+        <div class="glyphcell"><div class="glyphbig"><button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg><i class="pc-dot"></i></button></div><span class="glyphcap glyphcap--after">Eye with a dot, unaided</span></div>
+      </div>
+      <div class="pair">
+        <div class="slot slot--before">
+          <span class="slot-label">Before · no request yet</span>
+          <div class="stage" data-state="20-before">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button>
+            </div>
+            <div class="pc-coach"><b>New</b> Ask this supplier for a better price<i class="pc-coach-arrow"></i></div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+        <div class="arrow" aria-hidden="true">→</div>
+        <div class="slot slot--after">
+          <span class="slot-label">After · request open</span>
+          <div class="stage" data-state="20-after">
+      <div class="pc">
+        <div class="pc-media">
+          <span class="pc-unit">case</span>
+          <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
+          <span aria-hidden="true">🫒</span>
+          <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
+        </div>
+        <div class="pc-body">
+          <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
+          <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
+          <div class="pc-actions">
+            <div class="pc-split">
+              <button type="button" class="pc-btn pc-btn--primary" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button>
+              <button type="button" class="pc-split-seg pc-split-seg--done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg><i class="pc-dot"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close close--two">
+    <h2>What a mark can <b>and cannot</b> say</h2>
+    <p>Read down the “reads as” column and the problem is plain. Every glyph here can say <em>price</em>. Most can say <em>lower</em>. Not one of them, unaided, says <em>ask the supplier and wait for an answer</em> — and none but 19 can carry the reference that identifies the request afterwards.</p>
+
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Mark</th><th>Kind</th><th>Reads as</th><th>Requested becomes</th><th>Carries the ref</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="no">11</span>Bare tag</td><td>Glyph</td><td>A price tag</td><td>The same tag, filled in</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">12</span>Tag with a down arrow</td><td>Glyph</td><td>Move this price down</td><td>Tag with a tick</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">13</span>Percent</td><td>Glyph</td><td>A discount</td><td>Swaps to an eye</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">14</span>Tag with a percent inside</td><td>Glyph</td><td>A price, negotiable</td><td>Filled, with a dot</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">15</span>Scissors</td><td>Glyph</td><td>Cut this price</td><td>Swaps to an eye</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">16</span>Two-way arrows</td><td>Glyph</td><td>Back and forth</td><td>Same mark, with a dot</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">17</span>Bubble with a falling price</td><td>Glyph</td><td>Talk about this price</td><td>Bubble with a dot</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">18</span>Coin with a down arrow</td><td>Glyph</td><td>Lower the amount</td><td>Swaps to an eye</td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">19</span>Tag with a tooltip</td><td>Treatment</td><td>Tag, plus the words on hover</td><td>Eye, plus the reference on hover</td><td><span class="dot w-mid">On hover only</span></td></tr>
+          <tr><td><span class="no">20</span>Tag with a first-run coach mark</td><td>Treatment</td><td>Tag, taught once in words</td><td>Eye with a dot, unaided</td><td><span class="dot w-high">No</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rec">
+      <div class="reccard reccard--pick">
+        <h4>Best of the ten</h4>
+        <p><strong>17 — bubble with a falling price.</strong> It is the only mark whose <em>requested</em> state explains itself: a bubble with a dot reads as an open thread with something in it, which is exactly what an open request is. Every other option answers “you asked” with a fill or a tick and leaves the way back unstated.</p>
+      </div>
+      <div class="reccard">
+        <h4>Most accurate, least usable</h4>
+        <p><strong>16 — two-way arrows.</strong> It draws the counter-offer loop precisely, and it is also the standard mark for sort, swap and sync. On a labelled control that ambiguity costs nothing. On an unlabelled one it is fatal.</p>
+      </div>
+      <div class="reccard">
+        <h4>The honest conclusion</h4>
+        <p>Icon-only does not carry this action. <strong>19</strong> only works with a pointer, <strong>20</strong> only works for buyers who were there on launch day, and <strong>13</strong> and <strong>15</strong> promise a discount the supplier has not agreed to. If the card must save the width, <strong>02</strong> from part one — the same mark plus the single word <em>Request</em> — costs nothing at all until a request is open, and 27px after. That is the price of being understood.</p>
+      </div>
+    </div>
   </section>
 
 </div>
