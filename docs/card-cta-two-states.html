@@ -345,84 +345,57 @@ body {
 
 .close--two { border-top-width: 1px; }
 
-/* ── Part three: the same mark, off the actions row ─────────── */
-/* One base rule so the ten differ only in where they sit and how big they are. */
+/* ── Part three: a mark per placement, off the actions row ──── */
 .pc-mediabtn, .pc-bandic, .pc-bandedge, .pc-nameic, .pc-betweenbtn,
 .pc-fab, .pc-supic, .pc-revealbtn, .pc-save--ask {
   display: inline-flex; align-items: center; justify-content: center;
-  border: none; background: none; padding: 0; cursor: default; color: var(--blue);
-  flex: 0 0 auto;
+  border: none; background: none; padding: 0; cursor: default; color: var(--blue); flex: 0 0 auto;
 }
 .pc-mediabtn svg, .pc-bandic svg, .pc-bandedge svg, .pc-nameic svg, .pc-betweenbtn svg,
 .pc-fab svg, .pc-supic svg, .pc-revealbtn svg, .pc-save--ask svg { display: block; }
 .is-done { color: #157a41; }
 
 /* 21 — floating on the image, opposite the wholesale tag. */
-.pc-mediabtn {
-  position: absolute; bottom: 9px; inset-inline-end: 9px; width: 32px; height: 32px;
-  border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(2,26,55,.18);
-}
+.pc-mediabtn { position: absolute; bottom: 9px; inset-inline-end: 9px; width: 32px; height: 32px; border-radius: 10px; background: #fff; box-shadow: 0 2px 8px rgba(2,26,55,.18); }
 .pc-mediabtn.is-done { background: #e9fdee; }
-
 /* 22 — in the utility stack, styled exactly like the bookmark beside it. */
 .pc-save--ask { position: absolute; top: 8px; inset-inline-end: 42px; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,.85); }
-
 /* 23 / 27 — a ghost mark inside the band, after the amount. */
 .pc-bandic { width: 24px; height: 24px; border-radius: 6px; margin-inline-start: 2px; }
 .pc-bandic--tier { color: #a35c00; }
 .pc-bandic--tier.is-done { color: #157a41; }
-
 /* 24 — outside the band, so it reads as a control rather than as type. */
-.pc-bandedge {
-  width: 38px; align-self: stretch; border: 1.5px solid var(--blue); border-radius: 8px; background: #fff;
-}
+.pc-bandedge { width: 38px; align-self: stretch; border: 1.5px solid var(--blue); border-radius: 8px; background: #fff; }
 .pc-bandedge.is-done { border-color: #157a41; }
-
 /* 25 — closing the title line. */
 .pc-namerow { display: flex; align-items: flex-start; gap: 8px; }
 .pc-namerow .pc-name { flex: 1 1 auto; min-width: 0; }
 .pc-nameic { width: 24px; height: 24px; border-radius: 6px; margin-top: 1px; }
-
 /* 26 — straddling the divider between the two bands. */
 .pc--between .pc-body { gap: 10px; }
 .pc-between { height: 0; display: flex; justify-content: center; position: relative; z-index: 2; }
-.pc-betweenbtn {
-  width: 30px; height: 30px; border-radius: 50%; background: #fff;
-  border: 1.5px solid var(--blue); margin-top: -15px;
-  box-shadow: 0 1px 4px rgba(2,26,55,.12);
-}
+.pc-betweenbtn { width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 1.5px solid var(--blue); margin-top: -15px; box-shadow: 0 1px 4px rgba(2,26,55,.12); }
 .pc-betweenbtn.is-done { border-color: #157a41; }
-
 /* 28 — overlapping the seam between image and body. */
 .pc--fab { overflow: visible; }
 .pc--fab .pc-media { border-radius: 14px 14px 0 0; }
-.pc-fab {
-  position: absolute; bottom: -20px; inset-inline-end: 14px; width: 40px; height: 40px;
-  border-radius: 50%; background: var(--blue); color: #fff;
-  box-shadow: 0 4px 12px rgba(2,109,189,.38); z-index: 3;
-}
+.pc-fab { position: absolute; bottom: -20px; inset-inline-end: 14px; width: 40px; height: 40px; border-radius: 50%; background: var(--blue); color: #fff; box-shadow: 0 4px 12px rgba(2,109,189,.38); z-index: 3; }
 .pc-fab.is-done { background: #157a41; color: #fff; box-shadow: 0 4px 12px rgba(21,122,65,.34); }
-
 /* 29 — following the supplier's name. */
-.pc-supplier--ask { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
-.pc-supic { width: 22px; height: 22px; border-radius: 6px; }
-
+/* Inline, so the supplier name keeps the line it already had. */
+.pc-supplier--ask { text-align: end; }
+.pc-supic { width: 22px; height: 22px; border-radius: 6px; vertical-align: -6px; margin-inline-start: 5px; }
 /* 30 — nothing until the pointer arrives. */
-.pc-reveal {
-  position: absolute; inset: 0; background: rgba(2,26,55,.34); display: flex;
-  flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-}
+.pc-reveal { position: absolute; inset: 0; background: rgba(2,26,55,.34); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
 .pc-revealbtn { width: 46px; height: 46px; border-radius: 50%; background: #fff; box-shadow: 0 4px 14px rgba(2,26,55,.3); }
 .pc-reveal-cap { font-size: 10.5px; font-weight: 600; color: #fff; letter-spacing: .03em; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
 
-/* The fixed-mark note at the head of part three. */
-.glyphrow--fixed { border-bottom: none; padding-bottom: 0; margin: 26px 0 0; min-width: 0; flex-wrap: wrap; gap: 16px 28px; }
-.glyphbig--plain {
-  width: 52px; height: 52px; border-radius: 12px; border: 1.5px solid var(--rule);
-  background: var(--panel); color: var(--accent);
-  display: inline-flex; align-items: center; justify-content: center;
-}
-.glyphrow--fixed .glyphcell:last-child .glyphbig--plain { color: var(--good); border-color: var(--good); }
+.glyphbig--plain { width: 52px; height: 52px; border-radius: 12px; border: 1.5px solid var(--accent); background: var(--panel); color: var(--accent); display: inline-flex; align-items: center; justify-content: center; }
+.glyphbig--done { border-color: var(--good); color: var(--good); }
+.glyphcap i { display: block; font-style: normal; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); margin-top: 2px; }
+.glyphcap--after i { color: var(--delta); }
+.opt-why { font-size: 13.5px; color: var(--ink-2); border-inline-start: 2px solid var(--rule); padding-inline-start: 12px; }
+.opt-why b { color: var(--ink); font-weight: 600; }
 
 /* ── Comparison table ───────────────────────────────────────── */
 .close { padding-top: 56px; border-top: 2px solid var(--ink); margin-top: 46px; }
@@ -473,14 +446,14 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
   <header class="mast">
     <p class="eyebrow">HIGHBASE · Special Price Request &amp; RFQ</p>
     <h1>One slot,<br><b>two states</b>.</h1>
-    <p class="lede">The entry point on the product card is not one control — it is a control with a life. Before, it invites the buyer to ask. After, the same slot has to say a request is open, and give them the way back to it (AC-1.5). Thirty options, each drawn in both states — ten placements first, then ten icon-only marks that must do the same job without a word, then the best of those marks moved to ten other homes on the card.</p>
+    <p class="lede">The entry point on the product card is not one control — it is a control with a life. Before, it invites the buyer to ask. After, the same slot has to say a request is open, and give them the way back to it (AC-1.5). Thirty options, each drawn in both states — ten placements first, then ten icon-only marks that must do the same job without a word, then ten more homes on the card, each with the mark its neighbours call for.</p>
     <p class="lede">What separates them is not where the button sits. It is whether the placement can still carry <b>SPR-2608-0001</b> once the buyer has asked — because the reference is the one thing that says <em>which</em> request is open, and most of these have nowhere to put it.</p>
     <div class="legend">
       <span><i class="swatch swatch--delta"></i> Amber marks the requested state</span>
       <span><i class="swatch swatch--ship"></i> Already switchable in the prototype</span>
       <span>Both states drawn at the 246px grid track</span>
       <span><a class="jump" href="#icon-only">Icon-only marks ↓</a></span>
-      <span><a class="jump" href="#icon-elsewhere">The mark, elsewhere ↓</a></span>
+      <span><a class="jump" href="#icon-elsewhere">A mark per placement ↓</a></span>
     </div>
   </header>
 
@@ -2082,14 +2055,9 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   <section class="partbreak" id="icon-elsewhere">
     <p class="eyebrow">Part three · 21–30</p>
-    <h2>The same mark, <b>ten other homes</b></h2>
-    <p class="lede">Part two held the placement still and varied the mark. This holds the mark still — 17, the bubble, whose requested state was the only one that explained itself — and moves it off the actions row entirely. Nothing here touches Add to cart.</p>
-    <p class="lede">What changes is what the neighbours say about it. A mark on the photo inherits the meaning of the save control beside it; a mark in the tier band inherits the sentence about volume pricing; a mark on the supplier line inherits the supplier. Placement is not decoration here — it is most of the label the icon does not have.</p>
-    
-      <div class="glyphrow glyphrow--fixed">
-        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></div><span class="glyphcap">Ask — the mark held fixed from 17</span></div>
-        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></div><span class="glyphcap glyphcap--after">Request open</span></div>
-      </div>
+    <h2>Ten other homes, <b>ten different marks</b></h2>
+    <p class="lede">Part two held the placement still and varied the mark. This moves the mark off the actions row entirely — nothing here touches Add to cart — and gives every placement the glyph its neighbours actually call for.</p>
+    <p class="lede">That pairing is the point. An unlabelled mark borrows its meaning from what sits beside it, so the same glyph is not equally right everywhere: a percent survives the 16px utility stack where a compound mark would dissolve; an envelope is only honest on the line that names the supplier; scissors are only defensible in a band that already promises a lower price. Each option says which mark it took and why, and each requested state stays inside that mark’s own family.</p>
   </section>
 
   <section class="opt" id="p21">
@@ -2097,10 +2065,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">21</span>
       <h3>On the photo</h3>
       <p class="opt-where">Media · trailing corner</p>
-      <p>A floating white button on the image, diagonally opposite the Wholesale tag. It sits above every price on the card.</p>
+      <p>A floating white button on the image, diagonally opposite the Wholesale tag, carrying the plain price tag.</p>
+      <p class="opt-why"><b>Why this mark.</b> A tag on a photograph is a price sticker — the one place the literal object reads as itself.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>Costs no height, and it is the first thing in the card’s reading order — a buyer meets the ask before they meet the number that provokes it.</span></div>
-        <div class="con"><span class="k">−</span><span>Everything else on that image is either a label or a utility. A commerce action floating on a photo reads as “save”, “compare” or “zoom” before it reads as “negotiate”.</span></div>
+        <div class="pro"><span class="k">+</span><span>Costs no height, and it is the first thing in the card’s reading order — a buyer meets the ask before the number that provokes it.</span></div>
+        <div class="con"><span class="k">−</span><span>Everything else on that image is a label or a utility. A commerce action floating on a photo reads as “save”, “compare” or “zoom” before it reads as “negotiate”.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Image</span>
@@ -2109,6 +2078,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></div><span class="glyphcap">Price tag<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="m15.6 18.3 2.2 2.2 3.6-3.9"/></svg></div><span class="glyphcap glyphcap--after">Tag with a tick<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2119,7 +2093,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <button type="button" class="pc-mediabtn" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button>
+          <button type="button" class="pc-mediabtn" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></svg></button>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2141,7 +2115,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <button type="button" class="pc-mediabtn is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button>
+          <button type="button" class="pc-mediabtn is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="m15.6 18.3 2.2 2.2 3.6-3.9"/></svg></button>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2162,10 +2136,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">22</span>
       <h3>Next to the bookmark</h3>
       <p class="opt-where">Media · with the utilities</p>
-      <p>A second chip in the same stack as the save control, styled identically so the two read as one group of card tools.</p>
+      <p>A second chip in the same stack as the save control, styled identically, carrying a percent.</p>
+      <p class="opt-why"><b>Why this mark.</b> In a utility stack the mark has to survive at 16px with no context — only the flattest glyph on the board does.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>Uses a pattern the card already has, so nothing new is invented and the two controls share one visual rule.</span></div>
-        <div class="con"><span class="k">−</span><span>Grouping it with <em>save</em> tells the buyer this is a bookmark-class action — private, reversible, no consequence. A request goes to a supplier and starts a clock. Wrong neighbourhood.</span></div>
+        <div class="pro"><span class="k">+</span><span>Uses a pattern the card already has, and the percent is the only mark here that stays legible at bookmark size.</span></div>
+        <div class="con"><span class="k">−</span><span>Grouping it with <em>save</em> says this is a bookmark-class action — private, reversible, no consequence. A request goes to a supplier and starts a clock. Wrong neighbourhood, and the percent promises a discount nobody agreed to.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Image</span>
@@ -2174,6 +2149,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4"/><path d="M15.6 8.4 8.4 15.6"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></div><span class="glyphcap">Percent<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4"/><path d="M15.6 8.4 8.4 15.6"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/><circle cx="20" cy="4.4" r="2.6" fill="#fe8e00" stroke="none"/></svg></div><span class="glyphcap glyphcap--after">Percent with a dot<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2184,7 +2164,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <button type="button" class="pc-save pc-save--ask" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button>
+          <button type="button" class="pc-save pc-save--ask" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4"/><path d="M15.6 8.4 8.4 15.6"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/></svg></button>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2206,7 +2186,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <button type="button" class="pc-save pc-save--ask is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button>
+          <button type="button" class="pc-save pc-save--ask is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4"/><path d="M15.6 8.4 8.4 15.6"/><circle cx="9.3" cy="9.3" r="1.3"/><circle cx="14.7" cy="14.7" r="1.3"/><circle cx="20" cy="4.4" r="2.6" fill="#fe8e00" stroke="none"/></svg></button>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2227,10 +2207,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">23</span>
       <h3>Inside the price band</h3>
       <p class="opt-where">Price band · after the amount</p>
-      <p>A ghost icon riding inside the tinted band, immediately after the number.</p>
+      <p>A ghost tag-and-arrow riding inside the tinted band, immediately after the amount.</p>
+      <p class="opt-why"><b>Why this mark.</b> Sitting against the number, the mark can afford to name a direction: this price, downward.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>The tightest coupling on the board — the mark is inside the same box as the price it disputes, and it costs nothing in height.</span></div>
-        <div class="con"><span class="k">−</span><span>The band is a read-only object everywhere else in the product. Putting a control inside it makes the whole band ambiguous, and at 17px against a tint it is the lowest-contrast target here.</span></div>
+        <div class="pro"><span class="k">+</span><span>The tightest coupling on the board — the mark is inside the same box as the price it disputes, and the arrow says which way.</span></div>
+        <div class="con"><span class="k">−</span><span>The band is read-only everywhere else in the product. A control inside it makes the whole band ambiguous, and a two-part mark at 17px against a tint is the lowest-contrast target here.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Price</span>
@@ -2239,6 +2220,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="M18.6 14.4v6.2"/><path d="m15.9 18 2.7 2.7 2.7-2.7"/></svg></div><span class="glyphcap">Tag with a down arrow<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></div><span class="glyphcap glyphcap--after">Eye<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2252,7 +2238,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
-          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span><button type="button" class="pc-bandic" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button></div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span><button type="button" class="pc-bandic" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="translate(-1.4,-1.6) scale(.82)"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/></g><path d="M18.6 14.4v6.2"/><path d="m15.9 18 2.7 2.7 2.7-2.7"/></svg></button></div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
@@ -2273,7 +2259,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
-          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span><button type="button" class="pc-bandic is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button></div>
+          <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span><button type="button" class="pc-bandic is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.2 12S5.6 5.9 12 5.9 21.8 12 21.8 12 18.4 18.1 12 18.1 2.2 12 2.2 12Z"/><circle cx="12" cy="12" r="2.7"/></svg></button></div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
@@ -2290,10 +2276,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">24</span>
       <h3>Welded to the band</h3>
       <p class="opt-where">Price row · square button</p>
-      <p>The unlabelled cousin of option 03: the band takes the width it needs and a square icon button holds the end of the row.</p>
+      <p>The band takes the width it needs and a square button holds the end of the row, carrying the exchange arrows.</p>
+      <p class="opt-why"><b>Why this mark.</b> Outside the band the mark is unambiguously a control, so it can carry the more abstract idea: back and forth.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>Reads unmistakably as a control because it sits outside the band rather than inside it, and stays beside the number.</span></div>
-        <div class="con"><span class="k">−</span><span>It does not wrap where 03 does — 38px of button fits where a labelled one did not — but the band still surrenders enough width that <em>List price</em> breaks over two lines, and the card grows 10px for it.</span></div>
+        <div class="pro"><span class="k">+</span><span>Reads as a control because it sits outside the band rather than inside it, and the arrows describe the counter-offer loop rather than promising a discount.</span></div>
+        <div class="con"><span class="k">−</span><span>Exchange arrows are also the mark for sort, swap and sync. And the band still surrenders enough width that <em>List price</em> breaks over two lines.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Price</span>
@@ -2302,6 +2289,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h15.1"/><path d="m14.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/></svg></div><span class="glyphcap">Two-way arrows<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h13"/><path d="m12.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/><circle cx="20.2" cy="5.2" r="2.4" fill="#fe8e00" stroke="none"/></svg></div><span class="glyphcap glyphcap--after">Arrows with a dot<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2317,7 +2309,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-bandrow">
             <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
-            <button type="button" class="pc-bandedge" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button>
+            <button type="button" class="pc-bandedge" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h15.1"/><path d="m14.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/></svg></button>
           </div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
@@ -2341,7 +2333,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-bandrow">
             <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
-            <button type="button" class="pc-bandedge is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button>
+            <button type="button" class="pc-bandedge is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.2 8.4h13"/><path d="m12.9 5 3.4 3.4-3.4 3.4"/><path d="M20.8 15.6H5.7"/><path d="M9.1 12.2 5.7 15.6l3.4 3.4"/><circle cx="20.2" cy="5.2" r="2.4" fill="#fe8e00" stroke="none"/></svg></button>
           </div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
@@ -2359,10 +2351,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">25</span>
       <h3>On the title line</h3>
       <p class="opt-where">Product name · end of the row</p>
-      <p>The mark closes the product name, the way a link or an info affordance often does.</p>
+      <p>A speech bubble closes the product name, the way an info affordance often does.</p>
+      <p class="opt-why"><b>Why this mark.</b> Attached to the product’s name rather than to any one price, the honest verb is <em>ask</em>, not <em>discount</em>.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>Scannable down a column of cards because it always lands at a predictable x, and it belongs to the product rather than to any one price.</span></div>
-        <div class="con"><span class="k">−</span><span>It reads as “more about this product”. Next to a two-line title it also floats without an anchor, and on a long name it competes with the wrap.</span></div>
+        <div class="pro"><span class="k">+</span><span>Lands at a predictable x down a column of cards, and the bubble’s requested state — a dot — is the clearest “there is a thread here” on the board.</span></div>
+        <div class="con"><span class="k">−</span><span>Next to a two-line title it floats without an anchor, and beside a name it still reads as “more about this product”.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Name</span>
@@ -2371,6 +2364,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></div><span class="glyphcap">Bubble, price falling<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></div><span class="glyphcap glyphcap--after">Bubble with a dot<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2422,10 +2420,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">26</span>
       <h3>Between the two prices</h3>
       <p class="opt-where">On the divider · circular</p>
-      <p>A small circular button straddling the gap between the list price and the tier band, overlapping both.</p>
+      <p>A circular button straddling the gap between list price and tier band, overlapping both.</p>
+      <p class="opt-why"><b>Why this mark.</b> The one placement whose meaning is spatial, so the mark draws the space: two arrows closing on a line.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>Physically between the price you are offered and the price you could get — which is exactly the gap the feature exists to close.</span></div>
-        <div class="con"><span class="k">−</span><span>It breaks the price ladder in half. On a product with no tiers there is no gap to sit in, so the control has no home and the layout needs a fallback.</span></div>
+        <div class="pro"><span class="k">+</span><span>The mark and the position say the same thing — close the distance between the price you are offered and the price you could get.</span></div>
+        <div class="con"><span class="k">−</span><span>It breaks the price ladder in half, and on a product with no tiers there is no gap to sit in, so the control has no home at all.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Price</span>
@@ -2434,6 +2433,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 12h17.2"/><path d="M12 2.6v5.2"/><path d="m9 5.4 3-2.8 3 2.8"/><path d="M12 21.4v-5.2"/><path d="m9 18.6 3 2.8 3-2.8"/></svg></div><span class="glyphcap">Arrows closing a gap<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 12h17.2"/><path d="M12 4.4v4"/><path d="m9.4 6.6 2.6-2.2 2.6 2.2"/><circle cx="12" cy="18.4" r="2.4" fill="currentColor" stroke="none"/></svg></div><span class="glyphcap glyphcap--after">Gap closed<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2448,7 +2452,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
-          <div class="pc-between"><button type="button" class="pc-betweenbtn" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button></div>
+          <div class="pc-between"><button type="button" class="pc-betweenbtn" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 12h17.2"/><path d="M12 2.6v5.2"/><path d="m9 5.4 3-2.8 3 2.8"/><path d="M12 21.4v-5.2"/><path d="m9 18.6 3 2.8 3-2.8"/></svg></button></div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
@@ -2470,7 +2474,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
-          <div class="pc-between"><button type="button" class="pc-betweenbtn is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button></div>
+          <div class="pc-between"><button type="button" class="pc-betweenbtn is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.4 12h17.2"/><path d="M12 4.4v4"/><path d="m9.4 6.6 2.6-2.2 2.6 2.2"/><circle cx="12" cy="18.4" r="2.4" fill="currentColor" stroke="none"/></svg></button></div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
@@ -2487,10 +2491,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">27</span>
       <h3>In the tier band</h3>
       <p class="opt-where">Tier band · after the amount</p>
-      <p>In the orange band, where the card is already saying “there is a better price than the one above”.</p>
+      <p>Scissors in the orange band, where the card is already talking about a better price than the one above.</p>
+      <p class="opt-why"><b>Why this mark.</b> The band already says a lower price exists. The mark can be blunt about it.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>The only placement whose surrounding copy already frames the ask — the buyer is reading about volume pricing when they meet it.</span></div>
-        <div class="con"><span class="k">−</span><span>A third of the catalogue has no tiers. The entry point would vanish on exactly the products where a special price matters most.</span></div>
+        <div class="pro"><span class="k">+</span><span>The only placement whose surrounding copy frames the ask before the buyer meets it — they are reading about volume pricing when the mark appears.</span></div>
+        <div class="con"><span class="k">−</span><span>Scissors promise a cut the supplier has not agreed to, and a third of the catalogue has no tier band for them to sit in.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Price</span>
@@ -2499,6 +2504,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.2" cy="6.2" r="2.6"/><circle cx="6.2" cy="17.8" r="2.6"/><path d="M8.3 7.9 20.4 19.4"/><path d="M20.4 4.6 8.3 16.1"/></svg></div><span class="glyphcap">Scissors<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.1"/><path d="m8 12.2 2.7 2.7L16.2 9"/></svg></div><span class="glyphcap glyphcap--after">Tick<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2513,7 +2523,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
-          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span><button type="button" class="pc-bandic pc-bandic--tier" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span><button type="button" class="pc-bandic pc-bandic--tier" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6.2" cy="6.2" r="2.6"/><circle cx="6.2" cy="17.8" r="2.6"/><path d="M8.3 7.9 20.4 19.4"/><path d="M20.4 4.6 8.3 16.1"/></svg></button></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
         </div>
@@ -2534,7 +2544,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
-          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span><button type="button" class="pc-bandic pc-bandic--tier is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button></div>
+          <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span><button type="button" class="pc-bandic pc-bandic--tier is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.1"/><path d="m8 12.2 2.7 2.7L16.2 9"/></svg></button></div>
           <div class="pc-supplier">Supplier: <b>Gulf Distribution Co.</b></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
         </div>
@@ -2550,10 +2560,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">28</span>
       <h3>Floating on the corner</h3>
       <p class="opt-where">Card edge · overlapping</p>
-      <p>A filled circular button straddling the boundary between the image and the body, in the pattern of a floating action button.</p>
+      <p>A filled circular button straddling the seam between image and body, carrying a paper plane — and a clock once the request is out.</p>
+      <p class="opt-why"><b>Why this mark.</b> A floating action button is a <em>send</em> affordance in every app that uses one. The plane matches the gesture.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>The highest-contrast, largest and most obviously-a-control option in part three. Nobody misses it.</span></div>
-        <div class="con"><span class="k">−</span><span>It overlaps the card it belongs to, obscures the image edge, and imports a mobile app pattern into a dense B2B grid. Twenty of them in a viewport is a lot of blue.</span></div>
+        <div class="pro"><span class="k">+</span><span>The highest-contrast, largest, most obviously-a-control option here, and the clock is the only requested state on the board that says <em>waiting on them</em> rather than <em>you did a thing</em>.</span></div>
+        <div class="con"><span class="k">−</span><span>It overlaps the card it belongs to, obscures the image edge, and imports a mobile pattern into a dense B2B grid. Twenty in a viewport is a lot of blue.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Card</span>
@@ -2562,6 +2573,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.4 2.6 10.6 13.4"/><path d="M21.4 2.6 14.5 21.4l-3.9-8-8-3.9Z"/></svg></div><span class="glyphcap">Paper plane<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.1"/><path d="M12 6.9V12l3.4 2"/></svg></div><span class="glyphcap glyphcap--after">Clock<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2572,7 +2588,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <button type="button" class="pc-fab" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button>
+          <button type="button" class="pc-fab" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.4 2.6 10.6 13.4"/><path d="M21.4 2.6 14.5 21.4l-3.9-8-8-3.9Z"/></svg></button>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2594,7 +2610,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <button type="button" class="pc-fab is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button>
+          <button type="button" class="pc-fab is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.1"/><path d="M12 6.9V12l3.4 2"/></svg></button>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2615,18 +2631,24 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">29</span>
       <h3>On the supplier line</h3>
       <p class="opt-where">Supplier · after the name</p>
-      <p>The mark follows the supplier’s name, so the gesture reads as “ask <em>them</em>”.</p>
+      <p>A sealed envelope follows the supplier’s name; once a request is open it is an opened one.</p>
+      <p class="opt-why"><b>Why this mark.</b> The request is a message to a named company, so the mark is the one for messaging a named company.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>Semantically the most accurate placement on the board: the request goes to a named company, and here the control is attached to that company.</span></div>
-        <div class="con"><span class="k">−</span><span>The supplier line is the smallest, palest, most-ignored text on the card. Correct meaning, worst possible real estate.</span></div>
+        <div class="pro"><span class="k">+</span><span>Semantically the most accurate pairing on the board — mark, position and meaning all agree — and sealed-to-opened is a state change anyone reads without instruction.</span></div>
+        <div class="con"><span class="k">−</span><span>The supplier line is the smallest, palest, most-ignored text on the card — and at the 246px track it has no room: the mark cannot share the line with the name and drops beneath it, orphaned, for 22px. Correct meaning, worst possible real estate.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Supplier</span>
-        <span class="chip chip--h">+19px card height</span>
+        <span class="chip chip--h">+22px card height</span>
       </div>
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="4.9" width="18.8" height="14.2" rx="2.2"/><path d="m3.4 6.4 8.6 6.2 8.6-6.2"/></svg></div><span class="glyphcap">Sealed envelope<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.6 10.3 12 3.4l9.4 6.9v6.6a2.2 2.2 0 0 1-2.2 2.2H4.8a2.2 2.2 0 0 1-2.2-2.2Z"/><path d="m2.6 10.3 8.1 5.4a2.3 2.3 0 0 0 2.6 0l8.1-5.4"/></svg></div><span class="glyphcap glyphcap--after">Opened envelope<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
@@ -2642,7 +2664,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
-          <div class="pc-supplier pc-supplier--ask">Supplier: <b>Gulf Distribution Co.</b><button type="button" class="pc-supic" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button></div>
+          <div class="pc-supplier pc-supplier--ask">Supplier: <b>Gulf Distribution Co.</b><button type="button" class="pc-supic" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.6" y="4.9" width="18.8" height="14.2" rx="2.2"/><path d="m3.4 6.4 8.6 6.2 8.6-6.2"/></svg></button></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
         </div>
       </div>
@@ -2663,7 +2685,7 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
           <div class="pc-band"><span class="pc-band-l">List price</span><span class="pc-band-v"><small>BHD</small>14.800</span></div>
           <div class="pc-band pc-band--tier"><span class="pc-band-l">40+ units</span><span class="pc-band-v"><small>BHD</small>14.200</span></div>
-          <div class="pc-supplier pc-supplier--ask">Supplier: <b>Gulf Distribution Co.</b><button type="button" class="pc-supic is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button></div>
+          <div class="pc-supplier pc-supplier--ask">Supplier: <b>Gulf Distribution Co.</b><button type="button" class="pc-supic is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.6 10.3 12 3.4l9.4 6.9v6.6a2.2 2.2 0 0 1-2.2 2.2H4.8a2.2 2.2 0 0 1-2.2-2.2Z"/><path d="m2.6 10.3 8.1 5.4a2.3 2.3 0 0 0 2.6 0l8.1-5.4"/></svg></button></div>
           <div class="pc-actions"><button type="button" class="pc-btn pc-btn--primary pc-btn--block" tabindex="-1"><span aria-hidden="true">🛒</span>Add to Cart</button></div>
         </div>
       </div>
@@ -2678,10 +2700,11 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
       <span class="opt-no">30</span>
       <h3>Revealed on hover</h3>
       <p class="opt-where">Media · centred, on demand</p>
-      <p>Nothing until the pointer arrives, then a large mark centred on the image over a scrim.</p>
+      <p>Nothing until the pointer arrives, then a large tag-with-a-percent centred on the image, filling in once a request is open.</p>
+      <p class="opt-why"><b>Why this mark.</b> At 22px on a scrim, a mark can afford detail no other placement here can — so it carries both subject and kind.</p>
       <div class="tradeoff">
-        <div class="pro"><span class="k">+</span><span>The calmest grid of the twenty — no persistent chrome at all — and the biggest target once it appears.</span></div>
-        <div class="con"><span class="k">−</span><span>It does not exist on a phone, and it does not exist for a buyer who never hovers a given card. An entry point that only appears once you are already interested cannot create interest.</span></div>
+        <div class="pro"><span class="k">+</span><span>The calmest grid of the thirty — no persistent chrome at all — and the only placement big enough to render a compound mark honestly.</span></div>
+        <div class="con"><span class="k">−</span><span>It does not exist on a phone, and it does not exist for a buyer who never hovers a given card. An entry point that appears only once you are interested cannot create interest.</span></div>
       </div>
       <div class="meta">
         <span class="chip chip--new">Image</span>
@@ -2690,17 +2713,22 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     </div>
 
     <div class="plate">
+      
+      <div class="glyphrow">
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/><path d="M14.6 9.4 10 14"/><circle cx="10.5" cy="9.9" r=".95"/><circle cx="14.1" cy="13.5" r=".95"/></svg></div><span class="glyphcap">Tag with a percent<i>the ask</i></span></div>
+        <div class="glyphcell"><div class="glyphbig glyphbig--plain glyphbig--done"><svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><g fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M15.4 10.2 10.8 14.8"/></g><circle cx="11.2" cy="10.6" r="1" fill="#fff" stroke="none"/><circle cx="14.9" cy="14.3" r="1" fill="#fff" stroke="none"/></svg></div><span class="glyphcap glyphcap--after">The same tag, filled<i>request open</i></span></div>
+      </div>
       <div class="pair">
         <div class="slot slot--before">
           <span class="slot-label">Before · no request yet</span>
           <div class="stage" data-state="30-before">
-      <div class="pc ">
+      <div class="pc pc--reveal">
         <div class="pc-media">
           <span class="pc-unit">case</span>
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <div class="pc-reveal"><button type="button" class="pc-revealbtn" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><path d="M12 7.8v6"/><path d="m9.4 11.3 2.6 2.6 2.6-2.6"/></svg></button><span class="pc-reveal-cap">shown on hover and focus</span></div>
+          <div class="pc-reveal"><button type="button" class="pc-revealbtn" tabindex="-1" aria-label="Request special price"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><circle cx="7.1" cy="7.1" r="1.25"/><path d="M14.6 9.4 10 14"/><circle cx="10.5" cy="9.9" r=".95"/><circle cx="14.1" cy="13.5" r=".95"/></svg></button><span class="pc-reveal-cap">shown on hover and focus</span></div>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2716,13 +2744,13 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
         <div class="slot slot--after">
           <span class="slot-label">After · request open</span>
           <div class="stage" data-state="30-after">
-      <div class="pc ">
+      <div class="pc pc--reveal">
         <div class="pc-media">
           <span class="pc-unit">case</span>
           <button type="button" class="pc-save" tabindex="-1" aria-hidden="true">🔖</button>
           <span aria-hidden="true">🫒</span>
           <span class="pc-tag"><span aria-hidden="true">📦</span>Wholesale</span>
-          <div class="pc-reveal"><button type="button" class="pc-revealbtn is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.6a7.9 7.9 0 0 1-7.9 7.9H8.4L3.4 22l1.3-4.1A7.9 7.9 0 1 1 21 11.6Z"/><circle cx="12" cy="11.5" r="1.6" fill="currentColor" stroke="none"/></svg></button><span class="pc-reveal-cap">shown on hover and focus</span></div>
+          <div class="pc-reveal"><button type="button" class="pc-revealbtn is-done" tabindex="-1" aria-label="View my request"><svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M11.4 2.2H4.3a2.1 2.1 0 0 0-2.1 2.1v7.1a2.1 2.1 0 0 0 .6 1.5l8.2 8.2a2.1 2.1 0 0 0 3 0l7.1-7.1a2.1 2.1 0 0 0 0-3l-8.2-8.2a2.1 2.1 0 0 0-1.5-.6Z"/><g fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round"><path d="M15.4 10.2 10.8 14.8"/></g><circle cx="11.2" cy="10.6" r="1" fill="#fff" stroke="none"/><circle cx="14.9" cy="14.3" r="1" fill="#fff" stroke="none"/></svg></button><span class="pc-reveal-cap">shown on hover and focus</span></div>
         </div>
         <div class="pc-body">
           <div class="pc-name">Sunflower Cooking Oil 6×1.8L</div>
@@ -2740,24 +2768,24 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   <section class="close close--two">
     <h2>Where an unlabelled mark <b>borrows its meaning</b></h2>
-    <p>None of these carries the reference either — part two settled that, and moving the mark does not unsettle it. What moving it does change is what a buyer thinks the mark is <em>for</em> before they press it, and how likely they are to find it at all.</p>
+    <p>None of these carries the reference — part two settled that, and moving the mark does not unsettle it. What the pairing changes is what a buyer thinks the mark is <em>for</em> before they press it, and whether they find it at all.</p>
 
     <div class="tablewrap">
       <table>
         <thead>
-          <tr><th>Placement</th><th>Sits with</th><th>Borrows the meaning of</th><th>Found while scanning</th><th>Survives no tiers</th></tr>
+          <tr><th>Placement</th><th>Its mark</th><th>Requested</th><th>Borrows the meaning of</th><th>Found while scanning</th><th>Survives no tiers</th></tr>
         </thead>
         <tbody>
-          <tr><td><span class="no">21</span>On the photo</td><td>Image</td><td>Save, compare, zoom</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">22</span>Next to the bookmark</td><td>Image</td><td>Bookmarking — private, reversible</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">23</span>Inside the price band</td><td>Price</td><td>The band, which is read-only</td><td><span class="dot w-high">Barely</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">24</span>Welded to the band</td><td>Price</td><td>A control beside a number</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">25</span>On the title line</td><td>Name</td><td>Info, details, more about this</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">26</span>Between the two prices</td><td>Price</td><td>The gap between offered and possible</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-high">No</span></td></tr>
-          <tr><td><span class="no">27</span>In the tier band</td><td>Price</td><td>Volume pricing — the right sentence</td><td><span class="dot w-high">Barely</span></td><td><span class="dot w-high">No</span></td></tr>
-          <tr><td><span class="no">28</span>Floating on the corner</td><td>Card</td><td>A mobile app’s primary action</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">29</span>On the supplier line</td><td>Supplier</td><td>The named company — accurate</td><td><span class="dot w-high">No</span></td><td><span class="dot w-low">Yes</span></td></tr>
-          <tr><td><span class="no">30</span>Revealed on hover</td><td>Image</td><td>Nothing, until you hover</td><td><span class="dot w-high">No</span></td><td><span class="dot w-low">Yes</span></td></tr>
+          <tr><td><span class="no">21</span>On the photo</td><td>Price tag</td><td>Tag with a tick</td><td>Save, compare, zoom</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">22</span>Next to the bookmark</td><td>Percent</td><td>Percent with a dot</td><td>Bookmarking — private, reversible</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">23</span>Inside the price band</td><td>Tag with a down arrow</td><td>Eye</td><td>The band, which is read-only</td><td><span class="dot w-high">Barely</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">24</span>Welded to the band</td><td>Two-way arrows</td><td>Arrows with a dot</td><td>A control beside a number</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">25</span>On the title line</td><td>Bubble, price falling</td><td>Bubble with a dot</td><td>Info, details, more about this</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">26</span>Between the two prices</td><td>Arrows closing a gap</td><td>Gap closed</td><td>The gap between offered and possible</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">27</span>In the tier band</td><td>Scissors</td><td>Tick</td><td>Volume pricing — the right sentence</td><td><span class="dot w-high">Barely</span></td><td><span class="dot w-high">No</span></td></tr>
+          <tr><td><span class="no">28</span>Floating on the corner</td><td>Paper plane</td><td>Clock</td><td>A mobile app’s send action</td><td><span class="dot w-mid">Yes</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">29</span>On the supplier line</td><td>Sealed envelope</td><td>Opened envelope</td><td>Writing to the named company</td><td><span class="dot w-high">No</span></td><td><span class="dot w-mid">Yes</span></td></tr>
+          <tr><td><span class="no">30</span>Revealed on hover</td><td>Tag with a percent</td><td>The same tag, filled</td><td>Nothing, until you hover</td><td><span class="dot w-high">No</span></td><td><span class="dot w-mid">Yes</span></td></tr>
         </tbody>
       </table>
     </div>
@@ -2765,15 +2793,15 @@ td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
     <div class="rec">
       <div class="reccard reccard--pick">
         <h4>Best of these ten</h4>
-        <p><strong>24 — welded to the band.</strong> It is the only placement that reads as a control without borrowing a meaning that misleads: not a bookmark, not an info link, not a floating app button. It sits beside the number it disputes and nothing around it says otherwise. Its cost is 03’s cost — the row wraps at the narrow end of the grid.</p>
+        <p><strong>29 — envelope on the supplier line.</strong> It is the only option on the whole board where mark, position and meaning agree: the request is a message to a named company, the envelope is the mark for that, and it sits on the company’s name. Sealed becoming opened is also a state change nobody has to be taught. Its problem is real estate, not semantics — and real estate is the cheaper thing to fix.</p>
       </div>
       <div class="reccard">
-        <h4>Right idea, wrong real estate</h4>
-        <p><strong>29</strong> is the most accurate placement anyone could pick — the request goes to a named supplier, and here the mark is attached to that name. It is also on the palest, smallest line of the card. And <strong>27</strong> has the perfect surrounding sentence but disappears on every product without tiers.</p>
+        <h4>The one worth stealing</h4>
+        <p><strong>28’s clock.</strong> Every other requested state on the board says “you did a thing” — a fill, a tick, a dot. The clock says <em>waiting on them</em>, which is the actual state of an open request and the thing a buyer returning to the card wants to know. Worth lifting into whichever option wins.</p>
       </div>
       <div class="reccard">
         <h4>What part three settles</h4>
-        <p>Placement changes discoverability, not comprehension. The mark on the photo gets found and misread; the mark on the supplier line gets read correctly and never found. Across all twenty, the only options that a buyer both finds <em>and</em> understands are the ones carrying a word — which is the case for <strong>02</strong> and <strong>04</strong> from part one.</p>
+        <p>Placement changes discoverability; the mark changes comprehension; neither fixes the other. The tag on the photo gets found and misread. The envelope on the supplier line gets read correctly and never found. Across all thirty, the only options a buyer both finds <em>and</em> understands are the ones carrying a word — <strong>02</strong> and <strong>04</strong> from part one.</p>
       </div>
     </div>
   </section>
