@@ -321,6 +321,40 @@ body {
 /* FR-11.6 — the primary action sits on the trailing edge. */
 .hb-modal-foot .hb-primary-slot { margin-inline-start: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 
+/* ── Drawer ───────────────────────────────────────────────────────────────────
+   The same dialog, anchored to the inline-end edge and given the full height.
+   A request form is long: pinning the head and the footer keeps the item being
+   negotiated and the send button on screen however far down the buyer has
+   scrolled, and leaving the marketplace visible behind keeps them where they
+   came from. Only the body scrolls, and it contains its own overscroll so a
+   flick at the end of the form does not drag the page underneath. */
+.hb-overlay--drawer { align-items: stretch; justify-content: flex-end; padding: 0; overflow: hidden; }
+.hb-modal--drawer {
+  max-width: 560px; height: 100%; border-radius: 0;
+  /* Logical, so the rounded pair is always the edge that faces the page. */
+  border-start-start-radius: 16px; border-end-start-radius: 16px;
+  display: flex; flex-direction: column; min-height: 0;
+}
+.hb-modal--drawer .hb-modal-head { flex: 0 0 auto; }
+.hb-modal--drawer .hb-modal-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.hb-modal--drawer .hb-modal-foot { flex: 0 0 auto; }
+
+/* Slides in from whichever edge is the inline end in this direction. */
+.hb-overlay--drawer { --hb-drawer-from: 100%; }
+[dir="rtl"] .hb-overlay--drawer { --hb-drawer-from: -100%; }
+@keyframes hb-drawer-in { from { transform: translateX(var(--hb-drawer-from)); } }
+@keyframes hb-scrim-in { from { opacity: 0; } }
+.hb-overlay--drawer { animation: hb-scrim-in .18s ease-out both; }
+.hb-modal--drawer { animation: hb-drawer-in .22s cubic-bezier(.32, .72, 0, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .hb-overlay--drawer, .hb-modal--drawer { animation: none; }
+}
+/* Below the drawer's width there is no page left to see, so it takes the screen
+   and gives up the rounded edge with it. */
+@media (max-width: 560px) {
+  .hb-modal--drawer { max-width: none; border-start-start-radius: 0; border-end-start-radius: 0; }
+}
+
 /* ── Proof panel (US-16) ──────────────────────────────────────────────────── */
 .hb-proof { border: 1px solid var(--hb-line); border-radius: var(--hb-r-lg); overflow: hidden; }
 .hb-proof-viewer { background: var(--hb-navy); color: #a9c3da; min-height: 148px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12.5px; padding: 20px; }

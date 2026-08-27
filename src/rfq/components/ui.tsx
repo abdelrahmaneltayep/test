@@ -158,16 +158,29 @@ export function CheckBadge({ severity, lang }: { severity: CheckSeverity; lang: 
   return <span className={`hb-pill hb-pill--${CHECK_TONE[severity]}`}>{CHECK_WORD[severity][lang]}</span>
 }
 
-export function Modal({ title, onClose, children, footer, wide }: {
+export function Modal({ title, onClose, children, footer, wide, drawer }: {
   title: ReactNode
   onClose: () => void
   children: ReactNode
   footer?: ReactNode
   wide?: boolean
+  /**
+   * A drawer rather than a centred dialog: anchored to the inline-end edge, full height,
+   * with the head and the footer pinned and only the body scrolling. Long forms belong
+   * here — the send button stays reachable however far the buyer has scrolled, and the
+   * marketplace stays visible behind, which is where they came from. Short confirmations
+   * do not: a dialog that asks one question should sit in the middle and be dismissed.
+   */
+  drawer?: boolean
 }) {
+  const shape = drawer ? ' hb-modal--drawer' : wide ? ' hb-modal--wide' : ''
   return (
-    <div className="hb-overlay" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
-      <div className={`hb-modal${wide ? ' hb-modal--wide' : ''}`}>
+    <div
+      className={`hb-overlay${drawer ? ' hb-overlay--drawer' : ''}`}
+      role="dialog" aria-modal="true"
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div className={`hb-modal${shape}`}>
         <div className="hb-modal-head">
           <div>{title}</div>
           <button type="button" className="hb-btn hb-btn--quiet" onClick={onClose} aria-label="Close">✕</button>

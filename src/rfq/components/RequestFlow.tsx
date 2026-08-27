@@ -234,7 +234,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   // ── Confirmation (AC-7.5) ────────────────────────────────────────────────
   if (submittedRef) {
     return (
-      <Modal title={<h2 className="hb-h2">{t(lang, 'submittedTitle')}</h2>} onClose={onClose}>
+      <Modal drawer title={<h2 className="hb-h2">{t(lang, 'submittedTitle')}</h2>} onClose={onClose}>
         <div className="hb-banner hb-banner--good" style={{ marginBottom: 16 }}>
           <div>
             <strong>{t(lang, 'slaPromise')}</strong>
@@ -261,6 +261,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
 
   return (
     <Modal
+      drawer
       title={
         <h2 className="hb-h2">{t(lang, 'requestSpecialPrice')}</h2>
       }
