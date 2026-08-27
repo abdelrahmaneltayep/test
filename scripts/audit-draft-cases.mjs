@@ -29,7 +29,7 @@ await reset()
 const cta = p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Request special price/ })
 check('2.entry-on-card', await cta.count() === 1, await cta.innerText())
 await cta.click(); await p.waitForTimeout(300)
-check('2.quantity-field', await p.locator('.hb-modal-body .hb-field', { hasText: /Quantity|Requested quantity/ }).count() === 1,
+check('2.quantity-field', await p.locator('.hb-modal-body .hb-field', { hasText: /Quantity/ }).count() === 1,
   (await p.locator('.hb-modal-body .hb-label').allInnerTexts()).join(' / '))
 
 // ── §4 both routes offered together, per item ────────────────────────────────
@@ -39,7 +39,7 @@ check('4.both-routes-together', tabs.length === 2, tabs.map((t) => t.replace(/\n
 // ── §3 proof mandatory: send with a price but no attachment ──────────────────
 await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
 await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
-await p.getByRole('button', { name: /Submit Request|Send request/ }).click(); await p.waitForTimeout(250)
+await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(250)
 const blocked = await p.locator('.hb-overlay').count() === 1
 const proofErr = await txt('.hb-modal-body .hb-error')
 check('3.proof-mandatory', blocked && /document|attach|أرفق/i.test(await p.locator('.hb-modal-body').innerText()),
@@ -57,7 +57,7 @@ await p.waitForTimeout(400)
 check('3.buyer-sees-only-the-file', await p.locator('.hb-modal-body .hb-filechip').count() === 1
   && await p.locator('.hb-modal-body .hb-proof').count() === 0,
   await txt('.hb-modal-body .hb-filechip'))
-await p.getByRole('button', { name: /Submit Request|Send request/ }).click(); await p.waitForTimeout(400)
+await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
 const sentBody = await txt('.hb-overlay')
 check('3.case1-sent', /Request sent/i.test(sentBody) && /SPR-\d{4}-\d{4}/.test(sentBody), sentBody)
 
@@ -67,9 +67,9 @@ await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { n
 await p.waitForTimeout(300)
 await p.locator('.hb-modal-body [role="tab"]').nth(1).click(); await p.waitForTimeout(200)
 const rfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
-check('4.rfq-no-price', !rfqLabels.some((l) => /requested price|target price/i.test(l)), rfqLabels.join(' / '))
+check('4.rfq-no-price', !rfqLabels.some((l) => /target price/i.test(l)), rfqLabels.join(' / '))
 check('4.rfq-frequency-p2', rfqLabels.some((l) => /how often/i.test(l)), rfqLabels.join(' / '))
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(150)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(150)
 
 // ── §11 special credit: captured, shown, and Phase 2 under either reading ────
 await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Request special price/ }).click()
@@ -84,9 +84,9 @@ await p.locator('.hb-modal-body input[type="file"]').setInputFiles({
   name: 'inv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
 })
 await p.waitForTimeout(300)
-await p.getByRole('button', { name: /Submit Request|Send request/ }).click(); await p.waitForTimeout(400)
+await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
 const creditRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
 await p.locator('tbody tr', { hasText: creditRef }).click(); await p.waitForTimeout(350)
 // §3 — the invoice-reading result lands on the seller's page, where the decision is.
@@ -113,7 +113,7 @@ async function formLabels(phaseBtn) {
 
 // The PRD's cut: Case 1 is [P2] (AC-3.3), frequency is captured from P1 (AC-5.2, Q-8).
 const prd = await formLabels('P1 · PRD')
-check('11.p1-prd-cut', prd.routes === 0 && !prd.labels.some((l) => /requested price|target price/i.test(l))
+check('11.p1-prd-cut', prd.routes === 0 && !prd.labels.some((l) => /target price/i.test(l))
   && prd.labels.some((l) => /how often/i.test(l)) && prd.credit === 0,
   `routes=${prd.routes} credit=${prd.credit} · ${prd.labels.join(' / ')}`)
 
@@ -121,7 +121,7 @@ check('11.p1-prd-cut', prd.routes === 0 && !prd.labels.some((l) => /requested pr
 const draft = await formLabels('P1 · draft')
 await p.locator('.hb-modal-body [role="tab"]').nth(1).click(); await p.waitForTimeout(200)
 const draftRfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
-check('11.p1-draft-cut', draft.routes === 2 && draft.labels.some((l) => /requested price|target price/i.test(l))
+check('11.p1-draft-cut', draft.routes === 2 && draft.labels.some((l) => /target price/i.test(l))
   && !draftRfqLabels.some((l) => /how often/i.test(l)) && draft.credit === 0,
   `routes=${draft.routes} credit=${draft.credit} · case1: ${draft.labels.join(' / ')} · rfq: ${draftRfqLabels.join(' / ')}`)
 
@@ -175,7 +175,7 @@ const awaitBanner = await txt('.hb-overlay .hb-banner')
 const awaitBtns = await p.locator('.hb-modal-foot button').allInnerTexts()
 check('7.pending-cancel-only', /Waiting for the supplier/i.test(awaitBanner)
   && awaitBtns.length === 1 && /Cancel order/i.test(awaitBtns[0]), `${awaitBanner} :: ${awaitBtns.join(' | ')}`)
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 
 // ── §6/§7 seller modified: accept or cancel, on the seller's number ──────────
 const counteredRow = p.locator('tbody tr', { hasText: 'SPR-2608-0002' })
@@ -186,7 +186,7 @@ check('6.modify-accept-or-cancel', /changed the price/i.test(modBanner) && modBt
   `${modBanner} :: ${modBtns.join(' | ')}`)
 const modTable = await txt('.hb-overlay table')
 check('6.original-vs-offered', /Original price/i.test(modTable) && /Agreed price/i.test(modTable), modTable.slice(0, 160))
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 
 // ── §5 MVP / §7 rejected: order back to Pending at the original price ────────
 const rejectedRow = p.locator('tbody tr', { hasText: 'SPR-2607-0044' })
@@ -210,7 +210,7 @@ check('9.full-log-on-order', logCount >= 2, `${logCount} entries`)
 await p.getByRole('button', { name: 'HB Admin view' }).click(); await p.waitForTimeout(250)
 const adminNote = await txt('.hb-overlay .hb-banner--info')
 check('10.admin-view', /HIGHBASE administrators/i.test(adminNote), adminNote.slice(0, 120))
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 
 // ── §6 seller accepted as-is: nothing asked of the buyer ─────────────────────
 await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Final Orders' }).click(); await p.waitForTimeout(250)
@@ -221,7 +221,7 @@ const finFoot = await txt('.hb-modal-foot')
 check('6.accept-as-is-no-buyer-action', finBtns.length === 0 && /Nothing is needed from you/i.test(finFoot), finFoot)
 const finTable = await txt('.hb-overlay tfoot')
 check('9.old-vs-accepted-indicator', /Saved against list price/i.test(finTable) && /%/.test(finTable), finTable)
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 
 // ── §9 standard orders sit in the same Final Orders list ─────────────────────
 const finalRefs = await p.locator('tbody tr').allInnerTexts()
@@ -281,12 +281,12 @@ const rejPills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
 const rejFoot = await txt('.hb-overlay tfoot')
 check('9.rejected-final-at-original', rejPills.some((x) => /Special price rejected/i.test(x))
   && /No change/i.test(rejFoot), `${rejPills.join(' | ')} :: ${rejFoot}`)
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 await p.locator('tbody tr', { hasText: 'Special price accepted' }).first().click(); await p.waitForTimeout(300)
 const accPills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
 check('9.accepted-final-shows-saving', accPills.some((x) => /Special price accepted/i.test(x))
   && /%/.test(await txt('.hb-overlay tfoot')), accPills.join(' | '))
-await p.locator('.hb-drawer-close, .hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 
 // ── §8 Inbox, three categories, both roles ───────────────────────────────────
 for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashboard', 'seller']]) {
