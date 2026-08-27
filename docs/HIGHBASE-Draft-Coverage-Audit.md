@@ -219,8 +219,8 @@ seller sees it on the request line, beside the frequency the buyer asked for. An
 
 ## Still open
 
-Three places where the prototype diverges from the PRD at the user's direction, unchanged by
-this pass and still unreconciled in the PRD text itself:
+Places where the prototype diverges from the PRD at the user's direction, still unreconciled
+in the PRD text itself:
 
 1. **US-7** — the review step was collapsed into the single form.
 2. **AC-3.2** — the route is preselected, so there is no unchosen state.
@@ -233,7 +233,14 @@ this pass and still unreconciled in the PRD text itself:
    transition and its round cap stay in the state machine, because the PRD's multi-round
    negotiation is still what the domain describes, but nothing on a buyer surface reaches
    them. Rounds therefore only ever increment from the seller's side.
-5. **AC-13.1** — the request page no longer carries the history panel. The log is not lost:
+5. **AC-4.1 / AC-7.3** — the request drawer now follows the Figma frame's copy and shape
+   rather than the PRD's. "Target price per unit" is **Your requested price**, and the
+   single primary action **Send request** is a pair — **Cancel** beside **Submit Request**
+   — because that is what the design pairs at the foot of the drawer. AC-7.3's substance
+   holds: there is still exactly one primary action, and Cancel is a dismissal rather than
+   a second way to commit. The drawer also adds a **Justification** field the PRD does not
+   name, which the design carries and which reaches the seller with the request.
+6. **AC-13.1** — the request page no longer carries the history panel. The log is not lost:
    it is on the order (§9, §10), where the draft asks for it and where an HB Admin looks
    for it. What no longer exists is a second copy of it beside the decision.
 

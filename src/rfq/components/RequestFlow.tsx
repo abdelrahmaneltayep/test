@@ -204,7 +204,13 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       askedPrice: route === 'case_1' ? targetPrice : null,
       frequency: route === 'case_2' && frequencyAvailable(state.phase) ? frequency : null,
       specialCredit: phase2Only(state.phase) && specialCredit,
-      note: route === 'case_2' && note.trim() ? note.trim().slice(0, 500) : null,
+      /*
+        Both routes carry the buyer's own words now: the justification on case 1 (the
+        design's field, capped at 1000) and the note to the seller on case 2 (AC-5.3,
+        capped at 500). One field, two caps, because the two routes ask for different
+        amounts of explanation.
+      */
+      note: note.trim() ? note.trim().slice(0, route === 'case_1' ? 1000 : 500) : null,
       proof: route === 'case_1' ? proof : null,
     }
   }
@@ -262,19 +268,23 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   return (
     <Modal
       drawer
-      title={
-        <h2 className="hb-h2">{t(lang, 'requestSpecialPrice')}</h2>
-      }
+      title={<h2 className="hb-h2">{t(lang, 'requestDrawerTitle')}</h2>}
+      subtitle={t(lang, 'requestDrawerSub')}
       onClose={onClose}
       footer={
         // AC-7.3 — exactly one action on this surface, and it is the primary one.
-        <span className="hb-primary-slot">
+        <>
           {/* E-2 — a blocked control states its reason, once a send has been attempted. */}
           {blockedReason && <span className="hb-hint">{blockedReason}</span>}
-          <button type="button" className="hb-btn hb-btn--primary" onClick={handleSend}>
-            {t(lang, 'sendRequest')}
-          </button>
-        </span>
+          <span className="hb-primary-slot hb-drawer-actions">
+            <button type="button" className="hb-btn hb-btn--outline" onClick={onClose}>
+              {t(lang, 'cancel')}
+            </button>
+            <button type="button" className="hb-btn hb-btn--primary" onClick={handleSend}>
+              {t(lang, 'submitRequest')}
+            </button>
+          </span>
+        </>
       }
     >
       {/*
@@ -315,16 +325,37 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       )}
 
       {/* ── Quantity (US-2) ──────────────────────────────────────────────── */}
+      {/*
+        A stepper rather than a bare number field, and the pack unit stated beside it —
+        the design's shape. The unit matters here: the number counts cases, not bottles,
+        and a buyer who reads it the other way asks for the wrong thing.
+      */}
       <Field
-        label={t(lang, 'quantityLabel')}
-        hint={qty > 0 ? t(lang, 'equalsUnits', { units: qty * product.unitsPerCase, uom: product.baseUnit[lang] }) : undefined}
+        label={t(lang, 'requestedQuantity')}
+        required
+        hint={qty > 0
+          ? t(lang, 'equalsUnits', { units: qty * product.unitsPerCase, uom: product.baseUnit[lang] })
+          : t(lang, 'requestedQuantityHint')}
         error={qtyError}
       >
-        <input
-          className="hb-input" inputMode="numeric" autoFocus
-          value={qtyText} onChange={(e) => setQtyText(e.target.value)}
-          placeholder={String(NEGOTIATION_MIN_QTY)}
-        />
+        <div className="hb-qtyrow">
+          <div className="hb-stepper">
+            <button
+              type="button" className="hb-stepper-btn" aria-label={t(lang, 'decreaseQty')}
+              onClick={() => setQtyText(String(Math.max(0, (parseInt(qtyText, 10) || 0) - 1)))}
+            >−</button>
+            <input
+              className="hb-stepper-input" inputMode="numeric" autoFocus
+              value={qtyText} onChange={(e) => setQtyText(e.target.value)}
+              placeholder={String(NEGOTIATION_MIN_QTY)}
+            />
+            <button
+              type="button" className="hb-stepper-btn" aria-label={t(lang, 'increaseQty')}
+              onClick={() => setQtyText(String((parseInt(qtyText, 10) || 0) + 1))}
+            >+</button>
+          </div>
+          <span className="hb-qtyunit">{product.packSize} · {product.unitOfMeasure[lang]}</span>
+        </div>
       </Field>
 
       {/* AC-2.2 / FR-2.3 — tier pre-emption: the published price is offered before a
@@ -364,15 +395,32 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
               at the head of the modal, larger and permanent, so saying it twice within
               one screen was noise rather than help. */}
           <Field
-            label={t(lang, 'targetPrice')}
+            label={t(lang, 'requestedPrice')}
+            hint={targetError || targetWarning ? undefined : t(lang, 'requestedPriceHint')}
             error={targetError} warning={targetWarning}
           >
-            <input className="hb-input" inputMode="decimal" value={targetText}
-              onChange={(e) => setTargetText(e.target.value)} placeholder="0.000" />
+            <div className="hb-prefixfield">
+              <span className="hb-prefixfield-unit">BHD</span>
+              <input className="hb-input" inputMode="decimal" value={targetText}
+                onChange={(e) => setTargetText(e.target.value)} placeholder="0.000" />
+            </div>
           </Field>
 
           <Field label={t(lang, 'competitorName')} error={supplierError}>
             <input className="hb-input" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
+          </Field>
+
+          {/*
+            The design carries a justification field and this form did not. It is the
+            buyer's own account of why the ask is reasonable, and it reaches the seller
+            with the request — the one part of the case a document cannot make.
+          */}
+          <Field label={t(lang, 'justification')} hint={`${note.length} / 1000`}>
+            <textarea
+              className="hb-textarea" rows={4} maxLength={1000} value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t(lang, 'justificationPlaceholder')}
+            />
           </Field>
 
           {/* FR-7.7 / EC-36 — the exclusions are stated before upload, not after rejection. */}
@@ -393,8 +441,9 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
             request page in full (§3) — what is gone is the buyer being shown the working.
           */}
           <Field
-            label={t(lang, 'uploadProof')}
-            hint={file ? undefined : t(lang, 'uploadHint')}
+            label={t(lang, 'supportingDocument')}
+            required
+            description={file ? undefined : t(lang, 'supportingDocumentHint')}
             error={proofFileError ?? proofError}
           >
             {file ? (
@@ -411,11 +460,28 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
                 </button>
               </div>
             ) : (
-              /* AC-21.4 — camera and gallery on a phone, not a desktop-only file picker. */
-              <input
-                className="hb-input" type="file" accept=".pdf,image/*" capture="environment"
-                onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-              />
+              /*
+                The design's drop zone. The input still carries `capture`, so AC-21.4 holds
+                — a phone offers camera and gallery — but on a desktop the whole dashed
+                area is the target rather than a 90px system button.
+              */
+              <label className="hb-dropzone">
+                <input
+                  type="file" accept=".pdf,image/*" capture="environment"
+                  onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+                />
+                <span className="hb-dropzone-mark" aria-hidden="true">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14.5 2.5H7a2 2 0 0 0-2 2v15a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7Z" />
+                    <path d="M12 17.5v-7" /><path d="m9 13.2 3-3 3 3" />
+                  </svg>
+                </span>
+                <span className="hb-dropzone-line">
+                  <b>{t(lang, 'browseFiles')}</b> {t(lang, 'orDragAndDrop')}
+                </span>
+                <span className="hb-dropzone-formats">{t(lang, 'supportedFormats')}</span>
+              </label>
             )}
           </Field>
 

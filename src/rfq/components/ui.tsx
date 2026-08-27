@@ -34,6 +34,15 @@ export function TagMark({ size = 15 }: { size?: number }) {
   )
 }
 
+export function CloseMark({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M6 6 18 18M18 6 6 18" />
+    </svg>
+  )
+}
+
 export function EyeMark({ size = 15 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
@@ -74,13 +83,14 @@ export function Money({ value, lang, withCurrency }: { value: Minor | null; lang
  * than a row with two tags.
  */
 /**
- * The product, as a two-line list item.
+ * The product, as the Figma frame's Requested Product Card.
  *
- * A request is about one item (draft §2), and the buyer opened this from a card. Repeating
- * the card's own three facts — the image, the name, the price — is what tells them the
- * form is pointed at the thing they clicked, before they type a target price against it.
- * The second line carries the identifiers that matter when the seller reads it back: the
- * SKU and the pack size, which is the unit the quantity field is counting.
+ * Image, name, packaging, then the prices on one row — the same four facts the design
+ * puts at the head of the drawer, in the same order. A request is about one item
+ * (draft §2), and the buyer opened this from a card: restating what they clicked is
+ * what tells them the form is pointed at the right thing before they type a price
+ * against it. The tier price takes the trailing slot the design gives the coupon,
+ * because on this product it plays the same role — the other number already on offer.
  */
 export function ProductListItem({ product, price, lang }: {
   product: Product
@@ -88,16 +98,25 @@ export function ProductListItem({ product, price, lang }: {
   price?: Minor | null
   lang: Lang
 }) {
+  const bestTier = product.tiers.slice().sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
   return (
     <div className="hb-listitem">
       <span className="hb-listitem-media" aria-hidden="true">{product.emoji}</span>
       <span className="hb-listitem-text">
         <b className="hb-listitem-title">{product.name[lang]}</b>
-        <span className="hb-listitem-sub">{product.sku} · {product.packSize}</span>
-      </span>
-      <span className="hb-listitem-price">
-        <small>{t(lang, 'listPrice')}</small>
-        <Money value={price ?? product.listPrice} lang={lang} withCurrency />
+        <span className="hb-listitem-sub">
+          {t(lang, 'packagingLabel')}: <b>{product.packSize} · {product.unitOfMeasure[lang]}</b>
+        </span>
+        <span className="hb-listitem-prices">
+          <span className="hb-listitem-price">
+            {t(lang, 'currentPriceLabel')}: <b>{formatMoney(price ?? product.listPrice, { withCurrency: true, lang })}</b>
+          </span>
+          {bestTier && (
+            <span className="hb-listitem-price hb-listitem-price--alt">
+              {t(lang, 'unitsRange', { min: bestTier.minQty })}: <b>{formatMoney(bestTier.unitPrice, { withCurrency: true, lang })}</b>
+            </span>
+          )}
+        </span>
       </span>
     </div>
   )
@@ -158,8 +177,10 @@ export function CheckBadge({ severity, lang }: { severity: CheckSeverity; lang: 
   return <span className={`hb-pill hb-pill--${CHECK_TONE[severity]}`}>{CHECK_WORD[severity][lang]}</span>
 }
 
-export function Modal({ title, onClose, children, footer, wide, drawer }: {
+export function Modal({ title, subtitle, onClose, children, footer, wide, drawer }: {
   title: ReactNode
+  /** A line under the title. The drawer in Figma carries one; the dialogs do not. */
+  subtitle?: ReactNode
   onClose: () => void
   children: ReactNode
   footer?: ReactNode
@@ -181,9 +202,25 @@ export function Modal({ title, onClose, children, footer, wide, drawer }: {
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className={`hb-modal${shape}`}>
+        {/*
+          The drawer hangs its close control on the outside edge, as the Figma frame does:
+          a filled square against the scrim rather than a quiet glyph competing with the
+          title. Where the drawer takes the whole screen there is no outside left, so the
+          stylesheet moves it back inside the head.
+        */}
+        {drawer && (
+          <button type="button" className="hb-drawer-close" onClick={onClose} aria-label="Close">
+            <CloseMark />
+          </button>
+        )}
         <div className="hb-modal-head">
-          <div>{title}</div>
-          <button type="button" className="hb-btn hb-btn--quiet" onClick={onClose} aria-label="Close">✕</button>
+          <div>
+            {title}
+            {subtitle && <p className="hb-modal-sub">{subtitle}</p>}
+          </div>
+          {!drawer && (
+            <button type="button" className="hb-btn hb-btn--quiet" onClick={onClose} aria-label="Close">✕</button>
+          )}
         </div>
         <div className="hb-modal-body">{children}</div>
         {footer && <div className="hb-modal-foot">{footer}</div>}
@@ -192,16 +229,28 @@ export function Modal({ title, onClose, children, footer, wide, drawer }: {
   )
 }
 
-export function Field({ label, hint, error, warning, children }: {
+export function Field({ label, description, hint, error, warning, required, children }: {
   label: string
+  /**
+   * A line between the label and the control. The design puts the document's
+   * instructions above the drop zone, where they are read before the decision to
+   * upload; a hint below would arrive after it.
+   */
+  description?: string
   hint?: string
   error?: string | null
   warning?: string | null
+  /** The design marks the two fields a request cannot be sent without. */
+  required?: boolean
   children: ReactNode
 }) {
   return (
     <label className="hb-field">
-      <span className="hb-label">{label}</span>
+      <span className="hb-label">
+        {label}
+        {required && <span className="hb-req" aria-hidden="true">*</span>}
+      </span>
+      {description && <div className="hb-fielddesc">{description}</div>}
       {children}
       {hint && <div className="hb-hint">{hint}</div>}
       {/* E-1 — the constraint and the value that breached it, not "invalid input". */}

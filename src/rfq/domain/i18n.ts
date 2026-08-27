@@ -57,6 +57,27 @@ export const STRINGS: Dict = {
 
   // ── Marketplace entry point (US-1) ────────────────────────────────────────
   requestSpecialPrice: { en: 'Request special price', ar: 'اطلب سعراً خاصاً' },
+  // Drawer copy, taken from the Figma frame so the two surfaces read alike.
+  requestDrawerTitle: { en: 'Request a Special Price', ar: 'اطلب سعراً خاصاً' },
+  requestDrawerSub: { en: 'Have a price in mind? Send it to the seller for review.', ar: 'لديك سعر في ذهنك؟ أرسله إلى البائع للمراجعة.' },
+  packagingLabel: { en: 'Packaging', ar: 'التعبئة' },
+  currentPriceLabel: { en: 'Current', ar: 'الحالي' },
+  tierPriceLabel: { en: 'Tier', ar: 'الشريحة' },
+  requestedQuantity: { en: 'Requested quantity', ar: 'الكمية المطلوبة' },
+  requestedQuantityHint: { en: 'Enter the total quantity you intend to purchase.', ar: 'أدخل إجمالي الكمية التي تنوي شراءها.' },
+  requestedPrice: { en: 'Your requested price', ar: 'السعر المطلوب' },
+  requestedPriceHint: { en: 'Enter a price lower than the current listed price.', ar: 'أدخل سعراً أقل من السعر المعلن الحالي.' },
+  justification: { en: 'Justification', ar: 'المبرر' },
+  justificationPlaceholder: { en: 'Provide context for this price request (e.g., competitor pricing, volume commitment)…', ar: 'اذكر سياق هذا الطلب (مثل سعر منافس أو التزام بالكمية)…' },
+  supportingDocument: { en: 'Supporting document', ar: 'مستند داعم' },
+  supportingDocumentHint: { en: 'Upload an invoice, quotation, or screenshot showing the previous price.', ar: 'أرفق فاتورة أو عرض سعر أو لقطة شاشة تُظهر السعر السابق.' },
+  browseFiles: { en: 'Browse files', ar: 'تصفح الملفات' },
+  orDragAndDrop: { en: 'or drag and drop here', ar: 'أو أفلت الملف هنا' },
+  supportedFormats: { en: 'Supported formats: JPG, PNG, PDF (Max 10 MB)', ar: 'الصيغ المدعومة: JPG وPNG وPDF (١٠ ميجابايت كحد أقصى)' },
+  submitRequest: { en: 'Submit Request', ar: 'إرسال الطلب' },
+  decreaseQty: { en: 'Decrease quantity', ar: 'إنقاص الكمية' },
+  increaseQty: { en: 'Increase quantity', ar: 'زيادة الكمية' },
+  required: { en: 'Required', ar: 'مطلوب' },
   requestMyPrice: { en: 'Request my price', ar: 'اطلب سعري الخاص' },
   // The compact card CTA — the short label that sits beside the icon when the action row
   // is horizontal and has to share its width with Add to Cart.
