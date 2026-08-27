@@ -235,6 +235,38 @@ body {
 .hb-priceband--tier .hb-priceband-label { color: #a35c00; }
 .hb-priceband-value { font-size: 15px; font-weight: 700; color: var(--hb-navy); font-variant-numeric: tabular-nums; }
 .hb-priceband-value small { font-size: 11px; font-weight: 600; color: var(--hb-ink-2); margin-inline-end: 4px; }
+/* ── Product list item ────────────────────────────────────────────────────────
+   The card's three facts — image, name, price — restated as one row wherever a
+   surface needs to say which item it is about. The media tile reuses the card's
+   own gradient so the thumbnail reads as the same object the buyer clicked.
+   Two lines of text, so the SKU and pack size travel with the name without
+   competing with it; the price holds the trailing edge on its own baseline. */
+.hb-listitem {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; margin-bottom: 16px;
+  background: var(--hb-field); border: 1px solid var(--hb-line); border-radius: var(--hb-r);
+}
+.hb-listitem-media {
+  flex: 0 0 auto; width: 48px; height: 48px; border-radius: var(--hb-r-sm);
+  background: linear-gradient(160deg, #f7fafd, #eaf1f8);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.hb-listitem-text { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.hb-listitem-title { font-size: 14px; font-weight: 700; color: var(--hb-navy); line-height: 1.3; }
+.hb-listitem-sub { font-size: 12px; color: var(--hb-ink-2); font-variant-numeric: tabular-nums; }
+.hb-listitem-price {
+  flex: 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  text-align: end;
+}
+.hb-listitem-price small { font-size: 11px; font-weight: 600; color: var(--hb-orange); }
+.hb-listitem-price .hb-num { font-size: 15px; font-weight: 700; color: var(--hb-navy); white-space: nowrap; }
+/* Below the modal's narrow width the price drops under the text rather than
+   squeezing the name into a column two words wide. */
+@media (max-width: 420px) {
+  .hb-listitem { flex-wrap: wrap; }
+  .hb-listitem-price { flex-direction: row; align-items: baseline; gap: 6px; width: 100%; justify-content: flex-end; }
+}
+
 .hb-prod-supplier { font-size: 12px; color: var(--hb-ink-2); text-align: end; }
 .hb-prod-supplier b { color: var(--hb-blue); font-weight: 600; }
 .hb-prod-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }

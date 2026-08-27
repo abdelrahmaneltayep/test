@@ -12,7 +12,7 @@ import { formatMoney } from '../domain/money'
 import { STATE_META, type RequestState } from '../domain/states'
 import type { Lang } from '../domain/i18n'
 import { t } from '../domain/i18n'
-import type { CheckSeverity, Minor, RequestLine } from '../domain/types'
+import type { CheckSeverity, Minor, Product, RequestLine } from '../domain/types'
 
 /**
  * Inline marks for the compact card CTA.
@@ -73,6 +73,36 @@ export function Money({ value, lang, withCurrency }: { value: Minor | null; lang
  * FR-1.9 keeps a many-line request reachable and a row that lied about it would be worse
  * than a row with two tags.
  */
+/**
+ * The product, as a two-line list item.
+ *
+ * A request is about one item (draft §2), and the buyer opened this from a card. Repeating
+ * the card's own three facts — the image, the name, the price — is what tells them the
+ * form is pointed at the thing they clicked, before they type a target price against it.
+ * The second line carries the identifiers that matter when the seller reads it back: the
+ * SKU and the pack size, which is the unit the quantity field is counting.
+ */
+export function ProductListItem({ product, price, lang }: {
+  product: Product
+  /** FR-8.5 — an agreed price replaces the list price wherever the product is shown. */
+  price?: Minor | null
+  lang: Lang
+}) {
+  return (
+    <div className="hb-listitem">
+      <span className="hb-listitem-media" aria-hidden="true">{product.emoji}</span>
+      <span className="hb-listitem-text">
+        <b className="hb-listitem-title">{product.name[lang]}</b>
+        <span className="hb-listitem-sub">{product.sku} · {product.packSize}</span>
+      </span>
+      <span className="hb-listitem-price">
+        <small>{t(lang, 'listPrice')}</small>
+        <Money value={price ?? product.listPrice} lang={lang} withCurrency />
+      </span>
+    </div>
+  )
+}
+
 export function RouteTags({ lines, lang }: { lines: RequestLine[]; lang: Lang }) {
   const hasCase1 = lines.some((l) => l.route === 'case_1')
   const hasCase2 = lines.some((l) => l.route === 'case_2')

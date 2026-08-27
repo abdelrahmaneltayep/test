@@ -25,7 +25,7 @@ import { runAutoChecks, PROOF_EXCLUSIONS, ACCEPTED_MIME_TYPES, MAX_FILE_BYTES } 
 import { t, type Lang } from '../domain/i18n'
 import type { Frequency, Product, Proof, ProofFields } from '../domain/types'
 import { case1Available, frequencyAvailable, phase2Only, productBySku, useRfq, type DraftLine } from '../store'
-import { Field, Modal, Money } from './ui'
+import { Field, Modal, Money, ProductListItem } from './ui'
 
 /** FR-2.1 — the seller's configured negotiation minimum, per line. */
 export const NEGOTIATION_MIN_QTY = 10
@@ -262,10 +262,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   return (
     <Modal
       title={
-        <div>
-          <h2 className="hb-h2">{t(lang, 'requestSpecialPrice')}</h2>
-          <div className="hb-hint">{product.name[lang]} · {product.sku}</div>
-        </div>
+        <h2 className="hb-h2">{t(lang, 'requestSpecialPrice')}</h2>
       }
       onClose={onClose}
       footer={
@@ -279,6 +276,14 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         </span>
       }
     >
+      {/*
+        The product, before the first question about it. It was a line of grey text under
+        the modal title, which put the item the buyer is negotiating below the action in
+        the reading order and gave it no price at all — so the target-price field had
+        nothing on screen to be a target *against*.
+      */}
+      <ProductListItem product={product} lang={lang} />
+
       {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
       {routeChoice && (
         <div className="hb-field">
@@ -354,9 +359,11 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       {/* ── Case 1 (US-4) ────────────────────────────────────────────────── */}
       {route === 'case_1' && (
         <>
+          {/* The list price used to repeat here as a hint. It now sits in the list item
+              at the head of the modal, larger and permanent, so saying it twice within
+              one screen was noise rather than help. */}
           <Field
             label={t(lang, 'targetPrice')}
-            hint={`${t(lang, 'listPrice')}: ${formatMoney(product.listPrice, { withCurrency: true, lang })}`}
             error={targetError} warning={targetWarning}
           >
             <input className="hb-input" inputMode="decimal" value={targetText}
