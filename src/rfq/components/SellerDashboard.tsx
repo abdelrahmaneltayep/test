@@ -12,14 +12,14 @@ import { t } from '../domain/i18n'
 import { formatMoney } from '../domain/money'
 import { marginAfterAsk, type MarginBand } from '../domain/margin'
 import { guardrailValue } from '../domain/guardrails'
-import { STATE_META } from '../domain/states'
+import { routeOf, STATE_META } from '../domain/states'
 import type { LineOutcome, NegotiationRequest } from '../domain/types'
 import { useRfq } from '../store'
 import { Empty, Modal, Money, RouteTags, StatusPill } from './ui'
 import { DashboardChrome, type NavGroup } from './Chrome'
 import { Inbox } from './Inbox'
 import { Orders } from './Orders'
-import { SellerRequestPage } from './RequestDetail'
+import { DeclineDialog, SellerRequestPage } from './RequestDetail'
 import { buildInbox, threadCategory, unreadCount } from '../domain/inbox'
 
 const DEFAULT_VALIDITY = guardrailValue('offerValidityDays')
@@ -201,6 +201,9 @@ export function SellerDashboard() {
                   const mine = STATE_META[r.state].turn === 'seller'
                   // §5 — "Accept" takes the ask exactly as sent, so every line needs one.
                   const acceptableAsAsked = r.lines.every((l) => l.askedPrice !== null)
+                  // Price matching: the match route carries no counter, in the row as on
+                  // the page, and its primary move says what it is.
+                  const matching = routeOf(r.lines) === 'case_1'
                   return (
                     <tr
                       key={r.ref} className={`hb-clickable${escalated ? ' hb-row-action' : ''}`}
@@ -239,14 +242,16 @@ export function SellerDashboard() {
                                 title={acceptableAsAsked ? undefined : t(lang, 'acceptDisabledQuoteOnly')}
                                 onClick={(e) => { e.stopPropagation(); setConfirming({ ref: r.ref, kind: 'accept' }) }}
                               >
-                                {t(lang, 'accept')}
+                                {t(lang, matching ? 'matchAction' : 'accept')}
                               </button>
-                              <button
-                                type="button" className="hb-btn hb-btn--sm hb-btn--secondary"
-                                onClick={(e) => { e.stopPropagation(); open() }}
-                              >
-                                {t(lang, 'counter')}
-                              </button>
+                              {!matching && (
+                                <button
+                                  type="button" className="hb-btn hb-btn--sm hb-btn--secondary"
+                                  onClick={(e) => { e.stopPropagation(); open() }}
+                                >
+                                  {t(lang, 'counter')}
+                                </button>
+                              )}
                               {/* FR-11.6 — the destructive action is quiet and never primary. */}
                               <button
                                 type="button" className="hb-btn hb-btn--sm hb-btn--danger"
@@ -295,9 +300,9 @@ export function SellerDashboard() {
  * numbers in view. So the confirmation carries them: the ask against list, and the margin
  * that ask leaves. That is seller-internal (FR-5.3 / A7) and never crosses to the buyer.
  *
- * A floor breach is not confirmable here at all. AC-15.5 requires a written reason for an
- * override, and there is nowhere to write one in a two-button dialog, so the seller is sent
- * to the panel instead of being offered a shortcut past the guard.
+ * The two decisions no longer share a dialog. A decline has to name its reason now, which
+ * is a form; an acceptance is still one click against the numbers. So this dispatches to
+ * the decline dialog and keeps the numbers with it, rather than growing a second mode.
  */
 function DecisionConfirm({ request, kind, onClose }: {
   request: NegotiationRequest
@@ -305,31 +310,44 @@ function DecisionConfirm({ request, kind, onClose }: {
   onClose: () => void
 }) {
   const { dispatch, lang } = useRfq()
-  const margin = marginAfterAsk(request.lines)
+  const matching = routeOf(request.lines) === 'case_1'
   const belowFloor = request.lines.find(
     (l) => l.floorSnapshot !== null && l.askedPrice !== null && l.askedPrice < l.floorSnapshot,
   )
-  const blocked = kind === 'accept' && belowFloor !== undefined
+  /**
+   * The floor used to stop an acceptance dead here and send the seller to the panel to
+   * write an override reason. Price matching removed that on the match route: the buyer's
+   * verified price wins, so there is no override to write and nothing to be sent away for.
+   * The breach is still shown — in red, beside the margin — it just no longer has a veto.
+   * On the quote route the guard is untouched.
+   */
+  const blocked = kind === 'accept' && !matching && belowFloor !== undefined
 
-  function run() {
-    if (kind === 'accept') {
-      dispatch({ type: 'seller_accepts', ref: request.ref })
-    } else {
-      // FR-6.3 — a declined line resolves at list price; the reducer applies that.
-      dispatch({
-        type: 'seller_responds', ref: request.ref,
-        decisions: Object.fromEntries(
-          request.lines.map((l) => [l.id, { outcome: 'declined' as LineOutcome, price: null }]),
-        ),
-        validityDays: DEFAULT_VALIDITY, overrideReason: null,
-      })
-    }
-    onClose()
+  if (kind === 'decline') {
+    return (
+      <DeclineDialog
+        matching={matching}
+        onClose={onClose}
+        onDecline={(reason) => {
+          // FR-6.3 — a declined line resolves at list price; the reducer applies that.
+          dispatch({
+            type: 'seller_responds', ref: request.ref,
+            decisions: Object.fromEntries(
+              request.lines.map((l) => [l.id, { outcome: 'declined' as LineOutcome, price: null }]),
+            ),
+            validityDays: DEFAULT_VALIDITY, overrideReason: null, declineReason: reason,
+          })
+          onClose()
+        }}
+      >
+        <RequestNumbers request={request} />
+      </DeclineDialog>
+    )
   }
 
   return (
     <Modal
-      title={<h2 className="hb-h2">{t(lang, kind === 'accept' ? 'confirmSellerAcceptTitle' : 'confirmSellerDeclineTitle')}</h2>}
+      title={<h2 className="hb-h2">{t(lang, matching ? 'confirmMatchTitle' : 'confirmSellerAcceptTitle')}</h2>}
       onClose={onClose}
       footer={
         <>
@@ -341,11 +359,10 @@ function DecisionConfirm({ request, kind, onClose }: {
               </button>
             ) : (
               <button
-                type="button"
-                className={`hb-btn hb-btn--${kind === 'accept' ? 'primary' : 'danger'}`}
-                onClick={run}
+                type="button" className="hb-btn hb-btn--primary"
+                onClick={() => { dispatch({ type: 'seller_accepts', ref: request.ref }); onClose() }}
               >
-                {t(lang, kind === 'accept' ? 'accept' : 'decline')}
+                {t(lang, matching ? 'matchAction' : 'accept')}
               </button>
             )}
           </span>
@@ -353,15 +370,44 @@ function DecisionConfirm({ request, kind, onClose }: {
       }
     >
       <p className="hb-sub" style={{ marginBottom: 14 }}>
-        {t(lang, kind === 'accept' ? 'confirmSellerAcceptBody' : 'confirmSellerDeclineBody')}
+        {t(lang, matching ? 'confirmMatchBody' : 'confirmSellerAcceptBody')}
       </p>
 
+      <RequestNumbers request={request} />
+
+      {/*
+        Two different sentences for the same fact. Off the match route a floor breach is a
+        blocker and the banner says where to go; on it the guarantee stands and the banner
+        states the position the seller is about to take.
+      */}
+      {belowFloor && (blocked || matching) && (
+        <div className="hb-banner hb-banner--bad" style={{ marginTop: 14 }}>
+          {blocked
+            ? t(lang, 'belowFloorWarning', { sku: belowFloor.sku })
+            : t(lang, 'matchBelowFloor', {
+              sku: belowFloor.sku,
+              floor: formatMoney(belowFloor.floorSnapshot as number, { withCurrency: true, lang }),
+            })}
+        </div>
+      )}
+    </Modal>
+  )
+}
+
+/**
+ * The numbers the row no longer shows, at the moment they decide something. Seller-internal
+ * throughout (FR-5.3 / A7) — this component is never rendered on a buyer surface.
+ */
+function RequestNumbers({ request }: { request: NegotiationRequest }) {
+  const { lang } = useRfq()
+  const margin = marginAfterAsk(request.lines)
+  return (
+    <>
       <div className="hb-row" style={{ marginBottom: 12 }}>
         <span className="hb-hint">{request.buyerName}</span>
         <span className="hb-ref">{request.ref}</span>
       </div>
 
-      {/* The numbers the row no longer shows, at the moment they decide something. */}
       <div className="hb-table-wrap">
         <table className="hb-table">
           <thead>
@@ -391,14 +437,6 @@ function DecisionConfirm({ request, kind, onClose }: {
           </tbody>
         </table>
       </div>
-
-      {blocked && belowFloor && (
-        <div className="hb-banner hb-banner--bad" style={{ marginTop: 14 }}>
-          {t(lang, 'belowFloorWarning', { sku: belowFloor.sku })}
-        </div>
-      )}
-
-    </Modal>
+    </>
   )
 }
-

@@ -51,21 +51,39 @@ first" means in practice.
 
 ## §5 Seller actions
 
-| Draft action | Status |
-| --- | --- |
-| Accept — one-time, this order only | **Built now** as its own button, "Accept (this order only)" |
-| Accept & apply as template | **Built now** as a distinct seller decision |
-| Modify — counter with a modified price | Already built, per line, with live margin |
-| Reject — keep the original price | Already built; a declined line resolves at list price |
-| MVP: rejected → order back to Pending with Cancel | **Reconciled** — see §7 |
+Price matching split this table in two. The draft wrote one set of seller actions because
+there was one kind of request; there are two now, and the difference is the whole feature.
 
-The template action was the one real defect this audit turned up. The seller's template
-dialog existed, but it dispatched the *buyer's* acceptance, which the transition guard
-rejects from a seller-side state — so the request stayed in the queue while a price-list
-entry was written anyway. Accept and Accept-&-apply-as-template are now two seller
-transitions of their own, and the price list is only written when the transition succeeds.
-Neither is offered on a request whose lines have no asked price, because an RFQ line has
-nothing to accept as-is.
+| Draft action | Match route (`case_1`) | Quote route (`case_2`) |
+| --- | --- | --- |
+| Accept — one-time, this order only | **Match this price** — the primary, and the default move | Accept, where the buyer named a price |
+| Accept & apply as template | **Gone** — a price settles one order (PM: order by order) | Gone |
+| Modify — counter with a modified price | **Gone** — the guarantee has nothing to counter with | Unchanged: per line, with live margin |
+| Reject — keep the original price | Built, and now **carries a named reason** | Same, with the supply-shaped reasons only |
+| MVP: rejected → order back to Pending with Cancel | **Reconciled** — see §7 | Same |
+
+Three things enforce the guarantee rather than merely hiding it:
+
+- the transition table itself. `→ countered_by_seller` is the only move in FR-3.3 that asks
+  which route a request took, and on `case_1` it is not there — so the reducer rejects a
+  seller counter with the same 409 any unlisted transition gets, whatever the UI offered;
+- the floor's **auto-decline** (FR-3.4f) no longer fires on the match route. It used to
+  refuse a below-floor ask before a person ever saw it, and AC-19.5 forbids the refusal
+  from saying why — a silent machine "no" to a price the buyer proved is the sharpest way
+  there is to break a guarantee. A below-floor match is queued for a rep instead. EC-22
+  survives in the only form left to it: the floor still outranks auto-accept, so the
+  machine never sells below floor on its own;
+- the floor does not block the seller's **match** either — on the queue row or on the page.
+  It is stated instead, in red, with a separate and blunter banner where the match is below
+  *cost*, because a floor is a policy and a cost is a loss.
+
+A decline now takes a code from a controlled list and an optional note, mandatory on
+`other`, and both are shown to the buyer verbatim. **The list is a placeholder**: the PM
+deferred the question of when a verified match may be refused at all, so the vocabulary is
+shaped like AC-17.2's and is expected to be replaced once those conditions land.
+
+The template action was the one real defect this audit originally turned up, and it has
+since been removed entirely along with the rest of the template branch.
 
 ## §6 Buyer actions after the seller responds
 
@@ -171,14 +189,17 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Forty-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Fifty-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
 | §2 | The entry point is on the card, the form asks for quantity, and no request holds more than one item |
 | §3 | A priced ask cannot be sent without its document; the buyer sees the picker before the upload and the file after it, and nothing else; extraction and its checks run on submission and land on the seller's page; the request sends and returns a reference |
 | §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
-| §5 | Accept, Counter and Decline on the queue row; the detail opens as a page carrying the buyer's submission read back; Accept & apply as template on it; the template acceptance lands the request in Template active |
+| §5 | Counter and Decline on a quote row; the detail opens as a page carrying the buyer's submission read back; the quote route keeps Decline · Counter · Accept, and Counter stays dead until a price is typed |
+| §5 (matching) | A match row offers Match and Decline and **no Counter**; its page carries three actions and **no price input at all**; the guarantee is stated in words rather than left to be inferred from the missing button; a below-floor match says so in red and the primary stays enabled; matching settles the request once and writes nothing forward |
+| Declines | The send button is dead until a reason is chosen; the reasons are a controlled list with a "Choose a reason" placeholder; once named the decline sends, and the buyer's page shows the reason and not just the outcome |
+| The guarantee, from the buyer's side | The buyer's special-price list holds no "Counter received" row at all — a counter is now something only the quote route can produce |
 | §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |
 | §6 | A modified price gives the buyer Accept and Cancel on the order; an acceptance as-is asks nothing of them; original and agreed sit side by side; the buyer's request detail is a page carrying the same four ranked actions the seller's has, and §6's three prices |
 | §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |
@@ -219,8 +240,8 @@ seller sees it on the request line, beside the frequency the buyer asked for. An
 
 ## Still open
 
-Three places where the prototype diverges from the PRD at the user's direction, unchanged by
-this pass and still unreconciled in the PRD text itself:
+Where the prototype diverges from the PRD at the user's direction, and what is still
+unreconciled in the PRD text itself:
 
 1. **US-7** — the review step was collapsed into the single form.
 2. **AC-3.2** — the route is preselected, so there is no unchosen state.
@@ -241,9 +262,33 @@ this pass and still unreconciled in the PRD text itself:
    permission, the marketplace card's "Agreed price until…" pill, and the rule that
    suppressed the entry point on a SKU already covered. **FR-3.1's twelve states are now
    eleven, and FR-8.3, FR-8.5, FR-8.7 and AC-18.4 describe behaviour the product no longer
-   has.** The PRD needs a pass. Still to land from the same direction change: the match
-   route becomes a guarantee (no seller counter on it, the verified price beats the floor),
-   declines carry a named reason, and the RFQ route keeps the counter loop untouched.
+   has.**
+
+   The guarantee has now landed on top of that: the seller's counter is off the match route
+   in the transition table, the floor neither auto-declines nor blocks a proved ask there,
+   and every decline carries a named reason. **This makes four more pieces of the PRD dead
+   as written** — FR-3.3's counter rows (unconditional; they are route-scoped now), FR-3.4f
+   and AC-19.1 (the auto-decline is quote-route only), AC-15.5's floor block (inert on the
+   match route, since there is no counter to block), and US-18 in full. The PRD needs a
+   pass; nothing in `docs/HIGHBASE-Special-Price-RFQ-PRD.md` has been edited, so it and the
+   code disagree on all of the above until it gets one.
+
+7. **FR-3.4f is now unreachable in Phase 1, and the PM should know.** The floor auto-decline
+   only fires on a line that carries an asked price, and after this change only on the quote
+   route — but AC-9.2 is explicit that a quote line names no price. So the rule is live,
+   tested and correct, and in the shipped P1 shape nothing can trigger it. Either the floor
+   stops being an automatic decision at all in P1, or it comes back in some other form; that
+   is a product call, not a code one.
+
+8. **Who absorbs a below-cost match.** HB-2210 has a 13.000 floor against an 11.600 cost. A
+   verified ask under 11.600 is now matchable, and the screen says so in red before the rep
+   confirms — but nothing decides whether the seller eats that, HIGHBASE subsidises it, or
+   the guarantee has a floor of its own. Open with the PM.
+
+9. **The name no longer covers the feature.** With the RFQ route staying "as is", this is
+   price matching *plus* a quote route, and the two work differently in every respect that
+   matters — one is a guarantee, the other a negotiation. Worth a decision on what the
+   feature is called before it reaches buyers.
 6. **AC-13.1** — the request page no longer carries the history panel. The log is not lost:
    it is on the order (§9, §10), where the draft asks for it and where an HB Admin looks
    for it. What no longer exists is a second copy of it beside the decision.

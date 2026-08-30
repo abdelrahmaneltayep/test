@@ -28,9 +28,25 @@ function line(overrides: Partial<RequestLine> = {}): RequestLine {
 
 describe('AC-19.1 / FR-3.4f — floor price auto-decline', () => {
   it('auto-declines an ask below floor so it never enters the queue', () => {
-    const out = evaluateAutoRules({ lines: [line({ askedPrice: 8500 })], hasFailedProofCheck: false })
+    const out = evaluateAutoRules({
+      lines: [line({ route: 'case_2', askedPrice: 8500 })], hasFailedProofCheck: false,
+    })
     expect(out.decision).toBe('auto_decline')
     expect(out.rule).toBe('FR-3.4f:floor_price')
+  })
+
+  /*
+   * Price matching. The same ask, proved, is not refused by a machine that AC-19.5 then
+   * forbids from explaining itself — it goes to a person with the position in view. The
+   * floor has not stopped mattering; it has stopped deciding.
+   */
+  it('queues the same ask on the match route instead of declining it', () => {
+    const out = evaluateAutoRules({
+      lines: [line({ route: 'case_1', askedPrice: 8500 })], hasFailedProofCheck: false,
+    })
+    expect(out.decision).toBe('queue')
+    expect(out.rule).toBeNull()
+    expect(out.internalReason).toMatch(/below floor · match route/)
   })
 
   it('queues an ask exactly at floor — at floor is not below floor', () => {
@@ -48,12 +64,23 @@ describe('EC-22 — auto-accept and floor rules both match', () => {
   it('lets the floor win: a request is never auto-accepted below floor', () => {
     // The ask is within a generous 10% auto-accept threshold *and* below the floor.
     const out = evaluateAutoRules({
-      lines: [line({ listPriceSnapshot: 10000, askedPrice: 9500, floorSnapshot: 9600 })],
+      lines: [line({ route: 'case_2', listPriceSnapshot: 10000, askedPrice: 9500, floorSnapshot: 9600 })],
       hasFailedProofCheck: false,
       config: { autoAcceptPercent: 10 },
     })
     expect(out.decision).toBe('auto_decline')
     expect(out.rule).toBe('FR-3.4f:floor_price')
+  })
+
+  // EC-22 in the only form the guarantee leaves it: the floor cannot decline a proved ask,
+  // but it still outranks auto-accept, so the machine never sells below floor on its own.
+  it('holds on the match route too — queued, never auto-accepted', () => {
+    const out = evaluateAutoRules({
+      lines: [line({ route: 'case_1', listPriceSnapshot: 10000, askedPrice: 9500, floorSnapshot: 9600 })],
+      hasFailedProofCheck: false,
+      config: { autoAcceptPercent: 10 },
+    })
+    expect(out.decision).toBe('queue')
   })
 })
 
@@ -105,7 +132,7 @@ describe('AC-19.4 — a failed proof check blocks auto-accept', () => {
 
   it('does not stop the floor rule — a failed check is not a reason to sell below floor', () => {
     const out = evaluateAutoRules({
-      lines: [line({ askedPrice: 100 })],
+      lines: [line({ route: 'case_2', askedPrice: 100 })],
       hasFailedProofCheck: true,
       config: { autoAcceptPercent: 3 },
     })

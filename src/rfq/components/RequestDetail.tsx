@@ -14,6 +14,11 @@
  * §2 — one item per request, so there is one line and the page is written for one. The
  * decision state is still keyed by line id, because the object model keeps its collection
  * for FR-1.9 and a page that quietly assumed otherwise would break the day it grows.
+ *
+ * Price matching split the page in two. On the match route this is a *verification* screen,
+ * not a negotiation one: the buyer's verified price wins, so the seller matches it, asks for
+ * better evidence, or declines with a named reason — there is no counter and no price input.
+ * On the quote route nothing changed; a quote is not a guarantee and keeps the full loop.
  */
 
 import { useState } from 'react'
@@ -23,8 +28,8 @@ import { t, type Lang } from '../domain/i18n'
 import { formatMoney, lineTotal, parseMoney } from '../domain/money'
 import { lineMargin, marginAfterAsk, type MarginBand } from '../domain/margin'
 import { hasFailedCheck, triStateOutcome } from '../domain/proof'
-import { STATE_META } from '../domain/states'
-import type { InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } from '../domain/types'
+import { routeOf, STATE_META } from '../domain/states'
+import type { DeclineReason, InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } from '../domain/types'
 import { productBySku, useRfq } from '../store'
 import { CheckBadge, Countdown, Field, Modal, Money, StatusPill } from './ui'
 
@@ -151,11 +156,17 @@ export function SellerRequestPage({ request, onBack }: {
   const [priceText, setPriceText] = useState('')
   const [validityDays, setValidityDays] = useState(DEFAULT_VALIDITY)
   const [infoOpen, setInfoOpen] = useState(false)
-  /** §5 — the acceptance that also writes the price forward, as a choice under Accept. */
+  const [declineOpen, setDeclineOpen] = useState(false)
   const [overrideReason, setOverrideReason] = useState('')
   const [sendError, setSendError] = useState<string | null>(null)
 
   const readOnly = STATE_META[request.state].terminal || STATE_META[request.state].turn !== 'seller'
+
+  /**
+   * Which of the two pages this is. It reads the route off the request rather than a prop,
+   * so the guarantee cannot be switched on by the surface that happens to be rendering.
+   */
+  const matching = routeOf(request.lines) === 'case_1'
 
   const counterPrice = parseMoney(priceText)
   /** What the seller is currently proposing: the typed counter, or the ask as it stands. */
@@ -169,11 +180,23 @@ export function SellerRequestPage({ request, onBack }: {
   const margin = lineMargin(livePrice ?? line.listPriceSnapshot, line.costSnapshot)
 
   // AC-15.5 — a counter below floor is blocked unless the permission is held and a reason
-  // is written. It only bites on a counter: an acceptance is the buyer's own number, and a
-  // decline resolves at list price.
+  // is written. It only ever bit on a counter, and the match route has no counter, so on
+  // that route this guard is inert by construction rather than by exception.
   const floorBreached = line.floorSnapshot !== null && counterPrice !== null
     && counterPrice < line.floorSnapshot
   const overrideOk = !floorBreached || (state.canOverrideFloor && overrideReason.trim().length > 0)
+
+  /**
+   * Where a match would leave this line. The floor does not block the guarantee — the
+   * buyer's verified price wins — but the seller is not asked to confirm it blind: the
+   * position is stated in full, in red, before the button is pressed. Below cost is the
+   * harder fact of the two and is stated separately, because a floor is a policy and a
+   * cost is a loss.
+   */
+  const matchBelowFloor = matching && line.floorSnapshot !== null && line.askedPrice !== null
+    && line.askedPrice < line.floorSnapshot
+  const matchBelowCost = matching && line.costSnapshot !== null && line.askedPrice !== null
+    && line.askedPrice < line.costSnapshot
 
   /** Resolve the request in one move, with the outcome the button names. */
   function resolve(outcome: Exclude<LineOutcome, 'pending'>, price: Minor | null) {
@@ -205,9 +228,21 @@ export function SellerRequestPage({ request, onBack }: {
     resolve('countered', counterPrice)
   }
 
-  /** FR-6.3 — a declined line resolves at list price; the reducer applies that. */
-  function decline() {
-    resolve('declined', null)
+  /**
+   * FR-6.3 — a declined line resolves at list price; the reducer applies that. What the
+   * button no longer does is decline on the spot: a decline carries a named reason now, so
+   * it opens the dialog that collects one.
+   */
+  function decline(reason: { code: DeclineReason; note: string }) {
+    dispatch({
+      type: 'seller_responds',
+      ref: request.ref,
+      decisions: { [line.id]: { outcome: 'declined', price: null } },
+      validityDays,
+      overrideReason: null,
+      declineReason: reason,
+    })
+    onBack()
   }
 
   function setPrice(raw: string) {
@@ -272,6 +307,41 @@ export function SellerRequestPage({ request, onBack }: {
               )}
 
               {/*
+                The guarantee, said before the buttons rather than discovered from their
+                absence. A seller who has used this page before will look for the counter
+                field; this is where they are told why it is not there.
+              */}
+              {matching && (
+                <div className="hb-banner hb-banner--info" style={{ marginBottom: 12 }}>
+                  <div>
+                    <strong>{t(lang, 'matchGuaranteeTitle')}</strong>
+                    <div style={{ marginTop: 4 }}>{t(lang, 'matchGuaranteeBody')}</div>
+                  </div>
+                </div>
+              )}
+
+              {/*
+                Where a match lands. Stated, never used to block: the floor is a policy the
+                guarantee outranks, and the seller confirms with the number in front of them.
+              */}
+              {matchBelowCost && (
+                <div className="hb-banner hb-banner--bad" style={{ marginBottom: 12 }}>
+                  {t(lang, 'matchBelowCost', {
+                    sku: line.sku,
+                    cost: formatMoney(line.costSnapshot as Minor, { withCurrency: true, lang }),
+                  })}
+                </div>
+              )}
+              {matchBelowFloor && !matchBelowCost && (
+                <div className="hb-banner hb-banner--bad" style={{ marginBottom: 12 }}>
+                  {t(lang, 'matchBelowFloor', {
+                    sku: line.sku,
+                    floor: formatMoney(line.floorSnapshot as Minor, { withCurrency: true, lang }),
+                  })}
+                </div>
+              )}
+
+              {/*
                 Four actions, and the inputs one of them needs.
                 §5's moves are not equals and the buttons no longer pretend they are:
                 Accept is the primary, Counter the secondary that carries the typed price,
@@ -280,6 +350,8 @@ export function SellerRequestPage({ request, onBack }: {
                 for better evidence (US-17). Each acts on click; nothing selects a mode and
                 waits for a second button to mean it.
               */}
+              {/* The quote route keeps every input it had; the match route has none. */}
+              {!matching && (
               <div className="hb-row" style={{ alignItems: 'flex-end' }}>
                 <Field
                   label={t(lang, 'counterPrice')}
@@ -312,9 +384,29 @@ export function SellerRequestPage({ request, onBack }: {
                   )}
                 </span>
               </div>
+              )}
+
+              {/*
+                The margin still has to be visible on the match route, where it is the whole
+                point of the screen — it just has no typed price to track, so it reads off
+                the ask the buyer proved.
+              */}
+              {matching && (
+                <div className="hb-row" style={{ alignItems: 'flex-end' }}>
+                  <span>
+                    {margin !== null ? (
+                      <span className={`hb-pill hb-pill--${matchBelowCost ? 'bad' : matchBelowFloor ? 'bad' : margin >= 20 ? 'good' : 'warn'}`}>
+                        {t(lang, 'lineMargin')} {margin}%
+                      </span>
+                    ) : (
+                      <span className="hb-pill hb-pill--neutral" tabIndex={0} title={t(lang, 'costNotConfigured')}>—</span>
+                    )}
+                  </span>
+                </div>
+              )}
 
               {/* FR-10.3 — an override needs the permission, a confirmation and a recorded reason. */}
-              {floorBreached && state.canOverrideFloor && (
+              {!matching && floorBreached && state.canOverrideFloor && (
                 <div className="hb-banner hb-banner--bad" style={{ marginBottom: 4 }}>
                   <div style={{ width: '100%' }}>
                     <strong>{t(lang, 'floorBlocked', {
@@ -345,28 +437,32 @@ export function SellerRequestPage({ request, onBack }: {
                 {t(lang, 'requestMoreInfo')}
               </button>
             )}
-            {/* FR-11.6 — destructive, so quiet and never primary. */}
-            <button type="button" className="hb-btn hb-btn--danger" onClick={decline}>
+            {/* FR-11.6 — destructive, so quiet and never primary. It now opens the dialog
+                that names the reason rather than declining on the click. */}
+            <button type="button" className="hb-btn hb-btn--danger" onClick={() => setDeclineOpen(true)}>
               {t(lang, 'decline')}
             </button>
             <span className="hb-primary-slot">
-              {/* Secondary: it needs the price above it before it can mean anything. */}
-              <button
-                type="button" className="hb-btn hb-btn--outline"
-                disabled={counterPrice === null || !overrideOk}
-                title={counterPrice === null ? t(lang, 'counterNeedsPrice') : undefined}
-                onClick={counter}
-              >
-                {t(lang, 'counter')}
-              </button>
-              {/* Primary: §5's first move, and the one the seller most often wants. */}
+              {/* Secondary: it needs the price above it before it can mean anything. The
+                  match route does not carry it at all — there is nothing to counter. */}
+              {!matching && (
+                <button
+                  type="button" className="hb-btn hb-btn--outline"
+                  disabled={counterPrice === null || !overrideOk}
+                  title={counterPrice === null ? t(lang, 'counterNeedsPrice') : undefined}
+                  onClick={counter}
+                >
+                  {t(lang, 'counter')}
+                </button>
+              )}
+              {/* Primary: on the match route it is the default move and says what it does. */}
               <button
                 type="button" className="hb-btn hb-btn--primary"
                 disabled={line.askedPrice === null}
                 title={line.askedPrice === null ? t(lang, 'acceptDisabledOnPage') : undefined}
                 onClick={accept}
               >
-                {t(lang, 'accept')}
+                {t(lang, matching ? 'matchPrice' : 'accept')}
               </button>
             </span>
           </div>
@@ -374,6 +470,13 @@ export function SellerRequestPage({ request, onBack }: {
       </div>
 
       {infoOpen && <InfoRequestDialog request={request} onClose={() => setInfoOpen(false)} onSent={onBack} />}
+      {declineOpen && (
+        <DeclineDialog
+          matching={matching}
+          onClose={() => setDeclineOpen(false)}
+          onDecline={(reason) => { setDeclineOpen(false); decline(reason) }}
+        />
+      )}
     </>
   )
 }
@@ -458,7 +561,7 @@ function PreviousPrice({ line, onUse, lang }: { line: RequestLine; onUse: (p: Mi
   const { state } = useRfq()
   const cutoff = new Date(state.now.getTime() - SAME_AS_LAST_TIME_DAYS * 86_400_000)
   const previous = state.requests.find(
-    (r) => ['accepted', 'accepted_as_template'].includes(r.state)
+    (r) => r.state === 'accepted'
       && new Date(r.submittedAt ?? 0) >= cutoff
       && r.lines.some((l) => l.sku === line.sku && l.offeredPrice !== null),
   )
@@ -523,7 +626,85 @@ function InfoRequestDialog({ request, onClose, onSent }: { request: NegotiationR
 }
 
 
-/** US-18 / FR-8 — write the accepted price into the buyer's price list. */
+/**
+ * A decline, named.
+ *
+ * Under price matching the buyer arrives with evidence, so "no" on its own is not an
+ * answer — the reason is mandatory and comes from a controlled list, the same shape
+ * AC-17.2 gives the information request. `other` is the escape hatch and pays for itself
+ * with a written note, so the list can never quietly become free text for everything.
+ *
+ * The vocabulary is deliberately about the claim and the supply and never about the price:
+ * on the match route the price is not the seller's to argue with. It is a placeholder —
+ * the conditions under which a verified match may be refused at all are still with the PM.
+ */
+export function DeclineDialog({ matching, onClose, onDecline, children }: {
+  matching: boolean
+  onClose: () => void
+  onDecline: (reason: { code: DeclineReason; note: string }) => void
+  /** Whatever the surface owes the seller before they decide — the queue row's numbers. */
+  children?: React.ReactNode
+}) {
+  const { lang } = useRfq()
+  /** Empty until chosen: a pre-selected reason is a reason nobody gave. */
+  const [code, setCode] = useState<DeclineReason | ''>('')
+  const [note, setNote] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const REASONS: { value: DeclineReason; key: string }[] = [
+    { value: 'proof_not_verifiable', key: 'reasonProofNotVerifiable' },
+    { value: 'not_comparable', key: 'reasonNotComparable' },
+    { value: 'cannot_supply', key: 'reasonCannotSupply' },
+    { value: 'terms_differ', key: 'reasonTermsDiffer' },
+    { value: 'other', key: 'reasonOther' },
+  ]
+  // A claim-shaped reason only means something where there is a claim; on the quote route
+  // the honest options are the two about supply.
+  const offered = matching
+    ? REASONS
+    : REASONS.filter((r) => r.value === 'cannot_supply' || r.value === 'terms_differ' || r.value === 'other')
+
+  function send() {
+    if (code === '') { setError(t(lang, 'declineNeedsReason')); return }
+    if (code === 'other' && note.trim().length === 0) { setError(t(lang, 'declineNeedsNote')); return }
+    onDecline({ code, note: note.trim() })
+  }
+
+  return (
+    <Modal
+      title={<h2 className="hb-h2">{t(lang, 'confirmSellerDeclineTitle')}</h2>}
+      onClose={onClose}
+      footer={
+        <>
+          <button type="button" className="hb-btn hb-btn--secondary" onClick={onClose}>{t(lang, 'cancel')}</button>
+          <span className="hb-primary-slot">
+            <button type="button" className="hb-btn hb-btn--danger" disabled={code === ''} onClick={send}>
+              {t(lang, 'sendDecline')}
+            </button>
+          </span>
+        </>
+      }
+    >
+      <p className="hb-sub" style={{ marginBottom: 14 }}>{t(lang, 'confirmSellerDeclineBody')}</p>
+      {children}
+      {error && <div className="hb-banner hb-banner--bad" style={{ marginBottom: 12, marginTop: 12 }}>{error}</div>}
+      <Field label={t(lang, 'declineReasonLabel')}>
+        <select
+          className="hb-select" value={code}
+          onChange={(e) => { setCode(e.target.value as DeclineReason | ''); setError(null) }}
+        >
+          <option value="">{t(lang, 'declineReasonChoose')}</option>
+          {offered.map((r) => <option key={r.value} value={r.value}>{t(lang, r.key)}</option>)}
+        </select>
+      </Field>
+      <Field label={t(lang, 'noteToSeller')} hint={t(lang, 'declineReasonShown')}>
+        <textarea className="hb-textarea" maxLength={500} value={note}
+          onChange={(e) => { setNote(e.target.value); setError(null) }} />
+      </Field>
+    </Modal>
+  )
+}
+
 
 /**
  * The buyer's request page — the mirror of the seller's.
@@ -601,6 +782,23 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
               {!live && request.offerExpiresAt && (
                 <div className="hb-banner hb-banner--bad" style={{ marginBottom: 14 }}>
                   {t(lang, 'offerExpiredOn', { date: request.offerExpiresAt.slice(0, 10) })}
+                </div>
+              )}
+
+              {/*
+                A decline the buyer can read. They produced evidence and asked for a price
+                against it, so the answer names which exception was taken — verbatim, the
+                same treatment AC-11.1 gives an information request.
+              */}
+              {request.state === 'declined' && request.declineReason && (
+                <div className="hb-banner hb-banner--bad" style={{ marginBottom: 14 }}>
+                  <div>
+                    <strong>{t(lang, 'supplierDeclinedBecause')}</strong>
+                    <div style={{ marginTop: 4 }}>
+                      {t(lang, `reason${request.declineReason.code.replace(/(^|_)(\w)/g, (_, __, c) => c.toUpperCase())}`)}
+                      {request.declineReason.note && ` — ${request.declineReason.note}`}
+                    </div>
+                  </div>
                 </div>
               )}
 

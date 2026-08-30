@@ -380,21 +380,29 @@ export const FLOWS: Flow[] = [
     ],
   },
   {
-    id: 'US-18', group: 'seller', phase: 'P2',
-    title: 'Make an agreed price stick',
-    caption: 'An accepted price is written into the buyer’s price list, so the same SKU is not renegotiated next month.',
+    /*
+     * US-18 as written was "make an agreed price stick" — accept once, and the price
+     * follows the buyer into next month. The PM's direction is order by order and price
+     * matching, so that story is gone and this is what stands in its place: the seller
+     * verifying a claim they cannot counter. The id is kept so the board still lines up
+     * with the PRD's numbering, and the caption says what happened rather than pretending
+     * the old flow was never there.
+     */
+    id: 'US-18', group: 'seller', phase: 'P1',
+    title: 'Verify a price match they cannot counter',
+    caption: 'Replaces "make an agreed price stick". Price matching made the buyer’s verified price binding, so the seller’s moves are match, ask for better evidence, or decline with a named reason — a price now settles one order and no more.',
     nodes: [
-      { id: 'a', col: 0, row: 0, kind: 'start', actor: 'seller', label: 'Accepts a line' },
-      { id: 'b', col: 1, row: 0, kind: 'decision', actor: 'seller', label: 'This order, or a template?', ref: 'AC-18.1' },
-      { id: 'c', col: 2, row: 1, kind: 'end', actor: 'system', label: 'Accepted · price applies once' },
-      { id: 'd', col: 2, row: 0, kind: 'step', actor: 'seller', label: 'Valid dates, min and max quantity', ref: 'AC-18.2' },
-      { id: 'e', col: 3, row: 0, kind: 'decision', actor: 'system', label: 'Entry already exists?' },
-      { id: 'f', col: 4, row: 1, kind: 'step', actor: 'seller', label: 'Replace or supersede · never silent', ref: 'AC-18.4' },
-      { id: 'g', col: 5, row: 0, kind: 'end', actor: 'system', label: 'Entry written · accepted_as_template', ref: 'AC-18.3' },
+      { id: 'a', col: 0, row: 0, kind: 'start', actor: 'buyer', label: 'Proved ask arrives · route case_1' },
+      { id: 'b', col: 1, row: 0, kind: 'decision', actor: 'seller', label: 'Is the document good enough?', ref: 'FR-7.3' },
+      { id: 'c', col: 2, row: 1, kind: 'step', actor: 'seller', label: 'Ask for better evidence · reason from a fixed list', ref: 'AC-17.2' },
+      { id: 'd', col: 2, row: 0, kind: 'decision', actor: 'seller', label: 'Can they supply it at all?' },
+      { id: 'e', col: 3, row: 1, kind: 'end', actor: 'seller', label: 'Declined · named reason, shown to the buyer' },
+      { id: 'f', col: 3, row: 0, kind: 'step', actor: 'system', label: 'Below floor? Stated in red · never blocked' },
+      { id: 'g', col: 4, row: 0, kind: 'end', actor: 'system', label: 'Matched · binds this order only' },
     ],
     edges: [
-      { from: 'a', to: 'b' }, { from: 'b', to: 'c', label: 'this order' }, { from: 'b', to: 'd', label: 'template' },
-      { from: 'd', to: 'e' }, { from: 'e', to: 'f', label: 'yes' }, { from: 'e', to: 'g', label: 'no' }, { from: 'f', to: 'g' },
+      { from: 'a', to: 'b' }, { from: 'b', to: 'c', label: 'no' }, { from: 'b', to: 'd', label: 'yes' },
+      { from: 'd', to: 'e', label: 'no' }, { from: 'd', to: 'f', label: 'yes' }, { from: 'f', to: 'g' },
     ],
   },
   {
@@ -403,7 +411,7 @@ export const FLOWS: Flow[] = [
     caption: 'Rules handle the obvious cases, so reps only see the requests that need judgement.',
     nodes: [
       { id: 'a', col: 0, row: 0, kind: 'start', actor: 'buyer', label: 'Request submitted' },
-      { id: 'b', col: 1, row: 0, kind: 'decision', actor: 'system', label: 'Below the floor?', ref: 'FR-3.4f' },
+      { id: 'b', col: 1, row: 0, kind: 'decision', actor: 'system', label: 'Below the floor, on the quote route?', ref: 'FR-3.4f' },
       { id: 'c', col: 2, row: 1, kind: 'end', actor: 'system', label: 'Auto-declined · no rule value disclosed', ref: 'AC-19.1 · AC-19.5' },
       { id: 'd', col: 2, row: 0, kind: 'decision', actor: 'system', label: 'Any failed proof check?' },
       { id: 'e', col: 3, row: 0, kind: 'decision', actor: 'system', label: 'Within auto-accept threshold?', ref: 'FR-3.4g' },

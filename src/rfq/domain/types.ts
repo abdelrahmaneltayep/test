@@ -28,6 +28,26 @@ export type InfoReason =
   | 'incomplete_document'
   | 'other'
 
+/**
+ * The seller's reason for turning a request down, named rather than silent.
+ *
+ * Under price matching a decline is the exception, so it has to say which exception it is:
+ * the buyer produced evidence and is entitled to an answer about that evidence, not a bare
+ * "no". The list is deliberately about the *claim* and the *supply* — never about the price
+ * itself, because on the match route the price is not the seller's to argue with.
+ *
+ * Placeholder: the PM has not yet settled the conditions under which a verified match may
+ * be refused at all (their answer to that question was "ignore now"). This vocabulary is
+ * shaped like AC-17.2's — controlled, never free text, with `other` carrying a mandatory
+ * note — and is expected to be replaced once those conditions land.
+ */
+export type DeclineReason =
+  | 'proof_not_verifiable'
+  | 'not_comparable'
+  | 'cannot_supply'
+  | 'terms_differ'
+  | 'other'
+
 /** FR-7.8 — Case 1 resolves tri-state, never as a binary approve/reject (Decision 3). */
 export type TriStateOutcome = 'matched' | 'beaten' | 'declined'
 
@@ -177,6 +197,12 @@ export interface NegotiationRequest {
   offerExpiresAt: string | null
   /** AC-17.1 — the seller's stated reason, shown to the buyer verbatim. */
   infoReason: { code: InfoReason; note: string } | null
+  /**
+   * The seller's reason for declining, shown to the buyer verbatim like `infoReason`.
+   * Null on a request the seller has not declined, and on the buyer's own decline — the
+   * buyer walking away from a counter owes no reason to anyone.
+   */
+  declineReason: { code: DeclineReason; note: string } | null
   history: HistoryEvent[]
   comments: Comment[]
   /** EC-12 — optimistic concurrency. */

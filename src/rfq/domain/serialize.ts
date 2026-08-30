@@ -47,6 +47,8 @@ export interface BuyerRequestView {
   slaDueAt: string | null
   offerExpiresAt: string | null
   infoReason: { code: string; note: string } | null
+  /** The seller's named reason for declining. A code and a note — never a margin. */
+  declineReason: { code: string; note: string } | null
   previousRef: string | null
 }
 
@@ -86,6 +88,9 @@ export function toBuyerView(
     offerExpiresAt: request.offerExpiresAt,
     infoReason: request.infoReason
       ? { code: request.infoReason.code, note: request.infoReason.note }
+      : null,
+    declineReason: request.declineReason
+      ? { code: request.declineReason.code, note: request.declineReason.note }
       : null,
     previousRef: request.previousRef,
   }

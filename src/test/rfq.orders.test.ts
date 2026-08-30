@@ -35,7 +35,7 @@ function request(state: RequestState, lines: RequestLine[] = [line()]): Negotiat
     buyerId: 'b1', buyerName: 'Buyer', sellerId: 's1', sellerName: 'Seller',
     state, lines, rounds: 0, infoRequests: 0,
     submittedAt: '2026-08-20T09:00:00.000Z', slaDueAt: null, offerExpiresAt: null,
-    infoReason: null, history: [], comments: [], version: 1, previousRef: null, sellerResponses: [],
+    infoReason: null, declineReason: null, history: [], comments: [], version: 1, previousRef: null, sellerResponses: [],
   }
 }
 

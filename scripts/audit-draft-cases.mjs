@@ -131,39 +131,101 @@ await p.getByRole('button', { name: 'Buyer · Dashboard' }).click(); await p.wai
 const buyerItems = await p.locator('tbody tr td:nth-child(4)').allInnerTexts()
 check('2.one-item-buyer', buyerItems.every((x) => !/^\d+$/.test(x.trim())), buyerItems.map((x) => x.split('\n')[0]).join(' | '))
 
-// ── §5 the four seller actions ───────────────────────────────────────────────
+// ── §5 the seller's actions, on the route that carries them ──────────────────
+//
+// Price matching split this walk in two. The quote route still runs the draft's four
+// moves; the match route is a guarantee and carries three, with no price input at all.
+// The quote route: SPR-2608-0006 is a seeded RFQ awaiting the seller. The route is the
+// page here, so the RFQ queue is where it lives.
 await reset()
 await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
-const rowActions = await p.locator('tbody tr').first().locator('td:last-child button').allInnerTexts()
-check('5.seller-accept-modify-reject', ['Accept', 'Counter', 'Decline'].every((x) => rowActions.includes(x)), rowActions.join(' | '))
-await p.locator('tbody tr', { hasText: 'SPR-2608-0003' }).getByRole('button', { name: 'Counter' }).click()
+await p.locator('.hb-navitem', { hasText: 'RFQs' }).click(); await p.waitForTimeout(250)
+const quoteRow = p.locator('tbody tr', { hasText: 'SPR-2608-0006' })
+const rowActions = await quoteRow.locator('td:last-child button').allInnerTexts()
+check('5.seller-accept-modify-reject', ['Counter', 'Decline'].every((x) => rowActions.includes(x))
+  && rowActions.some((x) => /Accept|Match/.test(x)), rowActions.join(' | '))
+await quoteRow.getByRole('button', { name: 'Counter' }).click()
 await p.waitForTimeout(300)
 check('5.detail-is-a-page', await p.locator('.hb-overlay').count() === 0
   && await p.locator('.hb-readback').count() === 1, `overlays=${await p.locator('.hb-overlay').count()}`)
+const quoteActions = await p.locator('.hb-modal-foot button').allInnerTexts()
+check('5.quote-route-keeps-the-loop', quoteActions.join('|') === 'Decline|Counter|Accept',
+  quoteActions.join(' | '))
+// Counter is gated on the price it needs.
+const counterBtn = p.locator('.hb-modal-foot').getByRole('button', { name: 'Counter' })
+check('5.counter-needs-price', await counterBtn.isDisabled(), await counterBtn.getAttribute('title') ?? '')
+await p.locator('.hb-card-body input[inputmode="decimal"]').first().fill('1.800')
+await p.waitForTimeout(250)
+check('5.counter-enabled-with-price', !(await counterBtn.isDisabled()), 'typed 1.800')
+
+// The match route: SPR-2608-0007 is a proved ask below the seller's floor.
+await reset()
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
+const matchRow = p.locator('tbody tr', { hasText: 'SPR-2608-0007' })
+const matchRowActions = await matchRow.locator('td:last-child button').allInnerTexts()
+check('pm.no-counter-in-the-row', !matchRowActions.some((x) => /Counter/i.test(x))
+  && matchRowActions.some((x) => /Match/i.test(x)), matchRowActions.join(' | '))
+// The row's own buttons settle the request from the queue, so the page is opened by
+// clicking the row rather than a control.
+await matchRow.click()
+await p.waitForTimeout(350)
 const readback = await txt('.hb-readback')
 check('5.buyer-form-read-back', /Asking for/i.test(readback) && /Quantity/i.test(readback)
   && /Supplier offering/i.test(readback) && /Attachment/i.test(readback), readback.slice(0, 220))
 const actions = await p.locator('.hb-modal-foot button').allInnerTexts()
-check('5.four-actions', actions.join('|') === 'Request more info|Decline|Counter|Accept', actions.join(' | '))
-// The four are not equals, and the button types say which is which.
+check('pm.three-actions-on-a-match', actions.join('|') === 'Request more info|Decline|Match this price',
+  actions.join(' | '))
+// The three are not equals, and the button types say which is which.
 const types = await p.locator('.hb-modal-foot button').evaluateAll((els) => els.map((e) => e.className
   .split(' ').find((c) => c.startsWith('hb-btn--')) ?? 'none'))
-check('5.button-types', types.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--outline|hb-btn--primary', types.join(' | '))
-// Counter is gated on the price it needs; Accept is gated on there being an ask.
-const counterBtn = p.locator('.hb-modal-foot').getByRole('button', { name: 'Counter' })
-check('5.counter-needs-price', await counterBtn.isDisabled(), await counterBtn.getAttribute('title') ?? '')
-await p.locator('.hb-card-body input[inputmode="decimal"]').first().fill('6.000')
-await p.waitForTimeout(250)
-check('5.counter-enabled-with-price', !(await counterBtn.isDisabled()), 'typed 6.000')
-// Order by order: accepting settles this request and writes nothing forward.
-await p.locator('.hb-modal-foot').getByRole('button', { name: 'Accept' }).click()
+check('5.button-types', types.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--primary', types.join(' | '))
+// No price input at all: there is nothing on this page to counter with.
+check('pm.no-price-input-on-a-match',
+  await p.locator('.hb-card-body input[inputmode="decimal"]').count() === 0,
+  'the counter field is not rendered on the match route')
+// The guarantee is stated, not left to be inferred from a missing button.
+const guarantee = await txt('.hb-banner--info')
+check('pm.guarantee-is-stated', /verified price wins/i.test(guarantee), guarantee.slice(0, 160))
+// Below floor: said in red, and it does not block.
+const floorBanner = await txt('.hb-banner--bad')
+check('pm.below-floor-is-stated-not-blocking', /below your floor/i.test(floorBanner)
+  && !(await p.locator('.hb-modal-foot').getByRole('button', { name: 'Match this price' }).isDisabled()),
+  floorBanner.slice(0, 160))
+// Order by order: matching settles this request and writes nothing forward.
+await p.locator('.hb-modal-foot').getByRole('button', { name: 'Match this price' }).click()
 await p.waitForTimeout(350)
 check('5.no-template-offer', await p.locator('.hb-checkfield').count() === 0,
-  'no save-forward choice rides on Accept')
+  'no save-forward choice rides on the match')
 await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Sent' }).click(); await p.waitForTimeout(200)
-const acceptedRow = await p.locator('tbody tr', { hasText: 'SPR-2608-0003' }).innerText()
+const acceptedRow = await p.locator('tbody tr', { hasText: 'SPR-2608-0007' }).innerText()
 check('5.accept-settles-once', /Accepted/i.test(acceptedRow) && !/Template/i.test(acceptedRow),
   acceptedRow.replace(/\n/g, ' | '))
+
+// ── A decline names its reason, and the buyer reads it ───────────────────────
+await reset()
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
+await p.locator('tbody tr', { hasText: 'SPR-2608-0007' })
+  .getByRole('button', { name: 'Decline' }).click()
+await p.waitForTimeout(300)
+const declineSend = p.locator('.hb-modal-foot').getByRole('button', { name: 'Decline and reply' })
+check('pm.decline-needs-a-reason', await declineSend.isDisabled(),
+  'the send button is dead until a reason is chosen')
+const reasonOptions = await p.locator('.hb-overlay select option').allInnerTexts()
+check('pm.reason-is-a-controlled-list', reasonOptions.length >= 5
+  && /Choose a reason/i.test(reasonOptions[0])
+  && reasonOptions.some((x) => /could not be verified/i.test(x)), reasonOptions.join(' | '))
+await p.locator('.hb-overlay select').first().selectOption({ label: 'Not a comparable offer (pack size, spec or terms)' })
+await p.waitForTimeout(150)
+check('pm.decline-enabled-once-named', !(await declineSend.isDisabled()), 'reason chosen')
+await declineSend.click(); await p.waitForTimeout(350)
+// The buyer is owed the answer, so they get the reason and not just the outcome.
+await p.getByRole('button', { name: 'Buyer · Dashboard' }).click(); await p.waitForTimeout(300)
+// A declined request is terminal, so it is on the Closed tab.
+await p.locator('.hb-tab', { hasText: 'Closed' }).first().click(); await p.waitForTimeout(250)
+await p.locator('tbody tr', { hasText: 'SPR-2608-0007' }).click(); await p.waitForTimeout(350)
+const buyerDeclineText = await txt('.hb-content')
+check('pm.buyer-reads-the-reason', /supplier declined this request/i.test(buyerDeclineText)
+  && /comparable/i.test(buyerDeclineText), buyerDeclineText.slice(0, 200))
 
 // ── §7 pending order: cancel and nothing else while the seller decides ───────
 await reset()
@@ -230,8 +292,17 @@ check('9.standard-plus-negotiated', finalRefs.some((r) => /Standard order/i.test
   finalRefs.map((r) => r.split('\n')[1]).join(' | '))
 
 // ── §6 the buyer's request detail is a page, with the same ranked actions ────
+//
+// On the RFQ page, and only there. Price matching took the seller's counter off the match
+// route, so "Counter received" is a state a buyer can now only reach by asking for a quote
+// — the special-price page has no counters left to show, which is the guarantee seen from
+// the other side.
 await reset()
 await p.getByRole('button', { name: 'Buyer · Dashboard' }).click(); await p.waitForTimeout(250)
+check('pm.no-counters-on-the-match-page',
+  !(await p.locator('tbody tr').allInnerTexts()).some((r) => /Counter received/i.test(r)),
+  'the buyer never receives a counter on a proved ask')
+await p.locator('.hb-navitem', { hasText: 'RFQs' }).click(); await p.waitForTimeout(250)
 await p.locator('tbody tr', { hasText: 'Counter received' }).first()
   .getByRole('button', { name: 'Accept' }).click()
 await p.waitForTimeout(350)

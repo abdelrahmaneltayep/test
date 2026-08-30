@@ -15,9 +15,9 @@ import { hasFailedCheck, runAutoChecks } from './domain/proof'
 import { makeOrderId, orderLinesFrom, viewOrder, type Order, type OrderResolution } from './domain/orders'
 import { makeRef } from './domain/reference'
 import { evaluateAutoRules } from './domain/rules'
-import { attemptTransition, type RequestState } from './domain/states'
+import { attemptTransition, routeOf, type RequestState } from './domain/states'
 import type {
-  Actor, Frequency, HistoryEvent, InfoReason, LineOutcome, Minor,
+  Actor, DeclineReason, Frequency, HistoryEvent, InfoReason, LineOutcome, Minor,
   NegotiationRequest, Product, Proof, RequestLine,
 } from './domain/types'
 
@@ -239,7 +239,7 @@ export type Action =
   | { type: 'discard_draft' }
   | { type: 'submit_draft' }
   | { type: 'seller_opens'; ref: string }
-  | { type: 'seller_responds'; ref: string; decisions: Record<string, { outcome: LineOutcome; price: Minor | null }>; validityDays: number; overrideReason: string | null }
+  | { type: 'seller_responds'; ref: string; decisions: Record<string, { outcome: LineOutcome; price: Minor | null }>; validityDays: number; overrideReason: string | null; declineReason?: { code: DeclineReason; note: string } | null }
   | { type: 'request_more_info'; ref: string; reason: InfoReason; note: string }
   | { type: 'buyer_resubmits'; ref: string }
   | { type: 'buyer_accepts'; ref: string }
@@ -270,7 +270,9 @@ function transitioned(
   now: Date, type: string, params: Record<string, string | number | null> = {},
   money: Parameters<typeof event>[5] = {},
 ): NegotiationRequest {
-  const result = attemptTransition(request.state, to, actor)
+  // The route is part of the guard now: the seller's counter is not a move the match
+  // route carries, so a request on it is rejected here and not merely hidden in the UI.
+  const result = attemptTransition(request.state, to, actor, routeOf(request.lines))
   if (!result.ok) {
     // The UI never offers an invalid action; reaching here means a genuine 409 (EC-12).
     console.warn(`[${request.ref}] ${result.reason}`)
@@ -333,7 +335,7 @@ export function reducer(state: RfqState, action: Action): RfqState {
         state: 'draft', lines, rounds: 0, infoRequests: 0,
         submittedAt: now.toISOString(),
         slaDueAt: addHours(now, guardrailValue('sellerResponseSlaHours')).toISOString(),
-        offerExpiresAt: null, infoReason: null,
+        offerExpiresAt: null, infoReason: null, declineReason: null,
         history: [], comments: [], version: 0, previousRef: null, sellerResponses: [],
       }
       request = transitioned(request, 'submitted', 'buyer', BUYER.name[lang], now,
@@ -394,6 +396,7 @@ export function reducer(state: RfqState, action: Action): RfqState {
 
     case 'seller_responds': {
       const { decisions, validityDays, overrideReason } = action
+      const declineReason = action.declineReason ?? null
       return withRequest(state, action.ref, (r) => {
         const lines = r.lines.map((l) => {
           const d = decisions[l.id]
@@ -410,11 +413,18 @@ export function reducer(state: RfqState, action: Action): RfqState {
         const to: RequestState = allDeclined ? 'declined' : allAccepted ? 'accepted' : 'countered_by_seller'
         const expiresAt = addDays(state.now, validityDays)
 
+        // A decline is now named: the reason rides on the same history event as the
+        // transition (A4), so the record cannot hold one without the other.
         let next = transitioned(
           r, to, 'seller', SELLER.name[lang], state.now,
-          to === 'declined' ? 'RequestDeclined' : to === 'accepted' ? 'RequestAccepted' : 'SellerResponded',
-          { lines: lines.length },
+          to === 'declined'
+            ? (declineReason ? 'RequestDeclinedWithReason' : 'RequestDeclined')
+            : to === 'accepted' ? 'RequestAccepted' : 'SellerResponded',
+          to === 'declined' && declineReason
+            ? { lines: lines.length, reason: declineReason.code, note: declineReason.note }
+            : { lines: lines.length },
         )
+        if (next === r) return r
         if (overrideReason) {
           // FR-10.3 — a floor override is recorded with its mandatory reason.
           next = {
@@ -425,6 +435,9 @@ export function reducer(state: RfqState, action: Action): RfqState {
         return {
           ...next,
           lines,
+          // Kept only where it is true: a request that ends any other way carries no
+          // decline reason, so a later re-read cannot mistake a stale one for this answer.
+          declineReason: to === 'declined' ? declineReason : null,
           slaDueAt: null,
           // FR-6.8 — every response carries an expiry (AC-15.6).
           offerExpiresAt: to === 'countered_by_seller' ? expiresAt.toISOString() : null,
@@ -666,8 +679,8 @@ export function initialState(now: Date): RfqState {
   const proofStale: Proof = {
     fileName: 'photo-invoice.jpg', mimeType: 'image/jpeg', sizeBytes: 2_100_000,
     hash: 'hash-seed-2',
-    typed: { supplier: 'Reef Supplies', sku: 'HB-2210', unitPrice: 13_500, documentDate: '2026-05-19', currency: 'BHD' },
-    extracted: { supplier: 'Reef Supplies', sku: 'Afia 6x1.8L', unitPrice: 13_500, documentDate: '2026-05-19', currency: 'BHD' },
+    typed: { supplier: 'Reef Supplies', sku: 'HB-2210', unitPrice: 12_600, documentDate: '2026-05-19', currency: 'BHD' },
+    extracted: { supplier: 'Reef Supplies', sku: 'Afia 6x1.8L', unitPrice: 12_600, documentDate: '2026-05-19', currency: 'BHD' },
     extractionUnavailable: false, checks: [],
   }
   const checkCtx = {
@@ -683,7 +696,7 @@ export function initialState(now: Date): RfqState {
     state, lines, rounds: 0, infoRequests: 0,
     submittedAt: addHours(now, -6).toISOString(),
     slaDueAt: addHours(now, 18).toISOString(),
-    offerExpiresAt: null, infoReason: null,
+    offerExpiresAt: null, infoReason: null, declineReason: null,
     history: [event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -6), { lines: lines.length })],
     comments: [], version: 1, previousRef: null, sellerResponses: [],
     ...extra,
@@ -702,9 +715,16 @@ export function initialState(now: Date): RfqState {
       mkLine('HB-4471', 60, 'case_1', 9_400, null, 'pending', proofOk),
     ], { slaDueAt: addHours(now, 2).toISOString() }),
 
-    // Answered by the seller; it is the buyer's turn (AC-9.1 comparison).
+    /*
+     * Answered by the seller; it is the buyer's turn (AC-9.1 comparison).
+     *
+     * On the quote route, and it has to be: price matching made the seller's counter a
+     * move the match route does not carry, so a counter can only ever come back on a
+     * request that asked for a quote. This fixture used to be a matched request that had
+     * been countered, which the state machine now rejects outright.
+     */
     base('SPR-2608-0002', 'countered_by_seller', [
-      mkLine('HB-2210', 40, 'case_1', 13_500, 14_100, 'countered', proofStale),
+      mkLine('HB-2210', 40, 'case_2', null, 14_100, 'countered'),
     ], {
       rounds: 1, slaDueAt: null,
       offerExpiresAt: addDays(now, 5).toISOString(),
@@ -739,6 +759,25 @@ export function initialState(now: Date): RfqState {
       mkLine('HB-7788', 300, 'case_2', null, null, 'pending'),
     ], { slaDueAt: addHours(now, 12).toISOString(), submittedAt: addHours(now, -12).toISOString() }),
 
+    /*
+     * The verification case the match route is built for: a proved ask that lands *below*
+     * the seller's floor (12.600 against 13.000 on HB-2210) on a document that is months
+     * old. The guarantee means the floor does not block the match — the screen states the
+     * position in red and the seller matches it anyway, asks for a fresher document, or
+     * declines with a named reason. It is above cost (11.600), so the loss is policy and
+     * not money, which is the distinction the two banners draw.
+     */
+    base('SPR-2608-0007', 'viewed', [
+      mkLine('HB-2210', 40, 'case_1', 12_600, null, 'pending', proofStale),
+    ], {
+      slaDueAt: addHours(now, 16).toISOString(),
+      submittedAt: addHours(now, -8).toISOString(),
+      history: [
+        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -8), { lines: 1 }),
+        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -7)),
+      ],
+    }),
+
     // EC-20 — a request whose priced line has no cost configured.
     base('SPR-2608-0003', 'viewed', [
       mkLine('HB-9032', 80, 'case_1', 6_100, null, 'pending'),
@@ -769,19 +808,35 @@ export function initialState(now: Date): RfqState {
       history: [
         event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -220), { lines: 1 }),
         event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -214)),
-        event('RequestDeclined', 'seller', SELLER.name.en, addHours(now, -212)),
+        event('RequestDeclinedWithReason', 'seller', SELLER.name.en, addHours(now, -212), { reason: 'not_comparable' }),
       ],
+      declineReason: {
+        code: 'not_comparable',
+        note: 'Their price is for the 4x2L case, not the 6x1.8L we supply.',
+      },
     }),
 
-    // A closed one, so the buyer list is not all live rows (AC-22.1).
+    /*
+     * A closed one, so the buyer list is not all live rows (AC-22.1).
+     *
+     * It used to be the floor rule's fixture: 1.600 against a 1.700 floor, auto-declined by
+     * the machine before a person saw it. Price matching took that rule off the match
+     * route, so the same request is now answered by a rep who read the document and said
+     * which exception they were taking.
+     */
     base('SPR-2607-0044', 'declined', [
       mkLine('HB-7788', 100, 'case_1', 1_600, 1_950, 'declined'),
     ], {
       slaDueAt: null, submittedAt: addHours(now, -400).toISOString(),
       history: [
         event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -400), { lines: 1 }),
-        event('AutoRuleFired', 'system', null, addHours(now, -400), { rule: 'FR-3.4f:floor_price' }, { rule: 'FR-3.4f:floor_price' }),
+        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -398)),
+        event('RequestDeclinedWithReason', 'seller', SELLER.name.en, addHours(now, -397), { reason: 'cannot_supply' }),
       ],
+      declineReason: {
+        code: 'cannot_supply',
+        note: 'We cannot hold 100 cases at that price for this delivery window.',
+      },
     }),
   ]
 

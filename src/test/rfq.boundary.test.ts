@@ -30,7 +30,7 @@ function request(overrides: Partial<NegotiationRequest> = {}): NegotiationReques
     submittedAt: '2026-08-18T08:00:00Z',
     slaDueAt: '2026-08-19T08:00:00Z',
     offerExpiresAt: '2026-08-25T08:00:00Z',
-    infoReason: null, history: [], comments: [],
+    infoReason: null, declineReason: null, history: [], comments: [],
     version: 3, previousRef: null,
     sellerResponses: [{ sellerId: 's1', respondedAt: '2026-08-18T14:00:00Z', expiresAt: '2026-08-25T08:00:00Z', floorOverrideReason: 'strategic account' }],
     ...overrides,

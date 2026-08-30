@@ -4,6 +4,13 @@
  * The rules exist so negotiation volume does not scale linearly into seller headcount (O4).
  * Two hard constraints govern them: floor always wins over auto-accept (EC-22), and a
  * failed proof check blocks auto-accept entirely (AC-19.4).
+ *
+ * Price matching took the floor's *auto-decline* off the match route, and this is where
+ * that guarantee is easiest to break by omission: FR-3.4f used to refuse a below-floor ask
+ * before a person ever saw it, and AC-19.5 forbids the refusal from saying why. A silent
+ * machine "no" to a price the buyer proved is the exact thing the guarantee promises will
+ * not happen. So on the match route a below-floor ask is queued for a person; the floor
+ * still outranks auto-accept there, and the quote route keeps the rule whole.
  */
 
 import { guardrailValue } from './guardrails'
@@ -59,15 +66,31 @@ export function evaluateAutoRules(ctx: RuleContext): RuleOutcome {
     }
   }
 
-  // FR-3.4f — an ask below floor is auto-declined and never enters the queue (AC-19.1).
-  const belowFloor = priced.find(
+  const underFloor = priced.filter(
     (l) => l.floorSnapshot !== null && (l.askedPrice as Minor) < l.floorSnapshot,
   )
+
+  // FR-3.4f — an ask below floor is auto-declined and never enters the queue (AC-19.1).
+  // On the quote route only: see the note at the top of this file.
+  const belowFloor = underFloor.find((l) => l.route === 'case_2')
   if (belowFloor) {
     return {
       decision: 'auto_decline',
       rule: 'FR-3.4f:floor_price',
       internalReason: `${belowFloor.sku} asked below floor`,
+      opsAlert: null,
+    }
+  }
+
+  // EC-22 still holds on the match route, in the only form left to it: the floor cannot
+  // decline the request, but it can and does stop the machine accepting it. A proved ask
+  // below floor is a decision for a person, taken with the position stated in red.
+  const matchBelowFloor = underFloor.find((l) => l.route === 'case_1')
+  if (matchBelowFloor) {
+    return {
+      decision: 'queue',
+      rule: null,
+      internalReason: `${matchBelowFloor.sku} asked below floor · match route, seller decides`,
       opsAlert: null,
     }
   }

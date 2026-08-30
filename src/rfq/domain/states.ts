@@ -6,7 +6,7 @@
  * Any transition not in TRANSITIONS is invalid and is rejected with 409 (FR-3.3).
  */
 
-import type { Actor } from './types'
+import type { Actor, Route } from './types'
 
 /** FR-3.1 — eleven states since price matching went order by order. Adding one is a schema change. */
 export const STATES = [
@@ -108,6 +108,31 @@ export interface Transition {
   to: RequestState
   trigger: string
   actors: Actor[]
+  /**
+   * FR-1.2 — the routes this move exists on. Absent means both, which is every row but
+   * the seller's counter.
+   *
+   * Price matching is a guarantee: on the match route the buyer's verified price wins, so
+   * there is nothing for the seller to counter with. The move is not merely hidden in the
+   * UI — it is not in the table, so the reducer rejects it with the same 409 any other
+   * unlisted transition gets (FR-3.3). The quote route keeps the full loop: nothing there
+   * is verified, so there is nothing to guarantee.
+   */
+  routes?: Route[]
+}
+
+/**
+ * A request is on the match route only when every line is on it. A mixed request keeps the
+ * counter, because the guarantee is a claim about verified evidence and a quote line
+ * carries none — withdrawing the seller's counter over a line nobody proved anything about
+ * would be a guarantee the buyer never earned.
+ */
+export function routeOf(lines: readonly { route: Route }[]): Route {
+  return lines.length > 0 && lines.every((l) => l.route === 'case_1') ? 'case_1' : 'case_2'
+}
+
+function allowsRoute(t: Transition, route: Route | undefined): boolean {
+  return route === undefined || t.routes === undefined || t.routes.includes(route)
 }
 
 /**
@@ -128,8 +153,9 @@ export const TRANSITIONS: readonly Transition[] = [
   { from: 'draft', to: 'submitted', trigger: 'submit', actors: ['buyer'] },
   { from: 'submitted', to: 'viewed', trigger: 'seller_opens', actors: ['seller'] },
 
-  { from: 'submitted', to: 'countered_by_seller', trigger: 'send_response', actors: ['seller'] },
-  { from: 'viewed', to: 'countered_by_seller', trigger: 'send_response', actors: ['seller'] },
+  // The seller's counter, and the only rows in this table a route can take away.
+  { from: 'submitted', to: 'countered_by_seller', trigger: 'send_response', actors: ['seller'], routes: ['case_2'] },
+  { from: 'viewed', to: 'countered_by_seller', trigger: 'send_response', actors: ['seller'], routes: ['case_2'] },
 
   { from: 'submitted', to: 'accepted', trigger: 'accept_as_asked', actors: ['seller', 'system'] },
   { from: 'viewed', to: 'accepted', trigger: 'accept_as_asked', actors: ['seller', 'system'] },
@@ -151,7 +177,7 @@ export const TRANSITIONS: readonly Transition[] = [
   { from: 'countered_by_seller', to: 'countered_by_buyer', trigger: 'buyer_counters', actors: ['buyer'] },
   { from: 'countered_by_seller', to: 'declined', trigger: 'buyer_declines', actors: ['buyer'] },
 
-  { from: 'countered_by_buyer', to: 'countered_by_seller', trigger: 'send_response', actors: ['seller'] },
+  { from: 'countered_by_buyer', to: 'countered_by_seller', trigger: 'send_response', actors: ['seller'], routes: ['case_2'] },
   { from: 'countered_by_buyer', to: 'accepted', trigger: 'seller_accepts', actors: ['seller'] },
   { from: 'countered_by_buyer', to: 'declined', trigger: 'seller_declines', actors: ['seller'] },
 
@@ -167,15 +193,19 @@ export const TRANSITIONS: readonly Transition[] = [
 ]
 
 export function findTransition(
-  from: RequestState, to: RequestState, actor?: Actor,
+  from: RequestState, to: RequestState, actor?: Actor, route?: Route,
 ): Transition | undefined {
   return TRANSITIONS.find(
-    (t) => t.from === from && t.to === to && (actor === undefined || t.actors.includes(actor)),
+    (t) => t.from === from && t.to === to
+      && (actor === undefined || t.actors.includes(actor))
+      && allowsRoute(t, route),
   )
 }
 
-export function canTransition(from: RequestState, to: RequestState, actor?: Actor): boolean {
-  return findTransition(from, to, actor) !== undefined
+export function canTransition(
+  from: RequestState, to: RequestState, actor?: Actor, route?: Route,
+): boolean {
+  return findTransition(from, to, actor, route) !== undefined
 }
 
 export interface TransitionRejection {
@@ -188,18 +218,23 @@ export interface TransitionRejection {
 export type TransitionResult = { ok: true; transition: Transition } | TransitionRejection
 
 export function attemptTransition(
-  from: RequestState, to: RequestState, actor: Actor,
+  from: RequestState, to: RequestState, actor: Actor, route?: Route,
 ): TransitionResult {
-  const transition = findTransition(from, to, actor)
+  const transition = findTransition(from, to, actor, route)
   if (transition) return { ok: true, transition }
-  const existsForAnyActor = findTransition(from, to) !== undefined
-  return {
-    ok: false,
-    status: 409,
-    reason: existsForAnyActor
-      ? `${actor} may not move a request from ${from} to ${to}`
-      : `${from} → ${to} is not a permitted transition`,
+  // Three ways to be rejected, and the caller is told which: the pair does not exist, the
+  // actor may not make that move, or the route this request took does not carry it.
+  const forAnyone = findTransition(from, to, undefined, route)
+  const onAnyRoute = findTransition(from, to, actor)
+  let reason: string
+  if (onAnyRoute !== undefined) {
+    reason = `${from} → ${to} is not available on the ${route} route`
+  } else if (forAnyone !== undefined || findTransition(from, to) !== undefined) {
+    reason = `${actor} may not move a request from ${from} to ${to}`
+  } else {
+    reason = `${from} → ${to} is not a permitted transition`
   }
+  return { ok: false, status: 409, reason }
 }
 
 /** FR-3.2 — resolve the label for the actor who is looking. Never leaks the internal name. */

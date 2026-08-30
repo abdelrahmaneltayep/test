@@ -5,7 +5,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   STATES, STATE_META, TRANSITIONS, NON_TERMINAL_STATES,
-  canTransition, attemptTransition, isTerminal, labelFor,
+  canTransition, attemptTransition, isTerminal, labelFor, routeOf,
   type RequestState,
 } from '@/rfq/domain/states'
 
@@ -17,6 +17,63 @@ describe('FR-3.1 — exactly eleven states', () => {
 
   it('gives every state metadata', () => {
     for (const s of STATES) expect(STATE_META[s]).toBeDefined()
+  })
+})
+
+/**
+ * Price matching — the match route is a guarantee, so the seller's counter is not a move
+ * it carries. The quote route is untouched: a quote guarantees nothing.
+ */
+describe('the match route carries no counter', () => {
+  const REACH_COUNTER: RequestState[] = ['submitted', 'viewed', 'countered_by_buyer']
+
+  it('lets the seller counter on the quote route, from every state that could', () => {
+    for (const from of REACH_COUNTER) {
+      expect(canTransition(from, 'countered_by_seller', 'seller', 'case_2')).toBe(true)
+    }
+  })
+
+  it('refuses the same move on the match route', () => {
+    for (const from of REACH_COUNTER) {
+      expect(canTransition(from, 'countered_by_seller', 'seller', 'case_1')).toBe(false)
+    }
+  })
+
+  it('rejects it with a 409 that names the route rather than the actor', () => {
+    const result = attemptTransition('viewed', 'countered_by_seller', 'seller', 'case_1')
+    expect(result.ok).toBe(false)
+    if (result.ok) return
+    expect(result.status).toBe(409)
+    expect(result.reason).toMatch(/case_1 route/)
+  })
+
+  it('leaves every other move on the match route alone', () => {
+    expect(canTransition('viewed', 'accepted', 'seller', 'case_1')).toBe(true)
+    expect(canTransition('viewed', 'declined', 'seller', 'case_1')).toBe(true)
+    expect(canTransition('viewed', 'info_requested', 'seller', 'case_1')).toBe(true)
+    expect(canTransition('submitted', 'withdrawn', 'buyer', 'case_1')).toBe(true)
+    expect(canTransition('viewed', 'expired', 'system', 'case_1')).toBe(true)
+  })
+
+  it('asks about the route on exactly the counter rows and nowhere else', () => {
+    const restricted = TRANSITIONS.filter((t) => t.routes !== undefined)
+    expect(restricted).toHaveLength(3)
+    expect(restricted.every((t) => t.to === 'countered_by_seller')).toBe(true)
+  })
+
+  // A guarantee is a claim about proved evidence, so a request only earns it when every
+  // line brought some. One quote line and the whole request keeps the loop.
+  it('reads the route off the lines, and a mixed request is a quote', () => {
+    expect(routeOf([{ route: 'case_1' }])).toBe('case_1')
+    expect(routeOf([{ route: 'case_1' }, { route: 'case_1' }])).toBe('case_1')
+    expect(routeOf([{ route: 'case_1' }, { route: 'case_2' }])).toBe('case_2')
+    expect(routeOf([])).toBe('case_2')
+  })
+
+  // Omitting the route asks "does this move exist at all", which is what the rest of the
+  // suite means when it leaves the argument off.
+  it('is route-blind when no route is given', () => {
+    expect(canTransition('viewed', 'countered_by_seller', 'seller')).toBe(true)
   })
 })
 

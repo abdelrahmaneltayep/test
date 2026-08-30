@@ -83,9 +83,9 @@ export const STRINGS: Dict = {
   // ── Step 2, route (US-3) ──────────────────────────────────────────────────
   routeStepTitle: { en: 'What would you like to ask for?', ar: 'ما الذي تريد طلبه؟' },
   case1Title: { en: 'I have a price to match', ar: 'لديّ سعر أريد مطابقته' },
-  case1Body: { en: 'State your target price and attach the invoice or quote that shows it.', ar: 'حدّد السعر المستهدف وأرفق الفاتورة أو عرض السعر الذي يثبته.' },
+  case1Body: { en: 'State your target price and attach the invoice or quote that shows it. Once the supplier verifies the document they match that price — they do not counter it.', ar: 'حدّد السعر المستهدف وأرفق الفاتورة أو عرض السعر الذي يثبته. وبعد تحقق المورّد من المستند يطابق ذلك السعر — ولا يقدّم عرضاً مقابلاً.' },
   case2Title: { en: 'Ask the seller to quote', ar: 'اطلب من البائع تسعير الكمية' },
-  case2Body: { en: 'No competing price needed — the supplier prices your volume.', ar: 'لا حاجة لسعر منافس — يقوم المورّد بتسعير كميتك.' },
+  case2Body: { en: 'No competing price needed — the supplier prices your volume, and you can negotiate from there.', ar: 'لا حاجة لسعر منافس — يقوم المورّد بتسعير كميتك، ويمكنك التفاوض بعدها.' },
 
   // ── Step 3a, Case 1 (US-4) ────────────────────────────────────────────────
   targetPrice: { en: 'Your target price per unit', ar: 'السعر المستهدف للوحدة' },
@@ -226,7 +226,6 @@ export const STRINGS: Dict = {
   infoRequestsExhausted: { en: 'You have used both information requests on this one. A decision is required now.', ar: 'استخدمت طلبَي المعلومات على هذا الطلب. المطلوب الآن قرار.' },
   sameAsLastTime: { en: 'Same as last time ({price})', ar: 'مثل المرة السابقة ({price})' },
   thisOrderOnly: { en: 'This order only', ar: 'هذا الطلب فقط' },
-  saveAsTemplate: { en: 'Save as template', ar: 'حفظ كقالب سعر' },
   validFrom: { en: 'Valid from', ar: 'ساري من' },
   validUntil: { en: 'Valid until', ar: 'ساري حتى' },
   minQty: { en: 'Minimum quantity', ar: 'أقل كمية' },
@@ -243,10 +242,7 @@ export const STRINGS: Dict = {
   allChecksPassed: { en: 'All automatic checks passed — freshness, product identity and duplicate.', ar: 'اجتاز المستند كل الفحوص التلقائية — الحداثة ومطابقة الصنف وعدم التكرار.' },
   checksNeedingAttention: { en: 'Checks needing attention', ar: 'فحوص تحتاج انتباهك' },
   counterNeedsPrice: { en: 'Enter a counter price to send one.', ar: 'أدخل سعراً مقابلاً لإرساله.' },
-  alsoSaveTemplate: { en: 'Also save this price to their price list', ar: 'احفظ هذا السعر أيضاً في قائمة أسعارهم' },
-  alsoSaveTemplateHint: { en: 'It applies to their next orders too, not just this one.', ar: 'ينطبق على طلباتهم القادمة أيضاً وليس هذا الطلب فقط.' },
   sendAccept: { en: 'Accept and reply', ar: 'اقبل وأرسل الرد' },
-  sendAcceptTemplate: { en: 'Accept & save as template', ar: 'اقبل واحفظه كقالب' },
   sendCounter: { en: 'Send counter-offer', ar: 'أرسل العرض المقابل' },
   sendDecline: { en: 'Decline and reply', ar: 'ارفض وأرسل الرد' },
   checksNotRun: { en: 'Checks could not run — review the document manually.', ar: 'تعذّر تشغيل الفحوص — راجع المستند يدوياً.' },
@@ -294,6 +290,29 @@ export const STRINGS: Dict = {
   confirmSellerDeclineTitle: { en: 'Decline this request?', ar: 'رفض هذا الطلب؟' },
   confirmSellerDeclineBody: { en: 'Every item resolves at its list price and the negotiation ends. The buyer can still order at that price, and can send a new request.', ar: 'تُحسم كل الأصناف بسعرها المعلن وتنتهي المفاوضة. ويظل بإمكان المشتري الطلب بهذا السعر وإرسال طلب جديد.' },
   belowFloorWarning: { en: 'The asked price is below your floor on {sku}. Open the request to override it with a reason.', ar: 'السعر المطلوب أقل من حدك الأدنى في {sku}. افتح الطلب لتجاوزه مع ذكر السبب.' },
+
+  // ── Price matching — the match route is a guarantee, not a negotiation ────
+  matchPrice: { en: 'Match this price', ar: 'طابق هذا السعر' },
+  matchAction: { en: 'Match', ar: 'مطابقة' },
+  matchGuaranteeTitle: { en: 'Price match — the buyer\u2019s verified price wins', ar: 'مطابقة السعر — السعر المُثبت من المشتري هو المعتمد' },
+  matchGuaranteeBody: { en: 'You have three moves here and none of them is a counter-offer: match the verified price, ask for better evidence, or decline with a stated reason. The price itself is not open.', ar: 'أمامك ثلاثة خيارات وليس بينها عرض مقابل: طابق السعر المُثبت، أو اطلب إثباتاً أفضل، أو ارفض مع ذكر السبب. أما السعر نفسه فليس محل تفاوض.' },
+  matchBelowFloor: { en: 'Matching puts {sku} below your floor of {floor}. The guarantee still stands — this is stated so you decide with it in view.', ar: 'المطابقة تضع {sku} تحت حدك الأدنى البالغ {floor}. الضمان قائم — يُذكر هذا لتقرر وأنت على علم.' },
+  matchBelowCost: { en: 'Matching puts {sku} below your cost of {cost}. This order loses money at that price.', ar: 'المطابقة تضع {sku} تحت تكلفتك البالغة {cost}. هذا الطلب يخسر عند هذا السعر.' },
+  confirmMatchTitle: { en: 'Match this price?', ar: 'مطابقة هذا السعر؟' },
+  confirmMatchBody: { en: 'The buyer\u2019s verified price becomes the price on this order, and the negotiation closes. It applies to this order only.', ar: 'يصبح سعر المشتري المُثبت هو سعر هذا الطلب وتنتهي المفاوضة. وينطبق على هذا الطلب وحده.' },
+  guaranteeOnRequest: { en: 'Verified price match', ar: 'مطابقة سعر مُثبتة' },
+
+  // ── A decline is named — the buyer produced evidence and is owed an answer ─
+  declineReasonLabel: { en: 'Why are you declining?', ar: 'ما سبب الرفض؟' },
+  declineReasonChoose: { en: 'Choose a reason', ar: 'اختر سبباً' },
+  declineReasonShown: { en: 'The buyer sees this reason, in full.', ar: 'يرى المشتري هذا السبب كاملاً.' },
+  declineNeedsReason: { en: 'Choose a reason before declining.', ar: 'اختر سبباً قبل الرفض.' },
+  declineNeedsNote: { en: 'Describe the reason.', ar: 'اشرح السبب.' },
+  supplierDeclinedBecause: { en: 'The supplier declined this request', ar: 'رفض المورّد هذا الطلب' },
+  reasonProofNotVerifiable: { en: 'The document could not be verified', ar: 'تعذّر التحقق من المستند' },
+  reasonNotComparable: { en: 'Not a comparable offer (pack size, spec or terms)', ar: 'العرض غير مماثل (الحجم أو المواصفة أو الشروط)' },
+  reasonCannotSupply: { en: 'Cannot supply this quantity', ar: 'يتعذّر توريد هذه الكمية' },
+  reasonTermsDiffer: { en: 'Delivery or payment terms differ', ar: 'شروط التسليم أو الدفع مختلفة' },
 
   // ── Inbox — Feature Flow Draft §8 ─────────────────────────────────────────
   navInbox: { en: 'Inbox', ar: 'صندوق الوارد' },
@@ -357,7 +376,6 @@ export const STRINGS: Dict = {
   ordersEmptyTitle: { en: 'No orders here', ar: 'لا توجد طلبات هنا' },
   ordersEmptyBody: { en: 'Orders appear here once you place them.', ar: 'تظهر الطلبات هنا بعد إتمامها.' },
   savedVsList: { en: 'Saved against list price', ar: 'الوفر مقابل السعر المعلن' },
-  acceptAsTemplate: { en: 'Accept & apply as template', ar: 'اقبل واحفظه كقالب' },
   acceptThisOrderOnly: { en: 'Accept (this order only)', ar: 'اقبل (هذا الطلب فقط)' },
 
   // ── Cross-cutting ─────────────────────────────────────────────────────────
@@ -395,9 +413,9 @@ export const HISTORY_TEMPLATES: Dict = {
   InfoSupplied: { en: '{actor} supplied the requested information', ar: 'قدّم {actor} المعلومات المطلوبة' },
   RequestAccepted: { en: '{actor} accepted the price', ar: 'قبل {actor} السعر' },
   RequestDeclined: { en: '{actor} declined', ar: 'رفض {actor}' },
+  RequestDeclinedWithReason: { en: '{actor} declined: {reason}', ar: 'رفض {actor}: {reason}' },
   RequestExpired: { en: 'The request expired when its clock elapsed', ar: 'انتهت صلاحية الطلب بانتهاء المهلة' },
   RequestWithdrawn: { en: '{actor} withdrew the request', ar: 'سحب {actor} الطلب' },
-  TemplateCreated: { en: '{actor} saved the price to the buyer price list until {validUntil}', ar: 'حفظ {actor} السعر في قائمة أسعار المشتري حتى {validUntil}' },
   ProofUploaded: { en: '{actor} attached {fileName}', ar: 'أرفق {actor} الملف {fileName}' },
   ProofCheckCompleted: { en: 'Automatic checks completed: {summary}', ar: 'اكتملت الفحوص التلقائية: {summary}' },
   AutoRuleFired: { en: 'Rule {rule} resolved the request automatically', ar: 'حسم القاعدة {rule} الطلب تلقائياً' },
@@ -405,12 +423,23 @@ export const HISTORY_TEMPLATES: Dict = {
   FloorOverridden: { en: '{actor} overrode the floor price: {reason}', ar: 'تجاوز {actor} الحد الأدنى للسعر: {reason}' },
 }
 
+/**
+ * FR-11.3 — the log stores a reason *code*; it becomes words only here. A code with no
+ * entry (a floor override carries free text, not a code) is passed through untouched.
+ */
+function localiseReason(value: string, lang: Lang): string {
+  const key = `reason${value.replace(/(^|_)(\w)/g, (_, __, c: string) => c.toUpperCase())}`
+  return STRINGS[key] ? STRINGS[key][lang] : value
+}
+
 export function renderHistory(event: HistoryEvent, lang: Lang): string {
   const template = HISTORY_TEMPLATES[event.type]
   const actor = event.actorName ?? (lang === 'ar' ? 'النظام' : 'System')
   if (!template) return event.type
   const params: Record<string, string> = { actor }
-  for (const [k, v] of Object.entries(event.params)) params[k] = v === null ? '—' : String(v)
+  for (const [k, v] of Object.entries(event.params)) {
+    params[k] = v === null ? '—' : k === 'reason' ? localiseReason(String(v), lang) : String(v)
+  }
   return Object.entries(params).reduce(
     (acc, [k, v]) => acc.replace(new RegExp(`\\{${k}\\}`, 'g'), v),
     template[lang],
