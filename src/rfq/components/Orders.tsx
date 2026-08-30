@@ -23,12 +23,23 @@ import { Empty, Modal, Money } from './ui'
 
 type OrdersTab = 'pending' | 'final' | 'cancelled'
 
-/** §5/§9 — the outcome, named and toned. A rejection is not a failure of the order. */
+/** FR-11.3 — the log stores a code; the surfaces turn it into words at render time. */
+export function declineReasonKey(code: string): string {
+  return `reason${code.replace(/(^|_)(\w)/g, (_, __, c: string) => c.toUpperCase())}`
+}
+
+/**
+ * §5/§9 — the outcome, named and toned. A rejection is not a failure of the order.
+ *
+ * Matched and negotiated are both good outcomes and are both green, but they are not the
+ * same fact: one is a guarantee honoured, the other a bargain struck. The row says which.
+ */
 const OUTCOME_KEY: Record<Exclude<NegotiationOutcome, null>, string> = {
-  accepted: 'negotiationAccepted', rejected: 'negotiationRejected', open: 'negotiationOpen',
+  matched: 'negotiationMatched', negotiated: 'negotiationNegotiated',
+  rejected: 'negotiationRejected', open: 'negotiationOpen',
 }
 const OUTCOME_TONE: Record<Exclude<NegotiationOutcome, null>, string> = {
-  accepted: 'good', rejected: 'bad', open: 'info',
+  matched: 'good', negotiated: 'good', rejected: 'bad', open: 'info',
 }
 
 const TABS: { key: OrdersTab; label: string }[] = [
@@ -37,7 +48,7 @@ const TABS: { key: OrdersTab; label: string }[] = [
   { key: 'cancelled', label: 'tabCancelledOrders' },
 ]
 
-export function Orders({ viewer, lang }: { viewer: 'buyer' | 'seller'; lang: Lang }) {
+export function Orders({ viewer, lang }: { viewer: 'buyer' | 'seller' | 'admin'; lang: Lang }) {
   const { state } = useRfq()
   const [tab, setTab] = useState<OrdersTab>('pending')
   const [openId, setOpenId] = useState<string | null>(null)
@@ -74,7 +85,7 @@ export function Orders({ viewer, lang }: { viewer: 'buyer' | 'seller'; lang: Lan
               <thead>
                 <tr>
                   <th>{t(lang, 'orderRef')}</th>
-                  <th>{viewer === 'buyer' ? t(lang, 'supplier') : t(lang, 'buyer')}</th>
+                  <th>{viewer === 'admin' ? t(lang, 'bothParties') : viewer === 'buyer' ? t(lang, 'supplier') : t(lang, 'buyer')}</th>
                   <th>{t(lang, 'orderItems')}</th>
                   <th>{t(lang, 'originalPrice')}</th>
                   <th>{t(lang, 'agreedPrice')}</th>
@@ -97,9 +108,18 @@ export function Orders({ viewer, lang }: { viewer: 'buyer' | 'seller'; lang: Lan
                         {view.negotiation
                           ? <>{t(lang, OUTCOME_KEY[view.negotiation])} · {order.requestRef}</>
                           : t(lang, 'standardOrder')}
+                        {/* An order at its original price raises the question "why"; the
+                            answer is on the record, so the row carries it. */}
+                        {view.declineReason && (
+                          <div className="hb-hint">{t(lang, declineReasonKey(view.declineReason.code))}</div>
+                        )}
                       </div>
                     </td>
-                    <td>{viewer === 'buyer' ? order.sellerName : order.buyerName}</td>
+                    <td>
+                      {viewer === 'admin'
+                        ? <>{order.buyerName}<div className="hb-hint">{order.sellerName}</div></>
+                        : viewer === 'buyer' ? order.sellerName : order.buyerName}
+                    </td>
                     <td className="hb-num">{order.lines.length}</td>
                     <td><Money value={orderOriginalTotal(order)} lang={lang} /></td>
                     <td><Money value={orderTotal(order, view)} lang={lang} /></td>
@@ -150,12 +170,14 @@ function OrderPage({ order, request, view, viewer, lang, onClose }: {
   order: Order
   request: NegotiationRequest | null
   view: OrderView
-  viewer: 'buyer' | 'seller'
+  viewer: 'buyer' | 'seller' | 'admin'
   lang: Lang
   onClose: () => void
 }) {
   const { dispatch } = useRfq()
-  const [admin, setAdmin] = useState(false)
+  // An admin opens the order to audit it, so the provenance panel starts open for them:
+  // it is the reason they are on this page, not an extra they have to go looking for.
+  const [admin, setAdmin] = useState(viewer === 'admin')
   const proofLine = request?.lines.find((l) => l.proof !== null) ?? null
 
   // §6/§7 — only the buyer acts on the order, and only where the projection says so.
@@ -170,7 +192,11 @@ function OrderPage({ order, request, view, viewer, lang, onClose }: {
           <h2 className="hb-h2">{order.id}</h2>
           <div className="hb-row" style={{ marginTop: 6 }}>
             <OrderStatusPill view={view} lang={lang} />
-            <span className="hb-hint">{viewer === 'buyer' ? order.sellerName : order.buyerName}</span>
+            <span className="hb-hint">
+              {viewer === 'admin'
+                ? `${order.buyerName} · ${order.sellerName}`
+                : viewer === 'buyer' ? order.sellerName : order.buyerName}
+            </span>
           </div>
         </div>
       }
@@ -224,6 +250,19 @@ function OrderPage({ order, request, view, viewer, lang, onClose }: {
         )}
         {view.negotiated && order.requestRef && <span className="hb-ref">{order.requestRef}</span>}
       </div>
+
+      {/* §9/§10 — the seller's stated reason, verbatim, where the price did not move. */}
+      {view.declineReason && (
+        <div className="hb-banner hb-banner--bad" style={{ marginBottom: 14 }}>
+          <div>
+            <strong>{t(lang, 'supplierDeclinedBecause')}</strong>
+            <div style={{ marginTop: 4 }}>
+              {t(lang, declineReasonKey(view.declineReason.code))}
+              {view.declineReason.note && ` — ${view.declineReason.note}`}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* §9 — original price against the price the order will actually be placed at. */}
       <div className="hb-table-wrap">

@@ -14,8 +14,9 @@ import { BuyerDashboard } from './BuyerDashboard'
 import { MarketplaceChrome } from './Chrome'
 import { BuyerMarketplace } from './BuyerMarketplace'
 import { SellerDashboard } from './SellerDashboard'
+import { AdminDashboard } from './AdminDashboard'
 
-type Surface = 'marketplace' | 'buyer' | 'seller'
+type Surface = 'marketplace' | 'buyer' | 'seller' | 'admin'
 
 /** A fixed reference time, so the seeded fixtures render identically on every load. */
 const SEED_NOW = new Date('2026-08-20T09:00:00Z')
@@ -32,6 +33,9 @@ export function App() {
     { key: 'marketplace', en: 'Buyer · Marketplace', ar: 'المشتري · السوق' },
     { key: 'buyer', en: 'Buyer · Dashboard', ar: 'المشتري · لوحة الطلبات' },
     { key: 'seller', en: 'Seller · Dashboard', ar: 'البائع · لوحة الطلبات' },
+    // §10 — HIGHBASE staff are a third party to the trade, so they are a fourth surface
+    // rather than a mode on one of the other two.
+    { key: 'admin', en: 'HB Admin', ar: 'إدارة هاي بيس' },
   ]
 
   return (
@@ -146,6 +150,7 @@ export function App() {
         )}
         {surface === 'buyer' && <BuyerDashboard onBrowse={() => setSurface('marketplace')} />}
         {surface === 'seller' && <SellerDashboard />}
+        {surface === 'admin' && <AdminDashboard lang={lang} setLang={setLang} />}
 
         <div className="hb-shell" style={{ paddingTop: 0, paddingBottom: 28 }}>
           <p className="hb-hint">

@@ -9,7 +9,7 @@
  * on a request that is already closed" is circular when both live on one record.
  *
  * Both are satisfiable at once, and that is what this module does. The negotiation stays
- * exactly as the PRD specifies — twelve states, terminal is terminal, nothing here writes
+ * exactly as the PRD specifies — eleven states, terminal is terminal, nothing here writes
  * to it. The order is a second aggregate that *observes* the negotiation and stores only
  * two facts of its own: whether the buyer confirmed it, and whether the buyer cancelled
  * it. Everything else the draft asks for — the status, the buttons, the price shown, the
@@ -18,7 +18,7 @@
  */
 
 import { lineTotal, sumMinor } from './money'
-import { STATE_META, type RequestState } from './states'
+import { routeOf, STATE_META, type RequestState } from './states'
 import type { Minor, NegotiationRequest, RequestLine } from './types'
 
 /** §7 / §9 — Pending while the negotiation is live, Final once the price is settled. */
@@ -30,14 +30,25 @@ export type OrderAction = 'confirm' | 'cancel'
 /**
  * §5/§9 — how the price question was settled, which is what a Final Order has to state.
  *
- *  - `accepted`  the order stands at a negotiated price: the seller took the ask, or
- *                countered and the buyer took that
- *  - `rejected`  the price never moved. The seller declined, or the clock ran out, and the
- *                order stands at the original price — §5's MVP path
- *  - `open`      still under negotiation, so neither yet
- *  - `null`      a standard order; there was no negotiation to settle
+ * Price matching split the old `accepted` in two, because it stopped being one thing. A
+ * matched price is a guarantee honoured: the buyer proved a price and got exactly it. A
+ * negotiated price is the quote route working normally — a number nobody promised, arrived
+ * at by counter. Two Final Orders at the same total mean different things depending on
+ * which happened, and an auditor asking "was the guarantee kept?" cannot answer it from a
+ * row that calls both of them accepted.
+ *
+ *  - `matched`     the match route settled at the buyer's proved price. The guarantee held
+ *  - `negotiated`  a price was agreed that nobody was entitled to: the quote route settled,
+ *                  or the seller accepted an ask on it
+ *  - `rejected`    the price never moved. The seller declined, or the clock ran out, and the
+ *                  order stands at the original price — §5's MVP path
+ *  - `open`        still under negotiation, so none of the above yet
+ *  - `null`        a standard order; there was no negotiation to settle
  */
-export type NegotiationOutcome = 'accepted' | 'rejected' | 'open' | null
+export type NegotiationOutcome = 'matched' | 'negotiated' | 'rejected' | 'open' | null
+
+/** Every settled outcome, for a surface that groups or filters by it. */
+export const SETTLED_OUTCOMES = ['matched', 'negotiated', 'rejected'] as const
 
 export interface OrderLine {
   sku: string
@@ -91,8 +102,14 @@ export interface OrderView {
   hadProof: boolean
   /** §10 — did this order go through a negotiation at all. */
   negotiated: boolean
-  /** §5/§9 — accepted, rejected, or still open. Null on a standard order. */
+  /** §5/§9 — matched, negotiated, rejected, or still open. Null on a standard order. */
   negotiation: NegotiationOutcome
+  /**
+   * §9/§10 — why the seller turned it down, where they did. An order that reverted to its
+   * original price is a question an admin will ask about, and "rejected" is not an answer
+   * to it; the reason travels with the order so the answer is on the record beside it.
+   */
+  declineReason: { code: string; note: string } | null
 }
 
 /**
@@ -116,6 +133,7 @@ function standardView(order: Order): OrderView {
     hadProof: false,
     negotiated: false,
     negotiation: null,
+    declineReason: null,
   }
 }
 
@@ -141,11 +159,16 @@ export function viewOrder(order: Order, request: NegotiationRequest | null): Ord
    * The outcome is a fact about the negotiation, not about the order's status, so it is
    * read off the request the same way whether the order is pending, final or cancelled: a
    * buyer who cancelled after a rejection still cancelled after a rejection.
+   *
+   * A settlement on the match route is `matched` and nowhere else is: the route is what
+   * makes a price a guarantee rather than a bargain, and a counter the buyer accepted is a
+   * bargain however good it was. That is also why a confirmed counter reads `negotiated`
+   * and not `matched` — the buyer chose it, they were not owed it.
    */
-  const negotiation: NegotiationOutcome = settled ? 'accepted'
+  const matchRoute = routeOf(request.lines) === 'case_1'
+  const negotiation: NegotiationOutcome = settled ? (matchRoute ? 'matched' : 'negotiated')
     : request.state === 'declined' || request.state === 'expired' ? 'rejected'
-      // A counter the buyer confirmed is an acceptance — theirs rather than the seller's.
-      : request.state === 'countered_by_seller' && order.resolution?.kind === 'confirmed' ? 'accepted'
+      : request.state === 'countered_by_seller' && order.resolution?.kind === 'confirmed' ? 'negotiated'
         : 'open'
 
   const base = {
@@ -153,6 +176,8 @@ export function viewOrder(order: Order, request: NegotiationRequest | null): Ord
     hadProof,
     negotiated: true,
     negotiation,
+    // Carried only where it is the reason this order stands where it does.
+    declineReason: negotiation === 'rejected' ? request.declineReason : null,
   }
 
   // The buyer's own decision wins over everything: a cancelled order is cancelled even if

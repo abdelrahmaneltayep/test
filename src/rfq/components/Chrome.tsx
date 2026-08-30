@@ -92,7 +92,8 @@ export interface NavGroup {
 export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavigate, alerts, title, subtitle, breadcrumb, action, children }: {
   lang: Lang
   setLang: (l: Lang) => void
-  viewer: 'buyer' | 'seller'
+  /** Who is looking. `admin` is HIGHBASE staff — a third party to the trade (§10). */
+  viewer: 'buyer' | 'seller' | 'admin'
   groups: NavGroup[]
   active: string
   onNavigate: (key: string) => void
@@ -104,7 +105,7 @@ export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavig
   action?: ReactNode
   children: ReactNode
 }) {
-  const who = viewer === 'buyer' ? BUYER.name[lang] : SELLER.name[lang]
+  const who = viewer === 'buyer' ? BUYER.name[lang] : viewer === 'seller' ? SELLER.name[lang] : t(lang, 'adminOrg')
   return (
     <div className="hb-layout">
       <nav className="hb-sidebar" aria-label={title}>
@@ -137,8 +138,8 @@ export function DashboardChrome({ lang, setLang, viewer, groups, active, onNavig
             </button>
             <UserChip
               name={who}
-              initialsFrom={viewer === 'buyer' ? BUYER.name.en : SELLER.name.en}
-              sub={viewer === 'buyer' ? t(lang, 'branchLabel') : t(lang, 'roleSalesRep')}
+              initialsFrom={viewer === 'buyer' ? BUYER.name.en : viewer === 'seller' ? SELLER.name.en : 'HIGHBASE'}
+              sub={viewer === 'buyer' ? t(lang, 'branchLabel') : viewer === 'seller' ? t(lang, 'roleSalesRep') : t(lang, 'roleAdmin')}
             />
           </div>
         </div>

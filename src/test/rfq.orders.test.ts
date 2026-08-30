@@ -213,16 +213,39 @@ describe('the order reference', () => {
 })
 
 describe('§5/§9 — a Final Order says how the price question was settled', () => {
-  it('reads accepted where the seller took the ask', () => {
-    const r = request('accepted', [line({ outcome: 'accepted', offeredPrice: 9_000 })])
-    expect(viewOrder(order(r), r).negotiation).toBe('accepted')
+  // Price matching: a settlement on the match route is a guarantee honoured, and says so.
+  it('reads matched where the match route settled at the proved price', () => {
+    const r = request('accepted', [line({ route: 'case_1', outcome: 'accepted', offeredPrice: 9_000 })])
+    expect(viewOrder(order(r), r).negotiation).toBe('matched')
   })
 
-  it('reads accepted where the seller countered and the buyer took that', () => {
+  it('reads negotiated where the quote route settled instead', () => {
+    const r = request('accepted', [line({ route: 'case_2', outcome: 'accepted', offeredPrice: 9_000 })])
+    expect(viewOrder(order(r), r).negotiation).toBe('negotiated')
+  })
+
+  /*
+   * A counter the buyer took is a bargain, however good — they chose it, they were not owed
+   * it. So it reads negotiated even though the request began on the match route, which is
+   * the one case where the route alone would give the wrong answer.
+   */
+  it('reads negotiated where the seller countered and the buyer took that', () => {
     const r = request('countered_by_seller', [line({ outcome: 'countered', offeredPrice: 9_600 })])
     const view = viewOrder(order(r, { kind: 'confirmed', at: 'x', prices: { 'HB-4471': 9_600 } }), r)
-    expect(view.negotiation).toBe('accepted')
+    expect(view.negotiation).toBe('negotiated')
     expect(view.inFinalOrders).toBe(true)
+  })
+
+  // §9/§10 — an order standing at its original price carries the reason it does.
+  it('carries the seller’s decline reason onto the order, and only where it declined', () => {
+    const declined = request('declined', [line({ outcome: 'declined', offeredPrice: 10_000 })])
+    declined.declineReason = { code: 'cannot_supply', note: 'Not at that volume.' }
+    expect(viewOrder(order(declined), declined).declineReason)
+      .toEqual({ code: 'cannot_supply', note: 'Not at that volume.' })
+
+    const settled = request('accepted', [line({ outcome: 'accepted', offeredPrice: 9_000 })])
+    settled.declineReason = { code: 'cannot_supply', note: 'stale' }
+    expect(viewOrder(order(settled), settled).declineReason).toBeNull()
   })
 
   it('reads rejected where the seller declined, whether or not the buyer has answered', () => {

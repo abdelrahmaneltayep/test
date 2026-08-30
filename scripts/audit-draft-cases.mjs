@@ -293,7 +293,7 @@ check('7.reject-original-price', /No change/i.test(rejRow), rejRow)
 const pills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
 // The provenance pill now names the outcome rather than just the fact of a negotiation.
 check('10.negotiation-and-invoice-flags',
-  pills.some((x) => /Special price (accepted|rejected|under negotiation)/i.test(x))
+  pills.some((x) => /Price (matched|negotiated|declined|under negotiation)/i.test(x))
   && pills.some((x) => /document/i.test(x)), pills.join(' | '))
 const logCount = await p.locator('.hb-overlay .hb-log li').count()
 check('9.full-log-on-order', logCount >= 2, `${logCount} entries`)
@@ -316,7 +316,7 @@ await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 // ── §9 standard orders sit in the same Final Orders list ─────────────────────
 const finalRefs = await p.locator('tbody tr').allInnerTexts()
 check('9.standard-plus-negotiated', finalRefs.some((r) => /Standard order/i.test(r))
-  && finalRefs.some((r) => /Special price (accepted|rejected)/i.test(r)),
+  && finalRefs.some((r) => /Price (matched|negotiated|declined)/i.test(r)),
   finalRefs.map((r) => r.split('\n')[1]).join(' | '))
 
 // ── §6 the buyer's request detail is a page, with the same ranked actions ────
@@ -369,23 +369,58 @@ for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashb
   const rows = await p.locator('tbody tr').allInnerTexts()
   const flat = rows.join(' | ')
   check(`9.final-orders-outcomes-${who}`,
-    /Special price accepted/i.test(flat) && /Special price rejected/i.test(flat)
+    /Price (matched|negotiated)/i.test(flat) && /Price declined/i.test(flat)
     && /Standard order/i.test(flat),
     rows.map((r) => r.split('\n')[1]).join(' · '))
 }
 // The rejected one is final at the original price: bought, but at no saving.
-const rejectedFinal = p.locator('tbody tr', { hasText: 'Special price rejected' })
+const rejectedFinal = p.locator('tbody tr', { hasText: 'Price declined' })
 await rejectedFinal.click(); await p.waitForTimeout(300)
 const rejPills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
 const rejFoot = await txt('.hb-overlay tfoot')
-check('9.rejected-final-at-original', rejPills.some((x) => /Special price rejected/i.test(x))
+check('9.rejected-final-at-original', rejPills.some((x) => /Price declined/i.test(x))
   && /No change/i.test(rejFoot), `${rejPills.join(' | ')} :: ${rejFoot}`)
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
-await p.locator('tbody tr', { hasText: 'Special price accepted' }).first().click(); await p.waitForTimeout(300)
+await p.locator('tbody tr', { hasText: /Price (matched|negotiated)/ }).first().click(); await p.waitForTimeout(300)
 const accPills = await p.locator('.hb-overlay .hb-pill').allInnerTexts()
-check('9.accepted-final-shows-saving', accPills.some((x) => /Special price accepted/i.test(x))
+check('9.accepted-final-shows-saving', accPills.some((x) => /Price (matched|negotiated)/i.test(x))
   && /%/.test(await txt('.hb-overlay tfoot')), accPills.join(' | '))
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+
+// ── §10 HB Admin — the surface the draft asks for by name ────────────────────
+await reset()
+await p.getByRole('button', { name: 'HB Admin' }).click(); await p.waitForTimeout(400)
+const adminNotice = await txt('.hb-content .hb-banner--info')
+check('10.admin-is-read-only', /read-only/i.test(adminNotice) && /cannot change/i.test(adminNotice),
+  adminNotice.slice(0, 140))
+const stats = await p.locator('.hb-stat').allInnerTexts()
+check('10.admin-counts-the-negotiated', stats.length === 4
+  && stats.some((x) => /Negotiated orders/i.test(x)) && stats.some((x) => /price moved/i.test(x)),
+  stats.map((x) => x.replace(/\n/g, ' ')).join(' | '))
+// Declines carry a reason now, so the follow-up surface can group by it.
+const reasons = await txt('.hb-card')
+check('10.admin-groups-declines-by-reason', /Why suppliers declined/i.test(reasons)
+  && /Reason given/i.test(reasons), reasons.slice(0, 160))
+
+await p.locator('.hb-navitem', { hasText: 'Negotiated orders' }).click(); await p.waitForTimeout(400)
+const adminCols = await p.locator('thead th').allInnerTexts()
+check('10.admin-audit-columns', ['Buyer · Supplier', 'Type', 'Outcome', 'Order total', 'Change', 'Proof']
+  .every((c) => adminCols.includes(c)), adminCols.join(' | '))
+const allRows = await p.locator('tbody tr').count()
+// §10 — the full log, opened on the order, without losing the table it was found in.
+await p.locator('tbody tr').first().click(); await p.waitForTimeout(350)
+check('10.admin-log-opens-in-place', await p.locator('.hb-adminlog .hb-log li').count() >= 1
+  && await p.locator('thead th').count() > 0,
+  `${await p.locator('.hb-adminlog .hb-log li').count()} entries, table still shown`)
+await p.locator('tbody tr').first().click(); await p.waitForTimeout(250)
+await p.getByRole('button', { name: 'Price matched', exact: true }).click(); await p.waitForTimeout(300)
+const filtered = await p.locator('tbody tr').count()
+check('10.admin-filters-by-outcome', filtered > 0 && filtered < allRows,
+  `${filtered} of ${allRows}`)
+// A7 — the seller's commercial position never crosses to a third party.
+const adminText = await p.locator('.hb-content').innerText()
+check('10.admin-sees-no-margin-cost-or-floor',
+  !/margin|cost|floor/i.test(adminText), 'no seller-internal figure on the admin surface')
 
 // ── §8 Inbox, three categories, both roles ───────────────────────────────────
 for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashboard', 'seller']]) {

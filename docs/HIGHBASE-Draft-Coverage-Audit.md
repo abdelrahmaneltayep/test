@@ -240,7 +240,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Fifty-seven checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Sixty-four checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -255,8 +255,9 @@ Fifty-seven checks, exit non-zero on any failure. Current run: all pass. What ea
 | §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |
 | §6 | A modified price gives the buyer Accept and Cancel on the order; an acceptance as-is asks nothing of them; original and agreed sit side by side; the buyer's request detail is a page carrying the same four ranked actions the seller's has, and §6's three prices |
 | §8 | The Inbox carries Special Price Request · RFQ · Sent for both roles, with outcomes named |
-| §9 | Standard and negotiated orders in one Final Orders list, each naming its outcome — special price accepted or rejected; the old-versus-accepted indicator; the full log on the order |
+| §9 | Standard and negotiated orders in one Final Orders list, each naming its outcome — price matched, negotiated or declined; the old-versus-accepted indicator; the full log on the order |
 | §10 | The negotiation and invoice flags on the order page, and the HB Admin view |
+| §10 (admin) | HB Admin is its own surface: read-only and says so; counts the negotiated orders, the ones whose price moved, the verified prices matched and the ones with no document; groups declines by the reason the supplier gave; filters by outcome; opens the full log in place without losing the table; and shows no margin, cost or floor anywhere |
 | §11 | Special credit offered, captured and shown to the seller; both readings of the phase cut are walkable |
 
 ## §11 in full
@@ -289,6 +290,42 @@ seller sees it on the request line, beside the frequency the buyer asked for. An
 — what continuity actually entitles a buyer to — needs a definition before it can be built.
 
 ---
+
+## §9 / §10 after price matching
+
+**The Final Orders outcome split in two.** `accepted` had been covering a guarantee
+honoured and a bargain struck, which are not the same fact: two Final Orders at the same
+total mean different things depending on which happened, and an auditor asking "was the
+guarantee kept?" could not answer it from a row that called both of them accepted. The
+outcomes are now **`matched`** (the match route settled at the buyer's proved price),
+**`negotiated`** (the quote route settled, or a counter the buyer took — they chose it,
+they were not owed it), **`rejected`**, and **`open`**. A request that began on the match
+route but ended in a counter the buyer accepted reads `negotiated`, which is the one case
+where the route alone gives the wrong answer.
+
+The labels went with it, into one vocabulary: *Price matched · Price negotiated · Price
+declined · Price under negotiation*. "Special price rejected" sitting beside "Price
+matched" read as two features sharing a column.
+
+**A declined order carries the reason it stands at its original price.** The seller's
+decline reason now travels onto the order view and is shown verbatim on the order page,
+under the row in Final Orders, and grouped on the admin surface. An order at its original
+price raises the question "why", and "rejected" is not an answer to it.
+
+**HB Admin is a fourth surface.** §10 asks for it by name — "needed specifically so HB
+Admins can follow up on past orders where the price was changed" — and that is a brief for
+an *audit* surface, not a management one. It reads and never writes, and says so at the top
+of every section. It carries four counters, a decline-reason breakdown, a filterable table
+of every negotiated order with route and outcome and price movement and whether a document
+backed it, and the full history log opening in place rather than in a dialog: an admin is
+comparing rows, and losing the table to read one of them is the wrong trade on the one
+surface whose whole job is the comparison.
+
+What it deliberately does not show is margin, cost or floor. A7 keeps those on the seller's
+own surface, and §10 asks for price provenance rather than the seller's commercial
+position; an admin who can see a supplier's cost is a different product with a different
+set of promises in it. The audit asserts their absence. The one place that judgement could
+be revisited is a below-cost match — still open with the PM, below.
 
 ## Still open
 

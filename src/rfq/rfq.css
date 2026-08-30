@@ -505,3 +505,40 @@ body {
 }
 .hb-filechip-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hb-filechip .hb-hint { margin-top: 0; white-space: nowrap; }
+
+/*
+ * HB Admin — Feature Flow Draft §10.
+ *
+ * An audit surface, so the only new furniture is a counter row and an expanding log. Both
+ * borrow the card's own tokens; nothing here introduces a colour the rest of the product
+ * does not already use.
+ */
+.hb-stats { display: flex; flex-wrap: wrap; gap: 12px; }
+.hb-stat {
+  flex: 1 1 180px;
+  background: var(--hb-surface);
+  border: 1px solid var(--hb-line);
+  border-radius: var(--hb-r);
+  padding: 16px 18px;
+  box-shadow: var(--hb-shadow);
+}
+.hb-stat-n {
+  display: block;
+  font-family: var(--hb-display);
+  font-size: 34px;
+  line-height: 1;
+  color: var(--hb-navy);
+  font-variant-numeric: tabular-nums;
+}
+.hb-stat-label { display: block; margin-top: 6px; color: var(--hb-ink-2); font-size: 13px; }
+.hb-stat-sub { display: block; margin-top: 2px; color: var(--hb-good); font-size: 13px; font-weight: 600; }
+
+/* The log opens inside the table, so it is inset rather than carded — it belongs to the
+   row above it, and a second card border would say otherwise. */
+.hb-adminlog {
+  background: var(--hb-field);
+  border-inline-start: 3px solid var(--hb-blue);
+  border-radius: var(--hb-r-sm);
+  padding: 14px 16px;
+  margin: 4px 0;
+}
