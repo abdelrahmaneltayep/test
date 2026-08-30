@@ -206,7 +206,7 @@ worth following up on.
 ## The change sheet — a separate surface for the direction change
 
 `matching.html` (`npm run dev` → `/matching.html`; single-file at
-`matching-prototype.html`) is the price-matching change beside the prototype rather than
+`matching-change-sheet.html`) is the price-matching change beside the prototype rather than
 inside it. The prototype answers *what does the product do now*; a finished screen has no
 memory of the one it replaced, so it cannot answer *what did the direction change do, and
 where do I go and check it* — which is the first question a PM, a reviewer, and whoever

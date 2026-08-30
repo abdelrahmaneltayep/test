@@ -1,12 +1,19 @@
 /**
- * Bundles a prototype into one HTML file, matching the offline-preview convention
- * already used by prototype.html. Pass the entry name as an argument:
+ * Bundles an entry into one HTML file, matching the offline-preview convention already
+ * used by prototype.html. Pass the entry name as an argument:
  *
  *   node scripts/build-single.mjs rfq        -> rfq-prototype.html
  *   node scripts/build-single.mjs variants   -> variants-prototype.html
- * All CSS and JS are inlined, so the file
- * opens straight from disk; the single remaining external reference is the Google Fonts
- * stylesheet, which degrades to the declared fallback stack when there is no network.
+ *   node scripts/build-single.mjs matching   -> matching-change-sheet.html
+ *
+ * All CSS and JS are inlined, so the file opens straight from disk; the single remaining
+ * external reference is the Google Fonts stylesheet, which degrades to the declared
+ * fallback stack when there is no network.
+ *
+ * Not every entry is a prototype, and the filename has to say which is which. Calling the
+ * change sheet `matching-prototype.html` sent someone to a document expecting a clickable
+ * app — the file is what gets downloaded and forwarded, so its name is the only label it
+ * carries once it is off this machine.
  */
 import { build } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -14,7 +21,9 @@ import { readFileSync, writeFileSync, rmSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 
 const entry = process.argv[2] ?? 'rfq'
-const outFile = `${entry}-prototype.html`
+/** Entries that are documents rather than prototypes, and what to call their file. */
+const SUFFIX = { matching: 'change-sheet' }
+const outFile = `${entry}-${SUFFIX[entry] ?? 'prototype'}.html`
 const out = path.resolve('.single-build')
 rmSync(out, { recursive: true, force: true })
 
