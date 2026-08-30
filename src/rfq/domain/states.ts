@@ -8,7 +8,7 @@
 
 import type { Actor } from './types'
 
-/** FR-3.1 — exactly twelve states. Adding a thirteenth is a schema change. */
+/** FR-3.1 — eleven states since price matching went order by order. Adding one is a schema change. */
 export const STATES = [
   'draft',
   'submitted',
@@ -17,7 +17,6 @@ export const STATES = [
   'countered_by_seller',
   'countered_by_buyer',
   'accepted',
-  'accepted_as_template',
   'declined',
   'expired',
   'withdrawn',
@@ -74,11 +73,6 @@ export const STATE_META: Record<RequestState, StateMeta> = {
     buyerLabel: { en: 'Accepted', ar: 'تم القبول' },
     sellerLabel: { en: 'Accepted', ar: 'تم القبول' },
     turn: null, terminal: true, phase: 'P1', buyerActionRequired: false,
-  },
-  accepted_as_template: {
-    buyerLabel: { en: 'Accepted · price saved', ar: 'تم القبول · حُفظ السعر' },
-    sellerLabel: { en: 'Template active', ar: 'قالب سعر فعّال' },
-    turn: null, terminal: true, phase: 'P2', buyerActionRequired: false,
   },
   declined: {
     buyerLabel: { en: 'Declined', ar: 'مرفوض' },
@@ -140,13 +134,9 @@ export const TRANSITIONS: readonly Transition[] = [
   { from: 'submitted', to: 'accepted', trigger: 'accept_as_asked', actors: ['seller', 'system'] },
   { from: 'viewed', to: 'accepted', trigger: 'accept_as_asked', actors: ['seller', 'system'] },
 
-  // Feature Flow Draft §5 — the seller's two acceptances are different decisions, not one
-  // decision with a checkbox: "Accept" is a one-time acceptance for this order only, and
-  // "Accept & apply as template" also writes the price forward. Both are the seller's, and
-  // the PRD's own FR-10.4 already treats template creation as a separate permission.
-  { from: 'submitted', to: 'accepted_as_template', trigger: 'accept_as_template', actors: ['seller'] },
-  { from: 'viewed', to: 'accepted_as_template', trigger: 'accept_as_template', actors: ['seller'] },
-  { from: 'countered_by_buyer', to: 'accepted_as_template', trigger: 'accept_as_template', actors: ['seller'] },
+  // A price now settles one order and no more: the PM's direction is order by order, so
+  // the seller's second acceptance — the one that wrote the price forward as a template —
+  // is gone, and with it the state it led to.
 
   { from: 'submitted', to: 'declined', trigger: 'decline', actors: ['seller', 'system'] },
   { from: 'viewed', to: 'declined', trigger: 'decline', actors: ['seller', 'system'] },
@@ -158,7 +148,6 @@ export const TRANSITIONS: readonly Transition[] = [
   { from: 'info_requested', to: 'countered_by_buyer', trigger: 'buyer_resubmits', actors: ['buyer'] },
 
   { from: 'countered_by_seller', to: 'accepted', trigger: 'buyer_accepts', actors: ['buyer'] },
-  { from: 'countered_by_seller', to: 'accepted_as_template', trigger: 'buyer_accepts_template', actors: ['buyer'] },
   { from: 'countered_by_seller', to: 'countered_by_buyer', trigger: 'buyer_counters', actors: ['buyer'] },
   { from: 'countered_by_seller', to: 'declined', trigger: 'buyer_declines', actors: ['buyer'] },
 

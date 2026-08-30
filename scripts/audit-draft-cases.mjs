@@ -155,15 +155,15 @@ check('5.counter-needs-price', await counterBtn.isDisabled(), await counterBtn.g
 await p.locator('.hb-card-body input[inputmode="decimal"]').first().fill('6.000')
 await p.waitForTimeout(250)
 check('5.counter-enabled-with-price', !(await counterBtn.isDisabled()), 'typed 6.000')
-// §5's write-forward rides on Accept rather than being a fifth button.
-await p.locator('.hb-checkfield input').check(); await p.waitForTimeout(150)
+// Order by order: accepting settles this request and writes nothing forward.
 await p.locator('.hb-modal-foot').getByRole('button', { name: 'Accept' }).click()
-await p.waitForTimeout(250)
-await p.locator('.hb-overlay').last().getByRole('button', { name: 'Accept & apply as template' }).click()
 await p.waitForTimeout(350)
+check('5.no-template-offer', await p.locator('.hb-checkfield').count() === 0,
+  'no save-forward choice rides on Accept')
 await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Sent' }).click(); await p.waitForTimeout(200)
-const tmplRow = await p.locator('tbody tr', { hasText: 'SPR-2608-0003' }).innerText()
-check('5.template-state', /Template active/i.test(tmplRow), tmplRow.replace(/\n/g, ' | '))
+const acceptedRow = await p.locator('tbody tr', { hasText: 'SPR-2608-0003' }).innerText()
+check('5.accept-settles-once', /Accepted/i.test(acceptedRow) && !/Template/i.test(acceptedRow),
+  acceptedRow.replace(/\n/g, ' | '))
 
 // ── §7 pending order: cancel and nothing else while the seller decides ───────
 await reset()

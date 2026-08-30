@@ -304,7 +304,7 @@ function DecisionConfirm({ request, kind, onClose }: {
   kind: 'accept' | 'decline'
   onClose: () => void
 }) {
-  const { state, dispatch, lang } = useRfq()
+  const { dispatch, lang } = useRfq()
   const margin = marginAfterAsk(request.lines)
   const belowFloor = request.lines.find(
     (l) => l.floorSnapshot !== null && l.askedPrice !== null && l.askedPrice < l.floorSnapshot,
@@ -398,14 +398,6 @@ function DecisionConfirm({ request, kind, onClose }: {
         </div>
       )}
 
-      {/* AC-15.6 — an acceptance settles the request; there is no offer clock left to run. */}
-      {kind === 'accept' && !blocked && state.canCreateTemplate && (
-        <p className="hb-hint" style={{ marginTop: 12 }}>
-          {lang === 'ar'
-            ? 'لحفظ هذا السعر لطلبات المشتري القادمة، افتح الطلب واستخدم «اقبل واحفظه كقالب».'
-            : 'To carry this price forward to their next orders, open the request and use “Accept & apply as template”.'}
-        </p>
-      )}
     </Modal>
   )
 }

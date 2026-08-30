@@ -155,19 +155,6 @@ export interface Comment {
   body: string
 }
 
-/** FR-1.7 — written from an accepted request (FR-8.1). */
-export interface PriceListEntry {
-  buyerId: string
-  sku: string
-  price: Minor
-  validFrom: string
-  validUntil: string
-  minQty: number
-  maxQty: number
-  maxOrders: number | null
-  sourceRequestRef: string
-  active: boolean
-}
 
 export interface NegotiationRequest {
   /** FR-1.10 — SPR-{YY}{MM}-{seq}, stable and shown on every surface. */

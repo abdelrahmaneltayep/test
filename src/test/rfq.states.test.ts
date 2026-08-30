@@ -9,10 +9,10 @@ import {
   type RequestState,
 } from '@/rfq/domain/states'
 
-describe('FR-3.1 — exactly twelve states', () => {
-  it('declares twelve and no more', () => {
-    expect(STATES).toHaveLength(12)
-    expect(new Set(STATES).size).toBe(12)
+describe('FR-3.1 — exactly eleven states', () => {
+  it('declares eleven and no more', () => {
+    expect(STATES).toHaveLength(11)
+    expect(new Set(STATES).size).toBe(11)
   })
 
   it('gives every state metadata', () => {
@@ -88,11 +88,16 @@ describe('FR-3.3 — permitted transitions', () => {
     expect(canTransition('info_requested', 'accepted', 'buyer')).toBe(false)
   })
 
-  it('lets the buyer accept, accept-as-template, counter and decline a seller counter', () => {
+  it('lets the buyer accept, counter and decline a seller counter', () => {
     expect(canTransition('countered_by_seller', 'accepted', 'buyer')).toBe(true)
-    expect(canTransition('countered_by_seller', 'accepted_as_template', 'buyer')).toBe(true)
     expect(canTransition('countered_by_seller', 'countered_by_buyer', 'buyer')).toBe(true)
     expect(canTransition('countered_by_seller', 'declined', 'buyer')).toBe(true)
+  })
+
+  // Order by order: there is no template state left to reach, from anywhere.
+  it('has no acceptance that writes the price forward', () => {
+    expect(STATES).not.toContain('accepted_as_template')
+    expect(TRANSITIONS.some((t) => t.trigger.includes('template'))).toBe(false)
   })
 
   it('offers withdraw in exactly the states AC-12.1 lists', () => {

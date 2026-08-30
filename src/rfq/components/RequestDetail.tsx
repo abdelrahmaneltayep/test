@@ -17,7 +17,7 @@
  */
 
 import { useState } from 'react'
-import { acceptanceAllowed, addDays, isEscalated } from '../domain/clocks'
+import { acceptanceAllowed, isEscalated } from '../domain/clocks'
 import { guardrailValue, SAME_AS_LAST_TIME_DAYS } from '../domain/guardrails'
 import { t, type Lang } from '../domain/i18n'
 import { formatMoney, lineTotal, parseMoney } from '../domain/money'
@@ -151,9 +151,7 @@ export function SellerRequestPage({ request, onBack }: {
   const [priceText, setPriceText] = useState('')
   const [validityDays, setValidityDays] = useState(DEFAULT_VALIDITY)
   const [infoOpen, setInfoOpen] = useState(false)
-  const [templateOpen, setTemplateOpen] = useState(false)
   /** §5 — the acceptance that also writes the price forward, as a choice under Accept. */
-  const [asTemplate, setAsTemplate] = useState(false)
   const [overrideReason, setOverrideReason] = useState('')
   const [sendError, setSendError] = useState<string | null>(null)
 
@@ -189,9 +187,8 @@ export function SellerRequestPage({ request, onBack }: {
     onBack()
   }
 
-  /** §5 — accept the ask exactly as sent: once, or once and forward as a template. */
+  /** Accept the ask exactly as sent. A price settles this order and no other. */
   function accept() {
-    if (asTemplate) { setTemplateOpen(true); return }
     dispatch({ type: 'seller_accepts', ref: request.ref })
     onBack()
   }
@@ -331,20 +328,6 @@ export function SellerRequestPage({ request, onBack }: {
                 </div>
               )}
 
-              {/*
-                §5 — the acceptance that also writes the price forward. It is the same
-                decision as Accept, not a fifth action, so it rides on Accept as a choice
-                rather than adding a button to a row of four.
-              */}
-              {state.canCreateTemplate && line.askedPrice !== null && (
-                <label className="hb-field hb-checkfield" style={{ marginBottom: 0 }}>
-                  <input type="checkbox" checked={asTemplate} onChange={(e) => setAsTemplate(e.target.checked)} />
-                  <span>
-                    <span className="hb-label" style={{ marginBottom: 2 }}>{t(lang, 'alsoSaveTemplate')}</span>
-                    <span className="hb-hint" style={{ marginTop: 0 }}>{t(lang, 'alsoSaveTemplateHint')}</span>
-                  </span>
-                </label>
-              )}
             </>
           )}
         </div>
@@ -391,7 +374,6 @@ export function SellerRequestPage({ request, onBack }: {
       </div>
 
       {infoOpen && <InfoRequestDialog request={request} onClose={() => setInfoOpen(false)} onSent={onBack} />}
-      {templateOpen && <TemplateDialog request={request} onClose={() => setTemplateOpen(false)} onSaved={onBack} />}
     </>
   )
 }
@@ -542,78 +524,6 @@ function InfoRequestDialog({ request, onClose, onSent }: { request: NegotiationR
 
 
 /** US-18 / FR-8 — write the accepted price into the buyer's price list. */
-function TemplateDialog({ request, onClose, onSaved }: {
-  request: NegotiationRequest
-  onClose: () => void
-  onSaved: () => void
-}) {
-  const { state, dispatch, lang } = useRfq()
-  const line = request.lines[0]
-  // §5 — this is the acceptance branch, so the price written forward is the ask as sent.
-  const price = line.askedPrice ?? line.listPriceSnapshot
-
-  const [validFrom, setValidFrom] = useState(state.now.toISOString().slice(0, 10))
-  const [validUntil, setValidUntil] = useState(addDays(state.now, 180).toISOString().slice(0, 10))
-  const [minQty, setMinQty] = useState(String(line.quantity))
-  const [maxQty, setMaxQty] = useState(String(line.quantity * 4))
-  const [resolution, setResolution] = useState<'replace' | 'supersede'>('supersede')
-
-  // FR-8.3 / AC-18.4 — an existing entry must be resolved explicitly; never overwritten.
-  const conflict = state.priceList.find((e) => e.sku === line.sku && e.buyerId === request.buyerId && e.active)
-
-  return (
-    <Modal
-      title={<h2 className="hb-h2">{t(lang, 'acceptAsTemplate')}</h2>}
-      onClose={onClose}
-      footer={
-        <>
-          <button type="button" className="hb-btn hb-btn--secondary" onClick={onClose}>{t(lang, 'cancel')}</button>
-          <span className="hb-primary-slot">
-            <button
-              type="button" className="hb-btn hb-btn--primary"
-              onClick={() => {
-                dispatch({
-                  type: 'seller_accepts_template', ref: request.ref,
-                  prices: { [line.id]: price },
-                  template: {
-                    sku: line.sku, price, validFrom, validUntil,
-                    minQty: Number(minQty), maxQty: Number(maxQty), maxOrders: null,
-                  },
-                  conflictResolution: conflict ? resolution : undefined,
-                })
-                onClose(); onSaved()
-              }}
-            >
-              {t(lang, 'acceptAsTemplate')}
-            </button>
-          </span>
-        </>
-      }
-    >
-      <p className="hb-sub" style={{ marginBottom: 12 }}>
-        {line.productName[lang]} · <strong>{formatMoney(price, { withCurrency: true, lang })}</strong>
-      </p>
-
-      {conflict && (
-        <div className="hb-banner hb-banner--warn" style={{ marginBottom: 12 }}>
-          <div style={{ width: '100%' }}>
-            <div>{t(lang, 'templateConflict')}</div>
-            <div className="hb-row" style={{ marginTop: 8 }}>
-              <button type="button" className={`hb-btn hb-btn--sm hb-btn--secondary${resolution === 'replace' ? ' hb-btn--primary' : ''}`} onClick={() => setResolution('replace')}>{t(lang, 'replaceEntry')}</button>
-              <button type="button" className={`hb-btn hb-btn--sm hb-btn--secondary${resolution === 'supersede' ? ' hb-btn--primary' : ''}`} onClick={() => setResolution('supersede')}>{t(lang, 'supersedeEntry')}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* AC-18.2 — valid-from, valid-until (default 180 days), min and max quantity. */}
-      <Field label={t(lang, 'validFrom')}><input className="hb-input" type="date" value={validFrom} onChange={(e) => setValidFrom(e.target.value)} /></Field>
-      <Field label={t(lang, 'validUntil')}><input className="hb-input" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} /></Field>
-      <Field label={t(lang, 'minQty')}><input className="hb-input" inputMode="numeric" value={minQty} onChange={(e) => setMinQty(e.target.value)} /></Field>
-      <Field label={t(lang, 'maxQty')}><input className="hb-input" inputMode="numeric" value={maxQty} onChange={(e) => setMaxQty(e.target.value)} /></Field>
-    </Modal>
-  )
-}
 
 /**
  * The buyer's request page — the mirror of the seller's.
@@ -773,7 +683,7 @@ export function BuyerRequestPage({ request, onBack, onBrowse }: {
                   {/* AC-10.1 — Accept is the single primary action on this surface. */}
                   <span className="hb-primary-slot">
                     <button type="button" className="hb-btn hb-btn--primary"
-                      onClick={() => { dispatch({ type: 'buyer_accepts', ref: request.ref, asTemplate: false }); onBack() }}>
+                      onClick={() => { dispatch({ type: 'buyer_accepts', ref: request.ref }); onBack() }}>
                       {t(lang, 'accept')}
                     </button>
                   </span>

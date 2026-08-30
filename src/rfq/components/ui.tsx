@@ -119,7 +119,7 @@ export function StatusPill({ state, viewer, lang }: { state: RequestState; viewe
   const label = viewer === 'buyer' ? meta.buyerLabel : meta.sellerLabel
   if (!label) return null
   const tone =
-    meta.terminal && (state === 'accepted' || state === 'accepted_as_template') ? 'good'
+    meta.terminal && state === 'accepted' ? 'good'
       : meta.terminal && state === 'declined' ? 'bad'
         : meta.terminal ? 'neutral'
           : viewer === 'buyer' && meta.buyerActionRequired ? 'action'

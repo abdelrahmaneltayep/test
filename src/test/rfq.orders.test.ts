@@ -76,10 +76,6 @@ describe('§6 — "If the seller Accepts as-is: buyer takes no action — order 
     expect(view.prices['HB-4471']).toBe(9_000)
   })
 
-  it('treats an acceptance saved as a template the same way', () => {
-    const r = request('accepted_as_template', [line({ outcome: 'accepted', offeredPrice: 9_000 })])
-    expect(viewOrder(order(r), r).status).toBe('final')
-  })
 })
 
 describe('§6/§7 — a Modify gives the buyer Accept and Cancel, on the modified price', () => {

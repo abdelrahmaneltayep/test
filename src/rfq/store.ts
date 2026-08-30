@@ -18,7 +18,7 @@ import { evaluateAutoRules } from './domain/rules'
 import { attemptTransition, type RequestState } from './domain/states'
 import type {
   Actor, Frequency, HistoryEvent, InfoReason, LineOutcome, Minor,
-  NegotiationRequest, PriceListEntry, Product, Proof, RequestLine,
+  NegotiationRequest, Product, Proof, RequestLine,
 } from './domain/types'
 
 /** Seed catalogue. Cost and floor are seller-internal and never serialised to a buyer. */
@@ -147,7 +147,6 @@ export interface RfqState {
    */
   orders: Order[]
   orderSeq: number
-  priceList: PriceListEntry[]
   draft: Draft | null
   /** FR-2.9 — draft ids already submitted; a repeat submit returns the same reference. */
   submittedDrafts: Record<string, string>
@@ -171,7 +170,6 @@ export interface RfqState {
   /** FR-10.3 — does the signed-in seller user hold the floor-override permission? */
   canOverrideFloor: boolean
   /** FR-10.4 — template creation is a distinct permission from ordinary acceptance. */
-  canCreateTemplate: boolean
   /**
    * Card CTA layout, a prototype option rather than a tenant setting.
    *
@@ -244,16 +242,15 @@ export type Action =
   | { type: 'seller_responds'; ref: string; decisions: Record<string, { outcome: LineOutcome; price: Minor | null }>; validityDays: number; overrideReason: string | null }
   | { type: 'request_more_info'; ref: string; reason: InfoReason; note: string }
   | { type: 'buyer_resubmits'; ref: string }
-  | { type: 'buyer_accepts'; ref: string; asTemplate: boolean; template?: Omit<PriceListEntry, 'buyerId' | 'sourceRequestRef' | 'active'>; conflictResolution?: 'replace' | 'supersede' }
+  | { type: 'buyer_accepts'; ref: string }
   | { type: 'buyer_counters'; ref: string; prices: Record<string, Minor> }
   | { type: 'buyer_declines'; ref: string }
   | { type: 'buyer_withdraws'; ref: string }
   | { type: 're_request'; ref: string }
-  | { type: 'seller_accepts_template'; ref: string; prices: Record<string, Minor>; template: Omit<PriceListEntry, 'buyerId' | 'sourceRequestRef' | 'active'>; conflictResolution?: 'replace' | 'supersede' }
   | { type: 'seller_accepts'; ref: string }
   | { type: 'confirm_order'; id: string }
   | { type: 'cancel_order'; id: string }
-  | { type: 'set_flag'; key: 'canOverrideFloor' | 'canCreateTemplate'; value: boolean }
+  | { type: 'set_flag'; key: 'canOverrideFloor'; value: boolean }
   | { type: 'set_phase'; phase: Phase }
   | { type: 'set_card_cta'; layout: RfqState['cardCta'] }
   | { type: 'set_auto_accept'; percent: number }
@@ -262,16 +259,6 @@ function withRequest(
   state: RfqState, ref: string, fn: (r: NegotiationRequest) => NegotiationRequest,
 ): RfqState {
   return { ...state, requests: state.requests.map((r) => (r.ref === ref ? fn(r) : r)) }
-}
-
-/** FR-8.3 / AC-18.4 — never a silent overwrite; the caller has already chosen. */
-function writeTemplate(
-  priceList: PriceListEntry[], entry: PriceListEntry, resolution: 'replace' | 'supersede' | undefined,
-): PriceListEntry[] {
-  return resolution === 'replace'
-    ? [...priceList.filter((e) => !(e.buyerId === entry.buyerId && e.sku === entry.sku)), entry]
-    : [...priceList.map((e) =>
-        e.buyerId === entry.buyerId && e.sku === entry.sku ? { ...e, active: false } : e), entry]
 }
 
 /**
@@ -488,34 +475,14 @@ export function reducer(state: RfqState, action: Action): RfqState {
     case 'buyer_accepts': {
       const request = state.requests.find((r) => r.ref === action.ref)
       if (!request) return state
-      const to: RequestState = action.asTemplate ? 'accepted_as_template' : 'accepted'
-      const from = request.state
-      // Acceptance is available both from a seller counter and (as-asked) before one.
-      const targetState: RequestState = from === 'countered_by_seller' ? to : 'accepted'
-
-      let priceList = state.priceList
-      if (action.asTemplate && action.template) {
-        const entry: PriceListEntry = {
-          ...action.template,
-          buyerId: request.buyerId,
-          sourceRequestRef: request.ref,
-          active: true,
-        }
-        priceList = writeTemplate(priceList, entry, action.conflictResolution)
-      }
-
+      // A price settles this order and no more, so there is one acceptance and one
+      // state to reach — the template branch went with the order-by-order direction.
       return {
         ...withRequest(state, action.ref, (r) => {
-          let next = transitioned(
-            r, targetState, 'buyer', BUYER.name[lang], state.now, 'RequestAccepted',
+          const next = transitioned(
+            r, 'accepted', 'buyer', BUYER.name[lang], state.now, 'RequestAccepted',
           )
           if (next === r) return r
-          if (action.asTemplate && action.template) {
-            next = {
-              ...next,
-              history: [...next.history, event('TemplateCreated', 'seller', SELLER.name[lang], state.now, { validUntil: action.template.validUntil })],
-            }
-          }
           return {
             ...next,
             // AC-10.7 — an accepted line's price is binding from here on.
@@ -525,7 +492,6 @@ export function reducer(state: RfqState, action: Action): RfqState {
             slaDueAt: null,
           }
         }),
-        priceList,
       }
     }
 
@@ -583,40 +549,6 @@ export function reducer(state: RfqState, action: Action): RfqState {
       }
     }
 
-    /**
-     * Feature Flow Draft §5 — "Accept & apply as template": accept the ask as it stands
-     * and write the price forward. Distinct from Accept, which settles this order only.
-     */
-    case 'seller_accepts_template': {
-      const request = state.requests.find((r) => r.ref === action.ref)
-      if (!request) return state
-      const entry: PriceListEntry = {
-        ...action.template,
-        buyerId: request.buyerId,
-        sourceRequestRef: request.ref,
-        active: true,
-      }
-      const next = withRequest(state, action.ref, (r) => {
-        const moved = transitioned(
-          r, 'accepted_as_template', 'seller', SELLER.name[lang], state.now, 'RequestAccepted',
-        )
-        // The guard rejected it — the price list must not be written either.
-        if (moved === r) return r
-        return {
-          ...moved,
-          history: [...moved.history, event('TemplateCreated', 'seller', SELLER.name[lang], state.now, { validUntil: action.template.validUntil })],
-          lines: moved.lines.map((l) => ({
-            ...l,
-            outcome: 'accepted' as LineOutcome,
-            offeredPrice: action.prices[l.id] ?? l.offeredPrice ?? l.askedPrice ?? l.listPriceSnapshot,
-          })),
-          slaDueAt: null, offerExpiresAt: null,
-        }
-      })
-      // A rejected transition leaves the request identical; nothing else may change.
-      if (next.requests === state.requests) return state
-      return { ...next, priceList: writeTemplate(state.priceList, entry, action.conflictResolution) }
-    }
 
     /**
      * Feature Flow Draft §5 — "Accept: one-time acceptance for this order only." The ask
@@ -896,10 +828,10 @@ export function initialState(now: Date): RfqState {
   ]
 
   return {
-    now, seq: 9, requests: seeded, orders, orderSeq: 20, priceList: [],
+    now, seq: 9, requests: seeded, orders, orderSeq: 20,
     draft: null, submittedDrafts: {},
     phase: 'p1_p2', autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
-    canOverrideFloor: true, canCreateTemplate: true, cardCta: 'stacked', opsAlerts: [],
+    canOverrideFloor: true, cardCta: 'stacked', opsAlerts: [],
   }
 }
 

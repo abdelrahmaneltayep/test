@@ -24,14 +24,12 @@ interface Props {
   onRequest: () => void
   onViewRequest: (ref: string) => void
   existingRef: string | null
-  templatePrice: number | null
-  templateUntil: string | null
 }
 
-export function ProductDetails({ product, onBack, onRequest, onViewRequest, existingRef, templatePrice, templateUntil }: Props) {
+export function ProductDetails({ product, onBack, onRequest, onViewRequest, existingRef }: Props) {
   const { lang } = useRfq()
   const eligible = isNegotiable(product)
-  const effectivePrice = templatePrice ?? product.listPrice
+  const effectivePrice = product.listPrice
   const bestTier = product.tiers.slice().sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
 
   return (
@@ -102,11 +100,6 @@ export function ProductDetails({ product, onBack, onRequest, onViewRequest, exis
 
           <div className="hb-pdp-price">
             {/* FR-8.5 — an agreed price is shown as the buyer's price, labelled, with expiry. */}
-            {templatePrice !== null && (
-              <div className="hb-pill hb-pill--good hb-pill--round" style={{ marginBottom: 6 }}>
-                {lang === 'ar' ? `سعر متفق عليه حتى ${templateUntil}` : `Agreed price until ${templateUntil}`}
-              </div>
-            )}
             <b>BHD {formatMoney(effectivePrice)}</b>
             <span>{t(lang, 'inclusiveVat')}</span>
           </div>
@@ -122,7 +115,7 @@ export function ProductDetails({ product, onBack, onRequest, onViewRequest, exis
               <span aria-hidden="true">🛒</span>{t(lang, 'addToCart')}
             </button>
 
-            {eligible && templatePrice === null && (
+            {eligible && (
               existingRef
                 ? (
                   <button type="button" className="hb-btn hb-btn--outline" onClick={() => onViewRequest(existingRef)}>

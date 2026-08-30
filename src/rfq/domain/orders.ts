@@ -128,7 +128,7 @@ export function viewOrder(order: Order, request: NegotiationRequest | null): Ord
 
   const hadProof = request.lines.some((l) => l.proof !== null)
   const original = Object.fromEntries(order.lines.map((l) => [l.sku, l.originalUnitPrice]))
-  const settled = request.state === 'accepted' || request.state === 'accepted_as_template'
+  const settled = request.state === 'accepted'
 
   // The negotiated price, where one was agreed. A declined line resolves at list price
   // (FR-6.3), which is already what `original` holds.

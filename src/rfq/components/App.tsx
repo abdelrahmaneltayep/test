@@ -119,10 +119,6 @@ export function App() {
                 onClick={() => dispatch({ type: 'set_flag', key: 'canOverrideFloor', value: !state.canOverrideFloor })}>
                 floor override
               </button>
-              <button type="button" className="hb-demo-btn" aria-pressed={state.canCreateTemplate}
-                onClick={() => dispatch({ type: 'set_flag', key: 'canCreateTemplate', value: !state.canCreateTemplate })}>
-                templates
-              </button>
             </div>
 
             <div className="hb-demo-group">

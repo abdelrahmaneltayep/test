@@ -48,7 +48,6 @@ const OUTCOME_BY_EVENT: Record<string, InboxOutcome> = {
   InfoRequested: 'info',
   InfoSupplied: 'info',
   RequestAccepted: 'accepted',
-  TemplateCreated: 'accepted',
   RequestDeclined: 'rejected',
   RequestWithdrawn: 'closed',
   RequestExpired: 'closed',

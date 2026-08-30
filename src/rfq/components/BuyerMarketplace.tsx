@@ -17,7 +17,7 @@ import { CartMark, EyeMark, TagMark } from './ui'
 import { ProductDetails } from './ProductDetails'
 import { RequestFlow } from './RequestFlow'
 
-const LIVE_STATES = ['draft', 'accepted', 'accepted_as_template', 'declined', 'expired', 'withdrawn', 'lost']
+const LIVE_STATES = ['draft', 'accepted', 'declined', 'expired', 'withdrawn', 'lost']
 
 export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => void }) {
   const { state, dispatch, lang } = useRfq()
@@ -34,11 +34,6 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
     )
   }
 
-  /** FR-8.7 — a SKU covered by an active template is not offered the entry point. */
-  function templateFor(sku: string) {
-    return state.priceList.find((e) => e.sku === sku && e.active)
-  }
-
   function startRequest(product: Product) {
     if (!state.draft) dispatch({ type: 'start_draft' })
     setDetail(null)
@@ -47,7 +42,6 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
 
   if (detail) {
     const existing = openRequestFor(detail.sku)
-    const template = templateFor(detail.sku)
     return (
       <>
         <ProductDetails
@@ -56,8 +50,6 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
           onRequest={() => startRequest(detail)}
           onViewRequest={() => onGoToRequests()}
           existingRef={existing?.ref ?? null}
-          templatePrice={template?.price ?? null}
-          templateUntil={template?.validUntil ?? null}
         />
         {active && <Flow product={active} onClose={() => setActive(null)} onToast={setToast} onDone={onGoToRequests} />}
       </>
@@ -76,7 +68,6 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
       <div className="hb-grid">
         {PRODUCTS.map((p) => {
           const existing = openRequestFor(p.sku)
-          const template = templateFor(p.sku)
           const eligible = isNegotiable(p)
           const bestTier = p.tiers.slice().sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
           const compact = state.cardCta === 'compact'
@@ -90,7 +81,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
             One button, placed differently. AC-1.3 — where the product is not negotiable
             nothing is rendered in its place; a disabled control would only frustrate.
           */
-          const requestCta = eligible && !template ? (
+          const requestCta = eligible ? (
             existing ? (
               <button
                 type="button"
@@ -144,24 +135,17 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   <div className="hb-priceband">
                     <span className="hb-priceband-label">{t(lang, 'listPrice')}</span>
                     <span className="hb-priceband-value">
-                      <small>BHD</small>{formatMoney(template?.price ?? p.listPrice)}
+                      <small>BHD</small>{formatMoney(p.listPrice)}
                     </span>
                   </div>
                   {besidePrice && requestCta}
                 </div>
 
                 {/* AC-1.4 — the tier ladder is visible before the request flow opens. */}
-                {bestTier && !template && (
+                {bestTier && (
                   <div className="hb-priceband hb-priceband--tier">
                     <span className="hb-priceband-label">{t(lang, 'unitsRange', { min: bestTier.minQty })}</span>
                     <span className="hb-priceband-value"><small>BHD</small>{formatMoney(bestTier.unitPrice)}</span>
-                  </div>
-                )}
-
-                {/* FR-8.5 — an agreed price reads as the buyer's price, with its expiry. */}
-                {template && (
-                  <div className="hb-pill hb-pill--good hb-pill--round" style={{ alignSelf: 'flex-start' }}>
-                    {lang === 'ar' ? `سعر متفق عليه حتى ${template.validUntil}` : `Agreed price until ${template.validUntil}`}
                   </div>
                 )}
 
@@ -207,7 +191,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                     Where the label is short the reference cannot ride on it, and dropping
                     it would lose the one thing that says which request is already open.
                   */}
-                  {shortLabels && existing && eligible && !template && (
+                  {shortLabels && existing && eligible && (
                     <div className="hb-hint hb-prod-ctaref">{existing.ref}</div>
                   )}
                 </div>

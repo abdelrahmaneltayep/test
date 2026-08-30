@@ -171,7 +171,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Forty-four checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Forty-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -233,7 +233,18 @@ this pass and still unreconciled in the PRD text itself:
    transition and its round cap stay in the state machine, because the PRD's multi-round
    negotiation is still what the domain describes, but nothing on a buyer surface reaches
    them. Rounds therefore only ever increment from the seller's side.
-5. **AC-13.1** — the request page no longer carries the history panel. The log is not lost:
+5. **Direction change — price matching, order by order.** The PM has moved the feature
+   from "request a quote or a special price" to **price matching**, and confirmed that a
+   matched price settles one order and no more. The seller's second acceptance — "Accept &
+   apply as template" — is gone, and with it the `accepted_as_template` state, its four
+   transitions, the saved price list, the template dialog, the `canCreateTemplate`
+   permission, the marketplace card's "Agreed price until…" pill, and the rule that
+   suppressed the entry point on a SKU already covered. **FR-3.1's twelve states are now
+   eleven, and FR-8.3, FR-8.5, FR-8.7 and AC-18.4 describe behaviour the product no longer
+   has.** The PRD needs a pass. Still to land from the same direction change: the match
+   route becomes a guarantee (no seller counter on it, the verified price beats the floor),
+   declines carry a named reason, and the RFQ route keeps the counter loop untouched.
+6. **AC-13.1** — the request page no longer carries the history panel. The log is not lost:
    it is on the order (§9, §10), where the draft asks for it and where an HB Admin looks
    for it. What no longer exists is a second copy of it beside the decision.
 
