@@ -203,6 +203,31 @@ worth following up on.
 
 ---
 
+## The change sheet — a separate surface for the direction change
+
+`matching.html` (`npm run dev` → `/matching.html`; single-file at
+`matching-prototype.html`) is the price-matching change beside the prototype rather than
+inside it. The prototype answers *what does the product do now*; a finished screen has no
+memory of the one it replaced, so it cannot answer *what did the direction change do, and
+where do I go and check it* — which is the first question a PM, a reviewer, and whoever
+picks the work up next all ask.
+
+Seven sections: the direction dimension by dimension, the three pieces with the file each
+is enforced in, the state machine, the auto-rules run live, the seller's real screens, what
+is gone and what the PRD still says about it, and the four questions still open with the PM.
+
+Its rule is that only the "before" columns are written prose — that code is gone and there
+is nothing left to read it from. Everything else is read live from the same modules the
+prototype runs on: the state count and the route-scoped transitions come from `TRANSITIONS`,
+the rule verdicts from `evaluateAutoRules`, and §5 mounts the real `SellerRequestPage`
+against the same seeded fixtures rather than showing screenshots of it. So the sheet cannot
+quietly drift out of agreement with the product it describes.
+
+§4 earns its place on its own: it runs the floor rule on both routes against a price you can
+drag. The same 12.600 on HB-2210 is auto-declined on the quote route and queued for a person
+on the match route — which is the half of the guarantee no screen can show, because the
+behaviour it replaced happened before any screen existed.
+
 ## Verified, not asserted
 
 `scripts/audit-draft-cases.mjs` drives the built prototype in a browser and checks each

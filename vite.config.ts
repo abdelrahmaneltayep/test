@@ -17,6 +17,9 @@ export default defineConfig({
         variants: path.resolve(__dirname, 'variants.html'),
         stories: path.resolve(__dirname, 'stories.html'),
         flows: path.resolve(__dirname, 'flows.html'),
+        // The price-matching change sheet: what the direction change did, beside the
+        // prototype it changed rather than inside it.
+        matching: path.resolve(__dirname, 'matching.html'),
       },
     },
   },

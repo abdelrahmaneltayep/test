@@ -1,0 +1,265 @@
+/*
+ * The price-matching change sheet.
+ *
+ * A handout, not a product surface, so the frame is quiet and the two things that matter
+ * carry it: the before/after split, and the embedded screens. It loads *after* rfq.css,
+ * because the screens in §5 are the real components and need the real stylesheet — so
+ * everything here is namespaced `m-` and the only global it re-declares is `body`, which
+ * rfq.css had already claimed for a full-page app rather than a document.
+ *
+ * Full light and dark; every colour resolves from a token in both. Logical properties
+ * throughout, to match the prototype it documents.
+ */
+
+:root {
+  --m-paper: #f6f7f9;
+  --m-card: #ffffff;
+  --m-rule: #e3e7ec;
+  --m-ink: #151a20;
+  --m-ink-2: #59636e;
+  --m-ink-3: #8d97a2;
+
+  /* The load-bearing encoding on this page: what it was against what it is. */
+  --m-before: #8a5000;
+  --m-before-wash: #fdf5e9;
+  --m-before-rule: #ecd5ac;
+  --m-after: #0d7360;
+  --m-after-wash: #e6f5f1;
+  --m-after-rule: #a8ddd0;
+
+  --m-good: #0d7360; --m-good-wash: #e6f5f1;
+  --m-warn: #8a5000; --m-warn-wash: #fdf3e3;
+  --m-bad: #b02f22;  --m-bad-wash: #fdeeec;
+
+  --m-serif: 'Newsreader', Georgia, serif;
+  --m-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --m-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --m-paper: #10141a;
+    --m-card: #171c23;
+    --m-rule: #29313a;
+    --m-ink: #e8edf2;
+    --m-ink-2: #a5b1bd;
+    --m-ink-3: #78848f;
+    --m-before: #f0bd74; --m-before-wash: #2b2313; --m-before-rule: #5b4923;
+    --m-after: #58c7ae;  --m-after-wash: #102621;  --m-after-rule: #1f5347;
+    --m-good: #58c7ae; --m-good-wash: #102621;
+    --m-warn: #f0bd74; --m-warn-wash: #2b2313;
+    --m-bad: #f09186;  --m-bad-wash: #2c1815;
+  }
+}
+:root[data-theme="dark"] {
+  --m-paper: #10141a;
+  --m-card: #171c23;
+  --m-rule: #29313a;
+  --m-ink: #e8edf2;
+  --m-ink-2: #a5b1bd;
+  --m-ink-3: #78848f;
+  --m-before: #f0bd74; --m-before-wash: #2b2313; --m-before-rule: #5b4923;
+  --m-after: #58c7ae;  --m-after-wash: #102621;  --m-after-rule: #1f5347;
+  --m-good: #58c7ae; --m-good-wash: #102621;
+  --m-warn: #f0bd74; --m-warn-wash: #2b2313;
+  --m-bad: #f09186;  --m-bad-wash: #2c1815;
+}
+
+/*
+ * The frame lives on the wrapper, not on `body`.
+ *
+ * rfq.css also styles `body` — for a full-page app on a fixed light ground — and the
+ * bundler is free to emit the two stylesheets in either order, so a `body` rule here is a
+ * coin toss it loses in dark mode: everything that inherits its colour comes out dark on
+ * dark. Owning the frame one level in settles it by specificity instead of by luck, and
+ * every value below that would otherwise inherit names its own token for the same reason.
+ */
+body { margin: 0; }
+
+.m-wrap {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 40px 24px 80px;
+  background: var(--m-paper);
+  color: var(--m-ink);
+  font-family: var(--m-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+html { background: var(--m-paper); }
+
+/* ── Masthead ──────────────────────────────────────────────────────────── */
+.m-masthead { padding-bottom: 28px; border-bottom: 2px solid var(--m-ink); margin-bottom: 8px; color: var(--m-ink); }
+.m-kicker {
+  font-family: var(--m-mono); font-size: 11.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--m-ink-3); margin-bottom: 14px;
+}
+.m-h1 {
+  font-family: var(--m-serif); font-weight: 500; font-size: clamp(30px, 5vw, 46px);
+  line-height: 1.12; margin: 0 0 14px; letter-spacing: -0.01em; color: var(--m-ink);
+}
+.m-lede { max-width: 68ch; margin: 0 0 20px; color: var(--m-ink-2); font-size: 16px; }
+
+.m-themes { display: flex; flex-wrap: wrap; gap: 6px; }
+.m-chip {
+  font: inherit; font-size: 12.5px; padding: 5px 11px; border-radius: 999px;
+  border: 1px solid var(--m-rule); background: var(--m-card); color: var(--m-ink-2);
+  cursor: pointer; text-decoration: none;
+}
+.m-chip[aria-pressed="true"] { background: var(--m-ink); border-color: var(--m-ink); color: var(--m-paper); }
+.m-chip--link { color: var(--m-after); border-color: var(--m-after-rule); }
+
+/* ── Sections ──────────────────────────────────────────────────────────── */
+.m-section { padding-top: 44px; }
+.m-sectionhead { display: flex; gap: 14px; align-items: baseline; margin-bottom: 18px; }
+.m-num {
+  font-family: var(--m-mono); font-size: 12px; color: var(--m-ink-3);
+  border: 1px solid var(--m-rule); border-radius: 6px; padding: 2px 7px; flex: none;
+}
+.m-h2 { font-family: var(--m-serif); font-weight: 500; font-size: 26px; margin: 0; line-height: 1.2; color: var(--m-ink); }
+.m-h3 { font-size: 15.5px; font-weight: 600; margin: 0 0 8px; display: flex; gap: 8px; align-items: baseline; color: var(--m-ink); }
+.m-sub { margin: 5px 0 0; color: var(--m-ink-2); font-size: 14px; max-width: 70ch; }
+.m-note { margin: 14px 0 0; color: var(--m-ink-2); font-size: 14px; max-width: 74ch; }
+.m-note--tight { margin: 10px 0 14px; }
+.m-hint { font-size: 12px; color: var(--m-ink-3); }
+
+/* ── Tables ────────────────────────────────────────────────────────────── */
+.m-scroll { overflow-x: auto; border: 1px solid var(--m-rule); border-radius: 10px; background: var(--m-card); }
+.m-table { width: 100%; min-width: 720px; border-collapse: collapse; font-size: 14px; }
+.m-table th, .m-table td {
+  text-align: start; vertical-align: top; padding: 13px 16px;
+  border-bottom: 1px solid var(--m-rule);
+}
+.m-table thead th {
+  font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--m-ink-3); font-weight: 600; white-space: nowrap;
+}
+.m-table tbody tr:last-child th, .m-table tbody tr:last-child td { border-bottom: 0; }
+.m-table tbody th { font-weight: 600; color: var(--m-ink); }
+.m-table tbody td { color: var(--m-ink); }
+.m-table tbody td.m-before { color: var(--m-before); }
+.m-table tbody td.m-after { color: var(--m-after); }
+.m-table--tight { min-width: 560px; font-size: 13.5px; }
+.m-table code { font-family: var(--m-mono); font-size: 12.5px; }
+
+/* The one encoding this page cannot do without. */
+.m-before { color: var(--m-before); background: var(--m-before-wash); }
+.m-after { color: var(--m-after); background: var(--m-after-wash); }
+thead .m-before { color: var(--m-before); border-bottom: 2px solid var(--m-before-rule); }
+thead .m-after { color: var(--m-after); border-bottom: 2px solid var(--m-after-rule); }
+.m-tag {
+  display: inline-block; margin-inline-start: 6px; font-family: var(--m-mono);
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--m-ink-3); border: 1px solid var(--m-rule); border-radius: 4px; padding: 0 4px;
+}
+
+.m-route {
+  display: inline-block; font-family: var(--m-mono); font-size: 11.5px;
+  padding: 2px 7px; border-radius: 5px; margin-inline-end: 5px;
+  background: var(--m-after-wash); color: var(--m-after); border: 1px solid var(--m-after-rule);
+}
+.m-route--off {
+  background: transparent; color: var(--m-ink-3); border: 1px dashed var(--m-rule);
+  text-decoration: line-through;
+}
+
+/* ── Cards ─────────────────────────────────────────────────────────────── */
+.m-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.m-cards--two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.m-card {
+  background: var(--m-card); border: 1px solid var(--m-rule); border-radius: 10px;
+  padding: 18px; font-size: 14px; color: var(--m-ink);
+}
+.m-card--open { border-inline-start: 3px solid var(--m-warn); }
+.m-pill {
+  font-family: var(--m-mono); font-size: 11px; background: var(--m-after-wash);
+  color: var(--m-after); border-radius: 999px; padding: 1px 8px; flex: none;
+}
+.m-what { margin: 0 0 10px; color: var(--m-ink); }
+.m-why { margin: 0 0 12px; color: var(--m-ink-2); }
+.m-where { margin: 0; padding-inline-start: 18px; color: var(--m-ink-2); font-size: 13px; }
+.m-where li { margin-bottom: 5px; }
+.m-where code { font-family: var(--m-mono); font-size: 12px; }
+
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+.m-stats { display: flex; flex-wrap: wrap; gap: 12px; }
+.m-stat {
+  flex: 1 1 180px; background: var(--m-card); border: 1px solid var(--m-rule);
+  border-radius: 10px; padding: 16px 18px; color: var(--m-ink);
+}
+.m-statnum { display: block; font-family: var(--m-serif); font-size: 34px; line-height: 1; }
+.m-statlabel { display: block; margin-top: 6px; color: var(--m-ink-2); font-size: 13px; }
+
+/* ── The live rules demo ───────────────────────────────────────────────── */
+.m-demo {
+  display: grid; grid-template-columns: minmax(240px, 1fr) minmax(280px, 1.2fr);
+  gap: 16px; align-items: start;
+}
+@media (max-width: 760px) { .m-demo { grid-template-columns: 1fr; } }
+.m-controls {
+  background: var(--m-card); border: 1px solid var(--m-rule); border-radius: 10px;
+  padding: 18px; color: var(--m-ink);
+}
+.m-control { display: block; margin-bottom: 18px; }
+.m-control:last-child { margin-bottom: 0; }
+.m-control > span {
+  display: block; font-size: 12px; letter-spacing: .04em; text-transform: uppercase;
+  color: var(--m-ink-3); margin-bottom: 8px;
+}
+.m-control input[type="range"] { width: 100%; accent-color: var(--m-after); }
+.m-out { display: block; margin-top: 6px; font-family: var(--m-mono); font-size: 17px; color: var(--m-ink); }
+.m-seg { display: flex; gap: 6px; }
+.m-seg button {
+  font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--m-rule); background: transparent; color: var(--m-ink-2); flex: 1;
+}
+.m-seg button[aria-pressed="true"] {
+  background: var(--m-after-wash); border-color: var(--m-after-rule); color: var(--m-after); font-weight: 600;
+}
+
+.m-verdict {
+  border-radius: 10px; padding: 18px; border: 1px solid var(--m-rule);
+  background: var(--m-card); color: var(--m-ink);
+}
+.m-verdict strong {
+  display: inline-block; font-family: var(--m-mono); font-size: 12px; letter-spacing: .06em;
+  text-transform: uppercase; padding: 3px 9px; border-radius: 5px; margin-bottom: 10px;
+}
+.m-verdict p { margin: 0 0 14px; font-size: 14px; color: var(--m-ink-2); }
+.m-verdict--good { border-color: var(--m-after-rule); }
+.m-verdict--good strong { background: var(--m-good-wash); color: var(--m-good); }
+.m-verdict--warn strong { background: var(--m-warn-wash); color: var(--m-warn); }
+.m-verdict--bad { border-color: var(--m-bad); }
+.m-verdict--bad strong { background: var(--m-bad-wash); color: var(--m-bad); }
+
+.m-kv { margin: 0; display: grid; gap: 7px; }
+.m-kv > div { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--m-rule); padding-top: 7px; }
+.m-kv dt { color: var(--m-ink-3); font-size: 13px; }
+.m-kv dd { margin: 0; font-size: 13px; text-align: end; color: var(--m-ink); }
+
+/* ── The embedded screens ──────────────────────────────────────────────── */
+.m-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.m-tab {
+  font: inherit; font-size: 13px; padding: 7px 13px; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--m-rule); background: var(--m-card); color: var(--m-ink-2);
+}
+.m-tab[aria-pressed="true"] { background: var(--m-ink); border-color: var(--m-ink); color: var(--m-paper); }
+
+/*
+ * The screen is the real component, so it keeps the product's own light palette even when
+ * this sheet is dark — a document that recolours the thing it is documenting is lying about
+ * it. The frame makes the boundary obvious instead.
+ */
+.m-screen {
+  border: 1px solid var(--m-rule); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+  color-scheme: light;
+}
+.m-screen .hb-app { min-height: 0; }
+.m-screen .hb-content { padding: 22px; }
+
+.m-foot {
+  margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--m-rule);
+  color: var(--m-ink-3); font-size: 13px; max-width: 74ch;
+}
