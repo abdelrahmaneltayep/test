@@ -56,7 +56,7 @@ there was one kind of request; there are two now, and the difference is the whol
 
 | Draft action | Match route (`case_1`) | Quote route (`case_2`) |
 | --- | --- | --- |
-| Accept — one-time, this order only | **Match this price** — the primary, and the default move | Accept, where the buyer named a price |
+| Accept — one-time, this order only | **Match this price** — the default move, unless a check failed | Accept, where the buyer named a price |
 | Accept & apply as template | **Gone** — a price settles one order (PM: order by order) | Gone |
 | Modify — counter with a modified price | **Gone** — the guarantee has nothing to counter with | Unchanged: per line, with live margin |
 | Reject — keep the original price | Built, and now **carries a named reason** | Same, with the supply-shaped reasons only |
@@ -81,6 +81,32 @@ A decline now takes a code from a controlled list and an optional note, mandator
 `other`, and both are shown to the buyer verbatim. **The list is a placeholder**: the PM
 deferred the question of when a verified match may be refused at all, so the vocabulary is
 shaped like AC-17.2's and is expected to be replaced once those conditions land.
+
+### The seller's page is a verification screen now
+
+The page was built around a question that no longer exists. "What price am I willing to
+give?" was answered by a price field with a margin tracking what the seller typed; under
+the guarantee that question is settled before they arrive. What is left is *is this claim
+good, and can I live with where it leaves me* — so the page answers that first, and keeps
+the submission and the document below it as the working:
+
+1. **A verdict on the document**, before any number: passed every check, flagged something,
+   failed, or no document at all.
+2. **The claim** — their price, the list price, the gap per unit, and what the order comes
+   to against what it would have at list.
+3. **Where matching leaves you** — margin after matching, and the floor and the cost each
+   with the distance to them and which side. `below by 0.400 BHD` is a decision; "below
+   floor" is an adjective.
+
+The margin pill moved out of the status strip and the decision card into that panel, so the
+number appears once, against cost and floor, rather than three times in three shapes.
+
+**The ranking follows the verdict.** Matching is the default move — except where an
+automatic check has *failed*, because the guarantee is a promise about a price that is
+actually verified and that one is not yet. There, "Request more info" takes the primary slot
+and matching steps down to a secondary beside it. It is never disabled: a guarantee that
+hides its own button is not a guarantee. Where the request has exhausted its two information
+requests there is nothing to promote, and matching stays the default.
 
 The template action was the one real defect this audit originally turned up, and it has
 since been removed entirely along with the rest of the template branch.
@@ -189,7 +215,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Fifty-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Fifty-seven checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -197,7 +223,8 @@ Fifty-five checks, exit non-zero on any failure. Current run: all pass. What eac
 | §3 | A priced ask cannot be sent without its document; the buyer sees the picker before the upload and the file after it, and nothing else; extraction and its checks run on submission and land on the seller's page; the request sends and returns a reference |
 | §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
 | §5 | Counter and Decline on a quote row; the detail opens as a page carrying the buyer's submission read back; the quote route keeps Decline · Counter · Accept, and Counter stays dead until a price is typed |
-| §5 (matching) | A match row offers Match and Decline and **no Counter**; its page carries three actions and **no price input at all**; the guarantee is stated in words rather than left to be inferred from the missing button; a below-floor match says so in red and the primary stays enabled; matching settles the request once and writes nothing forward |
+| §5 (matching) | A match row offers Match and Decline and **no Counter**; its page carries three actions and **no price input at all**; the guarantee is stated in words rather than left to be inferred from the missing button; a below-floor match says so in red at the point of commitment and the button stays enabled; matching settles the request once and writes nothing forward |
+| The verification panel | It leads the page, names the claim and the position separately, and carries the floor and the cost with the distance to each; on a failed check the ranking flips to lead with "Request more info" while matching stays available; on a clean check matching is the default and the verdict says so |
 | Declines | The send button is dead until a reason is chosen; the reasons are a controlled list with a "Choose a reason" placeholder; once named the decline sends, and the buyer's page shows the reason and not just the outcome |
 | The guarantee, from the buyer's side | The buyer's special-price list holds no "Counter received" row at all — a counter is now something only the quote route can produce |
 | §5 MVP / §7 | A rejected request leaves the order Pending, at the original price, with Cancel and Accept |

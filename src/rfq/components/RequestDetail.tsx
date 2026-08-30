@@ -198,6 +198,18 @@ export function SellerRequestPage({ request, onBack }: {
   const matchBelowCost = matching && line.costSnapshot !== null && line.askedPrice !== null
     && line.askedPrice < line.costSnapshot
 
+  /**
+   * Which move the page puts forward. The guarantee makes matching the default, but only
+   * for a price that is actually verified — and a failed automatic check means this one is
+   * not yet. So on a failed check the ranking follows the verdict: asking for better
+   * evidence becomes the primary and matching steps down to a secondary the seller can
+   * still take. Nothing is disabled either way; a guarantee that hides its own button is
+   * not a guarantee. Where the request has used up its information requests there is
+   * nothing to promote, so matching stays the default.
+   */
+  const proofFailed = matching && line.proof !== null && hasFailedCheck(line.proof.checks)
+  const askFirst = proofFailed && request.infoRequests < MAX_INFO_REQUESTS
+
   /** Resolve the request in one move, with the outcome the button names. */
   function resolve(outcome: Exclude<LineOutcome, 'pending'>, price: Minor | null) {
     dispatch({
@@ -270,8 +282,10 @@ export function SellerRequestPage({ request, onBack }: {
               />
             </span>
           )}
-          {/* AC-14.2 — margin is stated in words as well as colour (FR-11.5). */}
-          {liveMargin.pct !== null && (
+          {/* AC-14.2 — margin is stated in words as well as colour (FR-11.5). On the match
+              route the verification panel below carries it in full, against cost and floor,
+              so repeating it here would be two versions of the same number in one view. */}
+          {!matching && liveMargin.pct !== null && (
             <span className={`hb-pill hb-pill--${BAND_TONE[liveMargin.band]}`}>
               {t(lang, 'requestMargin')}: {liveMargin.pct}% · {t(lang, BAND_KEY[liveMargin.band])}
             </span>
@@ -281,6 +295,14 @@ export function SellerRequestPage({ request, onBack }: {
           </span>
         </div>
       </div>
+
+      {/*
+        The conclusion before the working. On a match the seller's job is a verdict on a
+        claim, so the verdict and its numbers come first and the submission and the document
+        sit below as the evidence for it. On a quote there is no claim to verify and the
+        page keeps the order it always had.
+      */}
+      {matching && <MatchVerification line={line} lang={lang} />}
 
       <SubmissionReadback line={line} lang={lang} title={t(lang, 'whatBuyerSent')} />
 
@@ -329,6 +351,12 @@ export function SellerRequestPage({ request, onBack }: {
                   {t(lang, 'matchBelowCost', {
                     sku: line.sku,
                     cost: formatMoney(line.costSnapshot as Minor, { withCurrency: true, lang }),
+                    // The loss on this order, not a band: it is the one number a rep should
+                    // never have to work out on the way to pressing the button.
+                    amount: formatMoney(
+                      ((line.costSnapshot as Minor) - (line.askedPrice as Minor)) * line.quantity,
+                      { withCurrency: true, lang },
+                    ),
                   })}
                 </div>
               )}
@@ -340,6 +368,11 @@ export function SellerRequestPage({ request, onBack }: {
                   })}
                 </div>
               )}
+
+              {/*
+                The margin pill that used to sit here is in the verification panel now,
+                against cost and floor rather than on its own. What stays is the decision.
+              */}
 
               {/*
                 Four actions, and the inputs one of them needs.
@@ -386,25 +419,6 @@ export function SellerRequestPage({ request, onBack }: {
               </div>
               )}
 
-              {/*
-                The margin still has to be visible on the match route, where it is the whole
-                point of the screen — it just has no typed price to track, so it reads off
-                the ask the buyer proved.
-              */}
-              {matching && (
-                <div className="hb-row" style={{ alignItems: 'flex-end' }}>
-                  <span>
-                    {margin !== null ? (
-                      <span className={`hb-pill hb-pill--${matchBelowCost ? 'bad' : matchBelowFloor ? 'bad' : margin >= 20 ? 'good' : 'warn'}`}>
-                        {t(lang, 'lineMargin')} {margin}%
-                      </span>
-                    ) : (
-                      <span className="hb-pill hb-pill--neutral" tabIndex={0} title={t(lang, 'costNotConfigured')}>—</span>
-                    )}
-                  </span>
-                </div>
-              )}
-
               {/* FR-10.3 — an override needs the permission, a confirmation and a recorded reason. */}
               {!matching && floorBreached && state.canOverrideFloor && (
                 <div className="hb-banner hb-banner--bad" style={{ marginBottom: 4 }}>
@@ -426,8 +440,14 @@ export function SellerRequestPage({ request, onBack }: {
 
         {!readOnly && (
           <div className="hb-modal-foot">
-            {/* Quietest: it decides nothing, it asks for better evidence (US-17). */}
-            {line.route === 'case_1' && (
+            {/*
+              Information request. Normally the quietest of the moves, on the left with the
+              other things that decide nothing — but where the verdict says the claim is not
+              verified yet it *is* the move, so it goes to the primary slot rather than
+              becoming a filled button stranded on the far left. Whichever slot it takes,
+              it takes exactly one.
+            */}
+            {matching && !askFirst && (
               <button
                 type="button" className="hb-btn hb-btn--quiet"
                 disabled={request.infoRequests >= MAX_INFO_REQUESTS}
@@ -455,15 +475,25 @@ export function SellerRequestPage({ request, onBack }: {
                   {t(lang, 'counter')}
                 </button>
               )}
-              {/* Primary: on the match route it is the default move and says what it does. */}
+              {/* The default move, unless the verdict says the claim is not verified yet —
+                  then it steps down to a secondary, and stays available: a guarantee that
+                  hides its own button is not a guarantee. */}
               <button
-                type="button" className="hb-btn hb-btn--primary"
+                type="button" className={`hb-btn hb-btn--${askFirst ? 'outline' : 'primary'}`}
                 disabled={line.askedPrice === null}
                 title={line.askedPrice === null ? t(lang, 'acceptDisabledOnPage') : undefined}
                 onClick={accept}
               >
                 {t(lang, matching ? 'matchPrice' : 'accept')}
               </button>
+              {askFirst && (
+                <button
+                  type="button" className="hb-btn hb-btn--primary"
+                  onClick={() => setInfoOpen(true)}
+                >
+                  {t(lang, 'requestMoreInfo')}
+                </button>
+              )}
             </span>
           </div>
         )}
@@ -478,6 +508,149 @@ export function SellerRequestPage({ request, onBack }: {
         />
       )}
     </>
+  )
+}
+
+/**
+ * The verification panel — the seller's screen, rewritten around the question it now asks.
+ *
+ * Before price matching the seller's question was "what price am I willing to give?", and
+ * the page answered it with a price field and a margin that tracked what they typed. Under
+ * the guarantee that question is settled before they arrive: the price is the buyer's. What
+ * is left is "is this claim good, and can I live with where it leaves me?" — so that is
+ * what the top of the page answers, with the evidence below it as the working.
+ *
+ * Three blocks, in the order a rep actually decides: the verdict on the document, the two
+ * prices with the gap between them in money rather than adjectives, and the position the
+ * match takes against cost and floor. The last block is seller-internal (FR-5.3 / A7) and
+ * this component is never rendered on a buyer surface.
+ */
+function MatchVerification({ line, lang }: { line: RequestLine; lang: Lang }) {
+  const asked = line.askedPrice
+  if (asked === null) return null
+
+  const proof = line.proof
+  const failed = proof ? hasFailedCheck(proof.checks) : false
+  const flagged = proof ? proof.checks.some((c) => c.severity === 'warn') : false
+  const verdict = !proof ? 'none' : failed ? 'failed' : flagged ? 'warn' : 'clean'
+  const VERDICT = {
+    clean: { tone: 'good', mark: '✓', key: 'verdictClean' },
+    warn: { tone: 'warn', mark: '!', key: 'verdictWarn' },
+    failed: { tone: 'bad', mark: '✕', key: 'verdictFailed' },
+    // No banner variant is neutral, and a missing document is not good news, so it reads
+    // as the caution it is.
+    none: { tone: 'warn', mark: '—', key: 'verdictNoDocument' },
+  }[verdict]
+
+  const unitGap = line.listPriceSnapshot - asked
+  const askedTotal = lineTotal(asked, line.quantity)
+  const listTotal = lineTotal(line.listPriceSnapshot, line.quantity)
+  const margin = lineMargin(asked, line.costSnapshot)
+
+  // How far the match sits from each of the two lines the seller cares about, and which
+  // side of it. Stated in money on the whole order, because "below floor" is an adjective
+  // and 16.000 BHD is a decision.
+  const floorGap = line.floorSnapshot === null ? null : asked - line.floorSnapshot
+  const costGap = line.costSnapshot === null ? null : asked - line.costSnapshot
+  const money = (v: Minor) => formatMoney(v, { withCurrency: true, lang })
+
+  return (
+    <div className="hb-card">
+      <div className="hb-card-head">
+        <div>
+          <h2 className="hb-h2">{t(lang, 'verifyTitle')}</h2>
+          <p className="hb-hint">{t(lang, 'verifyHint')}</p>
+        </div>
+      </div>
+      <div className="hb-card-body">
+        {/* The verdict, before the numbers: a failed check is a reason not to read them. */}
+        <div className={`hb-banner hb-banner--${VERDICT.tone}`} style={{ marginBottom: 14 }}>
+          <span aria-hidden="true" style={{ fontWeight: 700 }}>{VERDICT.mark}</span>
+          <span>{t(lang, VERDICT.key)}</span>
+        </div>
+
+        {/* Two blocks, and they answer different questions: what is being claimed, and
+            what saying yes to it costs. Unlabelled they read as one long table. */}
+        <h3 className="hb-h3">{t(lang, 'verifyTheClaim')}</h3>
+        <div className="hb-table-wrap">
+          <table className="hb-table">
+            <tbody>
+              <tr>
+                <td>{t(lang, 'theirPrice')}</td>
+                <td><strong><Money value={asked} lang={lang} withCurrency /></strong></td>
+                <td className="hb-hint">
+                  {proof?.typed.supplier || t(lang, 'notProvided')}
+                  {proof?.typed.documentDate ? ` · ${proof.typed.documentDate}` : ''}
+                </td>
+              </tr>
+              <tr>
+                <td>{t(lang, 'yourList')}</td>
+                <td><Money value={line.listPriceSnapshot} lang={lang} withCurrency /></td>
+                <td className="hb-hint">
+                  {unitGap > 0 ? `−${money(unitGap)} ${t(lang, 'perUnit')}` : '—'}
+                </td>
+              </tr>
+              <tr>
+                <td>{t(lang, 'onThisOrder')}</td>
+                <td><strong><Money value={askedTotal} lang={lang} withCurrency /></strong></td>
+                <td className="hb-hint">{t(lang, 'againstList', { amount: money(listTotal) })}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Where the match leaves them. Nothing here blocks; all of it is said plainly. */}
+        <h3 className="hb-h3" style={{ marginTop: 16 }}>{t(lang, 'verifyYourPosition')}</h3>
+        <div className="hb-table-wrap">
+          <table className="hb-table">
+            <tbody>
+              <tr>
+                <td>{t(lang, 'marginAfterMatch')}</td>
+                <td colSpan={2}>
+                  {margin !== null ? (
+                    <span className={`hb-pill hb-pill--${costGap !== null && costGap < 0 ? 'bad' : floorGap !== null && floorGap < 0 ? 'bad' : margin >= 20 ? 'good' : 'warn'}`}>
+                      {margin}%
+                    </span>
+                  ) : (
+                    <span className="hb-pill hb-pill--neutral">{t(lang, 'costNotConfigured')}</span>
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <td>{t(lang, 'yourFloor')}</td>
+                <td>
+                  {line.floorSnapshot === null
+                    ? <span className="hb-muted">{t(lang, 'notConfigured')}</span>
+                    : <Money value={line.floorSnapshot} lang={lang} withCurrency />}
+                </td>
+                <td>
+                  {floorGap === null ? <span className="hb-muted">—</span> : (
+                    <span className={floorGap < 0 ? 'hb-pill hb-pill--bad' : 'hb-hint'}>
+                      {t(lang, floorGap < 0 ? 'belowBy' : 'aboveBy', { amount: money(Math.abs(floorGap)) })}
+                    </span>
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <td>{t(lang, 'yourCost')}</td>
+                <td>
+                  {line.costSnapshot === null
+                    ? <span className="hb-muted">{t(lang, 'notConfigured')}</span>
+                    : <Money value={line.costSnapshot} lang={lang} withCurrency />}
+                </td>
+                <td>
+                  {costGap === null ? <span className="hb-muted">—</span> : (
+                    <span className={costGap < 0 ? 'hb-pill hb-pill--bad' : 'hb-hint'}>
+                      {t(lang, costGap < 0 ? 'belowBy' : 'aboveBy', { amount: money(Math.abs(costGap)) })}
+                    </span>
+                  )}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -20,7 +20,7 @@ const errors = []
 p.on('pageerror', (e) => errors.push(String(e)))
 const R = []
 const check = (id, ok, detail) => R.push({ id, ok: !!ok, detail })
-const txt = async (sel) => (await p.locator(sel).first().innerText().catch(() => '')).replace(/\n/g, ' | ')
+const txt = async (sel, i = 0) => (await p.locator(sel).nth(i).innerText().catch(() => '')).replace(/\n/g, ' | ')
 const reset = async () => { await p.goto(BASE, { waitUntil: 'networkidle' }); await p.waitForTimeout(200) }
 
 await reset()
@@ -172,13 +172,25 @@ await p.waitForTimeout(350)
 const readback = await txt('.hb-readback')
 check('5.buyer-form-read-back', /Asking for/i.test(readback) && /Quantity/i.test(readback)
   && /Supplier offering/i.test(readback) && /Attachment/i.test(readback), readback.slice(0, 220))
+// Three moves, and their order follows the verdict rather than a fixed layout: this
+// fixture's document failed a check, so the ask leads and matching steps back.
 const actions = await p.locator('.hb-modal-foot button').allInnerTexts()
-check('pm.three-actions-on-a-match', actions.join('|') === 'Request more info|Decline|Match this price',
-  actions.join(' | '))
-// The three are not equals, and the button types say which is which.
+check('pm.three-actions-on-a-match',
+  actions.join('|') === 'Decline|Match this price|Request more info', actions.join(' | '))
+// The three are not equals, and the button types say which is which. SPR-2608-0007's
+// document fails a check, so the verdict promotes "ask for better evidence" and matching
+// steps down — available, never disabled: a guarantee that hides its own button is not one.
 const types = await p.locator('.hb-modal-foot button').evaluateAll((els) => els.map((e) => e.className
   .split(' ').find((c) => c.startsWith('hb-btn--')) ?? 'none'))
-check('5.button-types', types.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--primary', types.join(' | '))
+check('pm.ranking-follows-the-verdict',
+  types.join('|') === 'hb-btn--danger|hb-btn--outline|hb-btn--primary'
+  && !(await p.locator('.hb-modal-foot').getByRole('button', { name: 'Match this price' }).isDisabled()),
+  types.join(' | '))
+// The verification panel answers the question the page now asks, before the evidence below.
+const verify = await txt('.hb-card', 1)
+check('pm.verification-panel', /Verify this claim/i.test(verify) && /Their price/i.test(verify)
+  && /Where matching leaves you/i.test(verify) && /Your floor/i.test(verify) && /Your cost/i.test(verify),
+  verify.slice(0, 200))
 // No price input at all: there is nothing on this page to counter with.
 check('pm.no-price-input-on-a-match',
   await p.locator('.hb-card-body input[inputmode="decimal"]').count() === 0,
@@ -186,8 +198,10 @@ check('pm.no-price-input-on-a-match',
 // The guarantee is stated, not left to be inferred from a missing button.
 const guarantee = await txt('.hb-banner--info')
 check('pm.guarantee-is-stated', /verified price wins/i.test(guarantee), guarantee.slice(0, 160))
-// Below floor: said in red, and it does not block.
-const floorBanner = await txt('.hb-banner--bad')
+// Below floor: said in red at the point of commitment — the decision card, not the
+// verdict banner further up, which is red for its own reason on this fixture.
+const floorBanner = (await p.locator('.hb-card').last().locator('.hb-banner--bad').first()
+  .innerText().catch(() => '')).replace(/\n/g, ' | ')
 check('pm.below-floor-is-stated-not-blocking', /below your floor/i.test(floorBanner)
   && !(await p.locator('.hb-modal-foot').getByRole('button', { name: 'Match this price' }).isDisabled()),
   floorBanner.slice(0, 160))
@@ -200,6 +214,20 @@ await p.locator('.hb-card .hb-tabs .hb-tab', { hasText: 'Sent' }).click(); await
 const acceptedRow = await p.locator('tbody tr', { hasText: 'SPR-2608-0007' }).innerText()
 check('5.accept-settles-once', /Accepted/i.test(acceptedRow) && !/Template/i.test(acceptedRow),
   acceptedRow.replace(/\n/g, ' | '))
+
+// A clean claim: the verdict passes, so matching stays the default move.
+await reset()
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
+await p.locator('tbody tr', { hasText: 'SPR-2608-0001' }).click(); await p.waitForTimeout(400)
+const cleanTypes = await p.locator('.hb-modal-foot button').evaluateAll((els) => els.map((e) => e.className
+  .split(' ').find((c) => c.startsWith('hb-btn--')) ?? 'none'))
+const cleanVerdict = await txt('.hb-card .hb-banner')
+const cleanActions = await p.locator('.hb-modal-foot button').allInnerTexts()
+check('pm.clean-claim-matches-by-default',
+  cleanTypes.join('|') === 'hb-btn--quiet|hb-btn--danger|hb-btn--primary'
+  && cleanActions.join('|') === 'Request more info|Decline|Match this price'
+  && /passed every automatic check/i.test(cleanVerdict),
+  `${cleanActions.join(' | ')} :: ${cleanTypes.join(' | ')} :: ${cleanVerdict.slice(0, 80)}`)
 
 // ── A decline names its reason, and the buyer reads it ───────────────────────
 await reset()
