@@ -315,20 +315,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
           <p className="hb-hint" style={{ marginTop: 10 }}>
             {t(lang, route === 'case_1' ? 'case1Body' : 'case2Body')}
           </p>
-          {/*
-            The card promised 5–10%. Repeating it here is not decoration: a promise made on
-            a card and never mentioned again is the shape of a bait, and this is the screen
-            where the buyer decides whether finding the invoice is worth it. It says who
-            settles it, too — HIGHBASE, by hand — because that is what the business flow
-            actually does, and a prototype that implies an automatic discount would be
-            designing a feature nobody is building.
-          */}
-          {route === 'case_1' && (
-            <div className="hb-banner hb-banner--good" style={{ marginTop: 12 }}>
-              <span aria-hidden="true">🎁</span>
-              <span>{t(lang, 'incentiveInForm')}</span>
-            </div>
-          )}
         </div>
       )}
 
@@ -516,6 +502,23 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
             <span className="hb-hint" style={{ marginTop: 0 }}>{t(lang, 'specialCreditHint')}</span>
           </span>
         </label>
+      )}
+      {/*
+        The incentive, at the foot of the form and as a disclaimer — which is what it is.
+        It sat at the top as a green banner and that was the wrong shape twice over: a
+        celebratory banner reads as a reward already earned, and the top of the form is
+        before the buyer has done anything to earn it. Here it is the last thing read
+        before Send, which is when a condition matters.
+
+        Deliberately not an info icon. On the card an icon is right — it is an aside, and
+        the buyer may never want it. Here the buyer has committed to the flow and this is a
+        term of it; a term you have to go and uncover is not a term you disclosed.
+      */}
+      {route === 'case_1' && (
+        <p className="hb-disclaimer">
+          <span aria-hidden="true">🎁</span>
+          <span>{t(lang, 'incentiveInForm')}</span>
+        </p>
       )}
       </div>
 

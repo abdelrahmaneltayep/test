@@ -296,7 +296,7 @@ seller sees it on the request line, beside the frequency the buyer asked for. An
 
 A later note from the PM scoped a change to the product card, and it landed as written:
 
-- The card's action is **"Matching my price"**, below Add to Cart, with an **info icon**
+- The card's action is **"Match my price"**, below Add to Cart, with an **info icon**
   beside it carrying the incentive copy verbatim. It opens on click, not hover — on a phone
   there is no hover, and a card is exactly where a hover-only affordance goes unnoticed —
   and closes on Escape or a click outside. The two narrow CTA layouts get the short copy,
@@ -311,12 +311,36 @@ A later note from the PM scoped a change to the product card, and it landed as w
   saved has no way through; without it, a buyer holding paper has to go and photograph it
   first. Two labelled inputs let each take the route they are on.
 
-**Two judgement calls worth naming.** The incentive is repeated inside the form and again
-on the confirmation, because a promise made on a card and never mentioned again is the
-shape of a bait — and both say that **HIGHBASE settles it by hand**, which is what the
-business flow actually does. Nothing computes or issues a discount: the note puts that
-outside the feature, and a prototype implying an automatic coupon would be designing
-something nobody is building.
+- The incentive is disclosed again **at the foot of the form**, as a **disclaimer** — the
+  last thing read before Send — and on the confirmation. Both say that **HIGHBASE settles
+  it by hand**, which is what the business flow actually does. Nothing computes or issues a
+  discount: the note puts that outside the feature, and a prototype implying an automatic
+  coupon would be designing something nobody is building.
+
+### What the voice note corrected
+
+A follow-up voice note from the PM (4 minutes, Egyptian Arabic; transcript supplied by the
+user, since nothing in this environment can transcribe audio) settled two things the
+written note left open, and both were changes to what had already been built:
+
+**The label is "Match my price", not "Matching my price".** The note asks which is right
+and lands on the shorter one. It is also the correct answer on its own terms: a button
+names an action the person takes, and the gerund named a state — which is why the original
+read oddly enough to flag it before the audio arrived.
+
+**The incentive in the form is a disclaimer, not an info icon and not a banner.** It had
+been a green banner at the top of the form, and that was the wrong shape twice over: a
+celebratory banner reads as a reward already earned, and the top of the form is before the
+buyer has done anything to earn it. It now sits at the foot, above Send, under a rule. The
+distinction the note draws is worth keeping: on the **card** an icon is right, because the
+incentive is an aside a buyer may never want; in the **form** the buyer has committed to
+the flow and it is a term of it, and a term you have to go and uncover is not a term you
+disclosed.
+
+The note also confirms three things already built: the survey opens with the product's
+image and attributes (the drawer's product line item), then the price being asked, then the
+invoice; and it should be a **pop-up or a side modal**, with the platform already using
+side modals — which is what the drawer is.
 
 The drawer's title is no longer the card's. The card names the route the buyer came for;
 the drawer holds both routes and has to still be true after they switch tabs, so it reads
@@ -324,9 +348,17 @@ the drawer holds both routes and has to still be true after they switch tabs, so
 
 **Still open on this note.** The button label names one of the two routes the card opens —
 the quote route is now reachable only by switching tabs inside a drawer whose entry point
-does not mention it. And the note's Power BI item asks for internal visibility into
+does not mention it. The note's Power BI item asks for internal visibility into
 price-matching requests, which the HB Admin surface already provides on screen; no export
-was built, since the note routes that through the Data Team.
+was built, since the note routes that through the Data Team. And the voice note asks for
+the product-card mockups to be taken into Figma and presented — a hand-off task, waiting on
+the mockups the PM said they would send.
+
+**Scope, as the voice note frames it.** It calls this the same idea as the special-price
+work "but smaller, less effort, literally an MVP", with manual work by the internal team
+accepted as a stopgap until the full module and an agreed proposal exist. The prototype in
+this repository is the whole picture; the slice being built this week is the card, the
+survey and the invoice on it.
 
 ## §9 / §10 after price matching
 

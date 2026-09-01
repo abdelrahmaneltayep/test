@@ -26,12 +26,12 @@ const reset = async () => { await p.goto(BASE, { waitUntil: 'networkidle' }); aw
 await reset()
 
 // ── §2 entry point on the card, then quantity ────────────────────────────────
-const cta = p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Matching my price/ })
+const cta = p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ })
 check('2.entry-on-card', await cta.count() === 1, await cta.innerText())
 
 // ── The price-matching card note: the button, the icon, and what it promises ──
 const tipBtn = p.locator('.hb-prod', { hasText: 'Tomato Paste' }).locator('.hb-tip-btn')
-check('pm.card-names-the-action', /Matching my price/i.test(await cta.innerText())
+check('pm.card-names-the-action', /Match my price/i.test(await cta.innerText())
   && await tipBtn.count() === 1, await cta.innerText())
 await tipBtn.click(); await p.waitForTimeout(220)
 const tipText = await txt('.hb-prod .hb-tip-panel')
@@ -70,10 +70,13 @@ check('pm.camera-or-file', uploadBtns.length === 2
   && /Take a photo/i.test(uploadBtns[0]) && /Choose a file/i.test(uploadBtns[1])
   && uploadInputs[0].includes('environment') && uploadInputs[1].endsWith('none'),
   `${uploadBtns.join(' | ')} :: ${uploadInputs.join(' :: ')}`)
-// The card promised 5–10%; the form does not go quiet about it, and says who settles it.
-const formIncentive = await txt('.hb-modal-body .hb-banner--good')
-check('pm.incentive-restated-in-the-form', /5–10%/.test(formIncentive)
-  && /HIGHBASE team/i.test(formIncentive), formIncentive.slice(0, 160))
+// The card promised 5–10%; the form discloses it as a term, at the foot, before Send —
+// a disclaimer and not an info icon, which is what the voice note asks for.
+const formIncentive = await txt('.hb-modal-body .hb-disclaimer')
+check('pm.incentive-disclosed-at-the-foot', /5–10%/.test(formIncentive)
+  && /HIGHBASE team/i.test(formIncentive)
+  && await p.locator('.hb-modal-body .hb-disclaimer .hb-tip-btn').count() === 0,
+  formIncentive.slice(0, 160))
 
 // ── §3 AI/extraction check on the uploaded invoice ───────────────────────────
 const supplierField = p.locator('.hb-modal-body label.hb-field', { hasText: /Supplier offering/ }).locator('input')
@@ -93,7 +96,7 @@ check('3.case1-sent', /Request sent/i.test(sentBody) && /SPR-\d{4}-\d{4}/.test(s
 
 // ── §4 RFQ: quantity + frequency, no price; frequency is Phase 2 ─────────────
 await reset()
-await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Matching my price/ }).click()
+await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
 await p.waitForTimeout(300)
 await p.locator('.hb-modal-body [role="tab"]').nth(1).click(); await p.waitForTimeout(200)
 const rfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
@@ -102,7 +105,7 @@ check('4.rfq-frequency-p2', rfqLabels.some((l) => /how often/i.test(l)), rfqLabe
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(150)
 
 // ── §11 special credit: captured, shown, and Phase 2 under either reading ────
-await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Matching my price/ }).click()
+await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
 await p.waitForTimeout(300)
 const creditField = p.locator('.hb-modal-body .hb-checkfield')
 check('11.special-credit-offered', await creditField.count() === 1, await txt('.hb-modal-body .hb-checkfield'))
@@ -133,7 +136,7 @@ await p.getByRole('button', { name: /Back to the queue/ }).click(); await p.wait
 async function formLabels(phaseBtn) {
   await reset()
   await p.getByRole('button', { name: phaseBtn }).click(); await p.waitForTimeout(200)
-  await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Matching my price/ }).click()
+  await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
   await p.waitForTimeout(300)
   const labels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
   const routes = await p.locator('.hb-modal-body [role="tab"]').count()

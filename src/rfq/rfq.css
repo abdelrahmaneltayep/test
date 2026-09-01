@@ -610,3 +610,17 @@ body {
 }
 /* The label is the control, so the focus ring has to follow the input inside it. */
 .hb-uploadchoice .hb-btn:focus-within { outline: 2px solid var(--hb-blue); outline-offset: 2px; }
+
+/* The incentive as a term of the flow rather than a reward: quiet, at the foot of the
+   form, above the send button. Not a banner — a banner announces, a disclaimer discloses. */
+.hb-disclaimer {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--hb-line);
+  color: var(--hb-ink-2);
+  font-size: 12.5px;
+  line-height: 1.55;
+}

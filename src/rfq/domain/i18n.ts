@@ -89,7 +89,7 @@ export const STRINGS: Dict = {
   marketplaceSubtitle: { en: 'Wholesale catalogue from your linked suppliers', ar: 'كتالوج الجملة من مورّديك المرتبطين' },
 
   // ── Marketplace entry point (US-1) ────────────────────────────────────────
-  requestSpecialPrice: { en: 'Matching my price', ar: 'مطابقة سعري' },
+  requestSpecialPrice: { en: 'Match my price', ar: 'طابق سعري' },
   /*
    * The drawer holds both routes, so its title cannot be the card's. The card names the
    * route the buyer came for; the drawer has to still be true after they switch tabs.
