@@ -240,11 +240,12 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Sixty-four checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Seventy checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
 | §2 | The entry point is on the card, the form asks for quantity, and no request holds more than one item |
+| The card note | The card's action is "Matching my price" with an info icon beside it; the icon opens the incentive copy, closes on Escape, and is absent once a request is already open; the form offers a photo *and* a file as two named controls, and restates the 5–10% with who settles it |
 | §3 | A priced ask cannot be sent without its document; the buyer sees the picker before the upload and the file after it, and nothing else; extraction and its checks run on submission and land on the seller's page; the request sends and returns a reference |
 | §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
 | §5 | Counter and Decline on a quote row; the detail opens as a page carrying the buyer's submission read back; the quote route keeps Decline · Counter · Accept, and Counter stays dead until a price is typed |
@@ -290,6 +291,42 @@ seller sees it on the request line, beside the frequency the buyer asked for. An
 — what continuity actually entitles a buyer to — needs a definition before it can be built.
 
 ---
+
+## The product-card note — incentive and invoice capture
+
+A later note from the PM scoped a change to the product card, and it landed as written:
+
+- The card's action is **"Matching my price"**, below Add to Cart, with an **info icon**
+  beside it carrying the incentive copy verbatim. It opens on click, not hover — on a phone
+  there is no hover, and a card is exactly where a hover-only affordance goes unnoticed —
+  and closes on Escape or a click outside. The two narrow CTA layouts get the short copy,
+  which is what the note's "if space is tight" asks for; the beside-price layout gets no
+  icon at all, because the button already shares that row with the price and a third thing
+  would crush one of the first two.
+- The icon is **not shown once a request is already open** on that SKU. It answers "why
+  would I go and find an invoice", which is a question about starting.
+- The form takes the proof **two ways, named separately**: *Take a photo* and *Choose a
+  file*. One input hinting `capture` is not that — on a phone `capture` sends you straight
+  to the camera and some browsers drop the gallery, so a buyer with the invoice already
+  saved has no way through; without it, a buyer holding paper has to go and photograph it
+  first. Two labelled inputs let each take the route they are on.
+
+**Two judgement calls worth naming.** The incentive is repeated inside the form and again
+on the confirmation, because a promise made on a card and never mentioned again is the
+shape of a bait — and both say that **HIGHBASE settles it by hand**, which is what the
+business flow actually does. Nothing computes or issues a discount: the note puts that
+outside the feature, and a prototype implying an automatic coupon would be designing
+something nobody is building.
+
+The drawer's title is no longer the card's. The card names the route the buyer came for;
+the drawer holds both routes and has to still be true after they switch tabs, so it reads
+"Ask for a better price".
+
+**Still open on this note.** The button label names one of the two routes the card opens —
+the quote route is now reachable only by switching tabs inside a drawer whose entry point
+does not mention it. And the note's Power BI item asks for internal visibility into
+price-matching requests, which the HB Admin surface already provides on screen; no export
+was built, since the note routes that through the Data Team.
 
 ## §9 / §10 after price matching
 

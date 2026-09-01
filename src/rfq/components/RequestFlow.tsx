@@ -241,6 +241,10 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
             <div style={{ marginTop: 4 }}>
               {t(lang, 'yourReference')}: <strong className="hb-ref">{submittedRef}</strong>
             </div>
+            {/* What happens next on the discount, said once, where they are waiting. */}
+            {route === 'case_1' && (
+              <div style={{ marginTop: 8 }}>{t(lang, 'incentiveOnSent')}</div>
+            )}
           </div>
         </div>
         <button type="button" className="hb-btn hb-btn--primary" onClick={() => onSubmitted(submittedRef)}>
@@ -263,7 +267,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
     <Modal
       drawer
       title={
-        <h2 className="hb-h2">{t(lang, 'requestSpecialPrice')}</h2>
+        <h2 className="hb-h2">{t(lang, 'requestDrawerTitle')}</h2>
       }
       onClose={onClose}
       footer={
@@ -311,6 +315,20 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
           <p className="hb-hint" style={{ marginTop: 10 }}>
             {t(lang, route === 'case_1' ? 'case1Body' : 'case2Body')}
           </p>
+          {/*
+            The card promised 5–10%. Repeating it here is not decoration: a promise made on
+            a card and never mentioned again is the shape of a bait, and this is the screen
+            where the buyer decides whether finding the invoice is worth it. It says who
+            settles it, too — HIGHBASE, by hand — because that is what the business flow
+            actually does, and a prototype that implies an automatic discount would be
+            designing a feature nobody is building.
+          */}
+          {route === 'case_1' && (
+            <div className="hb-banner hb-banner--good" style={{ marginTop: 12 }}>
+              <span aria-hidden="true">🎁</span>
+              <span>{t(lang, 'incentiveInForm')}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -411,11 +429,31 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
                 </button>
               </div>
             ) : (
-              /* AC-21.4 — camera and gallery on a phone, not a desktop-only file picker. */
-              <input
-                className="hb-input" type="file" accept=".pdf,image/*" capture="environment"
-                onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-              />
+              /*
+                Two ways in, named separately — the feature note asks for a photo *or* a
+                file, and one input hinting `capture` is not that. On a phone `capture`
+                sends you straight to the camera and some browsers drop the gallery
+                entirely, so a buyer with the invoice already saved has no way through;
+                without it, a buyer holding a paper invoice has to go and photograph it
+                first. Two labelled inputs let each of them take the route they are on.
+              */
+              <div className="hb-uploadchoice">
+                <label className="hb-btn hb-btn--outline">
+                  <span aria-hidden="true">📷</span>{t(lang, 'takePhoto')}
+                  <input
+                    type="file" accept="image/*" capture="environment" className="hb-visually-hidden"
+                    onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+                <span className="hb-hint">{t(lang, 'uploadOr')}</span>
+                <label className="hb-btn hb-btn--secondary">
+                  <span aria-hidden="true">📎</span>{t(lang, 'chooseFile')}
+                  <input
+                    type="file" accept=".pdf,image/*" className="hb-visually-hidden"
+                    onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              </div>
             )}
           </Field>
 

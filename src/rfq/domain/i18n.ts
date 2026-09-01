@@ -89,11 +89,16 @@ export const STRINGS: Dict = {
   marketplaceSubtitle: { en: 'Wholesale catalogue from your linked suppliers', ar: 'كتالوج الجملة من مورّديك المرتبطين' },
 
   // ── Marketplace entry point (US-1) ────────────────────────────────────────
-  requestSpecialPrice: { en: 'Request special price', ar: 'اطلب سعراً خاصاً' },
+  requestSpecialPrice: { en: 'Matching my price', ar: 'مطابقة سعري' },
+  /*
+   * The drawer holds both routes, so its title cannot be the card's. The card names the
+   * route the buyer came for; the drawer has to still be true after they switch tabs.
+   */
+  requestDrawerTitle: { en: 'Ask for a better price', ar: 'اطلب سعراً أفضل' },
   requestMyPrice: { en: 'Request my price', ar: 'اطلب سعري الخاص' },
   // The compact card CTA — the short label that sits beside the icon when the action row
   // is horizontal and has to share its width with Add to Cart.
-  requestShort: { en: 'Request', ar: 'اطلب' },
+  requestShort: { en: 'Match', ar: 'مطابقة' },
   viewRequestShort: { en: 'View request', ar: 'عرض الطلب' },
   // Beside the price the band already takes most of the row, so the existing-request
   // label drops to one word; the reference under the card still says which request.
@@ -128,6 +133,29 @@ export const STRINGS: Dict = {
   documentDateHint: { en: 'We read this from the document — set it only if we got it wrong.', ar: 'نقرأ التاريخ من المستند — حدّده فقط إذا كانت القراءة خاطئة.' },
   uploadProof: { en: 'Attach the invoice, quote or screenshot', ar: 'أرفق الفاتورة أو عرض السعر أو لقطة الشاشة' },
   uploadHint: { en: 'PDF, JPG, PNG, WEBP or HEIC · up to 10 MB · camera or gallery', ar: 'PDF أو JPG أو PNG أو WEBP أو HEIC · حتى ١٠ ميجابايت · من الكاميرا أو المعرض' },
+
+  // ── The incentive, in the PM's words ──────────────────────────────────────
+  // Two lengths, and which one a card gets is decided by how much room it has: the
+  // stacked layouts carry the full sentence, the two narrow ones carry the short form.
+  incentiveTitle: { en: 'Found a lower price elsewhere?', ar: 'وجدت سعراً أقل في مكان آخر؟' },
+  incentiveBody: { en: 'Upload your invoice and request a price match — if the seller accepts it, you\u2019ll get an extra 5% or 10% off your order through HIGHBASE directly!', ar: 'ارفع فاتورتك واطلب مطابقة السعر — وإذا قبل البائع، تحصل على خصم إضافي ٥٪ أو ١٠٪ على طلبك من هاي بيس مباشرة!' },
+  incentiveShort: { en: 'Upload your invoice — get 5–10% off from HIGHBASE if the seller matches your price!', ar: 'ارفع فاتورتك — واحصل على خصم ٥–١٠٪ من هاي بيس إذا طابق البائع سعرك!' },
+  incentiveAria: { en: 'What is a price match?', ar: 'ما هي مطابقة السعر؟' },
+  incentiveClose: { en: 'Close', ar: 'إغلاق' },
+
+  // ── Attaching the proof: two ways in, named separately ────────────────────
+  takePhoto: { en: 'Take a photo', ar: 'التقط صورة' },
+  chooseFile: { en: 'Choose a file', ar: 'اختر ملفاً' },
+  uploadOr: { en: 'or', ar: 'أو' },
+
+  /*
+   * The incentive again, at the point of the ask. A card that promises 5–10% and a form
+   * that never mentions it again reads as a bait; this is the same promise, with the part
+   * the business flow makes explicit — HIGHBASE settles it with the buyer afterwards, by
+   * hand — said rather than implied.
+   */
+  incentiveInForm: { en: 'If the supplier matches this price, HIGHBASE adds 5–10% off your order on top. The HIGHBASE team confirms the outcome and issues the discount to you directly.', ar: 'إذا طابق المورّد هذا السعر، تضيف هاي بيس خصماً ٥–١٠٪ على طلبك فوق ذلك. ويؤكد فريق هاي بيس النتيجة ويصرف الخصم لك مباشرة.' },
+  incentiveOnSent: { en: 'If the supplier matches your price, the HIGHBASE team will be in touch with your 5–10% discount.', ar: 'إذا طابق المورّد سعرك، سيتواصل معك فريق هاي بيس بخصمك ٥–١٠٪.' },
   extractedConfirm: { en: 'extracted — please confirm', ar: 'مستخرج — يرجى التأكيد' },
   extractionConflict: { en: 'You typed {typed}; the document reads {extracted}. Which is correct?', ar: 'أدخلت {typed}؛ والمستند يقرأ {extracted}. أيهما الصحيح؟' },
   keepTyped: { en: 'Keep what I typed', ar: 'اعتمد ما أدخلته' },

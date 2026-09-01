@@ -6,7 +6,7 @@
  * user can reach.
  */
 
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { formatCountdown, remainingMs } from '../domain/clocks'
 import { formatMoney } from '../domain/money'
 import { STATE_META, type RequestState } from '../domain/states'
@@ -220,5 +220,58 @@ export function Empty({ title, body, action }: { title: string; body: string; ac
       <p className="hb-sub">{body}</p>
       {action && <div style={{ marginTop: 16 }}>{action}</div>}
     </div>
+  )
+}
+
+/**
+ * The incentive tooltip on the product card.
+ *
+ * A `title` attribute would have been one line of code and wrong: it never appears on a
+ * touch device, it cannot be reached from the keyboard on most browsers, and it is the
+ * only place this feature tells a buyer what they get for the trouble of finding an
+ * invoice. So it is a real disclosure — a button that toggles a panel, dismissible with
+ * Escape or a click outside, and labelled with the question it answers rather than "info".
+ *
+ * It opens on click rather than hover for the same reason: on a phone there is no hover,
+ * and a card is exactly where a hover-only affordance goes unnoticed.
+ */
+export function InfoTip({ lang, title, body }: { lang: Lang; title?: string; body: string }) {
+  const [open, setOpen] = useState(false)
+  const wrap = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const onDown = (e: MouseEvent) => {
+      if (wrap.current && !wrap.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('mousedown', onDown)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('mousedown', onDown)
+    }
+  }, [open])
+
+  return (
+    <span className="hb-tip" ref={wrap}>
+      <button
+        type="button" className="hb-tip-btn"
+        aria-expanded={open}
+        aria-label={t(lang, 'incentiveAria')}
+        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v) }}
+      >
+        <span aria-hidden="true">i</span>
+      </button>
+      {open && (
+        <span className="hb-tip-panel" role="dialog" aria-label={t(lang, 'incentiveAria')}>
+          {title && <strong>{title}</strong>}
+          <span>{body}</span>
+          <button type="button" className="hb-btn hb-btn--quiet hb-btn--sm" onClick={() => setOpen(false)}>
+            {t(lang, 'incentiveClose')}
+          </button>
+        </span>
+      )}
+    </span>
   )
 }

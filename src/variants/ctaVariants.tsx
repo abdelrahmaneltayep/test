@@ -6,7 +6,7 @@
  * hierarchy, not the styling. Two actions appear in all ten:
  *
  *   · Add        — the cart action, icon plus a short label
- *   · Request    — "Request special price", or "View request · REF" once one is open
+ *   · Request    — "Matching my price", or "View request · REF" once one is open
  *
  * Each variant states what the arrangement buys and what it costs, because that is the
  * decision being made: how much of the card's attention the negotiation action takes from
@@ -24,7 +24,7 @@ export interface CtaProps {
 
 const COPY = {
   add: { en: 'Add', ar: 'أضف' },
-  request: { en: 'Request special price', ar: 'اطلب سعراً خاصاً' },
+  request: { en: 'Matching my price', ar: 'مطابقة سعري' },
   requestShort: { en: 'Request price', ar: 'اطلب سعراً' },
   requestTiny: { en: 'Ask for a better price', ar: 'اطلب سعراً أفضل' },
   view: { en: 'View request', ar: 'عرض الطلب' },

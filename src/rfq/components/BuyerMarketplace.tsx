@@ -13,7 +13,7 @@ import { t } from '../domain/i18n'
 import { formatMoney } from '../domain/money'
 import { isNegotiable, PRODUCTS, useRfq } from '../store'
 import type { Product } from '../domain/types'
-import { CartMark, EyeMark, TagMark } from './ui'
+import { CartMark, EyeMark, InfoTip, TagMark } from './ui'
 import { ProductDetails } from './ProductDetails'
 import { RequestFlow } from './RequestFlow'
 
@@ -80,7 +80,22 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
           /*
             One button, placed differently. AC-1.3 — where the product is not negotiable
             nothing is rendered in its place; a disabled control would only frustrate.
+
+            The info icon rides with it, and only before a request exists: it explains why
+            a buyer would go and find an invoice, which is a question about starting, not
+            about the one they already sent. It also stays out of the beside-price layout,
+            where the button shares a row with the price and there is no room for a third
+            thing without crushing one of the first two — the same reasoning that gives that
+            layout the short labels.
           */
+          const tip = eligible && !existing && !besidePrice ? (
+            <InfoTip
+              lang={lang}
+              title={shortLabels ? undefined : t(lang, 'incentiveTitle')}
+              body={t(lang, shortLabels ? 'incentiveShort' : 'incentiveBody')}
+            />
+          ) : null
+
           const requestCta = eligible ? (
             existing ? (
               <button
@@ -157,7 +172,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   ladder stays whole and the CTA lands in the same place on every card
                   whether or not the product has tiers (AC-1.4).
                 */}
-                {underPrice && requestCta}
+                {underPrice && <div className="hb-cta-with-tip">{requestCta}{tip}</div>}
 
                 <div className="hb-prod-supplier">
                   {t(lang, 'supplier')}: <b>{state.requests[0]?.sellerName ?? ''}</b>
@@ -184,7 +199,9 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                         ? <><CartMark />{t(lang, 'addToCartShort')}</>
                         : <><span aria-hidden="true">🛒</span>{t(lang, 'addToCart')}</>}
                     </button>
-                    {!besidePrice && !underPrice && requestCta}
+                    {!besidePrice && !underPrice && (
+                      <div className="hb-cta-with-tip">{requestCta}{tip}</div>
+                    )}
                   </div>
 
                   {/*

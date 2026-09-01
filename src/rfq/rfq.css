@@ -542,3 +542,71 @@ body {
   padding: 14px 16px;
   margin: 4px 0;
 }
+
+/*
+ * The incentive tooltip and the two-way upload — the price-matching card note.
+ */
+.hb-cta-with-tip { display: flex; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; }
+.hb-cta-with-tip > .hb-btn { flex: 1 1 auto; min-width: 0; }
+
+.hb-tip { position: relative; display: inline-flex; flex: none; }
+.hb-tip-btn {
+  width: 22px; height: 22px; flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--hb-line);
+  background: var(--hb-field);
+  color: var(--hb-ink-2);
+  font: 600 12px/1 var(--hb-display);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.hb-tip-btn:hover { border-color: var(--hb-blue); color: var(--hb-blue); }
+.hb-tip-btn:focus-visible { outline: 2px solid var(--hb-blue); outline-offset: 2px; }
+.hb-tip-btn[aria-expanded="true"] { background: var(--hb-blue); border-color: var(--hb-blue); color: #fff; }
+
+/* Anchored to the icon and pulled back inside the card, so a tip on the last column of
+   the grid does not open off the edge of the page. */
+.hb-tip-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  inset-inline-end: -8px;
+  z-index: 40;
+  width: max-content;
+  max-width: min(280px, 78vw);
+  display: flex; flex-direction: column; gap: 6px; align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--hb-surface);
+  border: 1px solid var(--hb-line);
+  border-radius: var(--hb-r);
+  box-shadow: var(--hb-shadow-lift);
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--hb-ink-2);
+  text-align: start;
+  white-space: normal;
+}
+.hb-tip-panel strong { color: var(--hb-ink); font-size: 13px; }
+
+/* An arrow, so the panel reads as belonging to the icon rather than floating over the
+   card it happens to cover. Two boxes: the border, then the fill one pixel inside it. */
+.hb-tip-panel::before,
+.hb-tip-panel::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  inset-inline-end: 13px;
+  border: 7px solid transparent;
+}
+.hb-tip-panel::before { border-top-color: var(--hb-line); }
+.hb-tip-panel::after { border-top-color: var(--hb-surface); margin-top: -1px; }
+
+/* Two labelled inputs rather than one hinting `capture`: each label is the button, and
+   the input inside it is what the pointer and the keyboard both actually activate. */
+.hb-uploadchoice { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hb-uploadchoice .hb-btn { cursor: pointer; }
+.hb-visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+/* The label is the control, so the focus ring has to follow the input inside it. */
+.hb-uploadchoice .hb-btn:focus-within { outline: 2px solid var(--hb-blue); outline-offset: 2px; }
