@@ -784,14 +784,20 @@ export function initialState(now: Date): RfqState {
     ], { slaDueAt: addHours(now, 30).toISOString() }),
 
     // A settled one, so Final Orders has a negotiated row with a real saving on it (§9).
+    /*
+     * Settled, and deliberately older than the FR-2.6 cooldown: this is the only SKU whose
+     * card starts without a live request, so a decision inside the window would shut the
+     * one entry point the prototype opens on. Twenty days out keeps Final Orders populated
+     * and the flow walkable at the same time.
+     */
     base('SPR-2607-0031', 'accepted', [
       mkLine('HB-5520', 60, 'case_1', 8_300, 8_300, 'accepted', proofOk),
     ], {
-      slaDueAt: null, submittedAt: addHours(now, -96).toISOString(),
+      slaDueAt: null, submittedAt: addHours(now, -486).toISOString(),
       history: [
-        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -96), { lines: 1 }),
-        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -92)),
-        event('RequestAccepted', 'seller', SELLER.name.en, addHours(now, -90)),
+        event('RequestSubmitted', 'buyer', BUYER.name.en, addHours(now, -486), { lines: 1 }),
+        event('RequestViewed', 'seller', SELLER.name.en, addHours(now, -482)),
+        event('RequestAccepted', 'seller', SELLER.name.en, addHours(now, -480)),
       ],
     }),
 

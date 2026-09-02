@@ -737,3 +737,6 @@ body {
 }
 .hb-routeswitch:hover { color: var(--hb-blue-deep); }
 .hb-routeswitch:focus-visible { outline: 2px solid var(--hb-blue); outline-offset: 3px; border-radius: 4px; }
+
+/* FR-2.6 — the gate's reason, under the control it closed. */
+.hb-prod-gate { margin-top: 6px; color: var(--hb-warn); }

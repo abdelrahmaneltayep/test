@@ -9,10 +9,11 @@
  */
 
 import { useState } from 'react'
-import { t } from '../domain/i18n'
+import { t, type Lang } from '../domain/i18n'
 import { formatMoney } from '../domain/money'
 import { isNegotiable, PRODUCTS, useRfq } from '../store'
-import { STATE_META } from '../domain/states'
+import { requestGate, type GateReason } from '../domain/guardrails'
+import { STATE_META, isTerminal } from '../domain/states'
 import type { Product } from '../domain/types'
 import { CartMark, InfoTip, TagMark } from './ui'
 import { ProductDetails } from './ProductDetails'
@@ -33,6 +34,28 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
     return state.requests.find(
       (r) => !LIVE_STATES.includes(r.state) && r.lines.some((l) => l.sku === sku),
     )
+  }
+
+  /** Every live request this buyer holds — the count FR-2.6 caps. */
+  const openCount = state.requests.filter((r) => !LIVE_STATES.includes(r.state)).length
+
+  /**
+   * FR-2.6 — the two limits, answered per SKU. Both were configured and neither was ever
+   * read, so a buyer would have met them for the first time as a control that did nothing.
+   * The card now says which limit it is and what clears it, before the drawer opens.
+   */
+  function gateFor(sku: string): GateReason | null {
+    /*
+      Counted from when the request was *decided*, not when it was sent. A negotiation that
+      ran three weeks and closed yesterday is a decision from yesterday, and dating the
+      cooldown from its submission would let the buyer ask again the same afternoon.
+      The last history entry is when it closed.
+    */
+    const terminal = state.requests
+      .filter((r) => isTerminal(r.state) && r.lines.some((l) => l.sku === sku))
+      .map((r) => new Date(r.history[r.history.length - 1]?.at ?? r.submittedAt ?? 0))
+      .sort((a, b) => b.getTime() - a.getTime())[0] ?? null
+    return requestGate({ openRequestCount: openCount, lastTerminalAt: terminal, now: state.now })
   }
 
   function startRequest(product: Product) {
@@ -124,6 +147,8 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
           */
           const stateBelowLadder = underPrice || (besidePrice && existing !== undefined)
 
+          const gate = eligible && !existing ? gateFor(p.sku) : null
+
           const requestCta = eligible ? (
             existing ? (
               <button
@@ -143,11 +168,17 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
               <button
                 type="button"
                 className={`hb-btn hb-btn--outline${besidePrice ? ' hb-btn--sm' : ' hb-btn--block'}`}
+                // E-2 — a control that cannot do its job says why, in its own tooltip and
+                // in a line beneath it. Disabling it silently is the version of this that
+                // sends the buyer to support.
+                disabled={gate !== null}
+                title={gate ? gateMessage(gate, lang) : undefined}
                 onClick={() => startRequest(p)}
               >
-                {shortLabels
-                  ? <><TagMark />{t(lang, 'requestShort')}</>
-                  : <><span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}</>}
+                {gate ? gateShort(gate, lang)
+                  : shortLabels
+                    ? <><TagMark />{t(lang, 'requestShort')}</>
+                    : <><span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}</>}
               </button>
             )
           ) : null
@@ -244,6 +275,9 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   {compact && existing && eligible && (
                     <div className="hb-hint hb-prod-ctaref">{existing.ref}</div>
                   )}
+                  {gate && !shortLabels && (
+                    <div className="hb-hint hb-prod-gate">{gateMessage(gate, lang)}</div>
+                  )}
                 </div>
               </div>
             </div>
@@ -291,4 +325,22 @@ function Flow({ product, onClose, onToast, onDone }: {
       onSubmitted={() => { onClose(); onDone() }}
     />
   )
+}
+
+/** FR-2.6 — the gate in full, and in the words the buyer needs to act on it. */
+function gateMessage(gate: GateReason, lang: Lang): string {
+  if (gate.kind === 'too_many_open') return t(lang, 'gateTooManyOpen', { open: gate.open, max: gate.max })
+  // One day is its own sentence rather than "1 days"; the prototype has no plural helper
+  // and the one place it shows is worth a second string.
+  return gate.daysLeft === 1
+    ? t(lang, 'gateCooldownOne')
+    : t(lang, 'gateCooldown', { days: gate.daysLeft })
+}
+
+/** The same fact at button length, for a label that has to fit a card. */
+function gateShort(gate: GateReason, lang: Lang): string {
+  if (gate.kind === 'too_many_open') return t(lang, 'gateTooManyOpenShort')
+  return gate.daysLeft === 1
+    ? t(lang, 'gateCooldownShortOne')
+    : t(lang, 'gateCooldownShort', { days: gate.daysLeft })
 }

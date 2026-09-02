@@ -66,3 +66,43 @@ export function guardrailValue(key: GuardrailKey, configured?: number): number {
   if (configured !== undefined && withinBounds(key, configured)) return configured
   return GUARDRAILS[key].default
 }
+
+/**
+ * FR-2.6 — why a buyer cannot open a request right now, where that is the case.
+ *
+ * The two limits were configured and never enforced: nothing counted a buyer's open
+ * requests against `maxOpenRequestsPerBuyer`, and nothing held a SKU back for
+ * `cooldownDaysAfterTerminal` after one closed. A limit no code reads is a limit the
+ * product does not have, and the first a buyer would have heard of either was the day it
+ * started being enforced somewhere they could not see.
+ *
+ * `null` means the buyer may go ahead.
+ */
+export type GateReason =
+  | { kind: 'too_many_open'; open: number; max: number }
+  | { kind: 'cooldown'; daysLeft: number }
+
+export interface GateInput {
+  /** Live requests this buyer holds, across every SKU. */
+  openRequestCount: number
+  /**
+   * When this SKU's most recent request reached a terminal state, if it did. The cooldown
+   * counts from there — a buyer who was told no yesterday cannot ask again today.
+   */
+  lastTerminalAt: Date | null
+  now: Date
+}
+
+export function requestGate(input: GateInput): GateReason | null {
+  if (input.openRequestCount >= GATING.maxOpenRequestsPerBuyer) {
+    return { kind: 'too_many_open', open: input.openRequestCount, max: GATING.maxOpenRequestsPerBuyer }
+  }
+  if (input.lastTerminalAt) {
+    const elapsedDays = (input.now.getTime() - input.lastTerminalAt.getTime()) / 86_400_000
+    if (elapsedDays < GATING.cooldownDaysAfterTerminal) {
+      // Rounded up: with half a day left the buyer is told "1 day", never "0".
+      return { kind: 'cooldown', daysLeft: Math.ceil(GATING.cooldownDaysAfterTerminal - elapsedDays) }
+    }
+  }
+  return null
+}

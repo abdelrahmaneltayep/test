@@ -20,7 +20,7 @@
 import { useMemo, useState } from 'react'
 import { formatMoney, parseMoney } from '../domain/money'
 import { makeRef } from '../domain/reference'
-import { IMPLAUSIBLE_ASK_RATIO } from '../domain/guardrails'
+import { GATING, IMPLAUSIBLE_ASK_RATIO } from '../domain/guardrails'
 import { runAutoChecks, PROOF_EXCLUSIONS, ACCEPTED_MIME_TYPES, MAX_FILE_BYTES } from '../domain/proof'
 import { t, type Lang } from '../domain/i18n'
 import type { Frequency, Product, Proof, ProofFields } from '../domain/types'
@@ -229,7 +229,15 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
     }
   }
 
+  /*
+   * AC-6.5 — the cap was enforced in the reducer by returning the state unchanged, which
+   * from the buyer's side is a button that does nothing. The reducer still refuses; what
+   * is new is that the refusal has a sentence attached before the press.
+   */
+  const linesFull = draftLines.length >= GATING.maxLinesPerRequest
+
   function commitLine() {
+    if (linesFull) return
     if (!state.draft) dispatch({ type: 'start_draft' })
     dispatch({ type: 'add_line', line: currentLine() })
   }
@@ -253,20 +261,51 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
 
   // ── Confirmation (AC-7.5) ────────────────────────────────────────────────
   if (submittedRef) {
+    /*
+      A rule can settle a request in the same step that creates it — the floor auto-decline
+      on the quote route, or the auto-accept threshold — so the confirmation reads the
+      state that came back rather than assuming one. It used to promise a reply within 24
+      hours in every case, which on an auto-declined request was simply untrue, and on an
+      auto-accepted one sent the buyer away to wait for something that had already
+      happened.
+
+      AC-19.5 governs the declined wording: it names no floor, no margin and no rule, and
+      it points at the path that is still open (E-5).
+    */
+    const settled = state.requests.find((r) => r.ref === submittedRef)
+    const outcome = settled?.state === 'declined' ? 'declined'
+      : settled?.state === 'accepted' ? 'accepted' : 'sent'
+    const TONE = { sent: 'good', accepted: 'good', declined: 'warn' }[outcome]
+
     return (
-      <Modal drawer title={<h2 className="hb-h2">{t(lang, 'submittedTitle')}</h2>} onClose={onClose}>
-        <div className="hb-banner hb-banner--good" style={{ marginBottom: 16 }}>
+      <Modal
+        drawer
+        title={<h2 className="hb-h2">{t(lang, outcome === 'declined' ? 'submittedDeclinedTitle'
+          : outcome === 'accepted' ? 'submittedAcceptedTitle' : 'submittedTitle')}</h2>}
+        onClose={onClose}
+      >
+        <div className={`hb-banner hb-banner--${TONE}`} style={{ marginBottom: 16 }}>
           <div>
-            <strong>{t(lang, 'slaPromise')}</strong>
+            <strong>
+              {t(lang, outcome === 'declined' ? 'autoDeclinedLead'
+                : outcome === 'accepted' ? 'autoAcceptedLead' : 'slaPromise')}
+            </strong>
             <div style={{ marginTop: 4 }}>
               {t(lang, 'yourReference')}: <strong className="hb-ref">{submittedRef}</strong>
             </div>
-            {/* What happens next on the discount, said once, where they are waiting. */}
-            {route === 'case_1' && (
-              <div style={{ marginTop: 8 }}>{t(lang, 'incentiveOnSent')}</div>
+            {/* The discount only follows a match, so it is only promised where one is
+                still possible. On a declined request it would be a second untruth. */}
+            {route === 'case_1' && outcome !== 'declined' && (
+              <div style={{ marginTop: 8 }}>
+                {t(lang, outcome === 'accepted' ? 'incentiveOnMatched' : 'incentiveOnSent')}
+              </div>
             )}
           </div>
         </div>
+        {/* AC-22.1 / E-5 — a refused ask never costs the buyer the goods. */}
+        {outcome === 'declined' && (
+          <p className="hb-sub" style={{ marginBottom: 16 }}>{t(lang, 'stillPurchasable')}</p>
+        )}
         <button type="button" className="hb-btn hb-btn--primary" onClick={() => onSubmitted(submittedRef)}>
           {t(lang, 'goToMyRequests')}
         </button>
@@ -279,9 +318,11 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
    * send. Before that the form is simply unfilled, and nagging about it on open reads as
    * an error the buyer has not made yet.
    */
-  const blockedReason = showErrors && !lineComplete && !(lineUntouched && draftLines.length > 0)
-    ? t(lang, 'completeFormFirst')
-    : null
+  const blockedReason = linesFull && lineComplete
+    ? t(lang, 'maxLinesReached', { max: GATING.maxLinesPerRequest })
+    : showErrors && !lineComplete && !(lineUntouched && draftLines.length > 0)
+      ? t(lang, 'completeFormFirst')
+      : null
 
   return (
     <Modal
@@ -372,7 +413,13 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
           */}
           <Field
             label={t(lang, 'uploadProof')}
-            error={proofFileError ?? proofError}
+            /*
+              The rejection wins over the absence. Both are true after a bad upload — there
+              is still no document *and* the one just offered was too big — but "attach the
+              document that shows that price" is an instruction the buyer has already
+              followed, and it hid the only sentence that told them why it did not take.
+            */
+            error={proofError ?? proofFileError}
           >
             {file ? (
               <div className="hb-filechip">

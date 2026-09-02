@@ -177,6 +177,83 @@ check('11.special-credit-shown-to-seller', linePills.some((x) => /continuing arr
   `${creditRef} :: ${linePills.join(' | ')}`)
 await p.getByRole('button', { name: /Back to the queue/ }).click(); await p.waitForTimeout(200)
 
+// ── Error cases: every refusal names itself ──────────────────────────────────
+await reset()
+await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
+await p.waitForTimeout(350)
+const fieldErrors = async () =>
+  (await p.locator('.hb-modal-body .hb-error, .hb-modal-body .hb-warning').allInnerTexts()).join(' | ')
+
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(250)
+const empty = await fieldErrors()
+check('err.empty-form-names-every-field', /whole number/i.test(empty)
+  && /target price/i.test(empty) && /Attach the document/i.test(empty), empty.slice(0, 160))
+
+await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('2'); await p.waitForTimeout(200)
+check('err.below-minimum-quantity', /Minimum quantity/i.test(await fieldErrors()), await fieldErrors())
+
+await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
+await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('99.000'); await p.waitForTimeout(200)
+check('err.target-at-or-above-list', /below the list price/i.test(await fieldErrors()), await fieldErrors())
+
+// EC-8 — implausible is a warning, never a block: it still sends, flagged.
+await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('1.000'); await p.waitForTimeout(200)
+check('err.implausible-warns-not-blocks', /more than half off/i.test(await fieldErrors())
+  && !(await p.locator('.hb-modal-foot .hb-btn--primary').isDisabled()), await fieldErrors())
+
+await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
+await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles(
+  { name: 'big.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(11 * 1024 * 1024) })
+await p.waitForTimeout(300)
+// The rejection has to beat the absence: both are true, only one is news.
+check('err.file-too-large', /maximum file size/i.test(await fieldErrors()), await fieldErrors())
+await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles(
+  { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') })
+await p.waitForTimeout(300)
+check('err.wrong-file-type', /Accepted formats/i.test(await fieldErrors()), await fieldErrors())
+
+// FR-2.6 — the cooldown, walked rather than seeded: send, decline, come back to the card.
+await reset()
+await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
+await p.waitForTimeout(350)
+await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
+await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
+await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles(
+  { name: 'gulf-foods-inv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x') })
+await p.waitForTimeout(300)
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(400)
+const gateRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(300)
+await p.locator('tbody tr', { hasText: gateRef }).click(); await p.waitForTimeout(400)
+await p.getByRole('button', { name: 'Decline', exact: true }).click(); await p.waitForTimeout(300)
+await p.locator('.hb-overlay select').first().selectOption({ index: 3 }); await p.waitForTimeout(150)
+await p.getByRole('button', { name: 'Decline and reply' }).click(); await p.waitForTimeout(400)
+await p.getByRole('button', { name: 'Buyer · Marketplace' }).click(); await p.waitForTimeout(400)
+const gatedCta = p.locator('.hb-prod', { hasText: 'Tomato Paste' }).locator('.hb-btn--outline')
+check('err.cooldown-after-a-decision', await gatedCta.isDisabled()
+  && /Ask again/i.test(await gatedCta.innerText())
+  && /order it now at list price/i.test(await txt('.hb-prod:has-text("Tomato Paste") .hb-prod-gate')),
+  await txt('.hb-prod:has-text("Tomato Paste") .hb-prod-gate'))
+
+// A rule can settle a request in the step that created it, and the confirmation says so
+// rather than promising a reply that is never coming.
+await reset()
+await p.getByRole('button', { name: '10%', exact: true }).click(); await p.waitForTimeout(250)
+await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
+await p.waitForTimeout(350)
+await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
+await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.500')
+await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles(
+  { name: 'inv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x') })
+await p.waitForTimeout(300)
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(400)
+check('err.auto-resolved-is-told-truthfully',
+  /Price matched/i.test(await p.locator('.hb-overlay h2').innerText())
+  && /no waiting/i.test(await txt('.hb-overlay .hb-banner'))
+  && !/within 24 hours/i.test(await txt('.hb-overlay .hb-banner')),
+  `${await p.locator('.hb-overlay h2').innerText()} :: ${(await txt('.hb-overlay .hb-banner')).slice(0, 90)}`)
+
 // ── §11 / AC-3.3 — both release lines are walkable ───────────────────────────
 async function formLabels(phaseBtn) {
   await reset()

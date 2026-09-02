@@ -163,6 +163,8 @@ export const STRINGS: Dict = {
    */
   incentiveInForm: { en: 'If the supplier matches this price, HIGHBASE adds 5–10% off your order on top. The HIGHBASE team confirms the outcome and issues the discount to you directly.', ar: 'إذا طابق المورّد هذا السعر، تضيف هاي بيس خصماً ٥–١٠٪ على طلبك فوق ذلك. ويؤكد فريق هاي بيس النتيجة ويصرف الخصم لك مباشرة.' },
   incentiveOnSent: { en: 'If the supplier matches your price, the HIGHBASE team will be in touch with your 5–10% discount.', ar: 'إذا طابق المورّد سعرك، سيتواصل معك فريق هاي بيس بخصمك ٥–١٠٪.' },
+  /* The same promise in the past tense — the match already happened, so "if" would be odd. */
+  incentiveOnMatched: { en: 'Your price was matched, so the HIGHBASE team will be in touch with your 5–10% discount.', ar: 'تمت مطابقة سعرك، وسيتواصل معك فريق هاي بيس بخصمك ٥–١٠٪.' },
   extractedConfirm: { en: 'extracted — please confirm', ar: 'مستخرج — يرجى التأكيد' },
   extractionConflict: { en: 'You typed {typed}; the document reads {extracted}. Which is correct?', ar: 'أدخلت {typed}؛ والمستند يقرأ {extracted}. أيهما الصحيح؟' },
   keepTyped: { en: 'Keep what I typed', ar: 'اعتمد ما أدخلته' },
@@ -350,6 +352,27 @@ export const STRINGS: Dict = {
   noAttachment: { en: 'No document — this is a quote request', ar: 'بلا مستند — هذا طلب تسعير' },
   notProvided: { en: 'Not given', ar: 'غير مذكور' },
   readFromDocument: { en: 'Read from the document', ar: 'مقروء من المستند' },
+
+  // ── When a rule settles the request in the same step that created it ──────
+  submittedDeclinedTitle: { en: 'This one we cannot match', ar: 'هذا الطلب لا يمكننا مطابقته' },
+  submittedAcceptedTitle: { en: 'Price matched', ar: 'تمت مطابقة السعر' },
+  // AC-19.5 — names no floor, no cost, no margin and no rule.
+  autoDeclinedLead: { en: 'The supplier cannot meet this price for these items.', ar: 'لا يستطيع المورّد تلبية هذا السعر لهذه الأصناف.' },
+  autoAcceptedLead: { en: 'Matched. Your price stands on this order — no waiting.', ar: 'تمت المطابقة. سعرك معتمد على هذا الطلب — دون انتظار.' },
+
+  // ── FR-2.6 — the two gates, each naming its limit and what to do about it ──
+  gateTooManyOpen: { en: 'You have {open} requests open, which is the limit of {max}. Close one — accept it, decline it or withdraw it — and this opens again.', ar: 'لديك {open} طلبات مفتوحة، وهو الحد الأقصى {max}. أغلق أحدها — بالقبول أو الرفض أو السحب — ليُتاح هذا من جديد.' },
+  /*
+   * One number, and it is the one the buyer can act on. The first draft opened with "this
+   * item was decided {days} ago" and reused the same value for both halves, so a decision
+   * taken this morning read as a fortnight old — a sentence that is wrong about the past
+   * to explain the future.
+   */
+  gateCooldown: { en: 'This item was decided recently. You can ask again in {days} days, or order it now at list price.', ar: 'تم البتّ في هذا الصنف مؤخراً. يمكنك السؤال مجدداً بعد {days} يوماً، أو طلبه الآن بالسعر المعلن.' },
+  gateCooldownOne: { en: 'This item was decided recently. You can ask again tomorrow, or order it now at list price.', ar: 'تم البتّ في هذا الصنف مؤخراً. يمكنك السؤال مجدداً غداً، أو طلبه الآن بالسعر المعلن.' },
+  gateTooManyOpenShort: { en: 'Request limit reached', ar: 'بلغت حد الطلبات' },
+  gateCooldownShort: { en: 'Ask again in {days} days', ar: 'اسأل بعد {days} يوماً' },
+  gateCooldownShortOne: { en: 'Ask again tomorrow', ar: 'اسأل غداً' },
   readOnlyRequest: { en: 'This request is read-only now.', ar: 'هذا الطلب للقراءة فقط الآن.' },
   acceptDisabledQuoteOnly: { en: 'This request has no asked price to accept — open it and quote a price.', ar: 'لا يوجد سعر مطلوب لقبوله — افتح الطلب وقدّم سعراً.' },
   // On the page the request is already open, so the way out is the counter beside it.
@@ -480,7 +503,7 @@ export const STRINGS: Dict = {
   priceRequired: { en: 'Enter a target price.', ar: 'أدخل السعر المستهدف.' },
   supplierRequired: { en: 'Name the supplier offering that price.', ar: 'اذكر المورّد صاحب هذا السعر.' },
   fileRequired: { en: 'Attach the document that shows that price.', ar: 'أرفق المستند الذي يُظهر هذا السعر.' },
-  maxLinesReached: { en: 'A request holds up to {max} items.', ar: 'يتسع الطلب حتى {max} صنفاً.' },
+  maxLinesReached: { en: 'A request holds up to {max} items. Send this one, then start another.', ar: 'يتسع الطلب حتى {max} صنفاً. أرسل هذا ثم ابدأ طلباً آخر.' },
   differentSeller: { en: 'That product is from a different supplier. Start a second request for it — this one stays as it is.', ar: 'هذا الصنف من مورّد آخر. ابدأ طلباً ثانياً له — ويبقى هذا الطلب كما هو.' },
   language: { en: 'العربية', ar: 'English' },
 }

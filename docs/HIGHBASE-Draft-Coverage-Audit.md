@@ -240,7 +240,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Seventy-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Eighty-three checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -317,6 +317,52 @@ A later note from the PM scoped a change to the product card, and it landed as w
   it by hand**, which is what the business flow actually does. Nothing computes or issues a
   discount: the note puts that outside the feature, and a prototype implying an automatic
   coupon would be designing something nobody is building.
+
+### Error cases
+
+Every refusal in the match flow now names itself, and the audit walks each one.
+
+| Case | What the buyer gets |
+| --- | --- |
+| Empty form | All three fields named at once, only after a send is attempted |
+| Quantity below the minimum | The constraint and the value (AC-2.5) |
+| Target at or above list | Blocked, with the list price named (AC-4.6 / EC-7) |
+| Target implausibly low | **Warns and still sends**, flagged to the seller (EC-8) |
+| File over 10 MB | The limit, before the upload completes (EC-30) |
+| Unsupported file type | The accepted formats (EC-29) |
+| Draft already at the line cap | The cap and what to do next (AC-6.5) |
+| Ten requests already open | The count, the limit, and what clears it (FR-2.6) |
+| SKU decided inside the cooldown | When they can ask again, and that they can order now (FR-2.6) |
+| A rule settled it on submit | The real outcome, not a promised reply |
+
+Four of these were genuinely missing rather than merely unstyled:
+
+**FR-2.6's two gates were configured and never read.** Nothing counted a buyer's open
+requests against `maxOpenRequestsPerBuyer`, and nothing held a SKU back for
+`cooldownDaysAfterTerminal`. A limit no code reads is a limit the product does not have.
+Both are enforced at the card now, which states which limit it is and what clears it before
+the drawer opens. The cooldown counts from when the request was **decided**, not when it
+was sent: a negotiation that ran three weeks and closed yesterday is a decision from
+yesterday.
+
+**AC-6.5's line cap was enforced by the reducer returning state unchanged**, which from the
+buyer's side is a button that does nothing. The reducer still refuses; the refusal now has
+a sentence attached before the press.
+
+**The confirmation promised a reply that was sometimes never coming.** A rule can settle a
+request in the same step that creates it — the floor auto-decline, or the auto-accept
+threshold — and the drawer said "most suppliers reply within 24 hours" either way. It now
+reads the state that came back: sent, matched on the spot, or refused. The refused wording
+follows AC-19.5 — no floor, no margin, no rule named — and points at the path still open.
+
+**A rejected upload was masked by the absence message.** Both were true after a bad file —
+there is still no document, *and* the one just offered was too large — but "attach the
+document that shows that price" is an instruction the buyer had already followed. The
+rejection wins.
+
+One seeded fixture moved with this: the settled HB-5520 request now sits twenty days back
+rather than four, because it is the only SKU whose card starts without a live request and a
+decision inside the cooldown would have shut the prototype's one entry point on first load.
 
 ### The drawer, rebuilt to the PM's design
 
