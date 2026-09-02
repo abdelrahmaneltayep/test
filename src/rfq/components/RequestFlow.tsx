@@ -18,17 +18,18 @@
  */
 
 import { useMemo, useState } from 'react'
-import { formatMoney, parseMoney } from '../domain/money'
+import { formatMoney } from '../domain/money'
 import { makeRef } from '../domain/reference'
-import { GATING, IMPLAUSIBLE_ASK_RATIO } from '../domain/guardrails'
-import { runAutoChecks, PROOF_EXCLUSIONS, ACCEPTED_MIME_TYPES, MAX_FILE_BYTES } from '../domain/proof'
+import { GATING } from '../domain/guardrails'
+import { runAutoChecks, PROOF_EXCLUSIONS } from '../domain/proof'
+import {
+  parsePriceMinor, quantityHint, validateFile, validatePrice, validateQuantity,
+  SALE_UNIT_KEY, type Finding,
+} from '../domain/validation'
 import { t, type Lang } from '../domain/i18n'
 import type { Frequency, Product, Proof, ProofFields } from '../domain/types'
 import { case1Available, frequencyAvailable, phase2Only, productBySku, useRfq, type DraftLine } from '../store'
 import { Field, Modal, Money, ProductListItem } from './ui'
-
-/** FR-2.1 — the seller's configured negotiation minimum, per line. */
-export const NEGOTIATION_MIN_QTY = 10
 
 interface Props {
   product: Product
@@ -98,6 +99,34 @@ function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean
   }
 }
 
+/**
+ * Turn a finding into the sentence the buyer reads.
+ *
+ * The rules deal in case ids and numbers; the words are here, and only here, because only
+ * the renderer knows the language. Two parameters need resolving before `t` can use them:
+ * `unit` is itself a key (the product's own noun, which is a different word in each
+ * language), and anything in minor units has to be formatted as money rather than printed
+ * as an integer — 10250 is not a price.
+ */
+function say(finding: Finding | null, lang: Lang): string | null {
+  if (!finding) return null
+  const params: Record<string, string | number> = { ...finding.params }
+  if (typeof params.unit === 'string') params.unit = t(lang, params.unit)
+  if (typeof params.price === 'number') params.price = formatMoney(params.price, { withCurrency: true, lang })
+  if (finding.key === 'priceNonPositive') params.zero = formatMoney(0, { withCurrency: true, lang })
+  return t(lang, finding.key, params)
+}
+
+/** The two halves of a finding, split for `Field`, which shows each in its own colour. */
+function fieldMessages(finding: Finding | null, lang: Lang) {
+  const text = say(finding, lang)
+  return {
+    error: finding?.severity === 'error' ? text : null,
+    warning: finding?.severity === 'warning' ? text : null,
+    hint: finding?.severity === 'hint' ? text ?? undefined : undefined,
+  }
+}
+
 export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: Props) {
   const { state, dispatch, lang } = useRfq()
 
@@ -116,8 +145,14 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   const routeChoice = case1Available(state.phase)
   const [route, setRoute] = useState<'case_1' | 'case_2'>(routeChoice ? 'case_1' : 'case_2')
   const [targetText, setTargetText] = useState('')
-  const [file, setFile] = useState<File | null>(null)
-  const [proofError, setProofError] = useState<string | null>(null)
+  /*
+   * A list, capped at MAX_FILES_PER_LINE. One invoice is the common case and still the
+   * only one the seller's verification panel leads with — but the evidence a buyer holds
+   * is not always a single page, and a cap you cannot reach is a rule nobody has tested.
+   */
+  const [files, setFiles] = useState<File[]>([])
+  /** The last rejection, kept until the next attempt rather than cleared on a timer. */
+  const [fileFinding, setFileFinding] = useState<Finding | null>(null)
   const [frequency, setFrequency] = useState<Frequency>('one_off')
   const [specialCredit, setSpecialCredit] = useState(false)
   const [note, setNote] = useState('')
@@ -126,25 +161,45 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
 
   const qty = Number(qtyText)
   const tier = useMemo(() => applicableTier(product, qty), [product, qty])
-  const targetPrice = parseMoney(targetText)
+  const targetPrice = parsePriceMinor(targetText)
   const draftLines = state.draft?.lines ?? []
 
-  function handleFile(picked: File | null) {
-    setProofError(null)
-    if (!picked) { setFile(null); return }
-    // EC-30 — the size limit is enforced before upload completes where the client can see it.
-    if (picked.size > MAX_FILE_BYTES) {
-      setProofError(lang === 'ar' ? 'الحد الأقصى لحجم الملف ١٠ ميجابايت.' : 'The maximum file size is 10 MB.')
+  /**
+   * Take what the picker returned.
+   *
+   * Files are judged one at a time and against the ones already accepted in this same
+   * batch, so picking three copies of one invoice catches the second and the third rather
+   * than only the second. A rejection stops nothing that came before it: what passed is
+   * attached, and the first refusal is the sentence shown. Silently discarding a good file
+   * because a later one was bad would be the worse of the two behaviours.
+   */
+  function handlePicked(list: FileList | null) {
+    const picked = list ? Array.from(list) : []
+    // EC-31 — a picker dismissed without a choice is its own case, not an empty success.
+    if (picked.length === 0) {
+      setFileFinding({ key: 'fileNoneSelected', severity: 'error', params: {} })
       return
     }
-    // EC-29 — an unsupported type is rejected with the accepted formats listed.
-    if (picked.type && !(ACCEPTED_MIME_TYPES as readonly string[]).includes(picked.type)) {
-      setProofError(lang === 'ar'
-        ? 'الصيغ المقبولة: PDF، JPG، PNG، WEBP، HEIC.'
-        : 'Accepted formats: PDF, JPG, PNG, WEBP, HEIC.')
-      return
+    const accepted: File[] = []
+    let refusal: Finding | null = null
+    for (const candidate of picked) {
+      const found = validateFile(candidate, [...files, ...accepted])
+      if (found) { refusal = refusal ?? found; continue }
+      // EC-30 — the transport can still fail after every rule has passed, and that failure
+      // is about the connection rather than about the file the buyer chose.
+      if (state.uploadFails) {
+        refusal = refusal ?? { key: 'fileUploadFailed', severity: 'error', params: {} }
+        continue
+      }
+      accepted.push(candidate)
     }
-    setFile(picked)
+    if (accepted.length > 0) setFiles([...files, ...accepted])
+    setFileFinding(refusal)
+  }
+
+  function removeFile(index: number) {
+    setFiles(files.filter((_, i) => i !== index))
+    setFileFinding(null)
   }
 
   /*
@@ -153,8 +208,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
    * the auto-checks — freezing the typed set at upload time would silently compare against
    * empty fields.
    */
-  const proof = useMemo<Proof | null>(() => {
-    if (!file) return null
+  const proofs = useMemo<Proof[]>(() => {
     /*
       FR-7.5 keeps typed and extracted apart, and the form now only asks for one of the
       five: the price. The rest is left empty rather than pre-filled from the document —
@@ -168,51 +222,61 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       documentDate: null,
       currency: 'BHD',
     }
-    // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
-    // request is marked for manual review rather than blocked.
-    // §3 — the invoice-reading service is Phase 2 under either reading of the phases.
-    const built = simulateExtraction(file, typed, !phase2Only(state.phase), state.now)
-    built.checks = runAutoChecks(built, {
-      now: state.now,
-      target: { sku: product.sku, brand: product.brand, packSize: product.packSize, unitOfMeasure: product.unitOfMeasure.en },
-      buyerHashes: [],
-      otherBuyerHashes: [],
-      tenantCurrency: 'BHD',
+    return files.map((f) => {
+      // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
+      // request is marked for manual review rather than blocked.
+      // §3 — the invoice-reading service is Phase 2 under either reading of the phases.
+      const built = simulateExtraction(f, typed, !phase2Only(state.phase), state.now)
+      built.checks = runAutoChecks(built, {
+        now: state.now,
+        target: { sku: product.sku, brand: product.brand, packSize: product.packSize, unitOfMeasure: product.unitOfMeasure.en },
+        buyerHashes: [],
+        otherBuyerHashes: [],
+        tenantCurrency: 'BHD',
+      })
+      return built
     })
-    return built
-  }, [file, targetPrice, product, state.phase, state.now])
+  }, [files, targetPrice, product, state.phase, state.now])
 
 
-  // ── AC-2.5 / AC-2.3 — quantity validation names the constraint and the value ──
-  const qtyError =
-    qtyText === '' ? (showErrors ? t(lang, 'quantityInvalid') : null)
-      : !/^\d+$/.test(qtyText) || qty <= 0 ? t(lang, 'quantityInvalid')
-        : qty < NEGOTIATION_MIN_QTY ? t(lang, 'minQuantityBlocked', { min: NEGOTIATION_MIN_QTY })
-          : null
+  /*
+   * The two fields, judged by the rule table rather than here (domain/validation.ts).
+   *
+   * `touched` is what a blank field means: nothing yet, until the buyer has tried to send.
+   * The empty-field sentence is an answer to "why did that not go", and shown before the
+   * press it is an accusation about something nobody has done.
+   *
+   * Where nothing is wrong the quantity field carries its instruction instead — how this
+   * product is sold — which is the thing that stops most of the refusals below from ever
+   * being reached.
+   */
+  const qtyFinding = validateQuantity(qtyText, product, { touched: showErrors })
+    ?? (qtyText.trim() === '' ? quantityHint(product) : null)
+  const qtyMsg = fieldMessages(qtyFinding, lang)
+  const qtyBlocked = qtyFinding?.severity === 'error'
 
-  // ── AC-4.6 / EC-7 — a target at or above list is blocked, with the list price named ──
-  const targetError =
-    route !== 'case_1' ? null
-      : targetText === '' ? (showErrors ? t(lang, 'priceRequired') : null)
-        : targetPrice === null ? t(lang, 'priceRequired')
-          : targetPrice >= product.listPrice
-            ? t(lang, 'targetAboveList', { list: formatMoney(product.listPrice, { withCurrency: true, lang }) })
-            : null
+  const priceFinding = route === 'case_1'
+    ? validatePrice(targetText, product.listPrice, { touched: showErrors })
+    : null
+  const priceMsg = fieldMessages(priceFinding, lang)
+  const priceBlocked = priceFinding?.severity === 'error'
 
-  // ── EC-8 — an implausibly low ask warns and flags, but never blocks ──
-  const targetWarning =
-    route === 'case_1' && targetPrice !== null && targetPrice > 0 && targetPrice < product.listPrice * IMPLAUSIBLE_ASK_RATIO
-      ? t(lang, 'targetImplausible') : null
-
-  const proofFileError = showErrors && route === 'case_1' && !proof ? t(lang, 'fileRequired') : null
+  /*
+   * The rejection wins over the absence. Both are true after a bad upload — there is still
+   * no document *and* the one just offered was refused — but "attach the document that
+   * shows that price" is an instruction the buyer has already followed, and it hid the
+   * only sentence that told them why it did not take.
+   */
+  const fileError = say(fileFinding, lang)
+    ?? (showErrors && route === 'case_1' && proofs.length === 0 ? t(lang, 'fileRequired') : null)
 
   /** Everything the current line needs before it can join the request. */
   const lineComplete =
-    qtyText !== '' && qtyError === null &&
-    (route === 'case_2' || (targetPrice !== null && targetError === null && proof !== null))
+    qtyText.trim() !== '' && !qtyBlocked &&
+    (route === 'case_2' || (targetPrice !== null && !priceBlocked && proofs.length > 0))
 
   /** The form is untouched, so "Send" means "send what is already in the request". */
-  const lineUntouched = qtyText === '' && targetText === '' && proof === null
+  const lineUntouched = qtyText === '' && targetText === '' && proofs.length === 0
 
   /** Left/right (or up/down) move between tabs, per the tablist pattern. */
 
@@ -225,7 +289,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       frequency: route === 'case_2' && frequencyAvailable(state.phase) ? frequency : null,
       specialCredit: phase2Only(state.phase) && specialCredit,
       note: route === 'case_2' && note.trim() ? note.trim().slice(0, 500) : null,
-      proof: route === 'case_1' ? proof : null,
+      proofs: route === 'case_1' ? proofs : [],
     }
   }
 
@@ -352,14 +416,24 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
 
       {/* ── Quantity (US-2) ──────────────────────────────────────────────── */}
       <Field
-        label={t(lang, 'quantityLabel')}
-        hint={qty > 0 ? t(lang, 'equalsUnits', { units: qty * product.unitsPerCase, uom: product.baseUnit[lang] }) : undefined}
-        error={qtyError}
+        /* The label counts in the product's own noun, like every message below it —
+           a form that says "cases" over a product sold by the pallet is the first
+           thing that has to be right if the refusals under it are to make sense. */
+        label={t(lang, 'quantityLabel', { unit: t(lang, SALE_UNIT_KEY[product.saleUnit]) })}
+        /*
+          One hint slot, two things that could fill it. The equivalent unit count (AC-2.4)
+          only exists once there is a number to convert, so the sold-by instruction takes
+          the slot until then — which is exactly the moment it is useful.
+        */
+        hint={qty > 0 && !qtyBlocked
+          ? t(lang, 'equalsUnits', { units: qty * product.unitsPerCase, uom: product.baseUnit[lang] })
+          : qtyMsg.hint}
+        error={qtyMsg.error} warning={qtyMsg.warning}
       >
         <input
           className="hb-input" inputMode="numeric" autoFocus
           value={qtyText} onChange={(e) => setQtyText(e.target.value)}
-          placeholder={String(NEGOTIATION_MIN_QTY)}
+          placeholder={String(product.minOrderQty)}
         />
       </Field>
 
@@ -397,7 +471,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
               one screen was noise rather than help. */}
           <Field
             label={t(lang, 'targetPrice')}
-            error={targetError} warning={targetWarning}
+            error={priceMsg.error} warning={priceMsg.warning}
           >
             <input className="hb-input" inputMode="decimal" value={targetText}
               onChange={(e) => setTargetText(e.target.value)} placeholder="0.000" />
@@ -411,39 +485,44 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
             it now comes from the document rather than from the buyer, which is also the
             more trustworthy of the two sources for a claim about someone else's price.
           */}
-          <Field
-            label={t(lang, 'uploadProof')}
-            /*
-              The rejection wins over the absence. Both are true after a bad upload — there
-              is still no document *and* the one just offered was too big — but "attach the
-              document that shows that price" is an instruction the buyer has already
-              followed, and it hid the only sentence that told them why it did not take.
-            */
-            error={proofError ?? proofFileError}
-          >
-            {file ? (
-              <div className="hb-filechip">
-                <span aria-hidden="true">{file.type.startsWith('image/') ? '🖼' : '📄'}</span>
-                <span className="hb-filechip-name" dir="ltr">{file.name}</span>
-                <span className="hb-hint">{Math.max(1, Math.round(file.size / 1024))} KB</span>
-                <button
-                  type="button" className="hb-btn hb-btn--quiet hb-btn--sm"
-                  style={{ marginInlineStart: 'auto' }}
-                  onClick={() => handleFile(null)}
-                >
-                  {t(lang, 'removeFile')}
-                </button>
+          {/* `group`: this field holds an attachment list and a drop zone, which is more
+              than one control, so it cannot be a label. See ui.tsx. */}
+          <Field label={t(lang, 'uploadProof')} error={fileError} group>
+            {files.length > 0 && (
+              <div className="hb-filelist">
+                {files.map((f, i) => (
+                  <div className="hb-filechip" key={`${f.name}-${f.size}-${i}`}>
+                    <span aria-hidden="true">{f.type.startsWith('image/') ? '🖼' : '📄'}</span>
+                    <span className="hb-filechip-name" dir="ltr">{f.name}</span>
+                    <span className="hb-hint">{Math.max(1, Math.round(f.size / 1024))} KB</span>
+                    <button
+                      type="button" className="hb-btn hb-btn--quiet hb-btn--sm"
+                      style={{ marginInlineStart: 'auto' }}
+                      onClick={() => removeFile(i)}
+                    >
+                      {t(lang, 'removeFile')}
+                    </button>
+                  </div>
+                ))}
               </div>
-            ) : (
-              /*
+            )}
+            {/*
+              The zone stays, at the cap as much as below it — including at three files,
+              where it is the thing that answers. Replacing it with a notice, or greying it
+              out, hides the control the buyer is reaching for and says nothing when they
+              reach for it anyway; leaving it live means the fourth attempt gets the
+              sentence that tells them to remove one first. A drop zone would have had to
+              answer that drop regardless.
+            */}
+            {/*
                 One drop zone rather than the two buttons that were here. `capture` is
                 deliberately absent: without it the phone's own sheet offers Take Photo and
                 Photo Library together, which is both routes in one control — and it is
                 `capture` that makes some browsers drop the library, stranding a buyer who
                 already has the invoice saved. The hint says both are there.
-              */
-              <label className="hb-dropzone">
-                <span className="hb-dropzone-icon" aria-hidden="true">
+            */}
+            <label className="hb-dropzone">
+              <span className="hb-dropzone-icon" aria-hidden="true">
                   {/* The sheet in currentColor, the arrow knocked out of it in the zone's
                       own background — drawing both in one fill made the arrow invisible. */}
                   <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
@@ -454,12 +533,11 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
                 </span>
                 <span className="hb-dropzone-cta">{t(lang, 'uploadFile')}</span>
                 <span className="hb-dropzone-hint">{t(lang, 'uploadHint')}</span>
-                <input
-                  type="file" accept=".pdf,image/*" className="hb-visually-hidden"
-                  onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-                />
-              </label>
-            )}
+              <input
+                type="file" accept=".pdf,image/*" multiple className="hb-visually-hidden"
+                onChange={(e) => handlePicked(e.target.files)}
+              />
+            </label>
           </Field>
 
           {/* FR-7.7 / EC-36 — the exclusions are stated before the send, not after a

@@ -215,7 +215,7 @@ function RulesDemo() {
   const line: RequestLine = {
     id: 'demo', sku: product.sku, productName: product.name, route, quantity: 40,
     listPriceSnapshot: product.listPrice, askedPrice: asked, offeredPrice: null,
-    outcome: 'pending', proof: null, frequency: null, specialCredit: false, note: null,
+    outcome: 'pending', proofs: [], frequency: null, specialCredit: false, note: null,
     costSnapshot: product.cost, floorSnapshot: product.floorPrice,
   }
   const out = evaluateAutoRules({ lines: [line], hasFailedProofCheck: false })

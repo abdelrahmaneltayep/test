@@ -93,6 +93,14 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
         {PRODUCTS.map((p) => {
           const existing = openRequestFor(p.sku)
           const eligible = isNegotiable(p)
+          /*
+            Not negotiable for two different reasons, and the card owes the buyer the
+            difference. A controlled-price category renders no control at all (AC-1.3) —
+            there is nothing to wait for. A product that is simply out of stock and not
+            backordered renders the control with its reason on it, because the answer is
+            "not today", and a card that goes blank cannot say that.
+          */
+          const unavailable = !eligible && !p.excluded
           const bestTier = p.tiers.slice().sort((a, b) => a.unitPrice - b.unitPrice)[0] ?? null
           const compact = state.cardCta === 'compact'
           const besidePrice = state.cardCta === 'beside_price'
@@ -181,6 +189,15 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                     : <><span aria-hidden="true">🏷</span>{t(lang, 'requestSpecialPrice')}</>}
               </button>
             )
+          ) : unavailable ? (
+            <button
+              type="button"
+              className={`hb-btn hb-btn--outline${besidePrice ? ' hb-btn--sm' : ' hb-btn--block'}`}
+              disabled
+              title={t(lang, 'productUnavailable')}
+            >
+              {t(lang, 'cardUnavailable')}
+            </button>
           ) : null
 
           return (

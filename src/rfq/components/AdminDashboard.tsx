@@ -342,7 +342,7 @@ function AuditTable({ rows, lang, openRef, setOpenRef }: {
 
 /** §10 — the full back-and-forth, plus the document that was on the record for it. */
 function AuditLog({ request, view, lang }: { request: NegotiationRequest; view: OrderView; lang: Lang }) {
-  const proof = request.lines.find((l) => l.proof !== null)?.proof ?? null
+  const proof = request.lines.flatMap((l) => l.proofs)[0] ?? null
   return (
     <div className="hb-adminlog">
       <div className="hb-spread" style={{ marginBottom: 8 }}>

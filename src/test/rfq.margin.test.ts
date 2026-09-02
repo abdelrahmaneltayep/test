@@ -10,7 +10,7 @@ function line(overrides: Partial<RequestLine> = {}): RequestLine {
     id: 'l1', sku: 'SKU-1', productName: { en: 'P', ar: 'ص' },
     route: 'case_1', quantity: 10,
     listPriceSnapshot: 10000, askedPrice: 9000, offeredPrice: null,
-    outcome: 'pending', proof: null, frequency: null, specialCredit: false, note: null,
+    outcome: 'pending', proofs: [], frequency: null, specialCredit: false, note: null,
     costSnapshot: 7000, floorSnapshot: null,
     ...overrides,
   }

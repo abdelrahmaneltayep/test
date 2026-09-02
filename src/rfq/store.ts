@@ -28,46 +28,66 @@ export const PRODUCTS: Product[] = [
     brand: 'Almarai', category: { en: 'Dairy', ar: 'الألبان' }, emoji: '🥛', packSize: '12x1L', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'litres', ar: 'لتر' }, unitsPerCase: 12,
     listPrice: 10_250,
     tiers: [{ minQty: 50, unitPrice: 9_900 }, { minQty: 120, unitPrice: 9_600 }],
-    cost: 7_400, floorPrice: 8_900, inStock: true, backorderable: true, excluded: false,
+    cost: 7_400, floorPrice: 8_900, saleUnit: 'case', minOrderQty: 10, specialPriceMinQty: 20, maxRequestQty: 500, stockQty: 340, orderMultiple: 5,
+    inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-2210', name: { en: 'Sunflower Cooking Oil 6×1.8L', ar: 'زيت دوار الشمس ٦×١٫٨ لتر' },
     brand: 'Afia', category: { en: 'Cooking Oils', ar: 'زيوت الطهي' }, emoji: '🫒', packSize: '6x1.8L', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'litres', ar: 'لتر' }, unitsPerCase: 6,
     listPrice: 14_800,
     tiers: [{ minQty: 40, unitPrice: 14_200 }],
-    cost: 11_600, floorPrice: 13_000, inStock: true, backorderable: true, excluded: false,
+    cost: 11_600, floorPrice: 13_000, saleUnit: 'carton', minOrderQty: 10, specialPriceMinQty: 20, maxRequestQty: 400, stockQty: 120, orderMultiple: 1,
+    inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-9032', name: { en: 'Basmati Rice 10kg', ar: 'أرز بسمتي ١٠ كجم' },
     brand: 'Abu Kass', category: { en: 'Rice & Grains', ar: 'الأرز والحبوب' }, emoji: '🍚', packSize: '10kg', unitOfMeasure: { en: 'bag', ar: 'كيس' }, baseUnit: { en: 'bags', ar: 'كيس' }, unitsPerCase: 1,
     listPrice: 6_450, tiers: [],
     // EC-20 — no cost configured. The queue must render "—", not 0 %.
-    cost: null, floorPrice: null, inStock: true, backorderable: false, excluded: false,
+    cost: null, floorPrice: null, saleUnit: 'pallet', minOrderQty: 4, specialPriceMinQty: 8, maxRequestQty: 60, stockQty: 45, orderMultiple: 2,
+    inStock: true, backorderable: false, excluded: false,
   },
   {
     sku: 'HB-7788', name: { en: 'Bottled Water 24×330ml', ar: 'مياه معبأة ٢٤×٣٣٠ مل' },
     brand: 'Oasis', category: { en: 'Water & Beverages', ar: 'المياه والمشروبات' }, emoji: '💧', packSize: '24x330ml', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'bottles', ar: 'زجاجة' }, unitsPerCase: 24,
     listPrice: 1_950, tiers: [{ minQty: 100, unitPrice: 1_800 }],
-    cost: 1_500, floorPrice: 1_700, inStock: true, backorderable: true, excluded: false,
+    cost: 1_500, floorPrice: 1_700, saleUnit: 'case', minOrderQty: 20, specialPriceMinQty: 50, maxRequestQty: 1000, stockQty: 800, orderMultiple: 10,
+    inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-5520', name: { en: 'Tomato Paste 24×400g', ar: 'معجون طماطم ٢٤×٤٠٠ جم' },
     brand: 'Al Alali', category: { en: 'Canned & Preserved', ar: 'المعلبات' }, emoji: '🥫', packSize: '24x400g', unitOfMeasure: { en: 'case', ar: 'كرتون' }, baseUnit: { en: 'tins', ar: 'علبة' }, unitsPerCase: 24,
     listPrice: 8_900,
     tiers: [{ minQty: 30, unitPrice: 8_600 }, { minQty: 80, unitPrice: 8_250 }],
-    cost: 6_800, floorPrice: 7_900, inStock: true, backorderable: true, excluded: false,
+    cost: 6_800, floorPrice: 7_900, saleUnit: 'carton', minOrderQty: 10, specialPriceMinQty: 20, maxRequestQty: 300, stockQty: 260, orderMultiple: 1,
+    inStock: true, backorderable: true, excluded: false,
   },
   {
     sku: 'HB-6115', name: { en: 'White Sugar 50kg', ar: 'سكر أبيض ٥٠ كجم' },
     brand: 'Al Khaleej', category: { en: 'Sugar & Sweeteners', ar: 'السكر والمحليات' }, emoji: '🧂', packSize: '50kg', unitOfMeasure: { en: 'sack', ar: 'كيس' }, baseUnit: { en: 'sacks', ar: 'كيس' }, unitsPerCase: 1,
     listPrice: 12_300, tiers: [],
-    cost: 10_100, floorPrice: 11_200, inStock: true, backorderable: true, excluded: false,
+    cost: 10_100, floorPrice: 11_200, saleUnit: 'kg', minOrderQty: 50, specialPriceMinQty: 200, maxRequestQty: 5000, stockQty: 3200, orderMultiple: 50,
+    inStock: true, backorderable: true, excluded: false,
+  },
+  {
+    sku: 'HB-3390', name: { en: 'Chicken Franks 12×340g', ar: 'نقانق دجاج ١٢×٣٤٠ جم' },
+    brand: 'Sadia', category: { en: 'Frozen', ar: 'مجمدات' }, emoji: '🌭', packSize: '12x340g', unitOfMeasure: { en: 'carton', ar: 'كرتون' }, baseUnit: { en: 'packs', ar: 'عبوة' }, unitsPerCase: 12,
+    listPrice: 7_600, tiers: [],
+    cost: 6_200, floorPrice: 7_000, saleUnit: 'carton', minOrderQty: 10, specialPriceMinQty: 20, maxRequestQty: 300, stockQty: 0, orderMultiple: 1,
+    /*
+      Out of stock and not backordered — which is different from HB-1004's exclusion and
+      has to read differently on the card. This one is temporary: there is nothing to sell
+      today, and there will be. The controlled-price category is permanent, and gets no
+      entry point at all (AC-1.3).
+    */
+    inStock: false, backorderable: false, excluded: false,
   },
   {
     sku: 'HB-1004', name: { en: 'Infant Formula Stage 1', ar: 'حليب أطفال المرحلة الأولى' },
     brand: 'Nutricare', category: { en: 'Baby Care', ar: 'العناية بالطفل' }, emoji: '🍼', packSize: '400g', unitOfMeasure: { en: 'tin', ar: 'علبة' }, baseUnit: { en: 'tins', ar: 'علبة' }, unitsPerCase: 1,
     listPrice: 4_200, tiers: [],
-    cost: 3_500, floorPrice: 4_000, inStock: true, backorderable: false,
+    cost: 3_500, floorPrice: 4_000, saleUnit: 'case', minOrderQty: 5, specialPriceMinQty: 10, maxRequestQty: 200, stockQty: 90, orderMultiple: 1,
+    inStock: true, backorderable: false,
     // Q-11 / FR-2.1 — a controlled-price category. No entry point is rendered at all (AC-1.3).
     excluded: true,
   },
@@ -108,7 +128,7 @@ export interface DraftLine {
   frequency: Frequency | null
   specialCredit: boolean
   note: string | null
-  proof: Proof | null
+  proofs: Proof[]
 }
 
 export interface Draft {
@@ -184,6 +204,14 @@ export interface RfqState {
    * never in an overflow menu.
    */
   cardCta: 'stacked' | 'compact' | 'beside_price' | 'under_price'
+  /**
+   * Demo switch: the next upload fails in transport.
+   *
+   * A transfer that dies after every rule has passed is a real case with real copy, and it
+   * is the one upload failure a prototype cannot produce by choosing an awkward file. A
+   * toggle makes it walkable instead of leaving the sentence written but unreachable.
+   */
+  uploadFails: boolean
   opsAlerts: string[]
 }
 
@@ -200,7 +228,7 @@ function buildLine(d: DraftLine, now: Date): RequestLine {
     askedPrice: d.askedPrice,
     offeredPrice: null,
     outcome: 'pending',
-    proof: d.proof,
+    proofs: d.proofs,
     frequency: d.frequency,
     specialCredit: d.specialCredit,
     note: d.note,
@@ -253,6 +281,7 @@ export type Action =
   | { type: 'set_flag'; key: 'canOverrideFloor'; value: boolean }
   | { type: 'set_phase'; phase: Phase }
   | { type: 'set_card_cta'; layout: RfqState['cardCta'] }
+  | { type: 'set_upload_fails'; fails: boolean }
   | { type: 'set_auto_accept'; percent: number }
 
 function withRequest(
@@ -326,7 +355,7 @@ export function reducer(state: RfqState, action: Action): RfqState {
       const now = state.now
       const ref = makeRef(now, state.seq)
       const lines = draft.lines.map((l) => buildLine(l, now))
-      const failedProof = lines.some((l) => l.proof !== null && hasFailedCheck(l.proof.checks))
+      const failedProof = lines.some((l) => l.proofs.some((pr) => hasFailedCheck(pr.checks)))
 
       let request: NegotiationRequest = {
         ref, tenantId: 't1',
@@ -556,7 +585,7 @@ export function reducer(state: RfqState, action: Action): RfqState {
           lines: source.lines.map((l) => ({
             sku: l.sku, route: l.route, quantity: l.quantity,
             askedPrice: l.askedPrice, frequency: l.frequency, specialCredit: l.specialCredit,
-            note: l.note, proof: l.proof,
+            note: l.note, proofs: l.proofs,
           })),
         },
       }
@@ -623,6 +652,9 @@ export function reducer(state: RfqState, action: Action): RfqState {
     case 'set_card_cta':
       return { ...state, cardCta: action.layout }
 
+    case 'set_upload_fails':
+      return { ...state, uploadFails: action.fails }
+
     case 'set_auto_accept':
       return { ...state, autoAcceptPercent: action.percent }
 
@@ -658,13 +690,13 @@ export function initialState(now: Date): RfqState {
   const mkLine = (
     sku: string, quantity: number, route: 'case_1' | 'case_2',
     askedPrice: Minor | null, offeredPrice: Minor | null, outcome: LineOutcome,
-    proof: Proof | null = null,
+    proofs: Proof[] = [],
   ): RequestLine => {
     const p = productBySku(sku)
     return {
       id: `${sku}-seed-${quantity}`, sku, productName: p.name, route, quantity,
       listPriceSnapshot: p.listPrice, askedPrice, offeredPrice, outcome,
-      proof, frequency: route === 'case_2' ? 'monthly' : null, specialCredit: false, note: null,
+      proofs, frequency: route === 'case_2' ? 'monthly' : null, specialCredit: false, note: null,
       costSnapshot: p.cost, floorSnapshot: p.floorPrice,
     }
   }
@@ -712,7 +744,7 @@ export function initialState(now: Date): RfqState {
   const seeded: NegotiationRequest[] = [
     // Awaiting the seller with two hours of SLA left (AC-14.5 escalation).
     base('SPR-2608-0001', 'submitted', [
-      mkLine('HB-4471', 60, 'case_1', 9_400, null, 'pending', proofOk),
+      mkLine('HB-4471', 60, 'case_1', 9_400, null, 'pending', [proofOk]),
     ], { slaDueAt: addHours(now, 2).toISOString() }),
 
     /*
@@ -768,7 +800,7 @@ export function initialState(now: Date): RfqState {
      * not money, which is the distinction the two banners draw.
      */
     base('SPR-2608-0007', 'viewed', [
-      mkLine('HB-2210', 40, 'case_1', 12_600, null, 'pending', proofStale),
+      mkLine('HB-2210', 40, 'case_1', 12_600, null, 'pending', [proofStale]),
     ], {
       slaDueAt: addHours(now, 16).toISOString(),
       submittedAt: addHours(now, -8).toISOString(),
@@ -791,7 +823,7 @@ export function initialState(now: Date): RfqState {
      * and the flow walkable at the same time.
      */
     base('SPR-2607-0031', 'accepted', [
-      mkLine('HB-5520', 60, 'case_1', 8_300, 8_300, 'accepted', proofOk),
+      mkLine('HB-5520', 60, 'case_1', 8_300, 8_300, 'accepted', [proofOk]),
     ], {
       slaDueAt: null, submittedAt: addHours(now, -486).toISOString(),
       history: [
@@ -892,7 +924,7 @@ export function initialState(now: Date): RfqState {
     now, seq: 9, requests: seeded, orders, orderSeq: 20,
     draft: null, submittedDrafts: {},
     phase: 'p1_p2', autoAcceptPercent: GUARDRAILS.autoAcceptPercent.default,
-    canOverrideFloor: true, cardCta: 'stacked', opsAlerts: [],
+    canOverrideFloor: true, cardCta: 'stacked', uploadFails: false, opsAlerts: [],
   }
 }
 

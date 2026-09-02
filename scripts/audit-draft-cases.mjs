@@ -16,12 +16,21 @@ const BROWSER = process.env.PLAYWRIGHT_CHROMIUM ?? undefined
 const BASE = process.env.RFQ_URL ?? 'http://localhost:4173/rfq.html'
 const b = await chromium.launch(BROWSER ? { executablePath: BROWSER } : {})
 const p = await b.newPage({ viewport: { width: 1400, height: 1100 } })
+// A local prototype answers in milliseconds; eight seconds is already a hang, and the
+// 30s default turned one bad selector into a run nobody waited out.
+p.setDefaultTimeout(8000)
+// Top-level await means a throw escapes as an unhandled rejection; catching it here is
+// what lets the results collected so far still reach the console.
+process.on('uncaughtException', (e) => { console.log(`\nWALK STOPPED: ${e.message.split('\n')[0]}`); report(); })
+process.on('unhandledRejection', (e) => { console.log(`\nWALK STOPPED: ${String(e).split('\n')[0]}`); report(); })
 const errors = []
 p.on('pageerror', (e) => errors.push(String(e)))
 const R = []
 const check = (id, ok, detail) => R.push({ id, ok: !!ok, detail })
 const txt = async (sel, i = 0) => (await p.locator(sel).nth(i).innerText().catch(() => '')).replace(/\n/g, ' | ')
-const reset = async () => { await p.goto(BASE, { waitUntil: 'networkidle' }); await p.waitForTimeout(200) }
+// The load itself keeps a long leash — the page pulls webfonts, and a slow network there
+// is not a failing case.
+const reset = async () => { await p.goto(BASE, { waitUntil: 'networkidle', timeout: 45000 }); await p.waitForTimeout(200) }
 
 await reset()
 
@@ -186,19 +195,19 @@ const fieldErrors = async () =>
 
 await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(250)
 const empty = await fieldErrors()
-check('err.empty-form-names-every-field', /whole number/i.test(empty)
-  && /target price/i.test(empty) && /Attach the document/i.test(empty), empty.slice(0, 160))
+check('err.empty-form-names-every-field', /Enter the quantity/i.test(empty)
+  && /Enter your requested price/i.test(empty) && /Attach the document/i.test(empty), empty.slice(0, 160))
 
 await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('2'); await p.waitForTimeout(200)
-check('err.below-minimum-quantity', /Minimum quantity/i.test(await fieldErrors()), await fieldErrors())
+check('err.below-minimum-quantity', /minimum order quantity is 10 cartons/i.test(await fieldErrors()), await fieldErrors())
 
 await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
 await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('99.000'); await p.waitForTimeout(200)
-check('err.target-at-or-above-list', /below the list price/i.test(await fieldErrors()), await fieldErrors())
+check('err.target-at-or-above-list', /lower than the current price/i.test(await fieldErrors()), await fieldErrors())
 
 // EC-8 — implausible is a warning, never a block: it still sends, flagged.
 await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('1.000'); await p.waitForTimeout(200)
-check('err.implausible-warns-not-blocks', /more than half off/i.test(await fieldErrors())
+check('err.implausible-warns-not-blocks', /significantly lower/i.test(await fieldErrors())
   && !(await p.locator('.hb-modal-foot .hb-btn--primary').isDisabled()), await fieldErrors())
 
 await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
@@ -206,11 +215,11 @@ await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles(
   { name: 'big.pdf', mimeType: 'application/pdf', buffer: Buffer.alloc(11 * 1024 * 1024) })
 await p.waitForTimeout(300)
 // The rejection has to beat the absence: both are true, only one is news.
-check('err.file-too-large', /maximum file size/i.test(await fieldErrors()), await fieldErrors())
+check('err.file-too-large', /maximum allowed size of 10 MB/i.test(await fieldErrors()), await fieldErrors())
 await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles(
   { name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('x') })
 await p.waitForTimeout(300)
-check('err.wrong-file-type', /Accepted formats/i.test(await fieldErrors()), await fieldErrors())
+check('err.wrong-file-type', /file type is not supported/i.test(await fieldErrors()), await fieldErrors())
 
 // FR-2.6 — the cooldown, walked rather than seeded: send, decline, come back to the card.
 await reset()
@@ -590,10 +599,194 @@ for (const [surface, who] of [['Buyer · Dashboard', 'buyer'], ['Seller · Dashb
     `${cats.join(' | ')} · ${rows} rows · ${[...new Set(outcomes)].join(',')}`)
 }
 
+
+// ── The validation deck: every message the PM wrote, in the running form ─────
+//
+// The rules themselves are unit-tested at their boundaries (src/test/rfq.validation.test.ts).
+// What this adds is that each sentence is reachable by a person typing into the real field —
+// a copy deck nobody can get to is a document, not a product.
+await reset()
+
+const openDrawer = async (name) => {
+  await p.locator('.hb-prod', { hasText: name }).getByRole('button', { name: /Match my price/ }).click()
+  await p.waitForTimeout(300)
+}
+const qtyBox = () => p.locator('.hb-modal-body input[inputmode="numeric"]').first()
+const priceBox = () => p.locator('.hb-modal-body input[inputmode="decimal"]').first()
+const fieldOf = (label) => p.locator('.hb-modal-body .hb-field', { hasText: label })
+const QTY = /^Quantity \(/
+const PRICE = /target price/i
+const FILE = /Attach the invoice/i
+const msgOf = async (label) => (await fieldOf(label).locator('.hb-error, .hb-warning, .hb-hint').allInnerTexts()).join(' | ')
+const closeDrawer = async () => { await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200) }
+
+// Tomato Paste: sold by carton, min 10, special-price min 20, max 300, stock 260, list 8.900.
+await openDrawer('Tomato Paste')
+
+// The instruction the field carries before anything is typed — one of the five sold-by cases.
+check('v.qty-sold-by-carton', /sold by carton/i.test(await msgOf(QTY)), await msgOf(QTY))
+
+const qtyCases = [
+  ['v.qty-not-numeric', '10 cartons', /numbers only/i],
+  ['v.qty-zero', '0', /greater than zero/i],
+  ['v.qty-too-large', '2000000', /too large/i],
+  ['v.qty-below-minimum', '5', /minimum order quantity is 10 cartons/i],
+  ['v.qty-above-maximum', '400', /maximum quantity allowed per request is 300 cartons/i],
+  ['v.qty-exceeds-stock', '280', /exceeds the available stock of 260 cartons/i],
+  ['v.qty-special-price-minimum', '15', /minimum of 20 cartons to qualify/i],
+]
+for (const [id, value, re] of qtyCases) {
+  await qtyBox().fill(value); await p.waitForTimeout(150)
+  const msg = await msgOf(QTY)
+  check(id, re.test(msg), `"${value}" → ${msg}`)
+}
+// The special-price threshold is a warning, not a refusal: the way out is a bigger number.
+await qtyBox().fill('15'); await p.waitForTimeout(150)
+check('v.qty-special-price-is-a-warning',
+  await fieldOf(QTY).locator('.hb-warning').count() === 1
+  && await fieldOf(QTY).locator('.hb-error').count() === 0,
+  await msgOf(QTY))
+
+// Price, against a list price of 8.900.
+await qtyBox().fill('40'); await p.waitForTimeout(150)
+const priceCases = [
+  ['v.price-format', 'BHD 8.1', /numbers only/i],
+  ['v.price-invalid', '.', /valid numeric price/i],
+  ['v.price-decimals', '8.1234', /no more than 3 decimal places/i],
+  ['v.price-non-positive', '0', /must be greater than/i],
+  ['v.price-same-as-current', '8.900', /same as the current price/i],
+  ['v.price-not-lower', '9.500', /lower than the current price of .*8\.900/i],
+  ['v.price-out-of-range', '0.500', /outside the allowed range/i],
+  ['v.price-too-low', '3.000', /significantly lower/i],
+]
+for (const [id, value, re] of priceCases) {
+  await priceBox().fill(value); await p.waitForTimeout(150)
+  const msg = await msgOf(PRICE)
+  check(id, re.test(msg), `"${value}" → ${msg}`)
+}
+check('v.price-too-low-is-a-warning',
+  await fieldOf(PRICE).locator('.hb-warning').count() === 1
+  && await fieldOf(PRICE).locator('.hb-error').count() === 0,
+  await msgOf(PRICE))
+
+// The two empty-field messages appear on the attempt to send, not before it.
+await qtyBox().fill(''); await priceBox().fill(''); await p.waitForTimeout(150)
+check('v.empty-fields-stay-quiet-until-send',
+  await p.locator('.hb-modal-body .hb-error').count() === 0,
+  'nothing is an error before the first press')
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(250)
+check('v.qty-empty', /Enter the quantity/i.test(await msgOf(QTY)), await msgOf(QTY))
+check('v.price-empty', /Enter your requested price/i.test(await msgOf(PRICE)), await msgOf(PRICE))
+
+// ── The eight file cases, on the same form ───────────────────────────────────
+const fileInput = () => p.locator('.hb-modal-body .hb-dropzone input[type="file"]')
+const fileMsg = async () => (await fieldOf(FILE).locator('.hb-error').allInnerTexts()).join(' | ')
+const pick = async (files) => { await fileInput().setInputFiles(files); await p.waitForTimeout(250) }
+const pdf = (name, bytes = 1_000) => ({ name, mimeType: 'application/pdf', buffer: Buffer.alloc(bytes, 1) })
+
+await pick({ name: 'prices.xlsx', mimeType: 'application/vnd.ms-excel', buffer: Buffer.alloc(50, 1) })
+check('v.file-unsupported-type', /not supported.*JPG, PNG, or PDF/i.test(await fileMsg()), await fileMsg())
+
+await pick(pdf('huge-invoice.pdf', 11 * 1024 * 1024))
+check('v.file-too-large', /maximum allowed size of 10 MB/i.test(await fileMsg()), await fileMsg())
+
+await pick(pdf('empty-scan.pdf', 0))
+check('v.file-empty-or-corrupt', /empty or damaged/i.test(await fileMsg()), await fileMsg())
+
+await pick(pdf(`${'a'.repeat(130)}.pdf`))
+check('v.file-name-too-long', /file name is too long/i.test(await fileMsg()), await fileMsg())
+
+await pick([])
+check('v.file-none-selected', /Select a file before uploading/i.test(await fileMsg()), await fileMsg())
+
+// The transport failing after every rule has passed is its own sentence, about the
+// connection rather than about the file. The switch is on the demo bar, which the open
+// drawer covers, so this one case gets its own walk.
+await closeDrawer()
+await p.getByRole('button', { name: 'fails', exact: true }).click(); await p.waitForTimeout(200)
+await openDrawer('Tomato Paste')
+await pick(pdf('gulf-foods-invoice.pdf'))
+check('v.file-upload-failed', /could not be uploaded/i.test(await fileMsg())
+  && await p.locator('.hb-modal-body .hb-filechip').count() === 0, await fileMsg())
+await closeDrawer()
+await p.getByRole('button', { name: 'succeeds', exact: true }).click(); await p.waitForTimeout(200)
+await openDrawer('Tomato Paste')
+
+await pick(pdf('gulf-foods-invoice.pdf'))
+check('v.file-attaches', await p.locator('.hb-modal-body .hb-filechip').count() === 1,
+  await txt('.hb-modal-body .hb-filechip'))
+await pick(pdf('gulf-foods-invoice.pdf'))
+check('v.file-duplicate', /already been attached/i.test(await fileMsg())
+  && await p.locator('.hb-modal-body .hb-filechip').count() === 1, await fileMsg())
+
+await pick([pdf('page-2.pdf', 1_100), pdf('page-3.pdf', 1_200)])
+check('v.file-multiple-attachments', await p.locator('.hb-modal-body .hb-filechip').count() === 3,
+  `${await p.locator('.hb-modal-body .hb-filechip').count()} attachments`)
+await pick(pdf('page-4.pdf', 1_300))
+check('v.file-too-many', /maximum number of allowed attachments/i.test(await fileMsg())
+  && await p.locator('.hb-modal-body .hb-filechip').count() === 3, await fileMsg())
+// A cap you cannot get back under is a trap: removing one lets the next file in.
+const chipNames = async () => (await p.locator('.hb-modal-body .hb-filechip-name').allInnerTexts()).join(',')
+await p.locator('.hb-modal-body .hb-filechip').last().getByRole('button', { name: 'Remove' }).click()
+await p.waitForTimeout(250)
+check('v.file-remove-drops-the-one-asked-for',
+  (await chipNames()) === 'gulf-foods-invoice.pdf,page-2.pdf', await chipNames())
+await pick(pdf('page-5.pdf', 1_400))
+check('v.file-cap-clears-on-remove',
+  (await chipNames()) === 'gulf-foods-invoice.pdf,page-2.pdf,page-5.pdf' && (await fileMsg()) === '',
+  `${await chipNames()} :: ${await fileMsg()}`)
+
+// All three documents reach the record, not only the first.
+await priceBox().fill('8.100'); await qtyBox().fill('40'); await p.waitForTimeout(150)
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(400)
+const multiRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
+await closeDrawer()
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
+await p.locator('tbody tr', { hasText: multiRef }).click(); await p.waitForTimeout(350)
+const readbackFiles = await txt('.hb-readback')
+check('v.every-attachment-reaches-the-seller',
+  /gulf-foods-invoice\.pdf/.test(readbackFiles) && /page-2\.pdf/.test(readbackFiles)
+  && /page-5\.pdf/.test(readbackFiles), readbackFiles.slice(-220))
+
+// The other two sold-by instructions that have a free card, and the pack multiple.
+await reset()
+await openDrawer('Basmati Rice')
+check('v.qty-sold-by-pallet', /sold by pallet/i.test(await msgOf(QTY)), await msgOf(QTY))
+await qtyBox().fill('5'); await p.waitForTimeout(150)
+check('v.qty-not-multiple', /multiples of 2 pallets/i.test(await msgOf(QTY)), await msgOf(QTY))
+await closeDrawer()
+await openDrawer('White Sugar')
+check('v.qty-sold-by-weight', /required quantity in kg/i.test(await msgOf(QTY)), await msgOf(QTY))
+await closeDrawer()
+
+// A product with nothing to sell says so on the card, where the buyer is deciding —
+// which is different from the controlled-price category, which offers no control at all.
+const franks = p.locator('.hb-prod', { hasText: 'Chicken Franks' })
+check('v.product-unavailable',
+  await franks.locator('button[disabled]').count() === 1
+  && /currently unavailable for a special price/i.test(
+    await franks.locator('button[disabled]').getAttribute('title') ?? ''),
+  await franks.locator('button[disabled]').innerText())
+check('v.excluded-category-offers-nothing',
+  await p.locator('.hb-prod', { hasText: 'Infant Formula' }).locator('.hb-prod-actions button[disabled]').count() === 0,
+  'a controlled-price category renders no request control at all')
+
+
 await b.close()
 
+report()
+
+/**
+ * Print what was collected, whatever happened.
+ *
+ * A walk that throws half way through — a selector that no longer matches, a control that
+ * moved — used to print nothing at all, which says "everything is broken" when the truth
+ * is usually "one step is". The results up to the throw are the useful part.
+ */
+function report() {
 const failed = R.filter((r) => !r.ok)
 for (const r of R) console.log(`${r.ok ? 'ok  ' : 'FAIL'}  ${r.id.padEnd(34)} ${r.detail}`)
 if (errors.length) console.log('\npage errors:', errors)
 console.log(`\n${R.length} cases checked, ${failed.length} failing, ${errors.length} page errors`)
 process.exit(failed.length || errors.length ? 1 : 0)
+}

@@ -181,22 +181,33 @@ export function Modal({ title, onClose, children, footer, wide, drawer }: {
   )
 }
 
-export function Field({ label, hint, error, warning, children }: {
+export function Field({ label, hint, error, warning, group, children }: {
   label: string
   hint?: string
   error?: string | null
   warning?: string | null
+  /**
+   * Render a container rather than a `<label>`.
+   *
+   * A label has exactly one labelled control, and clicking anywhere inside it activates
+   * that control — which for a field holding several (an attachment list with a Remove
+   * button per row, above a drop zone) means every click is also a click on the *first*
+   * control in the field. That is not a styling nicety: removing the third attachment was
+   * silently removing the first one with it.
+   */
+  group?: boolean
   children: ReactNode
 }) {
+  const Tag = group ? 'div' : 'label'
   return (
-    <label className="hb-field">
+    <Tag className="hb-field">
       <span className="hb-label">{label}</span>
       {children}
       {hint && <div className="hb-hint">{hint}</div>}
       {/* E-1 — the constraint and the value that breached it, not "invalid input". */}
       {error && <div className="hb-error" role="alert">{error}</div>}
       {warning && <div className="hb-warning">{warning}</div>}
-    </label>
+    </Tag>
   )
 }
 

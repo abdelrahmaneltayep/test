@@ -498,6 +498,8 @@ body {
 }
 
 /* The attachment once it is chosen: the file, and the way to change your mind. */
+/* Attachments stack; the chip itself is unchanged whether there is one or three. */
+.hb-filelist { display: grid; gap: 8px; margin-bottom: 10px; }
 .hb-filechip {
   display: flex; align-items: center; gap: 10px;
   border: 1px solid var(--hb-line); border-radius: var(--hb-r);

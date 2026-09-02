@@ -79,7 +79,7 @@ export function toBuyerView(
       askedPrice: l.askedPrice,
       offeredPrice: l.offeredPrice,
       outcome: l.outcome,
-      hasProof: l.proof !== null,
+      hasProof: l.proofs.length > 0,
     })),
     rounds: request.rounds,
     maxRounds,

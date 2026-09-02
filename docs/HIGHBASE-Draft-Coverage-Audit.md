@@ -511,6 +511,84 @@ position; an admin who can see a supplier's cost is a different product with a d
 set of promises in it. The audit asserts their absence. The one place that judgement could
 be revisited is a below-cost match — still open with the PM, below.
 
+## The validation deck — 32 messages, and what they cost
+
+The PM supplied exact copy for 15 quantity messages, 9 price messages and 8 file-upload
+messages. All 32 are shipped. Three things had to change underneath them, because most of
+the deck describes rules the prototype did not have:
+
+**1. The catalogue learned how each product is sold.** `Product` gained `saleUnit`,
+`minOrderQty`, `specialPriceMinQty`, `maxRequestQty`, `stockQty` and `orderMultiple`. Twelve
+of the fifteen quantity messages name one of those numbers, and a message that names a
+number the object does not hold is a mock-up. All eight products carry real values now —
+Tomato Paste is sold by the carton in tens, Basmati Rice by the pallet in twos, White Sugar
+by weight in fifties — so the same form refuses differently depending on what is in it,
+which is the whole point of the deck.
+
+Two of the six are worth a second look before this ships: `minOrderQty` and
+`specialPriceMinQty` are deliberately different numbers. A buyer can order ten cartons and
+still not be able to negotiate on ten, and "the minimum is 10" when the real answer is "20
+to qualify" sends them back to a form that will refuse them again. If the business has one
+threshold rather than two, say so and one of them goes.
+
+**2. The rules moved out of the component.** `src/rfq/domain/validation.ts` holds all 32 as
+a pure table returning **a case id and its parameters, never a sentence** (FR-11.3) — so
+English and Arabic cannot drift, and a copy change never touches logic. What the table
+pins that JSX could not is **the order of the checks**: several inputs are wrong in more
+than one way at once, and the buyer has to get the one they can act on. "Enter numbers
+only" beats "the minimum is 10" on the text `10 cartons`; the pack multiple beats the
+special-price threshold; the attachment cap beats everything about the file, because at
+three attachments the fix is to remove one whatever the fourth one is. 35 unit tests pin
+those boundaries; the end-to-end audit then proves a person can reach each sentence by
+typing into the real field.
+
+Severity is part of the deck, not decoration. Two of the messages are **warnings that still
+send**: "significantly lower than the current price" is EC-8, which is deliberately sendable
+and flagged to the seller, and "request a minimum of 20 to qualify" is an instruction to
+raise a number rather than a refusal. Five are **hints** — the sold-by instructions — which
+sit on the field before anything is typed and are the reason most of the refusals below them
+are never reached.
+
+**3. A line carries a list of documents, not one.** "You have reached the maximum number of
+allowed attachments" and "This file has already been attached" are not copy you can write
+against a single-file model — there is no maximum to reach and no second file to duplicate.
+`RequestLine.proof` is now `RequestLine.proofs`, capped at the `MAX_FILES_PER_LINE` that had
+been declared and never enforced, with `primaryProof()` for the screens that lead with one
+document. The seller's page lists every attachment; the order's audit line names all of
+them rather than the first of three.
+
+Two cases needed a way to happen at all:
+
+- **"This product is currently unavailable"** could not be reached, because the marketplace
+  renders no request control for a product that is out of stock and not backordered. It now
+  renders one, disabled, carrying that sentence — which is a distinction the card owes the
+  buyer: a controlled-price category is permanent and offers no control at all (AC-1.3),
+  while out-of-stock is "not today". HB-3390 Chicken Franks was added to the catalogue as
+  the product that is in that state.
+- **"The file could not be uploaded"** is the one failure no choice of file can produce: the
+  transport dying after every rule has passed. It is behind a demo toggle (Upload ·
+  succeeds / fails), because a sentence nobody can reach is a sentence nobody has reviewed.
+
+### Two things in the copy to settle
+
+- **The accepted formats disagree with the message.** The file-type refusal says "Upload a
+  JPG, PNG, or PDF file", but the accepted set is PDF, JPG, PNG, **WEBP and HEIC**. That is
+  not a rounding error: **an iPhone photographs in HEIC by default**, and photographing an
+  invoice is the premise of this feature. As shipped the sentence under-promises — a HEIC
+  file is accepted and the buyer was told it would not be. Either the message names all
+  five, or the accepted set shrinks and iPhone photos start failing. The first is right.
+- **Currency position.** The price messages render "BHD 8.900" (symbol first, as the
+  marketplace card does); the drawer's own product line reads "8.900 BHD". One of the two
+  should give.
+
+### What the deck replaced
+
+Five older strings are gone, superseded by the new cases and deleted rather than left to
+rot: `quantityInvalid`, `minQuantityBlocked`, `priceRequired`, `targetAboveList` and
+`targetImplausible`. The behaviour they described survives — `targetAboveList` is now
+`priceNotLower`, which is the same refusal with the price named and a sibling case
+(`priceSameAsCurrent`) for the boundary it used to swallow.
+
 ## Still open
 
 Where the prototype diverges from the PRD at the user's direction, and what is still

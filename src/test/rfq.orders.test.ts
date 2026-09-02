@@ -24,7 +24,7 @@ function line(overrides: Partial<RequestLine> = {}): RequestLine {
     id: 'l1', sku: 'HB-4471', productName: { en: 'Milk', ar: 'حليب' },
     route: 'case_1', quantity: 10, listPriceSnapshot: 10_000,
     askedPrice: 9_000, offeredPrice: null, outcome: 'pending' as LineOutcome,
-    proof: null, frequency: null, specialCredit: false, note: null, costSnapshot: 7_000, floorSnapshot: 8_000,
+    proofs: [], frequency: null, specialCredit: false, note: null, costSnapshot: 7_000, floorSnapshot: 8_000,
     ...overrides,
   }
 }
@@ -182,7 +182,7 @@ describe('§9 — "Final Orders = standard orders, plus negotiated orders once a
 
 describe('§10 — provenance is on the order', () => {
   it('reports whether an invoice or quote was submitted', () => {
-    const withProof = request('accepted', [line({ outcome: 'accepted', offeredPrice: 9_000, proof: PROOF })])
+    const withProof = request('accepted', [line({ outcome: 'accepted', offeredPrice: 9_000, proofs: [PROOF] })])
     const without = request('accepted', [line({ outcome: 'accepted', offeredPrice: 9_000 })])
     expect(viewOrder(order(withProof), withProof).hadProof).toBe(true)
     expect(viewOrder(order(without), without).hadProof).toBe(false)

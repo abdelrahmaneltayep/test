@@ -27,7 +27,7 @@ import { guardrailValue, SAME_AS_LAST_TIME_DAYS } from '../domain/guardrails'
 import { t, type Lang } from '../domain/i18n'
 import { formatMoney, lineTotal, parseMoney } from '../domain/money'
 import { lineMargin, marginAfterAsk, type MarginBand } from '../domain/margin'
-import { hasFailedCheck, triStateOutcome } from '../domain/proof'
+import { hasFailedCheck, primaryProof, triStateOutcome } from '../domain/proof'
 import { routeOf, STATE_META } from '../domain/states'
 import type { DeclineReason, InfoReason, LineOutcome, Minor, NegotiationRequest, RequestLine } from '../domain/types'
 import { productBySku, useRfq } from '../store'
@@ -77,8 +77,8 @@ export function SubmissionReadback({ line, lang, title }: {
   lang: Lang
   title: string
 }) {
-  const typed = line.proof?.typed ?? null
-  const read = line.proof?.extracted ?? null
+  const typed = primaryProof(line)?.typed ?? null
+  const read = primaryProof(line)?.extracted ?? null
   /*
    * The buyer's form stopped asking for the competitor's name, its reference and its date
    * — extraction reads all three off the document anyway (FR-7.2), and asking twice for one
@@ -133,8 +133,10 @@ export function SubmissionReadback({ line, lang, title }: {
             </>
           )}
           <Row label={t(lang, 'attachment')}>
-            {line.proof
-              ? <span dir="ltr">{line.proof.fileName} · {Math.round(line.proof.sizeBytes / 1024)} KB</span>
+            {line.proofs.length > 0
+              ? line.proofs.map((pr) => (
+                <div key={pr.hash} dir="ltr">{pr.fileName} · {Math.round(pr.sizeBytes / 1024)} KB</div>
+              ))
               : <span className="hb-muted">{t(lang, 'noAttachment')}</span>}
           </Row>
           {/* §4/§11 — captured metadata: shown and recorded, never priced (Q-8). */}
@@ -221,7 +223,7 @@ export function SellerRequestPage({ request, onBack }: {
    * not a guarantee. Where the request has used up its information requests there is
    * nothing to promote, so matching stays the default.
    */
-  const proofFailed = matching && line.proof !== null && hasFailedCheck(line.proof.checks)
+  const proofFailed = matching && line.proofs.some((pr) => hasFailedCheck(pr.checks))
   const askFirst = proofFailed && request.infoRequests < MAX_INFO_REQUESTS
 
   /** Resolve the request in one move, with the outcome the button names. */
@@ -321,7 +323,7 @@ export function SellerRequestPage({ request, onBack }: {
       <SubmissionReadback line={line} lang={lang} title={t(lang, 'whatBuyerSent')} />
 
       {/* ── The document and its checks ───────────────────────────────────── */}
-      {line.proof && (
+      {line.proofs.length > 0 && (
         <div className="hb-card">
           <div className="hb-card-body">
             <ProofPanel line={line} lang={lang} onRequestInfo={() => setInfoOpen(true)} />
@@ -543,7 +545,7 @@ function MatchVerification({ line, lang }: { line: RequestLine; lang: Lang }) {
   const asked = line.askedPrice
   if (asked === null) return null
 
-  const proof = line.proof
+  const proof = primaryProof(line)
   const failed = proof ? hasFailedCheck(proof.checks) : false
   const flagged = proof ? proof.checks.some((c) => c.severity === 'warn') : false
   const verdict = !proof ? 'none' : failed ? 'failed' : flagged ? 'warn' : 'clean'
@@ -670,7 +672,7 @@ function MatchVerification({ line, lang }: { line: RequestLine; lang: Lang }) {
 
 /** US-16 — the proof summarised so the seller reads a badge, not a document. */
 function ProofPanel({ line, lang, onRequestInfo }: { line: RequestLine; lang: Lang; onRequestInfo: () => void }) {
-  const proof = line.proof
+  const proof = primaryProof(line)
   if (!proof) return null
   const failed = hasFailedCheck(proof.checks)
   const notable = proof.checks.filter((c) => c.severity !== 'pass')
@@ -683,6 +685,11 @@ function ProofPanel({ line, lang, onRequestInfo }: { line: RequestLine; lang: La
           <div style={{ fontSize: 28 }}>{proof.mimeType.startsWith('image/') ? '🖼' : '📄'}</div>
           <div>{proof.fileName}</div>
           <div className="hb-muted">{Math.round(proof.sizeBytes / 1024)} KB · {proof.mimeType}</div>
+          {/* The panel judges one document; a rep deciding on the evidence has to know
+              whether that is all of it. The rest are named in the readback above. */}
+          {line.proofs.length > 1 && (
+            <div className="hb-hint">{t(lang, 'moreAttachments', { n: line.proofs.length - 1 })}</div>
+          )}
         </div>
       </div>
 

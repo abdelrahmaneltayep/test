@@ -178,7 +178,12 @@ function OrderPage({ order, request, view, viewer, lang, onClose }: {
   // An admin opens the order to audit it, so the provenance panel starts open for them:
   // it is the reason they are on this page, not an extra they have to go looking for.
   const [admin, setAdmin] = useState(viewer === 'admin')
-  const proofLine = request?.lines.find((l) => l.proof !== null) ?? null
+  /*
+    Every document on the record, not the first one. A line can carry more than one now,
+    and an audit line that names one of three attachments is worse than naming none — it
+    reads as a complete list.
+  */
+  const proofsOnRecord = request?.lines.flatMap((l) => l.proofs) ?? []
 
   // §6/§7 — only the buyer acts on the order, and only where the projection says so.
   const canConfirm = viewer === 'buyer' && view.buyerActions.includes('confirm')
@@ -316,12 +321,12 @@ function OrderPage({ order, request, view, viewer, lang, onClose }: {
             <div className="hb-banner hb-banner--info" style={{ marginBottom: 10 }}>
               <div>
                 <div>{t(lang, view.hadProof ? 'adminViewNote' : 'adminViewNoteNoProof')}</div>
-                {proofLine?.proof && (
-                  <div className="hb-hint" style={{ marginTop: 6 }}>
-                    {t(lang, 'attachmentOnRecord')}: <span dir="ltr">{proofLine.proof.fileName}</span>
-                    {' · '}<span dir="ltr">{proofLine.proof.hash}</span>
+                {proofsOnRecord.map((pr) => (
+                  <div className="hb-hint" style={{ marginTop: 6 }} key={pr.hash}>
+                    {t(lang, 'attachmentOnRecord')}: <span dir="ltr">{pr.fileName}</span>
+                    {' · '}<span dir="ltr">{pr.hash}</span>
                   </div>
-                )}
+                ))}
               </div>
             </div>
           )}

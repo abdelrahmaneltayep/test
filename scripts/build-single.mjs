@@ -55,7 +55,10 @@ html = html
   .replace(/<script[^>]*src="[^"]*"[^>]*><\/script>/g, '')
   // Strip only the bundler's own stylesheet link — the Google Fonts link stays, so the
   // page uses the real typefaces online and falls back to the system stack offline.
-  .replace(/<link[^>]*rel="stylesheet"[^>]*href="[^"]*assets\/[^"]*"[^>]*>/g, '')
+  // Any *local* stylesheet link: the bundle's CSS is inlined below, so the link is a
+  // guaranteed 404 wherever the file is opened. Matching on `assets/` missed it, because
+  // assetFileNames puts the file at the output root.
+  .replace(/<link[^>]*rel="stylesheet"[^>]*href="(?!https?:)[^"]*"[^>]*>/g, '')
   .replace('</head>', () => `<style>${css}</style>\n  </head>`)
   .replace('</body>', () => `<script type="module">${js}</script>\n  </body>`)
 

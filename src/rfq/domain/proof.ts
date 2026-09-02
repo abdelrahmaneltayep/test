@@ -14,6 +14,20 @@ export const ACCEPTED_MIME_TYPES = [
 ] as const
 export const MAX_FILE_BYTES = 10 * 1024 * 1024
 export const MAX_FILES_PER_LINE = 3
+/** EC-29's own limit: a name longer than this is a paste accident, not a file name. */
+export const MAX_FILE_NAME_CHARS = 120
+
+/**
+ * The leading document on a line, for the screens that show one.
+ *
+ * Most of the product only ever needs this: the order page names the attachment on record,
+ * the seller's verification panel compares one document against the claim. Making that
+ * explicit here is better than every reader writing `line.proofs[0] ?? null` and quietly
+ * disagreeing about what happens when the list is empty.
+ */
+export function primaryProof(line: { proofs: Proof[] }): Proof | null {
+  return line.proofs[0] ?? null
+}
 
 /** FR-7.7 — stated to the buyer before upload, never after rejection (EC-36). */
 export const PROOF_EXCLUSIONS = {

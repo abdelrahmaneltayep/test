@@ -60,6 +60,13 @@ export interface Tier {
   unitPrice: Minor
 }
 
+/**
+ * How the product is sold, which decides both the word the quantity field counts in and
+ * the hint above it. Weight and volume are their own kinds because "enter the quantity in
+ * kg" is a different instruction from "enter the number of cartons", not a different noun.
+ */
+export type SaleUnit = 'carton' | 'case' | 'pallet' | 'kg' | 'g' | 'litre' | 'ml'
+
 export interface Product {
   sku: string
   name: { en: string; ar: string }
@@ -85,6 +92,23 @@ export interface Product {
   floorPrice: Minor | null
   inStock: boolean
   backorderable: boolean
+  /** How it is sold — the noun every quantity message counts in. */
+  saleUnit: SaleUnit
+  /** The seller's minimum order, in `saleUnit`. Below it the product cannot be bought. */
+  minOrderQty: number
+  /**
+   * The quantity that qualifies for a special price, in `saleUnit`. Distinct from
+   * `minOrderQty`: a buyer may be able to order five and still not be able to negotiate
+   * on five, and telling them "the minimum is 10" when the real answer is "20 to qualify"
+   * sends them back to a form that will refuse them again.
+   */
+  specialPriceMinQty: number
+  /** FR-2.6 — the cap on a single request, in `saleUnit`. */
+  maxRequestQty: number
+  /** What the seller can actually ship today, in `saleUnit`. */
+  stockQty: number
+  /** Orders come in multiples of this. 1 means any whole number. */
+  orderMultiple: number
   /** FR-2.1 — on the seller's exclusion list (Q-11). */
   excluded: boolean
 }
@@ -133,7 +157,17 @@ export interface RequestLine {
   /** Set when the seller responds. */
   offeredPrice: Minor | null
   outcome: LineOutcome
-  proof: Proof | null
+  /**
+   * The documents attached to this line, in the order the buyer added them.
+   *
+   * A list rather than a single file because the invoice a buyer holds is not always one
+   * page and not always one document — a quotation plus the delivery note that dates it is
+   * a normal thing to send. It also makes two of the upload rules real rather than
+   * theoretical: there is a maximum to reach, and a second copy of the same file to catch.
+   * Most lines still carry nothing or exactly one; `primaryProof` is what the screens that
+   * only need the leading document read.
+   */
+  proofs: Proof[]
   frequency: Frequency | null
   /**
    * §11 — Special Credit (استمرارية). The draft gives it one line and no rules, and the

@@ -99,6 +99,20 @@ export function App() {
             </div>
 
             <div className="hb-demo-group">
+              <span>Upload</span>
+              {/* The one upload failure no choice of file can produce: the transfer itself. */}
+              {([[false, 'succeeds'], [true, 'fails']] as const).map(([fails, label]) => (
+                <button
+                  key={label} type="button" className="hb-demo-btn"
+                  aria-pressed={state.uploadFails === fails}
+                  onClick={() => dispatch({ type: 'set_upload_fails', fails })}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="hb-demo-group">
               <span>Card CTA</span>
               {/* Three layouts for the same action, switchable so they compare in place. */}
               {([

@@ -144,7 +144,7 @@ function standardView(order: Order): OrderView {
 export function viewOrder(order: Order, request: NegotiationRequest | null): OrderView {
   if (!order.requestRef || !request) return standardView(order)
 
-  const hadProof = request.lines.some((l) => l.proof !== null)
+  const hadProof = request.lines.some((l) => l.proofs.length > 0)
   const original = Object.fromEntries(order.lines.map((l) => [l.sku, l.originalUnitPrice]))
   const settled = request.state === 'accepted'
 

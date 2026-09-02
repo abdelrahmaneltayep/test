@@ -117,7 +117,7 @@ export const STRINGS: Dict = {
   linkRequired: { en: 'You are not linked to this supplier yet — we will request the link first.', ar: 'لست مرتبطاً بهذا المورّد بعد — سنطلب الارتباط أولاً.' },
 
   // ── Step 1, quantity (US-2) ───────────────────────────────────────────────
-  quantityLabel: { en: 'Quantity (cases)', ar: 'الكمية (كراتين)' },
+  quantityLabel: { en: 'Quantity ({unit})', ar: 'الكمية ({unit})' },
   equalsUnits: { en: 'equals {units} {uom}', ar: 'تعادل {units} {uom}' },
   tierAvailableTitle: { en: 'A published price already covers this quantity', ar: 'يوجد سعر معلن يغطي هذه الكمية بالفعل' },
   tierAvailableBody: { en: 'At {qty} cases the price is {price} per unit — better than the {list} you are seeing.', ar: 'عند {qty} كرتون يكون السعر {price} للوحدة — أفضل من {list} المعروض لك.' },
@@ -353,6 +353,57 @@ export const STRINGS: Dict = {
   notProvided: { en: 'Not given', ar: 'غير مذكور' },
   readFromDocument: { en: 'Read from the document', ar: 'مقروء من المستند' },
 
+  // ── Units, so every quantity message counts in the product's own noun ─────
+  unitCartons: { en: 'cartons', ar: 'كرتون' },
+  unitCases: { en: 'cases', ar: 'كرتونة' },
+  unitPallets: { en: 'pallets', ar: 'منصة' },
+  unitKg: { en: 'kg', ar: 'كجم' },
+  unitGrams: { en: 'grams', ar: 'جرام' },
+  unitLitres: { en: 'litres', ar: 'لتر' },
+  unitMillilitres: { en: 'millilitres', ar: 'مليلتر' },
+
+  // ── Quantity validation, per the PM's deck ────────────────────────────────
+  qtyEmpty: { en: 'Enter the quantity you would like to purchase.', ar: 'أدخل الكمية التي ترغب في شرائها.' },
+  qtyZero: { en: 'The requested quantity must be greater than zero.', ar: 'يجب أن تكون الكمية المطلوبة أكبر من صفر.' },
+  qtyBelowMinimum: { en: 'The minimum order quantity is {min} {unit}.', ar: 'الحد الأدنى للطلب هو {min} {unit}.' },
+  qtyAboveMaximum: { en: 'The maximum quantity allowed per request is {max} {unit}.', ar: 'الحد الأقصى المسموح به لكل طلب هو {max} {unit}.' },
+  qtyExceedsStock: { en: 'The requested quantity exceeds the available stock of {stock} {unit}.', ar: 'الكمية المطلوبة تتجاوز المخزون المتاح البالغ {stock} {unit}.' },
+  qtyNotMultiple: { en: 'Enter a quantity in multiples of {multiple} {unit}.', ar: 'أدخل كمية من مضاعفات {multiple} {unit}.' },
+  qtyTooLarge: { en: 'The entered quantity is too large. Review the quantity and try again.', ar: 'الكمية المُدخلة كبيرة جداً. راجع الكمية وحاول مرة أخرى.' },
+  qtySpecialPriceMinimum: { en: 'Request a minimum of {min} {unit} to qualify for a special price.', ar: 'اطلب {min} {unit} على الأقل لتأهُّل الطلب لسعر خاص.' },
+  qtyNotNumeric: { en: 'Enter numbers only. Do not include letters or special characters.', ar: 'أدخل أرقاماً فقط. دون حروف أو رموز خاصة.' },
+  productUnavailable: { en: 'This product is currently unavailable for a special price request.', ar: 'هذا الصنف غير متاح حالياً لطلب سعر خاص.' },
+
+  // The five sold-by instructions. Hints above the field, never rejections.
+  soldByCarton: { en: 'This product is sold by carton. Enter the number of cartons required.', ar: 'يُباع هذا الصنف بالكرتون. أدخل عدد الكراتين المطلوبة.' },
+  soldByCase: { en: 'This product is sold by case. Enter the number of cases required.', ar: 'يُباع هذا الصنف بالكرتونة. أدخل عدد الكرتونات المطلوبة.' },
+  soldByPallet: { en: 'This product is sold by pallet. Enter the number of pallets required.', ar: 'يُباع هذا الصنف بالمنصة. أدخل عدد المنصات المطلوبة.' },
+  soldByWeight: { en: 'Enter the required quantity in {unit}.', ar: 'أدخل الكمية المطلوبة بـ {unit}.' },
+  soldByVolume: { en: 'Enter the required quantity in {unit}.', ar: 'أدخل الكمية المطلوبة بـ {unit}.' },
+
+  // ── Price validation ──────────────────────────────────────────────────────
+  priceInvalid: { en: 'Enter a valid numeric price.', ar: 'أدخل سعراً رقمياً صحيحاً.' },
+  priceNotLower: { en: 'Enter a price lower than the current price of {price}.', ar: 'أدخل سعراً أقل من السعر الحالي {price}.' },
+  priceNonPositive: { en: 'The requested price must be greater than {zero}.', ar: 'يجب أن يكون السعر المطلوب أكبر من {zero}.' },
+  priceTooLow: { en: 'The requested price is significantly lower than the current price. Review the amount before submitting your request.', ar: 'السعر المطلوب أقل بكثير من السعر الحالي. راجع المبلغ قبل إرسال طلبك.' },
+  priceDecimals: { en: 'Enter a price with no more than {max} decimal places.', ar: 'أدخل سعراً بما لا يزيد عن {max} خانات عشرية.' },
+  priceFormat: { en: 'Enter the price using numbers only. Do not include currency symbols or letters.', ar: 'أدخل السعر بالأرقام فقط. دون رموز عملة أو حروف.' },
+  priceEmpty: { en: 'Enter your requested price.', ar: 'أدخل السعر الذي تطلبه.' },
+  priceSameAsCurrent: { en: 'Your requested price is the same as the current price. Enter a lower price to continue.', ar: 'السعر المطلوب مطابق للسعر الحالي. أدخل سعراً أقل للمتابعة.' },
+  priceOutOfRange: { en: 'The requested price is outside the allowed range. Review the amount and try again.', ar: 'السعر المطلوب خارج النطاق المسموح. راجع المبلغ وحاول مرة أخرى.' },
+
+  // ── File upload validation ────────────────────────────────────────────────
+  fileUnsupportedType: { en: 'This file type is not supported. Upload a JPG, PNG, or PDF file.', ar: 'صيغة الملف غير مدعومة. ارفع ملف JPG أو PNG أو PDF.' },
+  fileTooLarge: { en: 'The file exceeds the maximum allowed size of {max} MB. Upload a smaller file and try again.', ar: 'حجم الملف يتجاوز الحد الأقصى {max} ميجابايت. ارفع ملفاً أصغر وحاول مرة أخرى.' },
+  fileNoneSelected: { en: 'Select a file before uploading.', ar: 'اختر ملفاً قبل الرفع.' },
+  fileEmptyOrCorrupt: { en: 'This file appears to be empty or damaged. Upload a valid file and try again.', ar: 'يبدو أن هذا الملف فارغ أو تالف. ارفع ملفاً صالحاً وحاول مرة أخرى.' },
+  fileUploadFailed: { en: 'The file could not be uploaded. Check your connection and try again.', ar: 'تعذّر رفع الملف. تحقق من اتصالك وحاول مرة أخرى.' },
+  fileTooMany: { en: 'You have reached the maximum number of allowed attachments. Remove a file before adding another.', ar: 'وصلت إلى الحد الأقصى للمرفقات المسموح بها. احذف ملفاً قبل إضافة آخر.' },
+  fileDuplicate: { en: 'This file has already been attached.', ar: 'سبق إرفاق هذا الملف.' },
+  fileNameTooLong: { en: 'The file name is too long. Rename the file and upload it again.', ar: 'اسم الملف طويل جداً. أعد تسميته وارفعه مرة أخرى.' },
+  moreAttachments: { en: '+{n} more attached — listed under what the buyer sent', ar: '+{n} مرفقات أخرى — مذكورة ضمن ما أرسله المشتري' },
+  cardUnavailable: { en: 'Out of stock', ar: 'غير متوفر' },
+
   // ── When a rule settles the request in the same step that created it ──────
   submittedDeclinedTitle: { en: 'This one we cannot match', ar: 'هذا الطلب لا يمكننا مطابقته' },
   submittedAcceptedTitle: { en: 'Price matched', ar: 'تمت مطابقة السعر' },
@@ -496,11 +547,6 @@ export const STRINGS: Dict = {
   acceptThisOrderOnly: { en: 'Accept (this order only)', ar: 'اقبل (هذا الطلب فقط)' },
 
   // ── Cross-cutting ─────────────────────────────────────────────────────────
-  minQuantityBlocked: { en: 'Minimum quantity for this product is {min} cases.', ar: 'أقل كمية لهذا الصنف هي {min} كرتون.' },
-  quantityInvalid: { en: 'Enter a whole number of cases greater than zero.', ar: 'أدخل عدداً صحيحاً من الكراتين أكبر من صفر.' },
-  targetAboveList: { en: 'Your target price must be below the list price of {list}.', ar: 'يجب أن يكون السعر المستهدف أقل من السعر المعلن {list}.' },
-  targetImplausible: { en: 'That is more than half off the list price. You can still send it, and the supplier will see it flagged.', ar: 'هذا أكثر من نصف السعر المعلن. يمكنك إرساله، وسيظهر للمورّد موسوماً للمراجعة.' },
-  priceRequired: { en: 'Enter a target price.', ar: 'أدخل السعر المستهدف.' },
   supplierRequired: { en: 'Name the supplier offering that price.', ar: 'اذكر المورّد صاحب هذا السعر.' },
   fileRequired: { en: 'Attach the document that shows that price.', ar: 'أرفق المستند الذي يُظهر هذا السعر.' },
   maxLinesReached: { en: 'A request holds up to {max} items. Send this one, then start another.', ar: 'يتسع الطلب حتى {max} صنفاً. أرسل هذا ثم ابدأ طلباً آخر.' },
