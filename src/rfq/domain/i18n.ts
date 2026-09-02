@@ -349,6 +349,7 @@ export const STRINGS: Dict = {
   attachment: { en: 'Attachment', ar: 'المرفق' },
   noAttachment: { en: 'No document — this is a quote request', ar: 'بلا مستند — هذا طلب تسعير' },
   notProvided: { en: 'Not given', ar: 'غير مذكور' },
+  readFromDocument: { en: 'Read from the document', ar: 'مقروء من المستند' },
   readOnlyRequest: { en: 'This request is read-only now.', ar: 'هذا الطلب للقراءة فقط الآن.' },
   acceptDisabledQuoteOnly: { en: 'This request has no asked price to accept — open it and quote a price.', ar: 'لا يوجد سعر مطلوب لقبوله — افتح الطلب وقدّم سعراً.' },
   // On the page the request is already open, so the way out is the counter beside it.
@@ -362,6 +363,10 @@ export const STRINGS: Dict = {
   // ── Price matching — the match route is a guarantee, not a negotiation ────
   matchPrice: { en: 'Match this price', ar: 'طابق هذا السعر' },
   matchAction: { en: 'Match', ar: 'مطابقة' },
+  matchPriceAction: { en: 'Match price', ar: 'طابق السعر' },
+  uploadFile: { en: 'Upload file', ar: 'ارفع الملف' },
+  switchToQuote: { en: 'No invoice to hand? Ask the supplier to quote instead', ar: 'لا تملك فاتورة؟ اطلب من المورّد تسعيراً بدلاً من ذلك' },
+  switchToMatch: { en: 'Have an invoice? Ask them to match its price instead', ar: 'لديك فاتورة؟ اطلب مطابقة سعرها بدلاً من ذلك' },
   matchGuaranteeTitle: { en: 'Price match — the buyer\u2019s verified price wins', ar: 'مطابقة السعر — السعر المُثبت من المشتري هو المعتمد' },
   matchGuaranteeBody: { en: 'You have three moves here and none of them is a counter-offer: match the verified price, ask for better evidence, or decline with a stated reason. The price itself is not open.', ar: 'أمامك ثلاثة خيارات وليس بينها عرض مقابل: طابق السعر المُثبت، أو اطلب إثباتاً أفضل، أو ارفض مع ذكر السبب. أما السعر نفسه فليس محل تفاوض.' },
   matchBelowFloor: { en: 'Matching puts {sku} below your floor of {floor}. The guarantee still stands — this is stated so you decide with it in view.', ar: 'المطابقة تضع {sku} تحت حدك الأدنى البالغ {floor}. الضمان قائم — يُذكر هذا لتقرر وأنت على علم.' },

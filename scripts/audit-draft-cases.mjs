@@ -71,26 +71,29 @@ check('2.quantity-field', await p.locator('.hb-modal-body .hb-field', { hasText:
   (await p.locator('.hb-modal-body .hb-label').allInnerTexts()).join(' / '))
 
 // ── §4 both routes offered together, per item ────────────────────────────────
-const tabs = await p.locator('.hb-modal-body [role="tab"]').allInnerTexts()
-check('4.both-routes-together', tabs.length === 2, tabs.map((t) => t.replace(/\n/g, ' ')).join(' | '))
+// Not as tabs any more: the card sends the buyer here to match, and the quote is the way
+// out for someone with no invoice. One press away, one line of the form.
+const switchLink = await txt('.hb-routeswitch')
+check('4.both-routes-together', /quote instead/i.test(switchLink), switchLink)
 
 // ── §3 proof mandatory: send with a price but no attachment ──────────────────
 await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
 await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
-await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(250)
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(250)
 const blocked = await p.locator('.hb-overlay').count() === 1
 const proofErr = await txt('.hb-modal-body .hb-error')
 check('3.proof-mandatory', blocked && /document|attach|أرفق/i.test(await p.locator('.hb-modal-body').innerText()),
   `still open=${blocked} · ${proofErr}`)
 
-// The note asks for a photo *or* a file, which is two controls and not one hint.
-const uploadBtns = await p.locator('.hb-uploadchoice label').allInnerTexts()
-const uploadInputs = await p.locator('.hb-uploadchoice input').evaluateAll(
-  (els) => els.map((e) => `${e.getAttribute('accept')}|${e.getAttribute('capture') ?? 'none'}`))
-check('pm.camera-or-file', uploadBtns.length === 2
-  && /Take a photo/i.test(uploadBtns[0]) && /Choose a file/i.test(uploadBtns[1])
-  && uploadInputs[0].includes('environment') && uploadInputs[1].endsWith('none'),
-  `${uploadBtns.join(' | ')} :: ${uploadInputs.join(' :: ')}`)
+// One drop zone, and no `capture` on it: without it the phone's own sheet offers Take
+// Photo and Photo Library together, and it is `capture` that makes some browsers drop the
+// library — stranding a buyer who already has the invoice saved.
+const zone = await txt('.hb-dropzone')
+const zoneInput = await p.locator('.hb-dropzone input').evaluate(
+  (e) => `${e.getAttribute('accept')}|${e.getAttribute('capture') ?? 'none'}`)
+check('pm.camera-or-file', /Upload file/i.test(zone) && /camera or gallery/i.test(zone)
+  && zoneInput.endsWith('none') && zoneInput.includes('image/*'),
+  `${zone} :: ${zoneInput}`)
 // The card promised 5–10%; the form discloses it as a term, at the foot, before Send —
 // a disclaimer and not an info icon, which is what the voice note asks for.
 const formIncentive = await txt('.hb-modal-body .hb-disclaimer')
@@ -100,9 +103,8 @@ check('pm.incentive-disclosed-at-the-foot', /5–10%/.test(formIncentive)
   formIncentive.slice(0, 160))
 
 // ── §3 AI/extraction check on the uploaded invoice ───────────────────────────
-const supplierField = p.locator('.hb-modal-body label.hb-field', { hasText: /Supplier offering/ }).locator('input')
-await supplierField.fill('Gulf Foods')
-await p.locator('.hb-modal-body .hb-uploadchoice input[type="file"]').last().setInputFiles({
+// The buyer no longer types the supplier; extraction reads it off the file.
+await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles({
   name: 'gulf-foods-invoice.pdf', mimeType: 'application/pdf', buffer: Buffer.from('invoice'),
 })
 await p.waitForTimeout(400)
@@ -111,7 +113,7 @@ await p.waitForTimeout(400)
 check('3.buyer-sees-only-the-file', await p.locator('.hb-modal-body .hb-filechip').count() === 1
   && await p.locator('.hb-modal-body .hb-proof').count() === 0,
   await txt('.hb-modal-body .hb-filechip'))
-await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(400)
 const sentBody = await txt('.hb-overlay')
 check('3.case1-sent', /Request sent/i.test(sentBody) && /SPR-\d{4}-\d{4}/.test(sentBody), sentBody)
 
@@ -119,35 +121,57 @@ check('3.case1-sent', /Request sent/i.test(sentBody) && /SPR-\d{4}-\d{4}/.test(s
 await reset()
 await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
 await p.waitForTimeout(300)
-await p.locator('.hb-modal-body [role="tab"]').nth(1).click(); await p.waitForTimeout(200)
+await p.locator('.hb-routeswitch').click(); await p.waitForTimeout(250)
 const rfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
 check('4.rfq-no-price', !rfqLabels.some((l) => /target price/i.test(l)), rfqLabels.join(' / '))
 check('4.rfq-frequency-p2', rfqLabels.some((l) => /how often/i.test(l)), rfqLabels.join(' / '))
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(150)
 
-// ── §11 special credit: captured, shown, and Phase 2 under either reading ────
+// ── §3 extraction, then §11 special credit — two walks, each from a clean load.
+//    They cannot share one: the match form stopped carrying special credit when the card
+//    design cut it to three questions, and one product can hold only one open request.
+
+// The match route carries the document, so extraction is walked on its own request.
 await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
 await p.waitForTimeout(300)
-const creditField = p.locator('.hb-modal-body .hb-checkfield')
-check('11.special-credit-offered', await creditField.count() === 1, await txt('.hb-modal-body .hb-checkfield'))
-await creditField.locator('input').check()
 await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
 await p.locator('.hb-modal-body input[inputmode="decimal"]').first().fill('8.100')
-await p.locator('.hb-modal-body label.hb-field', { hasText: /Supplier offering/ }).locator('input').fill('Gulf Foods')
-await p.locator('.hb-modal-body .hb-uploadchoice input[type="file"]').last().setInputFiles({
-  name: 'inv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
+await p.locator('.hb-modal-body .hb-dropzone input[type="file"]').setInputFiles({
+  name: 'gulf-foods-inv.pdf', mimeType: 'application/pdf', buffer: Buffer.from('x'),
 })
 await p.waitForTimeout(300)
-await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
-const creditRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
+await p.getByRole('button', { name: 'Match price' }).click(); await p.waitForTimeout(400)
+const proofRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
 await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
 await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
-await p.locator('tbody tr', { hasText: creditRef }).click(); await p.waitForTimeout(350)
+await p.locator('tbody tr', { hasText: proofRef }).click(); await p.waitForTimeout(350)
 // §3 — the invoice-reading result lands on the seller's page, where the decision is.
 check('3.extraction-reaches-the-seller', await p.locator('.hb-proof').count() === 1
   && /Buyer typed/i.test(await txt('.hb-proof'))
   && /All automatic checks passed|Warn|Fail/i.test(await txt('.hb-proof')),
   (await txt('.hb-proof')).slice(0, 140))
+// The buyer stopped typing the supplier, so the seller reads it off the document — and
+// the page says which of the two columns it came from.
+const readback0 = await txt('.hb-readback')
+check('pm.supplier-read-from-the-document',
+  /Gulf Foods/i.test(readback0) && /Read from the document/i.test(readback0),
+  readback0.slice(0, 220))
+
+// Special credit rides the quote route now, where the buyer describes an arrangement.
+await reset()
+await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
+await p.waitForTimeout(300)
+await p.locator('.hb-routeswitch').click(); await p.waitForTimeout(250)
+const creditField = p.locator('.hb-modal-body .hb-checkfield')
+check('11.special-credit-offered', await creditField.count() === 1, await txt('.hb-modal-body .hb-checkfield'))
+await creditField.locator('input').check()
+await p.locator('.hb-modal-body input[inputmode="numeric"]').first().fill('40')
+await p.getByRole('button', { name: 'Send request' }).click(); await p.waitForTimeout(400)
+const creditRef = (await txt('.hb-overlay')).match(/SPR-\d{4}-\d{4}/)?.[0] ?? ''
+await p.locator('.hb-modal-head button').click(); await p.waitForTimeout(200)
+await p.getByRole('button', { name: 'Seller · Dashboard' }).click(); await p.waitForTimeout(250)
+await p.locator('.hb-navitem', { hasText: 'RFQs' }).click(); await p.waitForTimeout(300)
+await p.locator('tbody tr', { hasText: creditRef }).click(); await p.waitForTimeout(350)
 const linePills = await p.locator('.hb-content .hb-pill').allInnerTexts()
 check('11.special-credit-shown-to-seller', linePills.some((x) => /continuing arrangement/i.test(x)),
   `${creditRef} :: ${linePills.join(' | ')}`)
@@ -160,7 +184,8 @@ async function formLabels(phaseBtn) {
   await p.locator('.hb-prod', { hasText: 'Tomato Paste' }).getByRole('button', { name: /Match my price/ }).click()
   await p.waitForTimeout(300)
   const labels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
-  const routes = await p.locator('.hb-modal-body [role="tab"]').count()
+  // The second route is a link now, not a tab: present or absent, never two of them.
+  const routes = await p.locator('.hb-routeswitch').count()
   const credit = await p.locator('.hb-modal-body .hb-checkfield').count()
   return { labels, routes, credit }
 }
@@ -173,9 +198,9 @@ check('11.p1-prd-cut', prd.routes === 0 && !prd.labels.some((l) => /target price
 
 // The draft's cut: both routes ship (§1, §4), frequency waits — "quantity ships first".
 const draft = await formLabels('P1 · draft')
-await p.locator('.hb-modal-body [role="tab"]').nth(1).click(); await p.waitForTimeout(200)
+await p.locator('.hb-routeswitch').click(); await p.waitForTimeout(250)
 const draftRfqLabels = await p.locator('.hb-modal-body .hb-label').allInnerTexts()
-check('11.p1-draft-cut', draft.routes === 2 && draft.labels.some((l) => /target price/i.test(l))
+check('11.p1-draft-cut', draft.routes === 1 && draft.labels.some((l) => /target price/i.test(l))
   && !draftRfqLabels.some((l) => /how often/i.test(l)) && draft.credit === 0,
   `routes=${draft.routes} credit=${draft.credit} · case1: ${draft.labels.join(' / ')} · rfq: ${draftRfqLabels.join(' / ')}`)
 

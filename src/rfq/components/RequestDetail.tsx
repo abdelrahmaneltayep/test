@@ -78,6 +78,20 @@ export function SubmissionReadback({ line, lang, title }: {
   title: string
 }) {
   const typed = line.proof?.typed ?? null
+  const read = line.proof?.extracted ?? null
+  /*
+   * The buyer's form stopped asking for the competitor's name, its reference and its date
+   * — extraction reads all three off the document anyway (FR-7.2), and asking twice for one
+   * answer was the first thing off the MVP form. So the readback falls back to what was
+   * read, and says so: FR-7.5 keeps the two columns apart, and a value the machine supplied
+   * must not be shown as though the buyer had stood behind it.
+   */
+  function fromDocument(typedValue: string | null | undefined, readValue: string | null | undefined) {
+    if (typedValue) return <>{typedValue}</>
+    if (readValue) return <>{readValue}<div className="hb-hint">{t(lang, 'readFromDocument')}</div></>
+    return <span className="hb-muted">{t(lang, 'notProvided')}</span>
+  }
+
   return (
       <div className="hb-card">
       <div className="hb-card-head">
@@ -113,9 +127,9 @@ export function SubmissionReadback({ line, lang, title }: {
           </Row>
           {line.route === 'case_1' && (
             <>
-              <Row label={t(lang, 'competitorName')}>{typed?.supplier || t(lang, 'notProvided')}</Row>
-              <Row label={t(lang, 'theirReference')}>{typed?.sku || t(lang, 'notProvided')}</Row>
-              <Row label={t(lang, 'documentDateLabel')}>{typed?.documentDate || t(lang, 'notProvided')}</Row>
+              <Row label={t(lang, 'competitorName')}>{fromDocument(typed?.supplier, read?.supplier)}</Row>
+              <Row label={t(lang, 'theirReference')}>{fromDocument(typed?.sku, read?.sku)}</Row>
+              <Row label={t(lang, 'documentDateLabel')}>{fromDocument(typed?.documentDate, read?.documentDate)}</Row>
             </>
           )}
           <Row label={t(lang, 'attachment')}>

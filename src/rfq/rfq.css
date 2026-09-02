@@ -612,18 +612,42 @@ body {
 .hb-uploadchoice .hb-btn:focus-within { outline: 2px solid var(--hb-blue); outline-offset: 2px; }
 
 /* The incentive as a term of the flow rather than a reward: quiet, at the foot of the
-   form, above the send button. Not a banner — a banner announces, a disclaimer discloses. */
+   form, above the send button. Not a banner — a banner announces, a disclaimer discloses.
+   Boxed and marked, so it reads as a term attached to the form rather than a stray line
+   of small print that ran off the end of it. */
+/* The disclaimer sits at the foot of the drawer, immediately above the action bar, on a
+   form short enough that it would otherwise float in the middle of an empty panel. The
+   route panel is the flex column it pushes against — it is the disclaimer's own parent. */
+.hb-modal--drawer .hb-modal-body { display: flex; flex-direction: column; }
+.hb-modal--drawer .hb-routepanel { display: flex; flex-direction: column; flex: 1 1 auto; }
+.hb-modal--drawer .hb-routepanel > .hb-disclaimer { margin-top: auto; }
+
 .hb-disclaimer {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: flex-start;
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--hb-line);
+  margin: 20px 0 0;
+  padding: 13px 14px;
+  border: 1px solid var(--hb-line);
+  border-radius: var(--hb-r-sm);
   color: var(--hb-ink-2);
   font-size: 12.5px;
   line-height: 1.55;
 }
+.hb-disclaimer-mark {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--hb-field);
+  border: 1px solid var(--hb-line);
+  color: var(--hb-ink-2);
+  font: 600 12px/1 var(--hb-display);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.hb-disclaimer b, .hb-disclaimer strong { color: var(--hb-ink); }
 
 /*
  * The card's after state — a status the buyer can press, not a link.
@@ -666,3 +690,50 @@ body {
   font-size: 11.5px;
   white-space: nowrap;
 }
+
+/* ── The match drawer, per the card design ───────────────────────────────── */
+
+/* One drop zone in place of two buttons. The whole box is the label, so the pointer
+   target is the box and not just the words in it. */
+.hb-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 30px 20px;
+  border: 1.5px dashed var(--hb-blue);
+  border-radius: var(--hb-r);
+  background: var(--hb-blue-wash);
+  cursor: pointer;
+  text-align: center;
+}
+.hb-dropzone:hover { background: var(--hb-blue-wash-2); }
+.hb-dropzone:focus-within { outline: 2px solid var(--hb-blue); outline-offset: 2px; }
+.hb-dropzone-icon { color: var(--hb-blue); line-height: 0; }
+.hb-dropzone-cta { color: var(--hb-blue); font-weight: 700; font-size: 15px; }
+.hb-dropzone-hint { color: var(--hb-ink-2); font-size: 12.5px; }
+
+/* A reference, folded away: an open list of what does not qualify would be the longest
+   thing on a form that asks three questions. */
+.hb-cannotmatch { margin-top: 16px; }
+.hb-cannotmatch > summary { cursor: pointer; font-size: 13px; font-weight: 600; }
+.hb-cannotmatch ul { margin: 6px 0 0; padding-inline-start: 18px; }
+
+/* The secondary route. Quiet on purpose — it is the way out for a buyer who does not
+   have what this form is asking for, not a choice to weigh before starting. */
+.hb-routeswitch {
+  display: block;
+  margin: 18px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--hb-blue);
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  text-align: start;
+}
+.hb-routeswitch:hover { color: var(--hb-blue-deep); }
+.hb-routeswitch:focus-visible { outline: 2px solid var(--hb-blue); outline-offset: 3px; border-radius: 4px; }

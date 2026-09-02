@@ -240,7 +240,7 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Seventy-four checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Seventy-five checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
@@ -317,6 +317,45 @@ A later note from the PM scoped a change to the product card, and it landed as w
   it by hand**, which is what the business flow actually does. Nothing computes or issues a
   discount: the note puts that outside the feature, and a prototype implying an automatic
   coupon would be designing something nobody is building.
+
+### The drawer, rebuilt to the PM's design
+
+A design for the match drawer arrived and the drawer now matches it. The shape is the MVP
+the voice note described — the product, then the price, then the invoice — and everything
+that was not one of those three questions came off:
+
+| Was | Now |
+| --- | --- |
+| Title "Ask for a better price" | **"Match my price"**, the card's own words |
+| Two route tabs, equal weight | One route, with a **link** out to the quote |
+| "Supplier offering that price", required | Gone — extraction reads it off the document |
+| "Their SKU or reference", "Document date" | Gone — same reason |
+| Special credit on both routes | Quote route only |
+| Two upload buttons | One **drop zone** |
+| "Send request" | **"Match price"** |
+
+**The competitor fields went because they were being asked twice.** Extraction already
+reads the supplier, the reference and the date off the invoice (FR-7.2), so typing them was
+a second answer to a question the document had answered. FR-7.5 still keeps the two columns
+apart: the buyer's column is now empty for those three, the machine's is not, and the
+seller's readback says **"Read from the document"** under each value it took from the second
+column. A value the machine supplied must not be shown as though the buyer had stood behind
+it.
+
+**The tabs became a link** because the two routes are not equal. The card sends the buyer
+here to match a price they already hold; the quote is the fall-back for someone who does
+not hold one. A tab pair says the buyer should be choosing before they start. §4's "both
+routes per item" stays true — it is one press away.
+
+**The drop zone carries no `capture` attribute**, and that is the point: without it the
+phone's own sheet offers Take Photo and Photo Library together, which is both routes in one
+control. It is `capture` that makes some browsers drop the library, stranding a buyer who
+already has the invoice saved.
+
+Two things in the built drawer are **not** in the design, both deliberate: the folded
+"What we cannot match" list, which FR-7.7 requires be stated before the send rather than
+after a rejection; and the link out to the quote route, without which the RFQ route would
+have no entry point on the marketplace at all.
 
 ### The after state — a status, not a link
 

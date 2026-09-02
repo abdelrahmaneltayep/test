@@ -17,7 +17,7 @@
  * discrete step, so US-7 should be rewritten against this before it is used as a test.
  */
 
-import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { formatMoney, parseMoney } from '../domain/money'
 import { makeRef } from '../domain/reference'
 import { IMPLAUSIBLE_ASK_RATIO } from '../domain/guardrails'
@@ -52,6 +52,22 @@ function applicableTier(product: Product, qty: number) {
  * same: where the buyer left the date blank, the extractor supplies one, so the freshness
  * check still has something to judge rather than failing for a field nobody had to fill.
  */
+/**
+ * A stand-in for reading the supplier's name off the uploaded document. Words before the
+ * first "invoice"/"quote" in the file name, title-cased — which is how these files are
+ * actually named — and a neutral fallback where the name says nothing.
+ */
+function supplierFromFile(name: string): string {
+  const stem = name.replace(/\.[^.]+$/, '').split(/[-_\s]+/)
+  const words = []
+  for (const w of stem) {
+    if (/^(invoice|inv|quote|quotation|receipt|scan|img|photo|\d+)$/i.test(w)) break
+    words.push(w)
+  }
+  if (words.length === 0) return 'Supplier on the document'
+  return words.map((w) => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(' ') + ' W.L.L.'
+}
+
 function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean, now: Date): Proof {
   const readDate = typed.documentDate ?? new Date(now.getTime() - 8 * 86_400_000).toISOString().slice(0, 10)
   return {
@@ -63,8 +79,15 @@ function simulateExtraction(file: File, typed: ProofFields, unavailable: boolean
     // FR-7.2 — the provider returns its own reading. It is stored alongside the typed
     // values, never on top of them (FR-7.5). The legal-entity suffix here is deliberate:
     // it exercises the AC-4.4 conflict path.
+    /*
+      The supplier now comes off the document, because the buyer is no longer asked for
+      it. The file name stands in for the read — a prototype cannot open a PDF, and a
+      fixed string would hide the one thing the seller's screen is for, which is seeing a
+      real name appear that the buyer never typed. The legal-entity suffix is deliberate:
+      it exercises the AC-4.4 conflict path against the seller's own records.
+    */
     extracted: unavailable ? null : {
-      supplier: typed.supplier ? `${typed.supplier} W.L.L.` : '',
+      supplier: supplierFromFile(file.name),
       sku: typed.sku,
       unitPrice: typed.unitPrice,
       documentDate: readDate,
@@ -93,9 +116,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
   const routeChoice = case1Available(state.phase)
   const [route, setRoute] = useState<'case_1' | 'case_2'>(routeChoice ? 'case_1' : 'case_2')
   const [targetText, setTargetText] = useState('')
-  const [supplier, setSupplier] = useState('')
-  const [theirSku, setTheirSku] = useState('')
-  const [docDate, setDocDate] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [proofError, setProofError] = useState<string | null>(null)
   const [frequency, setFrequency] = useState<Frequency>('one_off')
@@ -135,11 +155,17 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
    */
   const proof = useMemo<Proof | null>(() => {
     if (!file) return null
+    /*
+      FR-7.5 keeps typed and extracted apart, and the form now only asks for one of the
+      five: the price. The rest is left empty rather than pre-filled from the document —
+      writing the machine's reading into the buyer's column would erase exactly the
+      distinction the seller's screen depends on.
+    */
     const typed: ProofFields = {
-      supplier: supplier.trim(),
-      sku: theirSku.trim() || product.sku,
+      supplier: '',
+      sku: product.sku,
       unitPrice: targetPrice,
-      documentDate: docDate || null,
+      documentDate: null,
       currency: 'BHD',
     }
     // AC-4.7 / EC-27 — when the service is unavailable the buyer can still submit; the
@@ -154,7 +180,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       tenantCurrency: 'BHD',
     })
     return built
-  }, [file, supplier, theirSku, targetPrice, docDate, product, state.phase, state.now])
+  }, [file, targetPrice, product, state.phase, state.now])
 
 
   // ── AC-2.5 / AC-2.3 — quantity validation names the constraint and the value ──
@@ -178,23 +204,17 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
     route === 'case_1' && targetPrice !== null && targetPrice > 0 && targetPrice < product.listPrice * IMPLAUSIBLE_ASK_RATIO
       ? t(lang, 'targetImplausible') : null
 
-  const supplierError = showErrors && route === 'case_1' && !supplier.trim() ? t(lang, 'supplierRequired') : null
   const proofFileError = showErrors && route === 'case_1' && !proof ? t(lang, 'fileRequired') : null
 
   /** Everything the current line needs before it can join the request. */
   const lineComplete =
     qtyText !== '' && qtyError === null &&
-    (route === 'case_2' || (targetPrice !== null && targetError === null && supplier.trim() !== '' && proof !== null))
+    (route === 'case_2' || (targetPrice !== null && targetError === null && proof !== null))
 
   /** The form is untouched, so "Send" means "send what is already in the request". */
-  const lineUntouched = qtyText === '' && targetText === '' && supplier === '' && proof === null
+  const lineUntouched = qtyText === '' && targetText === '' && proof === null
 
   /** Left/right (or up/down) move between tabs, per the tablist pattern. */
-  function onRouteKeyDown(e: ReactKeyboardEvent) {
-    if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return
-    e.preventDefault()
-    setRoute((r) => (r === 'case_1' ? 'case_2' : 'case_1'))
-  }
 
   function currentLine(): DraftLine {
     return {
@@ -267,7 +287,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
     <Modal
       drawer
       title={
-        <h2 className="hb-h2">{t(lang, 'requestDrawerTitle')}</h2>
+        <h2 className="hb-h2">{t(lang, route === 'case_1' ? 'requestSpecialPrice' : 'case2Title')}</h2>
       }
       onClose={onClose}
       footer={
@@ -276,7 +296,7 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
           {/* E-2 — a blocked control states its reason, once a send has been attempted. */}
           {blockedReason && <span className="hb-hint">{blockedReason}</span>}
           <button type="button" className="hb-btn hb-btn--primary" onClick={handleSend}>
-            {t(lang, 'sendRequest')}
+            {t(lang, route === 'case_1' ? 'matchPriceAction' : 'sendRequest')}
           </button>
         </span>
       }
@@ -288,35 +308,6 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         nothing on screen to be a target *against*.
       */}
       <ProductListItem product={product} lang={lang} />
-
-      {/* ── Route (US-3) — explicit, never inferred (FR-2.2, AC-3.5) ─────── */}
-      {routeChoice && (
-        <div className="hb-field">
-          <span className="hb-label" id="hb-route-label">{t(lang, 'routeStepTitle')}</span>
-          <div className="hb-tabs" role="tablist" aria-labelledby="hb-route-label" onKeyDown={onRouteKeyDown}>
-            <button
-              type="button" role="tab" id="hb-tab-case1" className="hb-tab"
-              aria-selected={route === 'case_1'} aria-controls="hb-route-panel"
-              tabIndex={route === 'case_1' ? 0 : -1}
-              onClick={() => setRoute('case_1')}
-            >
-              <span aria-hidden="true">🏷</span>{t(lang, 'case1Title')}
-            </button>
-            <button
-              type="button" role="tab" id="hb-tab-case2" className="hb-tab"
-              aria-selected={route === 'case_2'} aria-controls="hb-route-panel"
-              tabIndex={route === 'case_2' ? 0 : -1}
-              onClick={() => setRoute('case_2')}
-            >
-              <span aria-hidden="true">📄</span>{t(lang, 'case2Title')}
-            </button>
-          </div>
-          {/* The selected tab still says what it means; the cards used to carry this. */}
-          <p className="hb-hint" style={{ marginTop: 10 }}>
-            {t(lang, route === 'case_1' ? 'case1Body' : 'case2Body')}
-          </p>
-        </div>
-      )}
 
       {/* ── Quantity (US-2) ──────────────────────────────────────────────── */}
       <Field
@@ -354,12 +345,8 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         </div>
       )}
 
-      {/* The quantity field sits between the tabs and their panel because it belongs to
-          both routes; the panel below holds only what the chosen route adds. */}
-      <div
-        id="hb-route-panel" role={routeChoice ? 'tabpanel' : undefined}
-        aria-labelledby={routeChoice ? (route === 'case_1' ? 'hb-tab-case1' : 'hb-tab-case2') : undefined}
-      >
+      {/* Quantity belongs to both routes; the panel below holds only what the route adds. */}
+      <div id="hb-route-panel" className="hb-routepanel">
 
       {/* ── Case 1 (US-4) ────────────────────────────────────────────────── */}
       {route === 'case_1' && (
@@ -375,30 +362,16 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
               onChange={(e) => setTargetText(e.target.value)} placeholder="0.000" />
           </Field>
 
-          <Field label={t(lang, 'competitorName')} error={supplierError}>
-            <input className="hb-input" value={supplier} onChange={(e) => setSupplier(e.target.value)} />
-          </Field>
-
-          {/* FR-7.7 / EC-36 — the exclusions are stated before upload, not after rejection. */}
-          <details style={{ marginBottom: 14 }}>
-            <summary style={{ cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>{t(lang, 'whatWeCannotMatch')}</summary>
-            <ul className="hb-hint" style={{ marginTop: 6 }}>
-              {PROOF_EXCLUSIONS[lang].map((x) => <li key={x}>{x}</li>)}
-            </ul>
-          </details>
-
           {/*
-            Before the upload, the picker. After it, the file — and nothing else.
-            The extraction read-back and its checks used to sit here, and they are the
-            seller's evidence, not the buyer's: the buyer knows what they attached, and a
-            panel telling them what a machine read off their own invoice asked them to
-            adjudicate a mismatch they cannot see the document behind. FR-7.2 extraction
-            and the FR-7.3 checks still run on submission and still reach the seller's
-            request page in full (§3) — what is gone is the buyer being shown the working.
+            Three questions and no more: how many, at what price, and show me. The fields
+            that went — the competitor's name, their SKU, the document's date — were all
+            things extraction reads off the invoice anyway (FR-7.2), so asking the buyer to
+            type them was asking twice for one answer. What the seller sees is unchanged;
+            it now comes from the document rather than from the buyer, which is also the
+            more trustworthy of the two sources for a claim about someone else's price.
           */}
           <Field
             label={t(lang, 'uploadProof')}
-            hint={file ? undefined : t(lang, 'uploadHint')}
             error={proofFileError ?? proofError}
           >
             {file ? (
@@ -416,47 +389,41 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
               </div>
             ) : (
               /*
-                Two ways in, named separately — the feature note asks for a photo *or* a
-                file, and one input hinting `capture` is not that. On a phone `capture`
-                sends you straight to the camera and some browsers drop the gallery
-                entirely, so a buyer with the invoice already saved has no way through;
-                without it, a buyer holding a paper invoice has to go and photograph it
-                first. Two labelled inputs let each of them take the route they are on.
+                One drop zone rather than the two buttons that were here. `capture` is
+                deliberately absent: without it the phone's own sheet offers Take Photo and
+                Photo Library together, which is both routes in one control — and it is
+                `capture` that makes some browsers drop the library, stranding a buyer who
+                already has the invoice saved. The hint says both are there.
               */
-              <div className="hb-uploadchoice">
-                <label className="hb-btn hb-btn--outline">
-                  <span aria-hidden="true">📷</span>{t(lang, 'takePhoto')}
-                  <input
-                    type="file" accept="image/*" capture="environment" className="hb-visually-hidden"
-                    onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-                <span className="hb-hint">{t(lang, 'uploadOr')}</span>
-                <label className="hb-btn hb-btn--secondary">
-                  <span aria-hidden="true">📎</span>{t(lang, 'chooseFile')}
-                  <input
-                    type="file" accept=".pdf,image/*" className="hb-visually-hidden"
-                    onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              </div>
+              <label className="hb-dropzone">
+                <span className="hb-dropzone-icon" aria-hidden="true">
+                  {/* The sheet in currentColor, the arrow knocked out of it in the zone's
+                      own background — drawing both in one fill made the arrow invisible. */}
+                  <svg viewBox="0 0 24 24" width="34" height="34" aria-hidden="true">
+                    <path fill="currentColor" d="M6 2h7.2L20 8.6V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
+                    <path fill="var(--hb-blue-wash)" d="M13.2 2.4v5.4h5.4Z" />
+                    <path fill="var(--hb-blue-wash)" d="M12 18.4a1 1 0 0 1-1-1v-4l-1.3 1.3a1 1 0 0 1-1.4-1.4l3-3a1 1 0 0 1 1.4 0l3 3a1 1 0 0 1-1.4 1.4L13 13.4v4a1 1 0 0 1-1 1Z" />
+                  </svg>
+                </span>
+                <span className="hb-dropzone-cta">{t(lang, 'uploadFile')}</span>
+                <span className="hb-dropzone-hint">{t(lang, 'uploadHint')}</span>
+                <input
+                  type="file" accept=".pdf,image/*" className="hb-visually-hidden"
+                  onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
             )}
           </Field>
 
-          {/*
-            Both optional, and both below the attachment on purpose: extraction reads them
-            off the document (FR-7.2), so they are a correction to what was read rather
-            than something the buyer has to supply before uploading.
-          */}
-          <div style={{ marginTop: 18 }}>
-            <Field label={t(lang, 'competitorSku')}>
-              <input className="hb-input" value={theirSku} onChange={(e) => setTheirSku(e.target.value)} />
-            </Field>
-
-            <Field label={t(lang, 'documentDate')} hint={t(lang, 'documentDateHint')}>
-              <input className="hb-input" type="date" value={docDate} onChange={(e) => setDocDate(e.target.value)} />
-            </Field>
-          </div>
+          {/* FR-7.7 / EC-36 — the exclusions are stated before the send, not after a
+              rejection. Folded away: it is a reference, and an open list of what does not
+              qualify would be the longest thing on a form with three questions on it. */}
+          <details className="hb-cannotmatch">
+            <summary>{t(lang, 'whatWeCannotMatch')}</summary>
+            <ul className="hb-hint">
+              {PROOF_EXCLUSIONS[lang].map((x) => <li key={x}>{x}</li>)}
+            </ul>
+          </details>
         </>
       )}
 
@@ -484,11 +451,17 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
       )}
 
       {/*
-        §11 — Special Credit (استمرارية). It belongs to the arrangement rather than to
-        either route, so it is offered on both; it is Phase 2 under both readings, and it
-        is captured and shown, never priced.
+        §11 — Special Credit (استمرارية). Captured and shown, never priced, and Phase 2
+        under both readings.
+
+        It used to be offered on both routes, on the reasoning that continuity belongs to
+        the arrangement rather than to how the price was reached. The PM's card design
+        overrules that for the match route: it asks three questions and this is not one of
+        them, and a Phase 2 field is the first thing off an MVP form. It stays on the quote
+        route, where the buyer is already describing an arrangement rather than pointing at
+        a price.
       */}
-      {phase2Only(state.phase) && (
+      {route === 'case_2' && phase2Only(state.phase) && (
         <label className="hb-field hb-checkfield">
           <input
             type="checkbox" checked={specialCredit}
@@ -514,9 +487,24 @@ export function RequestFlow({ product, onClose, onTierAccepted, onSubmitted }: P
         the buyer may never want it. Here the buyer has committed to the flow and this is a
         term of it; a term you have to go and uncover is not a term you disclosed.
       */}
+      {/*
+        The other route, offered as a link rather than a tab.
+        The tabs gave the two routes equal weight, and they are not equal: the card sends
+        the buyer here to match a price they already hold, and the quote is what they fall
+        back to when they do not hold one. A link says that; a tab pair says the buyer
+        should be choosing. It also keeps §4's "both routes per item" true — the quote
+        route is one press away, it just no longer competes for the buyer's attention
+        before they have started.
+      */}
+      {routeChoice && (
+        <button type="button" className="hb-routeswitch" onClick={() => setRoute(route === 'case_1' ? 'case_2' : 'case_1')}>
+          {t(lang, route === 'case_1' ? 'switchToQuote' : 'switchToMatch')}
+        </button>
+      )}
+
       {route === 'case_1' && (
         <p className="hb-disclaimer">
-          <span aria-hidden="true">🎁</span>
+          <span className="hb-disclaimer-mark" aria-hidden="true">i</span>
           <span>{t(lang, 'incentiveInForm')}</span>
         </p>
       )}
