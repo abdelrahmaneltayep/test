@@ -12,8 +12,9 @@ import { useState } from 'react'
 import { t } from '../domain/i18n'
 import { formatMoney } from '../domain/money'
 import { isNegotiable, PRODUCTS, useRfq } from '../store'
+import { STATE_META } from '../domain/states'
 import type { Product } from '../domain/types'
-import { CartMark, EyeMark, InfoTip, TagMark } from './ui'
+import { CartMark, InfoTip, TagMark } from './ui'
 import { ProductDetails } from './ProductDetails'
 import { RequestFlow } from './RequestFlow'
 
@@ -96,16 +97,47 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
             />
           ) : null
 
+          /*
+            The after state is a status, not a link.
+            It used to be an outline button reading "View my request · REF", which is an
+            action where the buyer wanted a fact: they had already pressed the button, and
+            what the card owed them next was confirmation that the ask landed. So the
+            control now leads with a tag — and the tag tells the truth about whose turn it
+            is, because a card still saying "requested" while the supplier waits on an
+            answer would be the one lie this surface is able to tell.
+
+            It stays one clickable control rather than a tag plus a separate link: the way
+            back to the request is the only thing a buyer wants from this card once the ask
+            is in, and two controls for one intention is a card that got busier for nothing.
+          */
+          const existingLine = existing?.lines.find((l) => l.sku === p.sku) ?? null
+          const needsBuyer = existing ? STATE_META[existing.state].turn === 'buyer' : false
+          const stateTag = needsBuyer ? 'cardNeedsYou'
+            : existingLine?.route === 'case_2' ? 'cardQuoteRequested' : 'cardMatchRequested'
+          /*
+            Beside the price is a placement for the *before* state and only that: its whole
+            point is to set the action against the number it challenges. Once the ask is in
+            there is nothing left to challenge, and the tag is wider than the button it
+            replaces — enough to wrap out of the row and land between the two price bands,
+            splitting the ladder. So the after state drops below the ladder there, which is
+            where a status belongs anyway.
+          */
+          const stateBelowLadder = underPrice || (besidePrice && existing !== undefined)
+
           const requestCta = eligible ? (
             existing ? (
               <button
                 type="button"
-                className={`hb-btn hb-btn--outline${besidePrice ? ' hb-btn--sm' : ' hb-btn--block'}`}
+                className="hb-prod-state"
                 onClick={onGoToRequests}
+                title={`${t(lang, 'viewMyRequest')} · ${existing.ref}`}
               >
-                {besidePrice ? <><EyeMark />{t(lang, 'viewShort')}</>
-                  : compact ? <><EyeMark />{t(lang, 'viewRequestShort')}</>
-                    : <>{t(lang, 'viewMyRequest')} · {existing.ref}</>}
+                <span className={`hb-prod-state-tag hb-prod-state-tag--${needsBuyer ? 'action' : 'ok'}`}>
+                  <TagMark />{t(lang, stateTag)}
+                </span>
+                {/* The reference identifies which request; where the layout has no room
+                    for it, the button's title still carries it. */}
+                {!compact && <span className="hb-prod-state-ref">{existing.ref}</span>}
               </button>
             ) : (
               <button
@@ -153,7 +185,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                       <small>BHD</small>{formatMoney(p.listPrice)}
                     </span>
                   </div>
-                  {besidePrice && requestCta}
+                  {besidePrice && !existing && requestCta}
                 </div>
 
                 {/* AC-1.4 — the tier ladder is visible before the request flow opens. */}
@@ -172,7 +204,7 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   ladder stays whole and the CTA lands in the same place on every card
                   whether or not the product has tiers (AC-1.4).
                 */}
-                {underPrice && <div className="hb-cta-with-tip">{requestCta}{tip}</div>}
+                {stateBelowLadder && <div className="hb-cta-with-tip">{requestCta}{tip}</div>}
 
                 <div className="hb-prod-supplier">
                   {t(lang, 'supplier')}: <b>{state.requests[0]?.sellerName ?? ''}</b>
@@ -205,10 +237,11 @@ export function BuyerMarketplace({ onGoToRequests }: { onGoToRequests: () => voi
                   </div>
 
                   {/*
-                    Where the label is short the reference cannot ride on it, and dropping
-                    it would lose the one thing that says which request is already open.
+                    Where the tag has no room for the reference beside it, it goes on its
+                    own line — losing it would cost the one thing that says which request
+                    this card is pointing at.
                   */}
-                  {shortLabels && existing && eligible && (
+                  {compact && existing && eligible && (
                     <div className="hb-hint hb-prod-ctaref">{existing.ref}</div>
                   )}
                 </div>

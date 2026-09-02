@@ -34,17 +34,6 @@ export function TagMark({ size = 15 }: { size?: number }) {
   )
 }
 
-export function EyeMark({ size = 15 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
-      <path
-        d="M1 8s2.6-4.3 7-4.3S15 8 15 8s-2.6 4.3-7 4.3S1 8 1 8Z"
-        stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"
-      />
-      <circle cx="8" cy="8" r="1.9" stroke="currentColor" strokeWidth="1.4" />
-    </svg>
-  )
-}
 
 export function CartMark({ size = 15 }: { size?: number }) {
   return (

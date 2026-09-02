@@ -45,6 +45,27 @@ check('pm.tooltip-dismissible', await p.locator('.hb-prod .hb-tip-panel').count(
 check('pm.no-tooltip-once-requested',
   await p.locator('.hb-prod', { hasText: 'Almarai' }).locator('.hb-tip-btn').count() === 0,
   'the card with a live request carries no incentive icon')
+// The after state is a status, and it says whose turn it is rather than only that an
+// ask was made. Almarai is with the supplier; Sunflower has been answered.
+const withSupplier = await txt('.hb-prod:has-text("Almarai") .hb-prod-state')
+const answered = await txt('.hb-prod:has-text("Sunflower") .hb-prod-state')
+check('pm.after-state-is-a-status', /Match requested/i.test(withSupplier)
+  && /SPR-\d{4}-\d{4}/.test(withSupplier), withSupplier)
+check('pm.after-state-turns-to-the-buyer', /Your answer needed/i.test(answered), answered)
+// Route-aware: a quote request is not a match request.
+check('pm.after-state-names-the-route',
+  /Quote requested/i.test(await txt('.hb-prod:has-text("Bottled Water") .hb-prod-state')),
+  await txt('.hb-prod:has-text("Bottled Water") .hb-prod-state'))
+// The price ladder stays whole in the layout that puts the action beside the price.
+await p.getByRole('button', { name: 'beside the price', exact: true }).click(); await p.waitForTimeout(300)
+check('pm.after-state-keeps-the-ladder-whole',
+  await p.locator('.hb-prod', { hasText: 'Almarai' }).evaluate((c) => {
+    const bands = [...c.querySelectorAll('.hb-priceband')]
+    const tag = c.querySelector('.hb-prod-state')
+    return bands.length >= 2 && !!tag
+      && tag.getBoundingClientRect().top > bands[1].getBoundingClientRect().top
+  }), 'the status sits below the ladder, not inside it')
+await p.getByRole('button', { name: 'full label', exact: true }).click(); await p.waitForTimeout(300)
 await cta.click(); await p.waitForTimeout(300)
 check('2.quantity-field', await p.locator('.hb-modal-body .hb-field', { hasText: /Quantity/ }).count() === 1,
   (await p.locator('.hb-modal-body .hb-label').allInnerTexts()).join(' / '))

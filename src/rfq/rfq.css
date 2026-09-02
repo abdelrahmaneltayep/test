@@ -624,3 +624,45 @@ body {
   font-size: 12.5px;
   line-height: 1.55;
 }
+
+/*
+ * The card's after state — a status the buyer can press, not a link.
+ *
+ * It reads as a chip rather than a button on purpose: the primary weight on this card
+ * belongs to Add to Cart, and once a request is in, the negotiation is a fact to notice
+ * rather than an action to take. Pressing it still goes to the request.
+ */
+.hb-prod-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--hb-line);
+  border-radius: var(--hb-r-sm);
+  background: var(--hb-field);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: start;
+}
+.hb-prod-state:hover { border-color: var(--hb-blue); background: var(--hb-blue-wash); }
+.hb-prod-state:focus-visible { outline: 2px solid var(--hb-blue); outline-offset: 2px; }
+
+.hb-prod-state-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+/* FR-11.5 — the two states differ in words first; the colour only seconds it. */
+.hb-prod-state-tag--ok { color: var(--hb-blue-deep); }
+.hb-prod-state-tag--action { color: var(--hb-warn); }
+
+.hb-prod-state-ref {
+  margin-inline-start: auto;
+  color: var(--hb-ink-3);
+  font-size: 11.5px;
+  white-space: nowrap;
+}

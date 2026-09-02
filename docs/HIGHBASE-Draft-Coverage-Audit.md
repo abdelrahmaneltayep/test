@@ -240,12 +240,13 @@ npx vite preview --port 4173 &
 node scripts/audit-draft-cases.mjs
 ```
 
-Seventy checks, exit non-zero on any failure. Current run: all pass. What each covers:
+Seventy-four checks, exit non-zero on any failure. Current run: all pass. What each covers:
 
 | Case | Checked |
 | --- | --- |
 | §2 | The entry point is on the card, the form asks for quantity, and no request holds more than one item |
-| The card note | The card's action is "Matching my price" with an info icon beside it; the icon opens the incentive copy, closes on Escape, and is absent once a request is already open; the form offers a photo *and* a file as two named controls, and restates the 5–10% with who settles it |
+| The card note | The card's action is "Match my price" with an info icon beside it; the icon opens the incentive copy, closes on Escape, and is absent once a request is already open; the form offers a photo *and* a file as two named controls, and discloses the 5–10% at its foot with who settles it |
+| The card's after state | It reads as a status and not a link: "Match requested" with the reference, "Quote requested" on the quote route, and "Your answer needed" once the supplier has come back; and in the beside-the-price layout it sits below the ladder rather than splitting it |
 | §3 | A priced ask cannot be sent without its document; the buyer sees the picker before the upload and the file after it, and nothing else; extraction and its checks run on submission and land on the seller's page; the request sends and returns a reference |
 | §4 | Both routes are offered together as tabs on one item; the RFQ route has no price field and does have frequency |
 | §5 | Counter and Decline on a quote row; the detail opens as a page carrying the buyer's submission read back; the quote route keeps Decline · Counter · Accept, and Counter stays dead until a price is typed |
@@ -316,6 +317,35 @@ A later note from the PM scoped a change to the product card, and it landed as w
   it by hand**, which is what the business flow actually does. Nothing computes or issues a
   discount: the note puts that outside the feature, and a prototype implying an automatic
   coupon would be designing something nobody is building.
+
+### The after state — a status, not a link
+
+The card's after state had been an outline button reading "View my request · SPR-…". That
+is an action offered where the buyer wanted a fact: they had already pressed the button,
+and what the card owed them next was confirmation that the ask landed.
+
+It is now one control that leads with a tag, and the tag reads the request rather than a
+flag on it:
+
+- **Match requested** — the ask is with the supplier, on the match route
+- **Quote requested** — the same, on the quote route; the two are different promises and
+  the card knows which was made
+- **Your answer needed**, in amber — the supplier has come back and the ball is the
+  buyer's. A card still saying "requested" while the supplier waits on an answer is the
+  one lie this surface is able to tell
+
+It stays a single clickable control rather than a tag plus a separate link: the way back to
+the request is the only thing a buyer wants from this card once the ask is in, and two
+controls for one intention is a card that got busier for nothing.
+
+**The beside-the-price layout drops it below the ladder.** That placement exists to set the
+action *against* the number it challenges; once the ask is in there is nothing to challenge,
+and the tag is wide enough to wrap out of the price row and land between the two price bands
+— splitting the ladder the row exists to keep whole. The audit asserts the ladder stays
+whole there.
+
+A before/after board across all four CTA placements is at
+`docs/match-my-price-before-after.png`.
 
 ### What the voice note corrected
 

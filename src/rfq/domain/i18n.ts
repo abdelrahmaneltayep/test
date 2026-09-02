@@ -99,12 +99,19 @@ export const STRINGS: Dict = {
   // The compact card CTA — the short label that sits beside the icon when the action row
   // is horizontal and has to share its width with Add to Cart.
   requestShort: { en: 'Match', ar: 'مطابقة' },
-  viewRequestShort: { en: 'View request', ar: 'عرض الطلب' },
   // Beside the price the band already takes most of the row, so the existing-request
   // label drops to one word; the reference under the card still says which request.
-  viewShort: { en: 'View', ar: 'عرض' },
   addToCartShort: { en: 'Add', ar: 'أضف' },
   viewMyRequest: { en: 'View my request', ar: 'عرض طلبي' },
+  /*
+   * The card's after state. It says what the buyer did and, where the supplier has come
+   * back, that the ball is theirs — a card still reading "requested" while the supplier
+   * waits on an answer is worse than no tag at all. Route-aware, because "match" and
+   * "quote" are different promises and the card knows which one was made.
+   */
+  cardMatchRequested: { en: 'Match requested', ar: 'تم طلب المطابقة' },
+  cardQuoteRequested: { en: 'Quote requested', ar: 'تم طلب التسعير' },
+  cardNeedsYou: { en: 'Your answer needed', ar: 'مطلوب ردك' },
   volumeTiers: { en: 'Volume pricing', ar: 'أسعار الكميات' },
   perUnit: { en: 'per unit', ar: 'للوحدة' },
   linkRequired: { en: 'You are not linked to this supplier yet — we will request the link first.', ar: 'لست مرتبطاً بهذا المورّد بعد — سنطلب الارتباط أولاً.' },
