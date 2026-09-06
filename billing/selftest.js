@@ -173,6 +173,36 @@
     check(17, 'Invariant 3 — no run releases more than the cash held', breaches.length, 0,
       HB.SELLERS.length * 4 + ' seller/mode combinations checked')
 
+    /*
+     * Separation of duties (§6 screen 15). Not one of the eighteen, but the same kind of
+     * rule and checked the same way: over every adjustment in every mode, an approval by
+     * the issuer must be impossible. Ops issues; Finance approves; nobody does both.
+     */
+    const dutyBreaches = []
+    for (const filing of HB.FILINGS) {
+      for (const risk of HB.RISK_MODES) {
+        for (const adj of HB.adjustments({ filing, risk })) {
+          for (const who of HB.ADMIN_ROLES) {
+            const v = HB.canApprove(adj, who)
+            if (v.allowed && who === adj.issuedBy) dutyBreaches.push(adj.id + ' approved by its issuer ' + who)
+            if (v.allowed && who !== 'finance') dutyBreaches.push(adj.id + ' approved by ' + who)
+          }
+        }
+      }
+    }
+    check(17.2, 'Separation of duties — the issuer can never approve', dutyBreaches.length, 0,
+      HB.adjustments().length + ' adjustment(s) × ' + (HB.FILINGS.length * HB.RISK_MODES.length) + ' modes × ' + HB.ADMIN_ROLES.length + ' roles')
+
+    /*
+     * The RET-1007 error decomposes into two legs, and the leverage between them is not a
+     * coincidence — it is 1/rate. Pinning it means the claim on the control screen stays
+     * true if the rate card ever changes.
+     */
+    const anat = HB.errorAnatomy('1042', 'RET-1007')
+    check(17.3, 'The cash leg outweighs the commission leg by exactly 1/rate',
+      anat.leverage.toFixed(4), anat.impliedByRate.toFixed(4),
+      'cash ' + HB.money(anat.cashDelta, { signed: true }) + ' · commission ' + HB.money(anat.commissionDelta, { signed: true }) + ' · total ' + HB.money(anat.total, { signed: true }))
+
     // ── 18 — three decimals, always ────────────────────────────────────────
     const shapes = [0, 1, 999, 1000, -1000, 45500, 1190000, -4500, 81000, 227500, 5300000]
     const badFormat = shapes.map((f) => HB.money(f)).filter((s) => !/^−?[\d,]+\.\d{3}$/.test(s))

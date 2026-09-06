@@ -182,11 +182,13 @@
     O({ id: 'ORD-1007', sellerId: '1042', buyerId: 'B-201', date: '2026-01-15', grossValue: bhd(400), paymentRoute: 'highbase', deliveryConfirmedAt: '2026-01-16' }),
     O({ id: 'RET-1007', sellerId: '1042', buyerId: 'B-201', date: '2026-01-17', grossValue: bhd(-150), paymentRoute: 'highbase',
       kind: 'return', reverses: 'ORD-1007', deliveryConfirmedAt: '2026-01-17',
+      // Example data: the evidence a real adjustment would carry. Nothing computes from it.
+      evidence: 'RET-1007-goods-received-note.pdf',
       note: 'Partial return against ORD-1007. Reverses value and commission together.' }),
 
     // ── #1067 — funded discount and the payout cap ──
     O({ id: 'ORD-2001', sellerId: '1067', buyerId: 'B-201', date: '2026-01-12', grossValue: bhd(90), paymentRoute: 'highbase', deliveryConfirmedAt: '2026-01-13',
-      discount: { amount: bhd(9), funder: 'highbase', reason: '10% price match, funded by Highbase' } }),
+      discount: { amount: bhd(9), funder: 'highbase', reason: '10% price match, funded by Highbase', evidence: 'PM-2001-competitor-quote.pdf' } }),
     O({ id: 'ORD-2002', sellerId: '1067', buyerId: 'B-202', date: '2026-01-14', grossValue: bhd(200), paymentRoute: 'seller', deliveryConfirmedAt: '2026-01-15' }),
 
     // ── #1088 — credit orders, the fourth state ──
@@ -589,6 +591,110 @@
     return { applicable: true, rows, total: sum(rows.map((r) => r.outstanding)) }
   }
 
+  // ── Ops and Finance ──────────────────────────────────────────────────────
+  /*
+   * Highbase admin is two roles, not one. Ops issues and corrects — rate cards,
+   * adjustments, price-match credits. Finance approves and pays — the reconciliation
+   * control, settlement runs, arrears invoicing. The separation is the control: the same
+   * person cannot both write a credit and release the money for it.
+   */
+  const ADMIN_ROLES = ['ops', 'finance']
+
+  /**
+   * The adjustments queue, derived from the ledger rather than kept as a second list.
+   *
+   * Every adjustment already exists as an event on an order — a return, a funded discount.
+   * Seeding a separate queue would create a second source of truth that could disagree
+   * with the postings, which is the exact failure the reconciliation control exists to
+   * catch. So the queue is a view.
+   *
+   * Break-even: a credit routes for approval when the discount rate exceeds the commission
+   * rate, because past that point Highbase is paying more to win the order than the order
+   * pays Highbase. Below it the credit posts silently; above it somebody signs.
+   */
+  function adjustments(o_) {
+    const k = opt(o_)
+    const rows = []
+    for (const ord of ORDERS) {
+      const s = seller(ord.sellerId)
+      const card = rateCard(s.rateCardId)
+      const commission = commissionOn(ord, card)
+
+      if (ord.kind === 'return') {
+        rows.push({
+          id: ord.id, type: 'return', orderId: ord.reverses, sellerId: ord.sellerId,
+          amount: ord.grossValue, funder: null, reason: ord.note, evidence: ord.evidence || null,
+          date: ord.date, issuedBy: 'ops',
+          // A return reverses what was already agreed; there is nothing to approve.
+          requiresApproval: false,
+          state: k.filing === 'as_filed' ? 'flagged' : 'posted',
+          flag: k.filing === 'as_filed' ? 'Sign error — commission charged instead of credited' : null,
+        })
+      }
+
+      if (ord.discount && ord.discount.amount > 0 && ord.discount.funder === 'highbase') {
+        const discountRate = ord.grossValue ? ord.discount.amount / ord.grossValue : 0
+        const overBreakEven = discountRate > card.rate
+        rows.push({
+          id: 'ADJ-' + ord.id, type: 'price_match_credit', orderId: ord.id, sellerId: ord.sellerId,
+          amount: ord.discount.amount, funder: ord.discount.funder,
+          reason: ord.discount.reason, evidence: ord.discount.evidence || null,
+          date: ord.date, issuedBy: 'ops',
+          discountRate, commissionRate: card.rate, overBreakEven,
+          requiresApproval: overBreakEven,
+          state: overBreakEven ? 'awaiting_approval' : 'posted',
+          net: commission - ord.discount.amount,
+        })
+      }
+    }
+    return rows
+  }
+
+  /**
+   * Separation of duties, as a function rather than as a note in a spec.
+   *
+   * Finance approves; Ops issues. The issuer can never be the approver, which is why the
+   * check compares roles rather than just asking whether the actor is Finance — if Ops
+   * ever gains an approval path, this still refuses their own adjustment.
+   */
+  function canApprove(adj, actor) {
+    if (!adj.requiresApproval) return { allowed: false, reason: 'Nothing to approve — this posts without a signature.' }
+    if (actor !== 'finance') return { allowed: false, reason: 'Only Finance approves. Ops issues and corrects.' }
+    if (actor === adj.issuedBy) return { allowed: false, reason: 'The issuer cannot approve their own adjustment.' }
+    return { allowed: true, reason: null }
+  }
+
+  /**
+   * What the mis-filed return actually did, leg by leg.
+   *
+   * The reconciliation control sees only the commission leg — 9.000 — while the balance
+   * moves by 291.000. That gap is not a flaw in the control; it is the shape of this class
+   * of error, and a screen that shows only one of the two numbers teaches the reader the
+   * wrong lesson about what the control can and cannot catch.
+   */
+  function errorAnatomy(sellerId, orderId) {
+    const legs = (filing) => {
+      const ps = postingsFor(sellerId, { filing }).filter((p) => p.orderId === orderId)
+      return {
+        cash: sum(ps.filter((p) => p.leg === 'cash').map((p) => p.amount)),
+        commission: sum(ps.filter((p) => p.leg === 'accrual').map((p) => p.amount)),
+      }
+    }
+    const filed = legs('as_filed')
+    const right = legs('corrected')
+    const cashDelta = filed.cash - right.cash
+    const commissionDelta = filed.commission - right.commission
+    const card = rateCard(seller(sellerId).rateCardId)
+    return {
+      orderId, filed, corrected: right,
+      cashDelta, commissionDelta, total: cashDelta + commissionDelta,
+      /* The cash leg outweighs the commission leg by exactly 1/rate — which is why a
+         commission-only control catches the small half of every error of this shape. */
+      leverage: commissionDelta ? Math.abs(cashDelta / commissionDelta) : 0,
+      impliedByRate: card.rate ? 1 / card.rate : 0,
+    }
+  }
+
   // ── INVARIANT 2 — the buyer projection ───────────────────────────────────
   /**
    * The only shape a buyer surface is allowed to read.
@@ -615,6 +721,7 @@
     FILS, bhd, round3, money, pct, sum,
     POSTING, STATES, FILINGS, RISK_MODES, DEFAULTS,
     RATE_CARDS, SELLERS, BUYERS, ORDERS, PAYOUTS, ARREARS_CEILING, STANDING_RULES,
+    ADMIN_ROLES, adjustments, canApprove, errorAnatomy,
     seller, buyer, order, rateCard, ordersFor, ordersForBuyer,
     commissionBase, commissionOn, buyerPays, isCollected, commissionAccrues,
     postingsFor, balance, collectionMix, standing,

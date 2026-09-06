@@ -129,9 +129,18 @@
   /** A computation shown as a computation, not as a result. */
   function calc(rows, expr) {
     return el('div', { class: 'hb-calc' }, [
+      /*
+       * A movement is coloured and signed; a balance is neither. Showing "+518.500" in
+       * green for a stated balance reads as money arriving, when the number is the whole
+       * position — and on this screen it is the wrong position.
+       */
       ...rows.map((r) => el('div', { class: 'hb-calc-row' + (r.rule ? ' hb-calc-row--rule' : '') }, [
         el('span', {}, r.label),
-        money(r.value, { currency: true, tone: r.rule ? null : 'auto', signed: !r.rule && r.value > 0 }),
+        money(r.value, {
+          currency: true,
+          tone: r.rule || r.plain ? null : 'auto',
+          signed: !r.rule && !r.plain && r.value > 0,
+        }),
       ])),
       expr ? el('div', { class: 'hb-calc-expr' }, expr) : null,
     ])
