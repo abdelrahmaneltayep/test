@@ -137,6 +137,15 @@ body {
 .hb-seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(7,31,57,.12); }
 .hb-seg button[aria-pressed="true"][data-tone="bad"] { color: var(--red); }
 
+.hb-risk { display: inline-flex; align-items: center; gap: 8px; }
+.hb-risk .hb-seg button[aria-pressed="true"] { color: var(--blue); }
+.hb-riskbanner {
+  border: 1px solid #CBE1F5; background: var(--blue-bg); color: #123E6B;
+  border-radius: var(--r-btn); padding: 10px 14px; font-size: 12.5px;
+  display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;
+}
+.hb-riskbanner b { color: var(--navy); }
+
 .hb-toggle {
   display: inline-flex; align-items: center; gap: 7px;
   font-size: 12.5px; font-weight: 600; color: var(--ink-2);
@@ -146,7 +155,9 @@ body {
 .hb-toggle[aria-pressed="true"] { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
 
 /* ── Cards ──────────────────────────────────────────────────────────────── */
-.hb-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow); }
+/* min-width: 0 so a wide table inside a grid column shrinks and lets its own wrapper
+   scroll, instead of forcing the whole page sideways. */
+.hb-card { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow); }
 .hb-card-head {
   padding: 16px 18px; border-bottom: 1px solid var(--line-soft);
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
@@ -157,10 +168,12 @@ body {
 .hb-card-foot { padding: 14px 18px; border-top: 1px solid var(--line-soft); background: #FBFCFE; border-radius: 0 0 var(--r-card) var(--r-card); }
 .hb-sub { color: var(--ink-2); font-size: 12.5px; margin: 4px 0 0; }
 .hb-h3 { margin: 0 0 10px; font-size: 13px; font-weight: 700; }
-.hb-stack { display: grid; gap: 18px; }
+.hb-stack { display: grid; gap: 18px; min-width: 0; }
 
 /* ── The three balance states ───────────────────────────────────────────── */
-.hb-states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+/* Four states, one row. They are one answer to one question — "where is the money?" —
+   so they are read across, not stacked into four separate claims. */
+.hb-states { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .hb-state {
   border: 1px solid var(--line); border-radius: var(--r-card);
   background: var(--surface); padding: 16px 18px; position: relative; overflow: hidden;
@@ -168,17 +181,52 @@ body {
 .hb-state::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; }
 .hb-state--payable::before { background: var(--green); }
 .hb-state--held::before { background: var(--orange); }
-.hb-state--owed::before { background: var(--red); }
+.hb-state--dues::before { background: var(--red); }
+.hb-state--awaiting::before { background: var(--blue); }
 .hb-state--payable { background: var(--green-bg); border-color: #CBEBD5; }
 .hb-state--held { background: var(--amber-bg); border-color: #F6E1BF; }
-.hb-state--owed { background: var(--red-bg); border-color: #F3D3DC; }
-.hb-state-label { font-size: 12px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+.hb-state--dues { background: var(--red-bg); border-color: #F3D3DC; }
+.hb-state--awaiting { background: var(--blue-bg); border-color: #CBE1F5; }
+/* Not uppercased. "Your Balance" and "Your Dues" are the team's own words from the
+   statement margin, and a text-transform is a quiet way of not using the string you were
+   given — it changes how the label reads and how a screen reader says it. Column headers
+   below are our own labels and keep the convention; these are proper names. */
+.hb-state-label { font-size: 12.5px; font-weight: 700; letter-spacing: 0; }
 .hb-state--payable .hb-state-label { color: var(--green); }
 .hb-state--held .hb-state-label { color: var(--orange-t); }
-.hb-state--owed .hb-state-label { color: var(--red); }
-.hb-state-value { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin: 4px 0 2px; }
-.hb-state-note { font-size: 12.5px; color: var(--ink-2); }
+.hb-state--dues .hb-state-label { color: var(--red); }
+.hb-state--awaiting .hb-state-label { color: var(--blue); }
+.hb-state-value { font-size: 26px; font-weight: 700; letter-spacing: -.02em; margin: 4px 0 2px; }
+.hb-state-note { font-size: 12px; color: var(--ink-2); }
+.hb-state-sub { font-size: 12px; font-weight: 600; color: var(--ink-2); margin-bottom: 4px; }
+/* A state at zero is still an answer, so it stays on screen — greyed, not removed. A
+   state that vanishes when empty teaches the reader it only exists when it is a problem. */
+.hb-state-zero { background: var(--surface); border-color: var(--line); }
+.hb-state-zero::before { background: var(--line); }
 .hb-state-zero .hb-state-value { color: var(--ink-3); }
+.hb-state-zero .hb-state-label { color: var(--ink-3); }
+
+/* ── Standing ───────────────────────────────────────────────────────────── */
+.hb-standing {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: var(--r-pill); padding: 4px 10px 4px 8px;
+  font-size: 12.5px; font-weight: 700;
+}
+.hb-standing-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+.hb-standing--good { background: var(--green-bg); color: var(--green); }
+.hb-standing--watch { background: var(--amber-bg); color: var(--orange-t); }
+.hb-standing--late { background: #FFEEDC; color: #8A4A02; }
+.hb-standing--suspended { background: var(--red-bg); color: var(--red); }
+
+.hb-ratio { display: grid; gap: 4px; }
+.hb-ratio-head { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.hb-ratio-head b { font-variant-numeric: tabular-nums; }
+.hb-ratio-head .hb-ratio-name { color: var(--ink-2); }
+.hb-ratio-bar { height: 8px; border-radius: 4px; background: var(--line-soft); overflow: hidden; position: relative; }
+.hb-ratio-fill { height: 100%; border-radius: 4px; background: var(--green); }
+.hb-ratio--trip .hb-ratio-fill { background: var(--red); }
+.hb-ratio-mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--ink); opacity: .55; }
+.hb-ratio-foot { font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 12px; }
 
 /* ── Pills and chips ────────────────────────────────────────────────────── */
 .hb-pill {
@@ -225,6 +273,9 @@ body {
    table loses the sidebar and the header with it. */
 .hb-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .hb-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 720px; }
+/* A four-column summary does not need the full ledger's minimum. Inheriting it pushed the
+   amount — the only column anyone reads — out of view inside a narrow card. */
+.hb-table--compact { min-width: 380px; }
 .hb-table th {
   text-align: left; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase;
   color: var(--ink-2); font-weight: 700; padding: 10px 12px;
@@ -268,10 +319,12 @@ body {
 }
 .hb-calc-row { display: flex; justify-content: space-between; gap: 20px; padding: 3px 0; }
 .hb-calc-row--rule { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 9px; font-weight: 700; }
+/* Wraps rather than scrolls. This line is the proof the screen exists to show, and a
+   formula clipped mid-number reads as a rendering fault rather than as arithmetic. */
 .hb-calc-expr {
-  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12.5px; line-height: 1.7;
   color: var(--ink-2); background: var(--line-soft); border-radius: 6px;
-  padding: 8px 10px; margin-top: 10px; overflow-x: auto; white-space: nowrap;
+  padding: 10px 12px; margin-top: 10px; white-space: pre-wrap; overflow-wrap: anywhere;
 }
 
 /* ── Drawer ─────────────────────────────────────────────────────────────── */
@@ -357,6 +410,10 @@ body:not(.hb-notes-on) .hb-note { display: none; }
 .hb-pick-card h2 { margin: 10px 0 4px; font-size: 16px; }
 .hb-pick-card p { color: var(--ink-2); font-size: 13px; margin: 0; }
 .hb-pick-mark { font-size: 24px; }
+
+@media (max-width: 1180px) {
+  .hb-states { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 
 @media (max-width: 1000px) {
   .hb-app { grid-template-columns: 1fr; }
