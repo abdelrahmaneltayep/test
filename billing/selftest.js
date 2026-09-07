@@ -202,6 +202,23 @@
       anat.leverage.toFixed(4), anat.impliedByRate.toFixed(4),
       'cash ' + HB.money(anat.cashDelta, { signed: true }) + ' · commission ' + HB.money(anat.commissionDelta, { signed: true }) + ' · total ' + HB.money(anat.total, { signed: true }))
 
+    /*
+     * Invoicing. The threshold is measured on the taxable amount, before VAT — and
+     * ORD-1006 is the case that proves it rather than merely illustrating it: priced at
+     * exactly 500.000, it lands at 550.000 with VAT, so the two readings put it on
+     * opposite sides. Pinned here because a boundary this close is one someone will
+     * "correct" back on a fast read.
+     */
+    const inv1006 = HB.invoices('B-203').find((i) => i.orderId === 'ORD-1006')
+    check(19.1, 'The simplified threshold is measured on the taxable amount', inv1006.simplifiedPermitted, true,
+      'taxable ' + M(inv1006.taxableAmount) + ' at the limit · total ' + M(inv1006.totalPayable) + ' over it')
+    const inv4002 = HB.invoices('B-203').find((i) => i.orderId === 'ORD-4002')
+    check(19.2, 'Above the threshold the full invoice is mandatory', inv4002.simplifiedPermitted, false,
+      'taxable ' + M(inv4002.taxableAmount))
+    check(19.3, 'VAT is charged at 10% of the taxable amount',
+      M(inv4002.vatAmount), M(HB.round3(inv4002.taxableAmount * 0.10)),
+      M(inv4002.taxableAmount) + ' + ' + M(inv4002.vatAmount) + ' = ' + M(inv4002.totalPayable))
+
     // ── 18 — three decimals, always ────────────────────────────────────────
     const shapes = [0, 1, 999, 1000, -1000, 45500, 1190000, -4500, 81000, 227500, 5300000]
     const badFormat = shapes.map((f) => HB.money(f)).filter((s) => !/^−?[\d,]+\.\d{3}$/.test(s))

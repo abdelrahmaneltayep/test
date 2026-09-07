@@ -237,10 +237,16 @@
         el('div', { class: 'hb-stack' }, [
           U.card({
             title: 'Simplified invoice',
-            body: U.banner(inv.simplifiedPermitted ? 'info' : 'warn', null,
-              S.fill(inv.simplifiedPermitted ? S.invoices.simplified : S.invoices.notSimplified, {
-                max: U.moneyText(HB.SIMPLIFIED_INVOICE_MAX, { currency: true }),
-              })),
+            body: [
+              U.banner(inv.simplifiedPermitted ? 'info' : 'warn', null,
+                S.fill(inv.simplifiedPermitted ? S.invoices.simplified : S.invoices.notSimplified, {
+                  taxable: U.moneyText(inv.taxableAmount, { currency: true }),
+                  max: U.moneyText(HB.SIMPLIFIED_INVOICE_MAX, { currency: true }),
+                })),
+              /* Said plainly, because this invoice is the case where it matters: 500.000
+                 taxable and 550.000 payable land on opposite sides of the threshold. */
+              el('p', { class: 'hb-sub', style: { marginTop: '10px' } }, S.invoices.simplifiedBasis),
+            ],
           }),
           U.card({
             title: S.lifecycle.title,

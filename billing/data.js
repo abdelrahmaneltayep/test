@@ -621,7 +621,14 @@
    */
   const TODAY = '2026-01-24'
   const VAT_RATE = 0.10
-  /** FR — a simplified tax invoice is permitted at or under this total. */
+  /**
+   * A simplified tax invoice is permitted at or under this **taxable amount** — the
+   * consideration before VAT, not the total the buyer pays.
+   *
+   * The distinction is not academic on this book: ORD-1006 is priced at exactly 500.000
+   * and reaches 550.000 with VAT. Measured on the total it needs the full eleven fields;
+   * measured on the taxable amount it does not, and the taxable amount is the rule.
+   */
   const SIMPLIFIED_INVOICE_MAX = bhd(500)
   const DUE_SOON_DAYS = 7
 
@@ -691,8 +698,8 @@
         paymentRoute: o.paymentRoute, terms: o.terms,
         status, subStatus,
         daysToDue: daysBetween(today, dueDate),
-        /** A simplified invoice is permitted at or under BHD 500. */
-        simplifiedPermitted: total <= SIMPLIFIED_INVOICE_MAX,
+        /** Measured on the taxable amount. See SIMPLIFIED_INVOICE_MAX. */
+        simplifiedPermitted: taxable <= SIMPLIFIED_INVOICE_MAX,
       }
     })
   }

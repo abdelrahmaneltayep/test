@@ -96,8 +96,5 @@ Buyer names, addresses and VAT numbers are fictional throughout.
 
 - **`partially_paid`** is implemented but has no example. A partial payment against the one
   credit order would collect cash and move #1088's `awaiting`, breaking acceptance test 10.
-- **The BHD 500 simplified-invoice threshold** is applied to the total including VAT.
-  ORD-1006 is priced at exactly 500.000 and lands at 550.000 with VAT, so it needs the full
-  eleven fields. If the rule is meant to apply to the taxable amount instead, that flips.
 - **Which rate card is contractual** is unresolved on purpose. The ledger applies flat 3%;
   Subscription Settings advertises 10%-then-0%. The prototype shows both and picks neither.
