@@ -12,7 +12,29 @@
   'use strict'
 
   const el = U.el
-  const BUYER_ID = 'B-203'
+
+  /* Which buyer's account this is, like the seller surface's switcher. */
+  function buyerId() {
+    const q = new URLSearchParams(location.search).get('buyer')
+    return HB.BUYERS.some((b) => b.id === q) ? q : 'B-203'
+  }
+  const BUYER_ID = buyerId()
+
+  function buyerSwitch() {
+    return el('div', { class: 'hb-risk' }, [
+      el('span', { class: 'hb-filter-label' }, S.personas.buyer),
+      el('select', {
+        class: 'hb-input hb-input--date', 'aria-label': S.personas.buyer,
+        onchange: (e) => {
+          const url = new URL(location.href)
+          if (e.target.value === 'B-203') url.searchParams.delete('buyer')
+          else url.searchParams.set('buyer', e.target.value)
+          location.href = url.toString()
+        },
+      }, HB.BUYERS.map((b) => el('option', { value: b.id, selected: b.id === BUYER_ID || null },
+        b.name + (b.exampleData ? ' · example' : '')))),
+    ])
+  }
 
   const NAV = [
     { label: 'Orders', items: [
@@ -34,6 +56,7 @@
   // The reference date belongs beside the other modes: this surface is almost entirely
   // statements about now.
   document.querySelector('.hb-top-right').prepend(U.todayControl())
+  document.querySelector('.hb-top-right').prepend(buyerSwitch())
 
   const openOrder = (id) => U.lifecycle(id, { role: 'buyer' })
   const invoiceOf = (number) => HB.invoices(BUYER_ID, U.modes()).find((i) => i.number === number)
@@ -166,6 +189,12 @@
               { label: S.invoices.colIssued, cell: (i) => i.issueDate },
               { label: S.invoices.colDue, cell: (i) => i.dueDate },
               { label: S.invoices.colTotal, num: true, cell: (i) => U.money(i.totalPayable, { currency: true }) },
+              /* Outstanding is its own column rather than a footnote on the total: on a
+                 part-paid invoice the total is no longer the number anyone acts on. */
+              { label: S.invoices.colOutstanding, num: true, cell: (i) =>
+                i.amountPaid > 0 || i.status === 'open'
+                  ? U.money(i.amountOutstanding, { currency: true, tone: i.amountOutstanding > 0 ? 'neg' : null })
+                  : el('span', { class: 'muted' }, '—') },
               { label: S.invoices.colStatus, cell: (i) => statusPill(i) },
             ],
             rows,
@@ -219,15 +248,20 @@
                 .concat(inv.discount > 0 ? [{ label: S.invoices.discountLine, value: -inv.discount }] : [])
                 .concat(inv.creditNote > 0 ? [{ label: S.invoices.creditNote, value: -inv.creditNote }] : []),
             }),
-            el('div', { style: { marginTop: '14px' } }, U.calc([
-              { label: S.invoices.taxable, value: inv.taxableAmount, plain: true },
-              { label: S.fill(S.invoices.vatAmount, { rate }), value: inv.vatAmount, plain: true },
-              { label: S.invoices.total, value: inv.totalPayable, rule: true },
-            ])),
+            el('div', { style: { marginTop: '14px' } }, U.calc(
+              [
+                { label: S.invoices.taxable, value: inv.taxableAmount, plain: true },
+                { label: S.fill(S.invoices.vatAmount, { rate }), value: inv.vatAmount, plain: true },
+                { label: S.invoices.total, value: inv.totalPayable, rule: true },
+              ].concat(inv.amountPaid > 0 ? [
+                { label: S.invoices.paid, value: -inv.amountPaid },
+                { label: S.invoices.outstanding, value: inv.amountOutstanding, rule: true },
+              ] : []))),
           ],
           foot: el('div', { style: { display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' } }, [
             inv.status === 'open'
-              ? el('button', { class: 'hb-btn hb-btn--primary' }, S.invoices.payNow)
+              ? el('button', { class: 'hb-btn hb-btn--primary' },
+                inv.amountPaid > 0 ? S.fill(S.invoices.payBalance, { amount: U.moneyText(inv.amountOutstanding, { currency: true }) }) : S.invoices.payNow)
               : el('span', { class: 'hb-sub', style: { margin: 0 } },
                 inv.paymentRoute === 'seller' ? S.invoices.directNote : S.invoices.paidNote),
             inv.status === 'open' ? el('span', { class: 'hb-sub', style: { margin: 0 } }, S.invoices.payNote) : null,
@@ -308,7 +342,7 @@
               { label: S.statement.colDue, cell: (i) => i.dueDate },
               { label: S.statement.colAge, cell: (i) => age(i) },
               { label: S.invoices.colStatus, cell: (i) => statusPill(i) },
-              { label: S.statement.colAmount, num: true, cell: (i) => U.money(i.totalPayable, { currency: true }) },
+              { label: S.statement.colAmount, num: true, cell: (i) => U.money(i.amountOutstanding, { currency: true }) },
             ],
             rows: st.open,
             rowKey: (i) => i.number,
@@ -364,7 +398,9 @@
                 : el('ul', { class: 'hb-sub', style: { margin: 0, paddingInlineStart: '18px' } },
                   invs.map((i) => el('li', {}, [
                     el('a', { href: U.href('/invoices/' + i.number) }, i.number), ' · ',
-                    U.money(i.totalPayable, { currency: true }), ' · due ' + i.dueDate,
+                    U.money(i.amountOutstanding, { currency: true }),
+                    i.amountPaid > 0 ? ' outstanding of ' : ' · due ',
+                    i.amountPaid > 0 ? U.moneyText(i.totalPayable, { currency: true }) + ' · due ' + i.dueDate : i.dueDate,
                   ]))),
             ]),
           ],

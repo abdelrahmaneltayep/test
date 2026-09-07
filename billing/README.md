@@ -39,7 +39,7 @@ written down — so the seller's wallet and the admin's exposure report cannot d
 
     node -e "require('./billing/selftest.js').run()"
 
-36 assertions, all passing.
+47 assertions, all passing.
 
 One figure in the brief was wrong and has been corrected: **#1088's payable is 54.600, not
 56.400.** The brief's arithmetic netted the 3.600 of dues but omitted ORD-3003's own 1.800
@@ -60,12 +60,17 @@ its default, a strip across the top of every screen names it.
 | `actor` | `ops` · `finance` | Admin only. Ops issues and corrects; Finance approves and pays. |
 | `today` | any date | Buyer only. Every invoice sub-state and aging bucket is a statement about now. |
 
-Plus `?seller=` on the seller surface and `?state=loading|error` on any of them.
+Plus `?seller=` and `?buyer=` on their surfaces, and `?state=loading|error` on any of them.
 
 ## Things to look at
 
 - **Seller wallet** (`seller.html#/wallet`) — the four states. Switch to Muharraq Cold
-  Store for `Held`, or Sitra Industrial Tools for `Awaiting buyer`.
+  Store for `Held`, Sitra Industrial Tools for `Awaiting buyer`, or Seef Steel Fabricators
+  to see a part-collected credit order sitting in both `Your Balance` and `Awaiting buyer`
+  at once.
+- **A part-paid invoice** (`buyer.html?buyer=B-204#/invoices`) — 165.000 of 330.000 paid.
+  The same 165.000 shows as the buyer's outstanding balance, as half the commission
+  accrued on the seller's ledger, and as the remainder still awaiting.
 - **Reconciliation control** (`admin.html?filing=as_filed#/control`) — the proof screen.
   It names `RET-1007` and splits the error into its two legs.
 - **A refused run** (`admin.html#/runs/1067-jan`) — the book asks for 81.300, Highbase
@@ -79,12 +84,17 @@ Turn on **Design notes** in the sidebar to see what rule each screen implements.
 
 ## Example data
 
-Everything is derived from the seed in `data.js`. Two things in it are marked
-`exampleData` and exist only so a state can be reviewed:
+Everything is derived from the seed in `data.js`. Four things in it are marked
+`exampleData` and exist only so a state can be reviewed. Each carries exactly one state
+the brief's own four sellers could not reach:
 
 - **Seller #1121 Muharraq Cold Store** — one delivery-unconfirmed order, so `Held` has a
   value. Every seller in the brief has all deliveries confirmed, and marking one of theirs
   unconfirmed would have moved a payable the acceptance tests name.
+- **Seller #1134 Seef Steel Fabricators** and **buyer B-204 Seef Retail Group** — a credit
+  order half paid, so `partially_paid` has a value. A part-payment collects cash, which
+  moves the seller's payable and shrinks their awaiting; on #1088 that would have broken
+  acceptance test 10.
 - **Three price-match requests** in `submitted`, `accepted` and `declined`. Safe to seed
   because none implies a posting. `credit_issued` is never seeded — that state does imply
   one, and a second record of it would be the same duplication the reconciliation control
@@ -94,7 +104,5 @@ Buyer names, addresses and VAT numbers are fictional throughout.
 
 ## Known gaps
 
-- **`partially_paid`** is implemented but has no example. A partial payment against the one
-  credit order would collect cash and move #1088's `awaiting`, breaking acceptance test 10.
 - **Which rate card is contractual** is unresolved on purpose. The ledger applies flat 3%;
   Subscription Settings advertises 10%-then-0%. The prototype shows both and picks neither.

@@ -32,6 +32,8 @@
    */
   const FILS = 1000
   const bhd = (n) => Math.round(n * FILS)
+  /** Bahrain VAT. Declared here because the ledger needs it to split a receipt. */
+  const VAT_RATE = 0.10
 
   /**
    * Round half away from zero, to whole fils.
@@ -151,6 +153,16 @@
      * an existing order unconfirmed was not an option: it would move a payable the
      * acceptance tests name. So the state gets its own seller, and nothing specified moves.
      */
+    /*
+     * EXAMPLE DATA — added so `partially_paid` has an example.
+     *
+     * A partial payment collects cash, which moves the seller's payable and shrinks their
+     * awaiting. On #1088 that would have broken acceptance test 10, so the state gets a
+     * seller of its own. Each example seller demonstrates exactly one thing the brief's
+     * own four could not reach.
+     */
+    { id: '1134', name: 'Seef Steel Fabricators', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING, exampleData: true,
+      cycle: { id: '1134-jan', label: '8–22 Jan 2026', from: '2026-01-08', to: '2026-01-22' }, nextPayoutDate: '2026-01-23', address: 'Workshop 14, Seef Industrial Area, Manama 428, Kingdom of Bahrain', vatNumber: '220006789000002' },
     { id: '1121', name: 'Muharraq Cold Store', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING, exampleData: true,
       cycle: { id: '1121-jan', label: '8–20 Jan 2026', from: '2026-01-08', to: '2026-01-20' }, nextPayoutDate: '2026-01-21', address: 'Cold Store 6, Muharraq Port Road, Muharraq 201, Kingdom of Bahrain', vatNumber: '220005678900002' },
   ]
@@ -162,6 +174,9 @@
       address: 'Building 214, Road 1502, Awali 951, Kingdom of Bahrain' },
     { id: 'B-202', name: 'Budaiya Trading Est.', vatNumber: '220000556600002', creditLimit: bhd(250), policy: 'require_approval',
       address: 'Shop 7, Budaiya Highway, Budaiya 540, Kingdom of Bahrain' },
+    /* EXAMPLE DATA — the buyer who part-pays, and the one account on `warn_only`. */
+    { id: 'B-204', name: 'Seef Retail Group', vatNumber: '220000991100002', creditLimit: bhd(500), policy: 'warn_only',
+      address: 'Level 3, Seef Mall Avenue, Seef 428, Kingdom of Bahrain', exampleData: true },
     { id: 'B-203', name: 'Hidd Marine Services', vatNumber: '220000778800002', creditLimit: bhd(1000), policy: 'enforce_hold',
       address: 'Unit 3, Hidd Industrial Area, Hidd 115, Kingdom of Bahrain' },
   ]
@@ -211,6 +226,12 @@
     O({ id: 'ORD-3002', sellerId: '1088', buyerId: 'B-202', date: '2026-01-16', grossValue: bhd(120), paymentRoute: 'seller', deliveryConfirmedAt: '2026-01-17' }),
     O({ id: 'ORD-3003', sellerId: '1088', buyerId: 'B-201', date: '2026-01-18', grossValue: bhd(60), paymentRoute: 'highbase', deliveryConfirmedAt: '2026-01-19' }),
 
+    // ── #1134 — the partially-paid case. EXAMPLE DATA, see the seller note above. ──
+    O({ id: 'ORD-6001', sellerId: '1134', buyerId: 'B-204', date: '2026-01-13', grossValue: bhd(300), paymentRoute: 'highbase',
+      terms: 'credit', dueDate: '2026-02-18', deliveryConfirmedAt: '2026-01-19',
+      note: 'Credit terms, half paid. The paid half is payable; the rest is still awaiting the buyer.' }),
+    O({ id: 'ORD-6002', sellerId: '1134', buyerId: 'B-204', date: '2026-01-17', grossValue: bhd(100), paymentRoute: 'highbase', deliveryConfirmedAt: '2026-01-18' }),
+
     // ── #1121 — the held case. EXAMPLE DATA, see the seller note above. ──
     O({ id: 'ORD-5001', sellerId: '1121', buyerId: 'B-201', date: '2026-01-18', grossValue: bhd(200), paymentRoute: 'highbase',
       deliveryConfirmedAt: null, note: 'Collected by Highbase, delivery not yet confirmed — the cash is held.' }),
@@ -225,6 +246,19 @@
   const ordersFor = (sellerId) => ORDERS.filter((o) => o.sellerId === sellerId)
   const ordersForBuyer = (buyerId) => ORDERS.filter((o) => o.buyerId === buyerId)
   const order = (id) => ORDERS.find((o) => o.id === id)
+
+  /**
+   * Payments received from buyers, recorded VAT-inclusive because that is what a buyer
+   * actually hands over. The ledger needs the ex-VAT half of it — the VAT is collected on
+   * behalf of the NBR and is not the seller's money — so `collected()` divides it back out.
+   *
+   * EXAMPLE DATA. A partial payment is the only way `partially_paid` can exist, and it had
+   * to land on a seller whose figures no acceptance test names.
+   */
+  const PAYMENTS = [
+    { id: 'RCPT-9001', orderId: 'ORD-6001', buyerId: 'B-204', date: '2026-01-22', amount: bhd(165), exampleData: true },
+  ]
+  const paymentsFor = (orderId) => PAYMENTS.filter((p) => p.orderId === orderId)
 
   const PAYOUTS = [
     { id: 'PAY-1042-1', sellerId: '1042', date: '2026-01-09', amount: bhd(45.5), runId: 'run-1042-a' },
@@ -248,16 +282,37 @@
   const commissionOn = (o, card) => round3(commissionBase(o) * card.rate)
   const buyerPays = (o) => o.grossValue - (o.discount ? o.discount.amount : 0)
 
-  /** Has anyone collected this order's cash yet? Credit orders: not until the buyer pays. */
-  const isCollected = (o, k) =>
-    o.terms !== 'credit' ? true : k.risk === 'guarantor' && !!o.deliveryConfirmedAt
+  /**
+   * How much of this order's cash has actually reached Highbase, ex-VAT.
+   *
+   * Collection is a proportion rather than a yes/no, because a buyer on credit terms can
+   * pay half. An immediate order is collected in full at the point of sale; a guaranteed
+   * credit order is fronted in full at delivery; an unguaranteed one is collected only as
+   * far as the buyer has paid.
+   */
+  function collected(o, k) {
+    if (o.terms !== 'credit') return buyerPays(o)
+    if (k.risk === 'guarantor' && o.deliveryConfirmedAt) return buyerPays(o)
+    const received = sum(paymentsFor(o.id).map((p) => p.amount))
+    return received ? Math.min(round3(received / (1 + VAT_RATE)), buyerPays(o)) : 0
+  }
+
+  /** What share of the order has been collected. Drives the commission that has accrued. */
+  const collectedRatio = (o, k) => (buyerPays(o) ? collected(o, k) / buyerPays(o) : 0)
+
+  /** Fully collected — the test the invoice status and the awaiting state both turn on. */
+  const isCollected = (o, k) => collected(o, k) >= buyerPays(o)
 
   /**
-   * Commission accrues on collection, not on delivery. A credit order that nobody has
-   * been paid for yet has earned Highbase nothing to net against — which is precisely
-   * what makes `awaiting` its own state rather than a flavour of payable.
+   * Commission accrues on collection, not on delivery — and pro rata, because half the
+   * cash has earned half the commission. A credit order nobody has paid for has earned
+   * Highbase nothing to net against, which is what makes `awaiting` its own state rather
+   * than a flavour of payable.
    */
-  const commissionAccrues = (o, k) => isCollected(o, k)
+  // Measured on the ratio rather than the amount, for the same reason: a return has
+  // collected −150.000 against a buyerPays of −150.000, which is a ratio of 1.
+  const commissionAccrues = (o, k) => collectedRatio(o, k) > 0
+  const accruedCommission = (o, card, k) => round3(commissionOn(o, card) * collectedRatio(o, k))
 
   // ── Filing — turning orders into postings ────────────────────────────────
   /*
@@ -283,11 +338,18 @@
       // Cash leg. Only exists once someone has actually collected — which for a credit
       // order in agent mode is never, and in guarantor mode is at delivery, because
       // Highbase fronts the money and takes the buyer's risk onto its own book.
-      if (ord.paymentRoute === 'highbase' && isCollected(ord, k)) {
+      /*
+       * `!== 0`, not `> 0`. A return's buyerPays is negative, so a positive-only guard
+       * silently drops the reversal — the whole event the reconciliation control exists
+       * to catch. Whether cash moved is a question about zero, not about sign.
+       */
+      const cashIn = collected(ord, k)
+      if (ord.paymentRoute === 'highbase' && cashIn !== 0) {
         push({
           type: ord.kind === 'return' ? 'P6' : 'P1',
           orderId: ord.id, date: ord.date, leg: 'cash',
-          amount: flip * buyerPays(ord),
+          amount: flip * cashIn,
+          partial: cashIn < buyerPays(ord),
           held: !ord.deliveryConfirmedAt,
           heldReason: ord.deliveryConfirmedAt ? null : 'Delivery not confirmed',
           guaranteed: ord.terms === 'credit',
@@ -300,7 +362,7 @@
       }
 
       if (commissionAccrues(ord, k)) {
-        const comm = commissionOn(ord, card)
+        const comm = accruedCommission(ord, card, k)
         push({
           type: ord.kind === 'return' ? 'P6' : 'P3',
           orderId: ord.id, date: ord.date, leg: 'accrual',
@@ -363,7 +425,9 @@
     // because the commission on it has not accrued and the seller should not read the
     // gross as money coming to them.
     const awaitingOrders = ordersFor(sellerId).filter((o) => o.terms === 'credit' && o.deliveryConfirmedAt && !isCollected(o, k))
-    const awaitingGross = sum(awaitingOrders.map((o) => o.grossValue))
+    // The remainder, not the order. Once a buyer has part-paid, only the unpaid half is
+    // still awaiting them — the paid half has already become payable.
+    const awaitingGross = sum(awaitingOrders.map((o) => buyerPays(o) - collected(o, k)))
     const awaitingNet = awaitingGross - round3(awaitingGross * card.rate)
 
     return {
@@ -488,12 +552,14 @@
     const inScope = ordersFor(sellerId).filter((o) => commissionAccrues(o, k))
 
     const rows = inScope.map((o) => {
-      const expected = commissionOn(o, card)
+      // Pro rata, matching what has accrued. Comparing a part-collected order against its
+      // full commission would report a timing fact as a discrepancy.
+      const expected = accruedCommission(o, card, k)
       const actual = sum(ps.filter((p) => p.orderId === o.id && p.commissionCharge !== undefined).map((p) => p.commissionCharge))
       return { orderId: o.id, orderValue: o.grossValue, expected, actual, delta: actual - expected, ok: actual === expected }
     })
 
-    const expectedTotal = round3(sum(inScope.map(commissionBase)) * card.rate)
+    const expectedTotal = sum(inScope.map((o) => accruedCommission(o, card, k)))
     const actualTotal = sum(rows.map((r) => r.actual))
 
     return {
@@ -603,10 +669,25 @@
     const k = opt(o_)
     if (k.risk !== 'guarantor') return { applicable: false, rows: [], total: 0 }
     const rows = BUYERS.map((b) => {
-      const os = ordersForBuyer(b.id).filter((o) => o.terms === 'credit' && o.deliveryConfirmedAt)
-      const outstanding = sum(os.map(buyerPays))
-      return { buyerId: b.id, name: b.name, orders: os.map((o) => o.id), outstanding, limit: b.creditLimit, policy: b.policy, overLimit: outstanding > b.creditLimit }
-    }).filter((r) => r.orders.length > 0)
+      /*
+       * What the buyer still owes, from their invoices — not from `collected()`.
+       *
+       * `collected()` answers a different question: in guarantor mode it reports a credit
+       * order as collected because Highbase fronted the seller, which is true of the
+       * seller's position and false of the buyer's. Reading it here would show a buyer who
+       * has part-paid as owing the full amount, and one Highbase has guaranteed as owing
+       * nothing.
+       *
+       * VAT-inclusive, unlike the seller's `awaiting`. The two are different debts: the
+       * seller is owed the goods value, the buyer owes the goods value plus the tax.
+       */
+      const open = invoices(b.id, k).filter((inv) => inv.terms === 'credit' && inv.status === 'open')
+      const outstanding = sum(open.map((inv) => inv.amountOutstanding))
+      return {
+        buyerId: b.id, name: b.name, orders: open.map((inv) => inv.orderId),
+        outstanding, limit: b.creditLimit, policy: b.policy, overLimit: outstanding > b.creditLimit,
+      }
+    }).filter((r) => r.orders.length > 0 && r.outstanding > 0)
     return { applicable: true, rows, total: sum(rows.map((r) => r.outstanding)) }
   }
 
@@ -620,7 +701,6 @@
    * taken in March. So "today" is data, and the demo can move it.
    */
   const TODAY = '2026-01-24'
-  const VAT_RATE = 0.10
   /**
    * A simplified tax invoice is permitted at or under this **taxable amount** — the
    * consideration before VAT, not the total the buyer pays.
@@ -663,20 +743,32 @@
       const credits = ORDERS.filter((x) => x.reverses === o.id)
       const creditNote = credits.length ? sum(credits.map((x) => -buyerPays(x))) : 0
 
+      const amountPaid = sum(paymentsFor(o.id).map((x) => x.amount))
+      const amountOutstanding = Math.max(total - amountPaid, 0)
+
       /*
-       * Status, then sub-status. `paid` is not a flag anyone set — it is what "somebody
-       * has collected this" means, and on this book that is every order except a credit
-       * order still waiting on its buyer.
+       * Status, then sub-status — and deliberately independent of the risk model.
+       *
+       * `collected()` cannot answer this. In guarantor mode it reports a delivered credit
+       * order as collected, because Highbase has fronted the seller — which would mark the
+       * buyer's invoice paid while the buyer still owes every fil of it. What settles an
+       * invoice is the buyer paying it, and nothing else.
        */
       let status = 'open'
       if (!o.deliveryConfirmedAt) status = 'draft'
-      else if (collected) status = 'paid'
+      else if (o.terms !== 'credit') status = 'paid'
+      else if (amountPaid >= total) status = 'paid'
 
+
+      /*
+       * `partially_paid` outranks the timing states deliberately. An invoice that is
+       * half paid and three days from due is, to the person chasing it, a part-payment
+       * first — the timing is the second sentence, and it is still on the row as the age.
+       */
       let subStatus = null
       if (status === 'open') {
         const days = daysBetween(today, dueDate)
-        const paidSoFar = 0 // No partial payment exists in the seed. See notes.
-        if (paidSoFar > 0) subStatus = 'partially_paid'
+        if (amountPaid > 0) subStatus = 'partially_paid'
         else if (days < 0) subStatus = 'overdue'
         else if (days <= DUE_SOON_DAYS) subStatus = 'due_soon'
         else subStatus = 'not_yet_due'
@@ -696,6 +788,7 @@
         taxableAmount: taxable, vatRate: VAT_RATE, vatAmount: vat, totalPayable: total,
         creditNote,
         paymentRoute: o.paymentRoute, terms: o.terms,
+        amountPaid, amountOutstanding,
         status, subStatus,
         daysToDue: daysBetween(today, dueDate),
         /** Measured on the taxable amount. See SIMPLIFIED_INVOICE_MAX. */
@@ -722,9 +815,11 @@
         const overdueBy = daysBetween(inv.dueDate, today)
         return overdueBy >= b.from && overdueBy <= b.to
       })
-      return { key: b.key, label: b.label, rows, total: sum(rows.map((r) => r.totalPayable)) }
+      // What is still owed, not what was billed. An invoice half paid ages for its
+      // remainder; carrying its full value into a bucket overstates the debt.
+      return { key: b.key, label: b.label, rows, total: sum(rows.map((r) => r.amountOutstanding)) }
     })
-    return { today, open, buckets, total: sum(open.map((r) => r.totalPayable)) }
+    return { today, open, buckets, total: sum(open.map((r) => r.amountOutstanding)) }
   }
 
   /**
@@ -740,7 +835,7 @@
     const k = opt(o_)
     const b = buyer(buyerId)
     const open = invoices(buyerId, k).filter((inv) => inv.status === 'open')
-    const exposure = sum(open.map((inv) => inv.totalPayable))
+    const exposure = sum(open.map((inv) => inv.amountOutstanding))
     const available = Math.max(b.creditLimit - exposure, 0)
     return {
       buyerId, limit: b.creditLimit, exposure, available,
@@ -933,6 +1028,7 @@
     TODAY, VAT_RATE, SIMPLIFIED_INVOICE_MAX, AGING_BUCKETS, CREDIT_POLICIES, PRICE_MATCH_STATES,
     invoices, statement, creditAccount, priceMatches, daysBetween,
     seller, buyer, order, rateCard, ordersFor, ordersForBuyer,
+    PAYMENTS, paymentsFor, collected, collectedRatio, accruedCommission,
     commissionBase, commissionOn, buyerPays, isCollected, commissionAccrues,
     postingsFor, balance, collectionMix, standing,
     reconcile, reconcileAll, overstatement, highbaseMargin, fundedDiscountRatio,

@@ -108,10 +108,18 @@
       el('div', { style: { display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,1fr)', gap: '18px', alignItems: 'start' } }, [
         U.card({
           title: S.wallet.cashPosition,
-          note: S.fill(S.wallet.collectedLine, {
-            collected: U.moneyText(b.collected, { currency: true }),
-            n: HB.ordersFor(SELLER_ID).filter((o) => o.paymentRoute === 'highbase' && HB.isCollected(o, m)).length,
-          }),
+          note: (function () {
+            /*
+             * Orders that contributed cash, not orders that are fully settled. A
+             * part-paid credit order put 150.000 into the total above; leaving it out of
+             * the count made the sentence describe a different number from the one
+             * beside it.
+             */
+            const n = HB.ordersFor(SELLER_ID).filter((o) => o.paymentRoute === 'highbase' && HB.collected(o, m) !== 0).length
+            return S.fill(n === 1 ? S.wallet.collectedLineOne : S.wallet.collectedLine, {
+              collected: U.moneyText(b.collected, { currency: true }), n,
+            })
+          })(),
           actions: [U.standingBadge(st.grade), el('a', { class: 'hb-btn hb-btn--quiet hb-btn--sm', href: U.href('/standing') }, 'Why? →')],
           body: [
             U.note('Cash position', 'The sentence a flat balance cannot say: what Highbase holds, what it kept, and what it already paid — three numbers that produce the fourth.'),

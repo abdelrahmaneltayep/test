@@ -219,6 +219,39 @@
       M(inv4002.vatAmount), M(HB.round3(inv4002.taxableAmount * 0.10)),
       M(inv4002.taxableAmount) + ' + ' + M(inv4002.vatAmount) + ' = ' + M(inv4002.totalPayable))
 
+    /*
+     * A part-payment has to be consistent in three places at once, or the prototype tells
+     * three different stories about the same 165.000: the buyer's invoice, the seller's
+     * accrued commission, and what is still awaiting the buyer.
+     */
+    const partial = HB.invoices('B-204').find((i) => i.orderId === 'ORD-6001')
+    check(20.1, 'A part-paid invoice reads partially_paid', partial.subStatus, 'partially_paid',
+      M(partial.amountPaid) + ' of ' + M(partial.totalPayable))
+    check(20.2, 'Its outstanding balance is the remainder', M(partial.amountOutstanding), '165.000')
+    const b1134 = HB.balance('1134')
+    check(20.3, 'Half collected accrues half the commission', M(HB.accruedCommission(HB.order('ORD-6001'), HB.rateCard('rc-v1'), {})), '4.500',
+      'full commission would be 9.000')
+    check(20.4, 'The paid half becomes cash, the rest stays awaiting',
+      M(b1134.cashBacked) + ' / ' + M(b1134.awaitingGross), '250.000 / 150.000',
+      'payable ' + M(b1134.payable))
+    check(20.5, 'The buyer’s exposure is the outstanding amount, not the invoice total',
+      M(HB.creditAccount('B-204').exposure), '165.000')
+
+    /*
+     * Two fixes worth pinning, both the same mistake at different depths: reading
+     * `collected()` — which is risk-mode aware because it describes the seller's position
+     * — to answer a question about what the buyer owes.
+     */
+    check(20.6, 'An invoice’s status does not change with the risk model',
+      HB.invoices('B-204', { risk: 'guarantor' }).map((i) => i.status).join(','),
+      HB.invoices('B-204', { risk: 'agent' }).map((i) => i.status).join(','),
+      'a guarantee is between Highbase and the seller; the buyer still owes what they owe')
+    const gEx = HB.buyerExposure({ risk: 'guarantor' })
+    check(20.7, 'Buyer exposure counts what the buyer has actually paid',
+      M((gEx.rows.find((r) => r.buyerId === 'B-204') || {}).outstanding), '165.000',
+      'the full order is 330.000; 165.000 of it is paid')
+    check(20.8, 'Agent mode carries no buyer exposure at all', HB.buyerExposure({ risk: 'agent' }).applicable, false)
+
     // ── 18 — three decimals, always ────────────────────────────────────────
     const shapes = [0, 1, 999, 1000, -1000, 45500, 1190000, -4500, 81000, 227500, 5300000]
     const badFormat = shapes.map((f) => HB.money(f)).filter((s) => !/^−?[\d,]+\.\d{3}$/.test(s))
