@@ -388,16 +388,15 @@
   // ── Rate cards ───────────────────────────────────────────────────────────
   function rateCardsView() {
     const m = U.modes()
-    const applied = HB.RATE_CARDS.find((r) => r.status === 'applied')
-    const advertised = HB.RATE_CARDS.find((r) => r.status === 'advertised')
-    const s = HB.seller('1042')
-    const commission = HB.reconcile('1042', m).expectedTotal
-    const orders = HB.ordersFor('1042')
-    const wouldCharge = HB.round3(orders[0].grossValue * advertised.rate)
+    const applied = HB.contractualCard()
+    const advertised = HB.advertisedCard()
+    const gap = HB.advertisedExposure(m)
 
     return U.frag([
-      U.note('Do not pick one',
-        'Two live cards describe the same contract and disagree by more than a rounding. The prototype shows both, marks the unapplied one stale, and leaves the question open — resolving it is a commercial decision, not a data fix.'),
+      U.note('Settled, and what it leaves behind',
+        'Flat 3% is contractual. That answers which rate applies; it does not answer what is owed to a seller who was shown the other card at signup and has been charged more than it promised. The counterfactual is below, so the number exists before anyone is asked to approve a write-off.'),
+
+      U.banner('good', S.rateCards.contractual, S.fill(S.rateCards.contractualBanner, { label: applied.label })),
 
       U.card({
         title: S.rateCards.title, note: S.rateCards.note, flush: true,
@@ -408,7 +407,7 @@
             { label: S.rateCards.colRate, num: true, cell: (r) => (r.rate * 100).toFixed(0) + '%' },
             { label: S.rateCards.colEffective, cell: (r) => r.effectiveFrom },
             { label: S.rateCards.colStatus, cell: (r) => U.frag([
-              U.pill(S.rateCards[r.status], r.status === 'applied' ? 'green' : 'orange'),
+              U.pill(r.contractual ? S.rateCards.contractual : S.rateCards[r.status], r.contractual ? 'green' : 'orange'),
               r.stale ? U.frag([' ', U.pill(S.rateCards.stale, 'red')]) : null,
             ]) },
             { label: S.rateCards.colSource, cell: (r) => el('span', { class: 'hb-sub', style: { margin: 0 } }, r.source) },
@@ -419,20 +418,34 @@
 
       U.card({
         title: S.rateCards.conflictTitle,
-        actions: [U.pill(S.rateCards.unresolved, 'red')],
-        body: [
-          U.banner('warn', null, S.fill(S.rateCards.conflictNote, { applied: applied.label, advertised: advertised.label })),
-          el('h3', { class: 'hb-h3', style: { marginTop: '16px' } }, S.rateCards.worked),
-          el('ul', { class: 'hb-sub', style: { paddingInlineStart: '18px' } }, [
-            el('li', {}, S.fill(S.rateCards.workedApplied, {
-              label: applied.label, amount: U.moneyText(commission, { currency: true }), n: orders.length,
-            })),
-            el('li', {}, S.fill(S.rateCards.workedAdvertised, {
-              label: advertised.label, amount: U.moneyText(wouldCharge, { currency: true }),
-            })),
+        note: S.rateCards.claimNote,
+        actions: [U.pill(S.rateCards.correctionNeeded, 'orange')],
+        flush: true,
+        body: U.frag([
+          el('div', { class: 'hb-card-body', style: { paddingBottom: '4px' } }, [
+            U.banner('warn', null, S.fill(S.rateCards.conflictNote, { advertised: advertised.label })),
+            el('p', { class: 'hb-sub', style: { marginTop: '12px' } }, S.rateCards.correctionNote),
           ]),
-          el('div', { style: { marginTop: '14px' } }, U.banner('bad', null, S.rateCards.unresolvedNote)),
-        ],
+          U.table({
+            columns: [
+              { label: S.exposure.colSeller, cell: (r) => HB.seller(r.sellerId).name },
+              { label: S.rateCards.colFirst, cell: (r) => r.firstOrderId },
+              { label: S.rateCards.colWould, num: true, cell: (r) => U.money(r.wouldCharge) },
+              { label: S.rateCards.colCharged, num: true, cell: (r) => U.money(r.charged) },
+              { label: S.rateCards.colGap, num: true, cell: (r) => U.money(r.gap, { signed: true, tone: r.overcharged ? 'neg' : null }) },
+              { label: '', cell: (r) => r.overcharged ? U.pill(S.rateCards.overcharged, 'red') : el('span', { class: 'muted' }, '—') },
+            ],
+            rows: gap.rows,
+            rowKey: (r) => r.firstOrderId,
+            rowLabel: (r) => 'Open ' + r.firstOrderId,
+            onRowClick: (r) => openOrder(r.firstOrderId),
+            foot: [
+              { cell: S.rateCards.claimTotal, span: 4 },
+              { cell: U.money(gap.total, { currency: true, tone: gap.total > 0 ? 'neg' : null }), num: true },
+              { cell: '' },
+            ],
+          }),
+        ]),
       }),
     ])
   }

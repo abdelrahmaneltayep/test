@@ -252,6 +252,22 @@
       'the full order is 330.000; 165.000 of it is paid')
     check(20.8, 'Agent mode carries no buyer exposure at all', HB.buyerExposure({ risk: 'agent' }).applicable, false)
 
+    /*
+     * The rate-card question is settled: flat 3% is contractual. What the assertions pin
+     * is that settling it did not quietly delete the consequence — two sellers were
+     * charged more than the withdrawn card promised them, and the claim is sized.
+     */
+    check(21.1, 'Flat 3% is the contractual card', HB.contractualCard().version, 'v1',
+      HB.contractualCard().label)
+    check(21.2, 'The advertised card is marked not contractual', HB.advertisedCard().contractual, false,
+      HB.advertisedCard().resolution)
+    const advEx = HB.advertisedExposure()
+    check(21.3, 'Two sellers were charged more than they were shown', advEx.over.length, 2,
+      advEx.over.map((r) => HB.seller(r.sellerId).name + ' ' + HB.money(r.gap, { signed: true })).join(' · '))
+    check(21.4, 'The claim if all of them asked is 26.600', M(advEx.total), '26.600')
+    check(21.5, 'Settling it changed no commission actually charged',
+      M(HB.reconcile('1042').expectedTotal), '31.200', 'the counterfactual posts nothing')
+
     // ── 18 — three decimals, always ────────────────────────────────────────
     const shapes = [0, 1, 999, 1000, -1000, 45500, 1190000, -4500, 81000, 227500, 5300000]
     const badFormat = shapes.map((f) => HB.money(f)).filter((s) => !/^−?[\d,]+\.\d{3}$/.test(s))

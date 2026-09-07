@@ -455,12 +455,11 @@
     const m = U.modes()
     const s = HB.seller(SELLER_ID)
     const applied = HB.rateCard(s.rateCardId)
-    const advertised = HB.RATE_CARDS.find((r) => r.status === 'advertised')
+    const advertised = HB.advertisedCard()
     const orders = HB.ordersFor(SELLER_ID)
     const mix = HB.collectionMix(SELLER_ID, m)
     const commission = HB.reconcile(SELLER_ID, m).expectedTotal
-    const firstOrder = orders[0]
-    const wouldCharge = HB.round3(firstOrder.grossValue * advertised.rate)
+    const gap = HB.advertisedGap(SELLER_ID, m)
 
     return U.frag([
       U.note('Versioned terms',
@@ -486,13 +485,24 @@
             U.banner('warn', advertised.label, S.fill(S.rateCard.conflictNote, {
               label: advertised.label, date: advertised.effectiveFrom, applied: applied.label,
             })),
-            el('p', { class: 'hb-sub', style: { marginTop: '12px' } }, [
-              'The two cards do not differ by a rounding. Flat 3% charges ',
-              U.money(commission, { currency: true }),
-              ' across this cycle; 10%-then-0% would charge ',
-              U.money(wouldCharge, { currency: true }),
-              ' on ' + firstOrder.id + ' and nothing after it. Which is contractual is unresolved, so neither is applied silently.',
-            ]),
+            /*
+             * The seller's own number, not the platform's. Telling a seller a screen was
+             * wrong is a disclosure; telling them what it cost them is the disclosure
+             * being useful — and it is the same figure the admin's claim table shows, so
+             * neither side is working from a number the other cannot see.
+             */
+            gap ? el('div', { style: { marginTop: '14px' } }, U.calc([
+              { label: S.fill('{label} would have charged', { label: advertised.label }), value: gap.wouldCharge, plain: true },
+              { label: 'You were charged', value: gap.charged, plain: true },
+              { label: 'Difference', value: gap.gap, rule: true },
+            ])) : null,
+            gap && gap.overcharged
+              ? el('p', { class: 'hb-sub', style: { marginTop: '12px' } }, S.fill(S.rateCard.conflictGap, {
+                would: U.moneyText(gap.wouldCharge, { currency: true }),
+                charged: U.moneyText(gap.charged, { currency: true }),
+                gap: U.moneyText(gap.gap, { currency: true }),
+              }))
+              : null,
           ],
         }),
       ]),

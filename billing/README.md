@@ -39,7 +39,7 @@ written down — so the seller's wallet and the admin's exposure report cannot d
 
     node -e "require('./billing/selftest.js').run()"
 
-47 assertions, all passing.
+52 assertions, all passing.
 
 One figure in the brief was wrong and has been corrected: **#1088's payable is 54.600, not
 56.400.** The brief's arithmetic netted the 3.600 of dues but omitted ORD-3003's own 1.800
@@ -68,6 +68,8 @@ Plus `?seller=` and `?buyer=` on their surfaces, and `?state=loading|error` on a
   Store for `Held`, Sitra Industrial Tools for `Awaiting buyer`, or Seef Steel Fabricators
   to see a part-collected credit order sitting in both `Your Balance` and `Awaiting buyer`
   at once.
+- **The rate-card claim** (`admin.html#/rate-cards`) — 3% is contractual, and the table
+  underneath sizes what the withdrawn card still costs.
 - **A part-paid invoice** (`buyer.html?buyer=B-204#/invoices`) — 165.000 of 330.000 paid.
   The same 165.000 shows as the buyer's outstanding balance, as half the commission
   accrued on the seller's ledger, and as the remainder still awaiting.
@@ -102,7 +104,19 @@ the brief's own four sellers could not reach:
 
 Buyer names, addresses and VAT numbers are fictional throughout.
 
+## Decisions taken
+
+- **Flat 3% is contractual.** The ledger's card stands. That does not close the file: the
+  product's Subscription Settings screen still advertises 10%-then-0%, which was never
+  applied, and **two sellers have since been charged more than that screen promised them**
+  — Gulf Metal Supplies by 26.200 and Muharraq Cold Store by 0.400, **26.600 in total** if
+  both asked. The admin rate-cards screen sizes it; the seller's own rate card shows each
+  seller their own figure, so neither side is working from a number the other cannot see.
+  Correcting the screen is the open action.
+- **#1088's payable is 54.600**, not the 56.400 first stated. See `BRIEF-CORRECTIONS.md`.
+- **The BHD 500 simplified-invoice threshold** is measured on the taxable amount, before
+  VAT. ORD-1006 is the boundary: 500.000 taxable qualifies, 550.000 payable would not have.
+
 ## Known gaps
 
-- **Which rate card is contractual** is unresolved on purpose. The ledger applies flat 3%;
-  Subscription Settings advertises 10%-then-0%. The prototype shows both and picks neither.
+None outstanding. Every state in the model has a reachable example.

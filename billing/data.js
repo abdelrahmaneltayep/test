@@ -107,25 +107,31 @@
   // ── Rate cards ───────────────────────────────────────────────────────────
   /*
    * Versioned, because "3% today" is not an answer to "why was this order charged 15.000
-   * in June". Two of these are in open conflict, seeded on purpose: the ledger prices
-   * every order at flat 3%, while the product's own Subscription Settings screen
-   * advertises 10% on a seller's first order and 0% after. Both are live claims about the
-   * same contract, and the prototype refuses to pick one.
+   * in June".
+   *
+   * The conflict is settled: **flat 3% is contractual.** That does not make the other
+   * card disappear — it turns it from an open commercial question into a defect in
+   * Subscription Settings, which is still showing sellers terms that are not theirs, and
+   * into a quantifiable claim from anyone who signed up on the strength of it. See
+   * `advertisedGap`.
    */
   const RATE_CARDS = [
     {
       id: 'rc-v1', version: 'v1', label: 'Flat 3%', model: 'flat', rate: 0.03,
-      effectiveFrom: '2025-01-01', status: 'applied', stale: false,
+      effectiveFrom: '2025-01-01', status: 'applied', stale: false, contractual: true,
       source: 'Ledger — the terms every posting in this book was priced with',
     },
     {
       id: 'rc-sub', version: 'v2 (draft)', label: '10% first order, 0% thereafter',
       model: 'first_order_then_zero', rate: 0.10, subsequentRate: 0,
-      effectiveFrom: '2025-11-01', status: 'advertised', stale: true,
+      effectiveFrom: '2025-11-01', status: 'advertised', stale: true, contractual: false,
       source: 'Product — Subscription Settings, shown to sellers at signup',
+      resolution: 'Not contractual. Subscription Settings is showing terms that were never applied and needs correcting.',
     },
   ]
   const rateCard = (id) => RATE_CARDS.find((r) => r.id === id)
+  const contractualCard = () => RATE_CARDS.find((r) => r.contractual)
+  const advertisedCard = () => RATE_CARDS.find((r) => r.status === 'advertised')
 
   // ── Standing thresholds ──────────────────────────────────────────────────
   const ARREARS_CEILING = bhd(150)
@@ -599,6 +605,42 @@
     }
   }
 
+  /**
+   * What the advertised card would have charged, against what the contractual one did.
+   *
+   * Deciding that 3% is contractual settles which rate applies. It does not settle what is
+   * owed to a seller who was shown 10%-then-0% at signup and has since been charged more
+   * than that — and on this book two of them have been. The counterfactual is computed
+   * here so the number exists before somebody is asked to approve a write-off.
+   *
+   * Counterfactual only: nothing in this function touches a posting.
+   */
+  function advertisedGap(sellerId, o_) {
+    const k = opt(o_)
+    const adv = advertisedCard()
+    const orders = ordersFor(sellerId).filter((o) => o.kind !== 'return')
+      .slice().sort((a, b) => (a.date < b.date ? -1 : 1))
+    if (orders.length === 0) return null
+    // "10% on the first order, 0% thereafter" — so the whole counterfactual charge is the
+    // first order's, and every order after it is free.
+    const first = orders[0]
+    const wouldCharge = round3(commissionBase(first) * adv.rate)
+    const charged = reconcile(sellerId, k).expectedTotal
+    return {
+      sellerId, firstOrderId: first.id, wouldCharge, charged,
+      gap: charged - wouldCharge,
+      /** Positive means the seller paid more than the screen promised them. */
+      overcharged: charged > wouldCharge,
+    }
+  }
+
+  /** The book-wide claim, if every seller who was shown the other card asked for it. */
+  function advertisedExposure(o_) {
+    const rows = SELLERS.map((s) => advertisedGap(s.id, o_)).filter(Boolean)
+    const over = rows.filter((r) => r.overcharged)
+    return { rows, over, total: sum(over.map((r) => r.gap)) }
+  }
+
   /** Highbase's own position on an order: commission earned less discount it funded. */
   function highbaseMargin(orderId) {
     const o = order(orderId)
@@ -1027,7 +1069,8 @@
     ADMIN_ROLES, adjustments, canApprove, errorAnatomy,
     TODAY, VAT_RATE, SIMPLIFIED_INVOICE_MAX, AGING_BUCKETS, CREDIT_POLICIES, PRICE_MATCH_STATES,
     invoices, statement, creditAccount, priceMatches, daysBetween,
-    seller, buyer, order, rateCard, ordersFor, ordersForBuyer,
+    seller, buyer, order, rateCard, contractualCard, advertisedCard,
+    advertisedGap, advertisedExposure, ordersFor, ordersForBuyer,
     PAYMENTS, paymentsFor, collected, collectedRatio, accruedCommission,
     commissionBase, commissionOn, buyerPays, isCollected, commissionAccrues,
     postingsFor, balance, collectionMix, standing,
