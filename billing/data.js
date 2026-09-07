@@ -96,7 +96,11 @@
   const RISK_MODES = ['agent', 'guarantor']
 
   const DEFAULTS = { filing: 'corrected', risk: 'agent' }
-  const opt = (o) => ({ filing: (o && o.filing) || DEFAULTS.filing, risk: (o && o.risk) || DEFAULTS.risk })
+  const opt = (o) => ({
+    filing: (o && o.filing) || DEFAULTS.filing,
+    risk: (o && o.risk) || DEFAULTS.risk,
+    today: (o && o.today) || null,
+  })
 
   // ── Rate cards ───────────────────────────────────────────────────────────
   /*
@@ -132,13 +136,13 @@
   // ── Sellers ──────────────────────────────────────────────────────────────
   const SELLERS = [
     { id: '1042', name: 'Gulf Metal Supplies', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING,
-      cycle: { id: '1042-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' },
+      cycle: { id: '1042-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' , address: 'Unit 12, Block 601, Sitra Industrial Area, Kingdom of Bahrain', vatNumber: '220001234500002'},
     { id: '1067', name: 'Manama Packaging Co.', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING,
-      cycle: { id: '1067-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' },
+      cycle: { id: '1067-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' , address: 'Warehouse 4, Road 3705, Manama 337, Kingdom of Bahrain', vatNumber: '220002345600002'},
     { id: '1088', name: 'Sitra Industrial Tools', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING,
-      cycle: { id: '1088-jan', label: '8–22 Jan 2026', from: '2026-01-08', to: '2026-01-22' }, nextPayoutDate: '2026-01-23' },
+      cycle: { id: '1088-jan', label: '8–22 Jan 2026', from: '2026-01-08', to: '2026-01-22' }, nextPayoutDate: '2026-01-23' , address: 'Plot 88, Sitra Industrial Area, Kingdom of Bahrain', vatNumber: '220003456700002'},
     { id: '1103', name: 'Riffa Building Materials', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING,
-      cycle: { id: '1103-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' },
+      cycle: { id: '1103-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' , address: 'Shop 21, Riffa Souq, Riffa 901, Kingdom of Bahrain', vatNumber: '220004567800002'},
   ]
   const seller = (id) => SELLERS.find((s) => s.id === id)
 
@@ -591,6 +595,188 @@
     return { applicable: true, rows, total: sum(rows.map((r) => r.outstanding)) }
   }
 
+  // ── Invoices, VAT and credit ─────────────────────────────────────────────
+  /*
+   * The reference date, and why it is a parameter rather than `new Date()`.
+   *
+   * Every invoice sub-state and every aging bucket is a statement about now. Reading the
+   * wall clock would make this prototype tell a different story every week and none of
+   * them reproducible — and a screenshot taken in February could not be compared with one
+   * taken in March. So "today" is data, and the demo can move it.
+   */
+  const TODAY = '2026-01-24'
+  const VAT_RATE = 0.10
+  /** FR — a simplified tax invoice is permitted at or under this total. */
+  const SIMPLIFIED_INVOICE_MAX = bhd(500)
+  const DUE_SOON_DAYS = 7
+
+  const daysBetween = (from, to) =>
+    Math.round((new Date(to).getTime() - new Date(from).getTime()) / 86400000)
+
+  /**
+   * One invoice per order, derived — never stored beside the order it bills.
+   *
+   * INVARIANT 2 lives here as much as in `buyerView`: an invoice carries the taxable
+   * amount, the VAT and the total payable, and nothing about commission. The buyer is
+   * billed for goods; what Highbase charges the seller for arranging the sale is not a
+   * line the buyer is party to, so it is not a field on the object they read.
+   */
+  function invoices(buyerId, o_) {
+    const k = opt(o_)
+    const today = k.today || TODAY
+    const list = (buyerId ? ordersForBuyer(buyerId) : ORDERS)
+      .filter((o) => o.kind !== 'return')
+      .slice()
+      .sort((a, b) => (a.date < b.date ? -1 : 1))
+
+    return list.map((o, i) => {
+      const s = seller(o.sellerId)
+      const b = buyer(o.buyerId)
+      const taxable = buyerPays(o)
+      const vat = round3(taxable * VAT_RATE)
+      const total = taxable + vat
+      // Credit terms carry the agreed due date; anything else is due on receipt.
+      const dueDate = o.terms === 'credit' ? o.dueDate : o.date
+      const collected = isCollected(o, k)
+      const credits = ORDERS.filter((x) => x.reverses === o.id)
+      const creditNote = credits.length ? sum(credits.map((x) => -buyerPays(x))) : 0
+
+      /*
+       * Status, then sub-status. `paid` is not a flag anyone set — it is what "somebody
+       * has collected this" means, and on this book that is every order except a credit
+       * order still waiting on its buyer.
+       */
+      let status = 'open'
+      if (!o.deliveryConfirmedAt) status = 'draft'
+      else if (collected) status = 'paid'
+
+      let subStatus = null
+      if (status === 'open') {
+        const days = daysBetween(today, dueDate)
+        const paidSoFar = 0 // No partial payment exists in the seed. See notes.
+        if (paidSoFar > 0) subStatus = 'partially_paid'
+        else if (days < 0) subStatus = 'overdue'
+        else if (days <= DUE_SOON_DAYS) subStatus = 'due_soon'
+        else subStatus = 'not_yet_due'
+      }
+
+      return {
+        number: 'INV-2026-' + String(i + 1).padStart(4, '0'),
+        orderId: o.id, buyerId: o.buyerId, sellerId: o.sellerId,
+        supplier: { name: s.name, address: s.address, vatNumber: s.vatNumber },
+        customer: { name: b.name, address: b.address, vatNumber: b.vatNumber },
+        issueDate: o.date,
+        supplyDate: o.deliveryConfirmedAt || o.date,
+        dueDate,
+        description: (o.terms === 'credit' ? 'Goods supplied on 30-day terms' : 'Goods supplied'),
+        discount: o.discount ? o.discount.amount : 0,
+        grossValue: o.grossValue,
+        taxableAmount: taxable, vatRate: VAT_RATE, vatAmount: vat, totalPayable: total,
+        creditNote,
+        paymentRoute: o.paymentRoute, terms: o.terms,
+        status, subStatus,
+        daysToDue: daysBetween(today, dueDate),
+        /** A simplified invoice is permitted at or under BHD 500. */
+        simplifiedPermitted: total <= SIMPLIFIED_INVOICE_MAX,
+      }
+    })
+  }
+
+  /** FR — open-item aging, measured from the due date, never balance-forward. */
+  const AGING_BUCKETS = [
+    { key: 'current', label: 'Current', from: -Infinity, to: 0 },
+    { key: 'd1_30', label: '1–30', from: 1, to: 30 },
+    { key: 'd31_60', label: '31–60', from: 31, to: 60 },
+    { key: 'd61_90', label: '61–90', from: 61, to: 90 },
+    { key: 'd90', label: '90+', from: 91, to: Infinity },
+  ]
+
+  function statement(buyerId, o_) {
+    const k = opt(o_)
+    const today = k.today || TODAY
+    const open = invoices(buyerId, k).filter((inv) => inv.status === 'open')
+    const buckets = AGING_BUCKETS.map((b) => {
+      const rows = open.filter((inv) => {
+        const overdueBy = daysBetween(inv.dueDate, today)
+        return overdueBy >= b.from && overdueBy <= b.to
+      })
+      return { key: b.key, label: b.label, rows, total: sum(rows.map((r) => r.totalPayable)) }
+    })
+    return { today, open, buckets, total: sum(open.map((r) => r.totalPayable)) }
+  }
+
+  /**
+   * The credit account, and what the policy would do at checkout.
+   *
+   * Four policies, escalating. The screen has to answer "what happens when I go over",
+   * and the honest answer depends entirely on which of the four is set — so the function
+   * returns the behaviour rather than the screen hard-coding one.
+   */
+  const CREDIT_POLICIES = ['ignore', 'warn_only', 'require_approval', 'enforce_hold']
+
+  function creditAccount(buyerId, o_) {
+    const k = opt(o_)
+    const b = buyer(buyerId)
+    const open = invoices(buyerId, k).filter((inv) => inv.status === 'open')
+    const exposure = sum(open.map((inv) => inv.totalPayable))
+    const available = Math.max(b.creditLimit - exposure, 0)
+    return {
+      buyerId, limit: b.creditLimit, exposure, available,
+      overLimit: exposure > b.creditLimit,
+      policy: b.policy, openInvoices: open.map((i) => i.number),
+      utilisation: b.creditLimit ? exposure / b.creditLimit : 0,
+      /** What checkout does when a new order would take exposure past the limit. */
+      atLimit: {
+        ignore: 'Checkout proceeds. The limit is recorded but not enforced.',
+        warn_only: 'Checkout shows a warning and proceeds. Nothing is blocked.',
+        require_approval: 'Checkout holds the order for Highbase approval before it is confirmed.',
+        enforce_hold: 'Credit terms are withdrawn at checkout. The order can still be placed on immediate payment.',
+      }[b.policy],
+    }
+  }
+
+  /**
+   * Price-match requests. Example data — a request that has not been accepted creates no
+   * posting, which is why these can be seeded without moving any figure in the ledger.
+   *
+   * The accepted one is not seeded: it is derived from ORD-2001's funded discount, because
+   * that request did produce a posting and inventing a second record of it would be the
+   * same duplication the reconciliation control exists to catch.
+   */
+  const PRICE_MATCH_REQUESTS = [
+    { id: 'PM-3310', buyerId: 'B-203', sellerId: '1042', orderId: 'ORD-1006', date: '2026-01-16',
+      claimedPrice: bhd(470), evidence: 'competitor-quote-jan.pdf', state: 'under_review', exampleData: true },
+    { id: 'PM-3311', buyerId: 'B-203', sellerId: '1103', orderId: 'ORD-4001', date: '2026-01-10',
+      claimedPrice: bhd(1900), evidence: 'supplier-invoice-scan.jpg', state: 'declined',
+      declineReason: 'The quoted supplier is not comparable — different pack size.', exampleData: true },
+    { id: 'PM-3312', buyerId: 'B-203', sellerId: '1042', orderId: 'ORD-1004', date: '2026-01-22',
+      claimedPrice: bhd(37), evidence: 'price-list-jan.pdf', state: 'submitted', exampleData: true },
+    /*
+     * Accepted but not yet credited — a real intermediate state, and one that can be
+     * seeded safely: the supplier has agreed, the credit has not been issued, so no
+     * posting exists yet. `credit_issued` is never seeded, because that state does imply
+     * a posting and inventing a second record of one is the duplication the
+     * reconciliation control exists to catch.
+     */
+    { id: 'PM-3313', buyerId: 'B-203', sellerId: '1103', orderId: 'ORD-4002', date: '2026-01-19',
+      claimedPrice: bhd(1740), evidence: 'competitor-invoice-0119.pdf', state: 'accepted', exampleData: true },
+  ]
+
+  const PRICE_MATCH_STATES = ['submitted', 'under_review', 'accepted', 'declined', 'credit_issued']
+
+  function priceMatches(buyerId) {
+    const derived = ORDERS
+      .filter((o) => o.buyerId === buyerId && o.discount && o.discount.funder === 'highbase' && o.discount.amount > 0)
+      .map((o) => ({
+        id: 'PM-' + o.id.replace(/\D/g, ''), buyerId, sellerId: o.sellerId, orderId: o.id, date: o.date,
+        claimedPrice: buyerPays(o), evidence: o.discount.evidence,
+        state: 'credit_issued', creditAmount: o.discount.amount, exampleData: false,
+      }))
+    return derived
+      .concat(PRICE_MATCH_REQUESTS.filter((r) => r.buyerId === buyerId))
+      .sort((a, b) => (a.date < b.date ? 1 : -1))
+  }
+
   // ── Ops and Finance ──────────────────────────────────────────────────────
   /*
    * Highbase admin is two roles, not one. Ops issues and corrects — rate cards,
@@ -722,6 +908,8 @@
     POSTING, STATES, FILINGS, RISK_MODES, DEFAULTS,
     RATE_CARDS, SELLERS, BUYERS, ORDERS, PAYOUTS, ARREARS_CEILING, STANDING_RULES,
     ADMIN_ROLES, adjustments, canApprove, errorAnatomy,
+    TODAY, VAT_RATE, SIMPLIFIED_INVOICE_MAX, AGING_BUCKETS, CREDIT_POLICIES, PRICE_MATCH_STATES,
+    invoices, statement, creditAccount, priceMatches, daysBetween,
     seller, buyer, order, rateCard, ordersFor, ordersForBuyer,
     commissionBase, commissionOn, buyerPays, isCollected, commissionAccrues,
     postingsFor, balance, collectionMix, standing,

@@ -220,11 +220,14 @@
     const q = new URLSearchParams(location.search)
     const filing = q.get('filing') === 'as_filed' ? 'as_filed' : 'corrected'
     const risk = q.get('risk') === 'guarantor' ? 'guarantor' : 'agent'
-    return { filing, risk }
+    // Every invoice sub-state and aging bucket is a statement about now, so "now" is a
+    // parameter too — otherwise the same screen tells a different story every week.
+    const today = /^\d{4}-\d{2}-\d{2}$/.test(q.get('today') || '') ? q.get('today') : HB.TODAY
+    return { filing, risk, today }
   }
   function setMode(key, value) {
     const url = new URL(location.href)
-    const dflt = key === 'filing' ? 'corrected' : 'agent'
+    const dflt = key === 'filing' ? 'corrected' : key === 'risk' ? 'agent' : HB.TODAY
     if (value === dflt) url.searchParams.delete(key)
     else url.searchParams.set(key, value)
     location.href = url.toString()
@@ -260,6 +263,26 @@
         { value: 'agent', label: S.risk.agent },
         { value: 'guarantor', label: S.risk.guarantor },
       ], m.risk, (v) => setMode('risk', v)),
+    ])
+  }
+
+  /**
+   * The reference date, as a control.
+   *
+   * Every invoice sub-state and every aging bucket on the buyer surface is a statement
+   * about now, and the seed contains one credit invoice. Rather than inventing five more
+   * invoices to show five states, the reviewer moves the date and watches the one real
+   * invoice pass through them — which is also how the states actually occur.
+   */
+  function todayControl() {
+    const m = modes()
+    return el('div', { class: 'hb-risk' }, [
+      el('span', { class: 'hb-filter-label' }, S.common.asAt),
+      el('input', {
+        type: 'date', class: 'hb-input hb-input--date', value: m.today,
+        'aria-label': S.common.asAt,
+        onchange: (e) => { if (e.target.value) setMode('today', e.target.value) },
+      }),
     ])
   }
 
@@ -508,6 +531,6 @@
     el, frag, money, moneyText, postingChip, pill, routePill, termsPill, standingBadge,
     table, card, note, banner, calc, ratio, empty, loading, errorState,
     drawer, closeDrawer, router, shell, segmented,
-    modes, setMode, href, filingToggle, riskToggle, filingWarning, riskBanner, lifecycle,
+    modes, setMode, href, filingToggle, riskToggle, todayControl, filingWarning, riskBanner, lifecycle,
   }
 })
