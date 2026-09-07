@@ -28,8 +28,6 @@
     const R = []
     const check = (n, name, got, want, note) =>
       R.push({ n: String(n), name, pass: got === want, got, want, note })
-    const known = (n, name, got, want, note) =>
-      R.push({ n: String(n), name, pass: got === want, got, want, note, contested: true })
 
     // ══ Reconciliation ══════════════════════════════════════════════════════
     const b1042 = HB.balance('1042')
@@ -82,17 +80,18 @@
     check(10.1, 'Seller #1088 awaiting is 300.000 gross', M(b1088.awaitingGross), '300.000')
     check(10.2, 'Seller #1088 awaiting is 291.000 net', M(b1088.awaitingNet), '291.000')
     /*
-     * CONTESTED. The brief derives 56.400 as "60.00 − 3.60 netted dues", but ORD-3003 is
-     * Highbase-collected and immediate, so its own 1.80 of commission accrues too:
+     * 54.600, not the 56.400 the brief first stated. The brief derived it as
+     * "60.00 − 3.60 netted dues", which nets the dues on ORD-3002 but omits ORD-3003's
+     * own commission — and ORD-3003 is Highbase-collected and immediate, so it accrues
+     * like any other:
      *
      *     60.000 cash − 3.600 (ORD-3002 dues) − 1.800 (ORD-3003 commission) = 54.600
      *
-     * The stated formula and the stated figure disagree, and the formula is the one
-     * #1042's anchor case depends on. Implemented per the formula, and reported here
-     * rather than silently matched — a test rewritten to fit the code proves nothing.
+     * The brief has been corrected to match its own formula, which is the one #1042's
+     * anchor case depends on. See BRIEF-CORRECTIONS.md.
      */
-    known(10.3, 'Seller #1088 payable', M(b1088.payable), '56.400',
-      'formula gives 54.600 — see the note in selftest.js; brief omits ORD-3003’s own 1.800')
+    check(10.3, 'Seller #1088 payable is 54.600', M(b1088.payable), '54.600',
+      M(b1088.cashBacked) + ' cash − 3.600 dues − 1.800 commission')
 
     const agentRun = HB.settlementRun('1088', { risk: 'agent' })
     const guarantorRun = HB.settlementRun('1088', { risk: 'guarantor' })
@@ -218,22 +217,21 @@
       R.push({ n: '18.2', name: 'Every money value on the page renders 3 decimals', skip: true, note: 'no DOM — runs in the browser' })
     }
 
-    const failed = R.filter((r) => !r.skip && !r.pass && !r.contested)
-    const contested = R.filter((r) => r.contested && !r.pass)
-    if (!o.quiet) print(R, failed, contested)
-    return { results: R, failed, contested, ok: failed.length === 0 }
+    const failed = R.filter((r) => !r.skip && !r.pass)
+    if (!o.quiet) print(R, failed)
+    return { results: R, failed, ok: failed.length === 0 }
   }
 
-  function print(R, failed, contested) {
+  function print(R, failed) {
     const line = (r) => {
-      const tag = r.skip ? 'skip' : r.pass ? 'pass' : r.contested ? 'DIFF' : 'FAIL'
-      const got = r.skip ? '' : r.pass ? String(r.got) : 'got ' + JSON.stringify(r.got) + ', brief says ' + JSON.stringify(r.want)
+      const tag = r.skip ? 'skip' : r.pass ? 'pass' : 'FAIL'
+      const got = r.skip ? '' : r.pass ? String(r.got) : 'got ' + JSON.stringify(r.got) + ', expected ' + JSON.stringify(r.want)
       return ['  ' + tag, r.n.padEnd(5), r.name.padEnd(56), got, r.note ? '· ' + r.note : ''].join(' ')
     }
     const out = ['', 'Highbase Billing — acceptance tests', ''].concat(R.map(line))
     out.push('',
       R.filter((r) => r.pass).length + ' passed · ' + failed.length + ' failed · ' +
-      contested.length + ' contested · ' + R.filter((r) => r.skip).length + ' skipped', '')
+      R.filter((r) => r.skip).length + ' skipped', '')
     if (typeof console !== 'undefined') console.log(out.join('\n'))
   }
 

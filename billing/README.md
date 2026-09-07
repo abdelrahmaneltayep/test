@@ -39,11 +39,13 @@ written down — so the seller's wallet and the admin's exposure report cannot d
 
     node -e "require('./billing/selftest.js').run()"
 
-35 assertions. One prints `DIFF` rather than `pass` or `fail`: **#1088's payable comes to
-54.600 under the brief's own formula, where the brief states 56.400** — its arithmetic nets
-the 3.600 of dues but omits ORD-3003's own 1.800 of commission, and that order is
-Highbase-collected and immediate. It is reported rather than quietly matched, because a
-test rewritten to fit the code proves nothing.
+36 assertions, all passing.
+
+One figure in the brief was wrong and has been corrected: **#1088's payable is 54.600, not
+56.400.** The brief's arithmetic netted the 3.600 of dues but omitted ORD-3003's own 1.800
+of commission, and that order is Highbase-collected and immediate, so it accrues like any
+other. See `BRIEF-CORRECTIONS.md` for the two paste-ready edits and the verification that
+nothing else moves.
 
 ## The four modes
 
