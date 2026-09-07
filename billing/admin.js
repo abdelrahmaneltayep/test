@@ -7,8 +7,15 @@
  * separation of duties is the control. Hiding the action from Ops would teach nobody why
  * it is hidden; refusing it, with the reason, teaches exactly that.
  */
-;(function (HB, S, U) {
-  'use strict'
+;(function (root) {
+  root.HBApps = root.HBApps || {}
+  /*
+   * A named app rather than an IIFE that runs itself, so the four surfaces can be bundled
+   * into one file and the right one started on demand. The multi-file build calls this at
+   * the foot of its own page; the single-file build picks by role.
+   */
+  root.HBApps.admin = function (HB, S, U) {
+    'use strict'
 
   const el = U.el
 
@@ -602,4 +609,5 @@
   }).go()
 
   if (window.HBTest) window.HBTest.run()
-})(window.HB, window.HBStrings, window.HBUI)
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)

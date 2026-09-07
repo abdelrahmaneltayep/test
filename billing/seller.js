@@ -5,8 +5,15 @@
  * Nothing is stored and nothing is written down, so the wallet and the ledger cannot drift
  * apart: they are two renderings of one computation.
  */
-;(function (HB, S, U) {
-  'use strict'
+;(function (root) {
+  root.HBApps = root.HBApps || {}
+  /*
+   * A named app rather than an IIFE that runs itself, so the four surfaces can be bundled
+   * into one file and the right one started on demand. The multi-file build calls this at
+   * the foot of its own page; the single-file build picks by role.
+   */
+  root.HBApps.seller = function (HB, S, U) {
+    'use strict'
 
   const el = U.el
 
@@ -559,4 +566,5 @@
   // The acceptance tests run on load, including the DOM half of test 18 now that a
   // surface exists to scan.
   if (window.HBTest) window.HBTest.run()
-})(window.HB, window.HBStrings, window.HBUI)
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)

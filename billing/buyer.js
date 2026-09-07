@@ -8,8 +8,15 @@
  * which withholds the commission and funding stages in the component rather than trusting
  * this file to leave them out.
  */
-;(function (HB, S, U) {
-  'use strict'
+;(function (root) {
+  root.HBApps = root.HBApps || {}
+  /*
+   * A named app rather than an IIFE that runs itself, so the four surfaces can be bundled
+   * into one file and the right one started on demand. The multi-file build calls this at
+   * the foot of its own page; the single-file build picks by role.
+   */
+  root.HBApps.buyer = function (HB, S, U) {
+    'use strict'
 
   const el = U.el
 
@@ -576,4 +583,5 @@
 
   // Invariant 2 gets its DOM half here: the test scans the rendered buyer page.
   if (window.HBTest) window.HBTest.run()
-})(window.HB, window.HBStrings, window.HBUI)
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)

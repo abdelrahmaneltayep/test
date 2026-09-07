@@ -14,58 +14,7 @@
     <script src="strings.js"></script>
     <script src="selftest.js"></script>
     <script src="ui.js"></script>
-    <script>
-      /*
-       * Role picker, and the place the two unresolved decisions are set before entering a
-       * surface. They ride on the query string from here, so every link out of this page
-       * carries the assumptions the reviewer chose — a screenshot of a surface can be
-       * traced back to the mode it was taken under.
-       */
-      ;(function (HB, S, U) {
-        const el = U.el
-        const m = U.modes()
-
-        const roleCard = (page, name, note, mark) =>
-          el('a', { class: 'hb-card hb-pick-card', href: U.href('', page) }, [
-            el('div', { class: 'hb-pick-mark', 'aria-hidden': 'true' }, mark),
-            el('h2', {}, name),
-            el('p', {}, note),
-          ])
-
-        // A live figure on the picker, so the modes visibly do something before you commit
-        // to a surface. Both come out of data.js like everything else.
-        const b1088 = HB.balance('1088', m)
-        const over = HB.overstatement('1042', m)
-
-        document.body.appendChild(el('div', { class: 'hb-pick' },
-          el('div', { class: 'hb-pick-inner' }, [
-            el('h1', {}, S.personas.title),
-            el('p', {}, S.personas.lead),
-
-            el('div', { class: 'hb-card', style: { padding: '16px 18px', marginBottom: '22px' } }, [
-              el('div', { style: { display: 'flex', gap: '18px', flexWrap: 'wrap', alignItems: 'center' } }, [
-                U.riskToggle(),
-                el('span', { class: 'hb-filter-label', style: { marginInlineStart: '6px' } }, S.common.filing),
-                U.filingToggle(),
-              ]),
-              el('p', { class: 'hb-sub', style: { marginTop: '12px' } }, S.risk.banner),
-              el('p', { class: 'hb-sub', style: { marginTop: '8px' } }, [
-                'Right now: Sitra Industrial Tools releases ',
-                U.money(HB.settlementRun('1088', m).net, { currency: true }),
-                ' under this risk model, and the mis-filed return overstates Gulf Metal Supplies by ',
-                U.money(over.amount, { currency: true }), '.',
-              ]),
-            ]),
-
-            el('div', { class: 'hb-pick-grid' }, [
-              roleCard('buyer.html', S.personas.buyer, S.personas.buyerNote, '◇'),
-              roleCard('seller.html', S.personas.seller, S.personas.sellerNote, '◆'),
-              roleCard('admin.html', S.personas.admin, S.personas.adminNote, '◈'),
-            ]),
-          ])))
-
-        if (window.HBTest) window.HBTest.run()
-      })(window.HB, window.HBStrings, window.HBUI)
-    </script>
+    <script src="picker.js"></script>
+    <script>HBApps.picker(HB, HBStrings, HBUI)</script>
   </body>
 </html>

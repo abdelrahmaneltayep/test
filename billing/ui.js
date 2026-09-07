@@ -7,10 +7,10 @@
  * A formatter you can bypass is a formatter that gets bypassed.
  */
 ;(function (root, factory) {
-  const api = factory(root.HB, root.HBStrings)
+  const api = factory(root.HB, root.HBStrings, root)
   root.HBUI = api
   if (typeof module !== 'undefined' && module.exports) module.exports = api
-})(typeof globalThis !== 'undefined' ? globalThis : this, function (HB, S) {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (HB, S, root) {
   'use strict'
 
   // ── DOM helper ───────────────────────────────────────────────────────────
@@ -225,18 +225,70 @@
     const today = /^\d{4}-\d{2}-\d{2}$/.test(q.get('today') || '') ? q.get('today') : HB.TODAY
     return { filing, risk, today }
   }
+  /**
+   * Go somewhere. Two builds, two mechanisms, one call site.
+   *
+   * The multi-file build navigates: four pages, and the browser does the work. The single
+   * file cannot rely on that — a link whose path is unchanged is treated as a
+   * same-document navigation and the scripts never re-run, and inside an artifact iframe a
+   * full navigation is riskier still. So the bundle rewrites the URL and restarts itself
+   * in place. The URL is identical either way, which is what keeps a link shareable
+   * between the two builds.
+   */
+  function navigate(url) {
+    if (root.HB_SINGLE && typeof root.HBBoot === 'function') {
+      history.replaceState(null, '', url)
+      root.HBBoot()
+      return
+    }
+    location.href = url
+  }
+
   function setMode(key, value) {
     const url = new URL(location.href)
     const dflt = key === 'filing' ? 'corrected' : key === 'risk' ? 'agent' : HB.TODAY
     if (value === dflt) url.searchParams.delete(key)
     else url.searchParams.set(key, value)
-    location.href = url.toString()
+    navigate(url.toString())
   }
   /** Carry the current modes onto an outbound link, so they survive navigation. */
-  function href(hash, page) {
+  function href(hash) {
+    const qs = new URLSearchParams(location.search).toString()
+    return (qs ? '?' + qs : '') + (hash ? '#' + hash : '')
+  }
+
+  /**
+   * A link to another surface, carrying the current modes.
+   *
+   * One function because there are two builds. The multi-file version navigates to a
+   * sibling page; the single file carries all four surfaces and selects one with `role`.
+   * Every cross-surface link goes through here so neither build has to know about the
+   * other's shape.
+   */
+  function pageHref(role, hash) {
     const q = new URLSearchParams(location.search)
+    if (root.HB_SINGLE) {
+      /*
+       * An absolute URL, and an explicit role on every link including the picker's.
+       *
+       * Two problems, one fix. A relative `?query` link to the same path navigated — the
+       * address bar changed — without re-executing the page's scripts, so the surface
+       * never started; and dropping the role for the picker produced a link to the bare
+       * path, which is the current document minus its query and does not reload at all.
+       * Building the whole URL is what `setMode` already does, and it is the form that
+       * demonstrably reloads.
+       */
+      const url = new URL(location.href)
+      url.search = ''
+      for (const [k2, v2] of q) url.searchParams.set(k2, v2)
+      url.searchParams.set('role', role === 'index' ? 'picker' : role)
+      url.hash = hash ? '#' + hash : ''
+      return url.toString()
+    }
+    q.delete('role')
     const qs = q.toString()
-    return (page || '') + (qs ? '?' + qs : '') + (hash ? '#' + hash : '')
+    const page = { index: 'index.html', buyer: 'buyer.html', seller: 'seller.html', admin: 'admin.html' }[role]
+    return page + (qs ? '?' + qs : '') + (hash ? '#' + hash : '')
   }
 
   function segmented(options, current, onChange) {
@@ -364,7 +416,7 @@
     }
 
     app.appendChild(el('aside', { class: 'hb-side' }, [
-      el('a', { class: 'hb-brand', href: href('', 'index.html') }, [
+      el('a', { class: 'hb-brand', href: pageHref('index') }, [
         el('span', { class: 'hb-brand-mark', 'aria-hidden': 'true' }, 'H'), S.brand,
       ]),
       el('div', { class: 'hb-persona' }, [opts.persona, el('strong', {}, opts.personaName)]),
@@ -457,6 +509,13 @@
       opts.render(match.pattern, match.params)
       window.scrollTo({ top: 0, behavior: 'instant' })
     }
+    /*
+     * One hashchange listener at a time. The bundle restarts an app in place when the role
+     * changes, and without this each restart would leave the previous surface's router
+     * still listening — every hash change then rendering two screens into one body.
+     */
+    if (root.__hbRoute) window.removeEventListener('hashchange', root.__hbRoute)
+    root.__hbRoute = go
     window.addEventListener('hashchange', go)
     return { go, parse }
   }
@@ -590,6 +649,23 @@
     })
   }
 
+  /*
+   * Cross-surface links are ordinary anchors — right-clickable, copyable, correct — and in
+   * the bundle a delegated listener turns the click into an in-place restart. One listener
+   * rather than a handler on every link, so `pageHref` stays a pure function.
+   */
+  if (root.HB_SINGLE && typeof document !== 'undefined') {
+    document.addEventListener('click', (e) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return
+      const a = e.target.closest && e.target.closest('a[href]')
+      if (!a) return
+      const href = a.getAttribute('href') || ''
+      if (!/[?&]role=/.test(href)) return
+      e.preventDefault()
+      navigate(href)
+    })
+  }
+
   /** A link to the current screen with a demo state applied, or cleared. */
   function stateHref(state) {
     const url = new URL(location.href)
@@ -603,6 +679,6 @@
     modeStrip, demoState, stateHref,
     table, card, note, banner, calc, ratio, empty, loading, errorState,
     drawer, closeDrawer, router, shell, segmented,
-    modes, setMode, href, filingToggle, riskToggle, todayControl, filingWarning, riskBanner, lifecycle,
+    modes, setMode, navigate, href, pageHref, filingToggle, riskToggle, todayControl, filingWarning, riskBanner, lifecycle,
   }
 })
