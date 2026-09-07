@@ -177,7 +177,7 @@
     })
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(null),
       U.riskBanner(),
       U.note('Refuse, not warn',
         'Where the book asks for more than the cash on hand the run does not go out short — it does not go out. Paying it and flagging it is how a 0.300 gap becomes a support ticket and somebody else’s money.'),
@@ -218,7 +218,7 @@
     const canPay = who === 'finance'
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(s.id),
       U.note('The cash-backed test',
         'MAX(cashBacked + MIN(accrued, 0), 0). Seller #1067 is the worked example: the book owes 81.300, Highbase holds 81.000, and the 0.300 difference is a discount it has promised but not funded.'),
 
@@ -299,7 +299,7 @@
     const rows = HB.adjustments(m)
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(null),
       U.note('Separation of duties', S.admin.separation),
       el('div', { class: 'hb-riskbanner' }, [
         el('b', {}, S.admin.actor + ': ' + S.admin[who]),
@@ -453,7 +453,7 @@
     const unsecured = HB.sum(rows.map((r) => r.b.dues))
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(null),
       U.note('The row this model exists for',
         'A seller who collects every order himself generates commission Highbase cannot net against anything. Sorted worst first, because an exposure report ordered by seller id hides its own headline.'),
 
@@ -555,6 +555,20 @@
     const r = routes[current.pattern]
     shell.content.textContent = ''
     if (!r) { shell.content.appendChild(U.empty(S.common.notFound, S.common.notFoundNote)); return }
+    // The designed loading and error states, reachable from the sidebar. See ui.js.
+    const demo = U.demoState()
+    if (demo) {
+      shell.content.appendChild(el('div', { class: 'hb-stack' }, [
+        U.card({
+          title: r.title,
+          note: demo === 'loading' ? S.common.loadingNote : S.common.errorNote2,
+          flush: true,
+          body: demo === 'loading' ? U.loading(6) : U.errorState(),
+          foot: el('a', { class: 'hb-btn hb-btn--quiet', href: U.stateHref(null) }, '← ' + S.common.backToLive),
+        }),
+      ]))
+      return
+    }
     // The role's remit is explained where it bites — on the adjustments queue and the
     // run's pay button — not repeated as a header subtitle that pushes the toggles onto
     // a second line.

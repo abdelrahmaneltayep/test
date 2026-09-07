@@ -502,6 +502,20 @@
     const r = routes[current.pattern]
     shell.content.textContent = ''
     if (!r) { shell.content.appendChild(U.empty(S.common.notFound, S.common.notFoundNote)); return }
+    // The designed loading and error states, reachable from the sidebar. See ui.js.
+    const demo = U.demoState()
+    if (demo) {
+      shell.content.appendChild(el('div', { class: 'hb-stack' }, [
+        U.card({
+          title: r.title,
+          note: demo === 'loading' ? S.common.loadingNote : S.common.errorNote2,
+          flush: true,
+          body: demo === 'loading' ? U.loading(6) : U.errorState(),
+          foot: el('a', { class: 'hb-btn hb-btn--quiet', href: U.stateHref(null) }, '← ' + S.common.backToLive),
+        }),
+      ]))
+      return
+    }
     shell.setTitle(r.titleOf ? r.titleOf(current.params) : r.title,
       HB.buyer(BUYER_ID).name + ' · as at ' + U.modes().today)
     shell.setActive(r.nav)

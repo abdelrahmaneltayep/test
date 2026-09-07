@@ -143,6 +143,16 @@
       cycle: { id: '1088-jan', label: '8–22 Jan 2026', from: '2026-01-08', to: '2026-01-22' }, nextPayoutDate: '2026-01-23' , address: 'Plot 88, Sitra Industrial Area, Kingdom of Bahrain', vatNumber: '220003456700002'},
     { id: '1103', name: 'Riffa Building Materials', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING,
       cycle: { id: '1103-jan', label: '8–18 Jan 2026', from: '2026-01-08', to: '2026-01-18' }, nextPayoutDate: '2026-01-19' , address: 'Shop 21, Riffa Souq, Riffa 901, Kingdom of Bahrain', vatNumber: '220004567800002'},
+    /*
+     * EXAMPLE DATA — added to make the `held` state reachable.
+     *
+     * Every seller in the brief has all deliveries confirmed, so `held` computed to 0.000
+     * everywhere and one of the four headline states could not be reviewed at all. Marking
+     * an existing order unconfirmed was not an option: it would move a payable the
+     * acceptance tests name. So the state gets its own seller, and nothing specified moves.
+     */
+    { id: '1121', name: 'Muharraq Cold Store', rateCardId: 'rc-v1', arrearsCeiling: ARREARS_CEILING, exampleData: true,
+      cycle: { id: '1121-jan', label: '8–20 Jan 2026', from: '2026-01-08', to: '2026-01-20' }, nextPayoutDate: '2026-01-21', address: 'Cold Store 6, Muharraq Port Road, Muharraq 201, Kingdom of Bahrain', vatNumber: '220005678900002' },
   ]
   const seller = (id) => SELLERS.find((s) => s.id === id)
 
@@ -200,6 +210,11 @@
       terms: 'credit', dueDate: '2026-02-19', deliveryConfirmedAt: '2026-01-20' }),
     O({ id: 'ORD-3002', sellerId: '1088', buyerId: 'B-202', date: '2026-01-16', grossValue: bhd(120), paymentRoute: 'seller', deliveryConfirmedAt: '2026-01-17' }),
     O({ id: 'ORD-3003', sellerId: '1088', buyerId: 'B-201', date: '2026-01-18', grossValue: bhd(60), paymentRoute: 'highbase', deliveryConfirmedAt: '2026-01-19' }),
+
+    // ── #1121 — the held case. EXAMPLE DATA, see the seller note above. ──
+    O({ id: 'ORD-5001', sellerId: '1121', buyerId: 'B-201', date: '2026-01-18', grossValue: bhd(200), paymentRoute: 'highbase',
+      deliveryConfirmedAt: null, note: 'Collected by Highbase, delivery not yet confirmed — the cash is held.' }),
+    O({ id: 'ORD-5002', sellerId: '1121', buyerId: 'B-202', date: '2026-01-15', grossValue: bhd(80), paymentRoute: 'highbase', deliveryConfirmedAt: '2026-01-16' }),
 
     // ── #1103 — the structural failure case ──
     O({ id: 'ORD-4001', sellerId: '1103', buyerId: 'B-203', date: '2026-01-09', grossValue: bhd(2000), paymentRoute: 'seller', deliveryConfirmedAt: '2026-01-10' }),

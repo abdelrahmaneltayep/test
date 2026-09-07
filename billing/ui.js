@@ -286,7 +286,60 @@
     ])
   }
 
-  const filingWarning = () => modes().filing === 'as_filed' ? banner('bad', null, S.common.asFiledWarn) : null
+  /**
+   * The as-filed warning, scoped to whoever is being looked at.
+   *
+   * Saying "figures on this screen are overstated" on a seller whose book contains no
+   * mis-filed row is itself a false statement, and a warning that cries wolf on four
+   * screens out of five is a warning nobody reads on the fifth.
+   */
+  function filingWarning(sellerId) {
+    if (modes().filing !== 'as_filed') return null
+    const rec = sellerId ? HB.reconcile(sellerId, modes()) : HB.reconcileAll(modes())
+    return rec.passes
+      ? banner('warn', null, S.common.asFiledClean)
+      : banner('bad', null, S.common.asFiledWarn)
+  }
+
+  /**
+   * Which assumptions are not the default, named across the top of every screen.
+   *
+   * The toggles already show the state, but a toggle is something you look at when you go
+   * looking. This is for the screenshot that ends up in a deck: a reader who was not the
+   * one who set the mode should not have to notice a highlighted segment to know they are
+   * looking at the mis-filed book, or at the guarantor product.
+   */
+  function modeStrip() {
+    const m = modes()
+    const off = []
+    if (m.filing === 'as_filed') off.push({ label: S.common.asFiled, tone: 'bad', key: 'filing', back: 'corrected' })
+    if (m.risk === 'guarantor') off.push({ label: S.risk.guarantor, tone: 'warn', key: 'risk', back: 'agent' })
+    if (m.today !== HB.TODAY) off.push({ label: S.common.asAt + ' ' + m.today, tone: 'info', key: 'today', back: HB.TODAY })
+    if (off.length === 0) return null
+    return el('div', { class: 'hb-modestrip hb-modestrip--' + off[0].tone },
+      [el('span', { class: 'hb-modestrip-mark', 'aria-hidden': 'true' }, '●')]
+        .concat(off.map((o) => el('strong', {}, o.label)))
+        .concat([
+          el('span', {}, S.common.nonDefault),
+          el('button', {
+            class: 'hb-btn hb-btn--quiet hb-btn--sm', style: { marginInlineStart: 'auto' },
+            onclick: () => { for (const o of off) setMode(o.key, o.back) },
+          }, S.common.resetModes),
+        ]))
+  }
+
+  /**
+   * Loading and error, on demand.
+   *
+   * A static prototype has nothing to wait for, so these states would never appear — and a
+   * state nobody can see is a state nobody reviews. They are reachable by flag instead,
+   * from the sidebar, so the design for "this did not load" gets looked at before it is
+   * needed rather than after.
+   */
+  const demoState = () => {
+    const v = new URLSearchParams(location.search).get('state')
+    return v === 'loading' || v === 'error' ? v : null
+  }
 
   /** The risk model is undecided, and every surface says so rather than implying a choice. */
   const riskBanner = () => {
@@ -325,6 +378,11 @@
             try { sessionStorage.setItem('hb-notes', on ? '1' : '0') } catch (_) {}
           },
         }, S.common.designNotes),
+        el('div', { class: 'hb-statelinks' }, [
+          el('span', {}, S.common.showState),
+          el('a', { href: stateHref('loading') }, S.common.loading),
+          el('a', { href: stateHref('error') }, S.common.errorShort),
+        ]),
       ]),
     ]))
 
@@ -333,6 +391,7 @@
     const content = el('main', { class: 'hb-content', id: 'main' })
 
     app.appendChild(el('div', { class: 'hb-main' }, [
+      modeStrip(),
       el('header', { class: 'hb-top' }, [
         el('div', {}, [title, sub]),
         el('div', { class: 'hb-top-right' }, [
@@ -344,6 +403,10 @@
       content,
     ]))
 
+    // A skip link, because the navy sidebar is a lot of links to tab through before the
+    // first figure on the page.
+    document.body.insertBefore(
+      el('a', { class: 'hb-skip', href: '#main' }, S.common.skipToContent), document.body.firstChild)
     document.body.appendChild(app)
     try {
       if (sessionStorage.getItem('hb-notes') === '1') {
@@ -527,8 +590,17 @@
     })
   }
 
+  /** A link to the current screen with a demo state applied, or cleared. */
+  function stateHref(state) {
+    const url = new URL(location.href)
+    if (state) url.searchParams.set('state', state)
+    else url.searchParams.delete('state')
+    return url.toString()
+  }
+
   return {
     el, frag, money, moneyText, postingChip, pill, routePill, termsPill, standingBadge,
+    modeStrip, demoState, stateHref,
     table, card, note, banner, calc, ratio, empty, loading, errorState,
     drawer, closeDrawer, router, shell, segmented,
     modes, setMode, href, filingToggle, riskToggle, todayControl, filingWarning, riskBanner, lifecycle,

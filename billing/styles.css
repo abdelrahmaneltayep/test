@@ -158,6 +158,29 @@ body {
 }
 .hb-toggle[aria-pressed="true"] { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
 
+/* ── Skip link, mode strip, state links ─────────────────────────────────── */
+.hb-skip {
+  position: absolute; inset-inline-start: -9999px; top: 0; z-index: 200;
+  background: var(--navy); color: #fff; padding: 10px 16px;
+  border-radius: 0 0 var(--r-btn) 0; font-weight: 600; text-decoration: none;
+}
+.hb-skip:focus { inset-inline-start: 0; }
+
+/* Named across the top, not left to a highlighted segment nobody looks at. */
+.hb-modestrip {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 7px 28px; font-size: 12.5px; font-weight: 600;
+  border-bottom: 1px solid transparent;
+}
+.hb-modestrip--bad { background: var(--red-bg); color: var(--red); border-bottom-color: #F3D3DC; }
+.hb-modestrip--warn { background: var(--amber-bg); color: var(--orange-t); border-bottom-color: #F6E1BF; }
+.hb-modestrip--info { background: var(--blue-bg); color: var(--blue); border-bottom-color: #CBE1F5; }
+.hb-modestrip span:not(.hb-modestrip-mark) { font-weight: 400; }
+.hb-modestrip .hb-btn { color: inherit; }
+
+.hb-statelinks { display: flex; gap: 8px; align-items: center; margin-top: 10px; font-size: 11.5px; color: #6E88A3; }
+.hb-statelinks a { color: #9FB6CC; }
+
 /* ── Cards ──────────────────────────────────────────────────────────────── */
 /* min-width: 0 so a wide table inside a grid column shrinks and lets its own wrapper
    scroll, instead of forcing the whole page sideways. */

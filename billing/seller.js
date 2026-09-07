@@ -9,7 +9,34 @@
   'use strict'
 
   const el = U.el
-  const SELLER_ID = '1042'
+
+  /*
+   * Which seller's dashboard this is. The four seed sellers are four different shapes of
+   * the same model — good standing, a capped payout, credit orders, and one who collects
+   * everything himself — and the wallet is where the difference is legible. Hard-coding
+   * one of them would leave the other three visible only from the admin side.
+   */
+  function sellerId() {
+    const q = new URLSearchParams(location.search).get('seller')
+    return HB.SELLERS.some((s) => s.id === q) ? q : '1042'
+  }
+  const SELLER_ID = sellerId()
+
+  function sellerSwitch() {
+    return el('div', { class: 'hb-risk' }, [
+      el('span', { class: 'hb-filter-label' }, S.personas.seller),
+      el('select', {
+        class: 'hb-input hb-input--date', 'aria-label': S.personas.seller,
+        onchange: (e) => {
+          const url = new URL(location.href)
+          if (e.target.value === '1042') url.searchParams.delete('seller')
+          else url.searchParams.set('seller', e.target.value)
+          location.href = url.toString()
+        },
+      }, HB.SELLERS.map((s) => el('option', { value: s.id, selected: s.id === SELLER_ID || null },
+        s.name + (s.exampleData ? ' · example' : '')))),
+    ])
+  }
 
   const NAV = [
     { label: S.nav.money, items: [
@@ -27,6 +54,8 @@
     persona: S.personas.seller, personaName: HB.seller(SELLER_ID).name,
     title: S.wallet.title, nav: NAV,
   })
+
+  document.querySelector('.hb-top-right').prepend(sellerSwitch())
 
   const openOrder = (id) => U.lifecycle(id, { role: 'seller' })
 
@@ -55,7 +84,7 @@
       ])
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(SELLER_ID),
       U.riskBanner(),
       U.note('Where is the money?',
         'One balance answers "what does the book say" and hides three other questions: may we release it, can we actually pay it, and has anyone even been paid. Four states answer all four. Zero is still an answer, so an empty state stays on screen.'),
@@ -80,18 +109,24 @@
         U.card({
           title: S.wallet.cashPosition,
           note: S.fill(S.wallet.collectedLine, {
-            collected: U.moneyText(mix.online, { currency: true }),
-            n: HB.ordersFor(SELLER_ID).filter((o) => o.paymentRoute === 'highbase' && o.terms !== 'credit').length,
+            collected: U.moneyText(b.collected, { currency: true }),
+            n: HB.ordersFor(SELLER_ID).filter((o) => o.paymentRoute === 'highbase' && HB.isCollected(o, m)).length,
           }),
           actions: [U.standingBadge(st.grade), el('a', { class: 'hb-btn hb-btn--quiet hb-btn--sm', href: U.href('/standing') }, 'Why? →')],
           body: [
             U.note('Cash position', 'The sentence a flat balance cannot say: what Highbase holds, what it kept, and what it already paid — three numbers that produce the fourth.'),
-            U.calc([
-              { label: S.runs.grossCollected, value: mix.online },
-              { label: S.runs.commissionNetted, value: -b.commissionKept },
-              { label: S.runs.alreadyPaid, value: -b.paidOut },
-              { label: S.states.payable, value: b.payable, rule: true },
-            ]),
+            /*
+             * Held cash is a line here, not an omission. Without it the block reads
+             * 280.000 − 8.400 = 71.600 and simply does not add up — which on a screen
+             * whose whole job is to explain a number is worse than showing no working.
+             */
+            U.calc([{ label: S.runs.grossCollected, value: b.collected }]
+              .concat(b.held > 0 ? [{ label: S.wallet.heldBack, value: -b.held }] : [])
+              .concat([
+                { label: S.runs.commissionNetted, value: -b.commissionKept },
+                { label: S.runs.alreadyPaid, value: -b.paidOut },
+                { label: S.states.payable, value: b.payable, rule: true },
+              ])),
             el('p', { class: 'hb-sub', style: { marginTop: '12px' } }, S.fill(S.wallet.cashLine, {
               held: U.moneyText(b.cashBacked, { currency: true }),
               commission: U.moneyText(b.commissionKept, { currency: true }),
@@ -149,7 +184,7 @@
           : S.fill(S.standing.reduce, { ratio: a.ratio.toFixed(2) }))
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(SELLER_ID),
       U.note('Derived, not assigned',
         'Three ratios, recomputed every time the ledger moves. The bar shows the value; the tick shows the threshold. Nothing here is a score somebody set, which is why the seller can be told exactly what moves it.'),
 
@@ -263,7 +298,7 @@
       })
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(SELLER_ID),
       U.note('One ledger, six posting types',
         'Every row carries the code that says what kind of movement it is, the payment route, the terms, and the rate card that priced it. The running total is derived here — the last row equals the wallet’s book balance by construction.'),
       U.card({
@@ -302,7 +337,7 @@
     }
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(SELLER_ID),
       U.note('The payout rule',
         'A run never releases more than the cash Highbase holds. The pending run is computed with MAX(cashBacked + MIN(accrued, 0), 0) — open it to see the arithmetic rather than the result.'),
       U.card({
@@ -337,7 +372,7 @@
     const included = run.included.map(HB.order)
 
     return U.frag([
-      U.filingWarning(),
+      U.filingWarning(SELLER_ID),
       U.riskBanner(),
       U.note('MAX(cashBacked + MIN(accrued, 0), 0)',
         'The net is shown as the computation, not as a result. MIN(accrued, 0) is the load-bearing half: a positive accrual — a discount Highbase owes but has not funded in cash — never increases what can be released.'),
@@ -472,6 +507,20 @@
     const r = routes[current.pattern]
     shell.content.textContent = ''
     if (!r) { shell.content.appendChild(U.empty(S.common.notFound, S.common.notFoundNote)); return }
+    // The designed loading and error states, reachable from the sidebar. See ui.js.
+    const demo = U.demoState()
+    if (demo) {
+      shell.content.appendChild(el('div', { class: 'hb-stack' }, [
+        U.card({
+          title: r.title,
+          note: demo === 'loading' ? S.common.loadingNote : S.common.errorNote2,
+          flush: true,
+          body: demo === 'loading' ? U.loading(6) : U.errorState(),
+          foot: el('a', { class: 'hb-btn hb-btn--quiet', href: U.stateHref(null) }, '← ' + S.common.backToLive),
+        }),
+      ]))
+      return
+    }
     const s = HB.seller(SELLER_ID)
     shell.setTitle(r.titleOf ? r.titleOf(current.params) : r.title, s.name + ' · #' + SELLER_ID + ' · ' + s.cycle.label)
     shell.setActive(r.nav)
