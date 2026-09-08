@@ -326,7 +326,7 @@
               { label: S.adjustments.colFunder, cell: (a) => a.funder ? U.pill(a.funder === 'highbase' ? 'Highbase' : 'Seller', a.funder === 'highbase' ? 'blue' : 'orange') : el('span', { class: 'muted' }, '—') },
               { label: S.adjustments.colAmount, num: true, cell: (a) => U.money(a.amount, { tone: 'auto' }) },
               { label: S.adjustments.colState, cell: (a) => U.pill(S.adjustments[a.state], a.state === 'posted' ? 'green' : a.state === 'flagged' ? 'red' : 'orange') },
-              { label: S.adjustments.colEvidence, cell: (a) => a.evidence
+              { label: S.adjustments.colEvidence, wrap: true, cell: (a) => a.evidence
                 ? el('a', { href: '#', onclick: (e) => e.preventDefault(), title: S.common.exampleData }, a.evidence)
                 : el('span', { class: 'muted' }, '—') },
             ],

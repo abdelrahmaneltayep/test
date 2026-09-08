@@ -83,7 +83,7 @@
         onclick: () => spec.onRowClick(row),
         onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); spec.onRowClick(row) } },
       } : {})
-      for (const c of spec.columns) tr.appendChild(el('td', { class: c.num ? 'num' : null }, c.cell(row)))
+      for (const c of spec.columns) tr.appendChild(el('td', { class: [c.num ? 'num' : null, c.wrap ? 'wrap' : null].filter(Boolean).join(' ') || null }, c.cell(row)))
       body.appendChild(tr)
     }
     t.appendChild(body)

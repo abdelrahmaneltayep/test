@@ -337,16 +337,21 @@ body {
    a generic table reaches for. */
 .hb-table th {
   text-align: start; font-size: 13px; font-weight: 600; color: var(--navy);
-  padding: 13px 16px; background: var(--thead);
+  padding: 13px 13px; background: var(--thead);
   border-bottom: 1px solid var(--line); white-space: nowrap;
 }
-.hb-table td { padding: 15px 16px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+/* A date, an invoice number and a status are single indivisible tokens: wrapping them
+   costs a line and reads as damage. The wrapper scrolls instead. Prose cells opt back
+   out — the reason on an adjustment, the description on an invoice line. */
+.hb-table td { padding: 14px 13px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; white-space: nowrap; }
+.hb-table td .hb-sub, .hb-table--compact td:first-child, .hb-table td.wrap { white-space: normal; }
+.hb-table td.wrap { overflow-wrap: anywhere; }
 .hb-table tbody tr:last-child td { border-bottom: none; }
 .hb-table td.num, .hb-table th.num { text-align: right; }
 .hb-table tbody tr[data-click] { cursor: pointer; }
 .hb-table tbody tr[data-click]:hover { background: var(--blue-bg); }
 .hb-table tbody tr[data-click]:focus-visible { background: var(--blue-bg); }
-.hb-table tfoot td { padding: 14px 16px; font-weight: 700; background: var(--thead); border-top: 1px solid var(--line); }
+.hb-table tfoot td { padding: 14px 13px; font-weight: 700; background: var(--thead); border-top: 1px solid var(--line); }
 .hb-table .muted { color: var(--ink-3); }
 .pos { color: var(--green); }
 .neg { color: var(--red); }
