@@ -1,0 +1,2522 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HIGHBASE Billing — statements</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" />
+<style>
+/**
+ * HIGHBASE statements — design system.
+ *
+ * Standalone: this prototype shares no file with the other one in this repo, so it can be
+ * opened, moved or handed over on its own. The palette is the live product's, sampled for
+ * the RFQ work, so the two read as one product without being coupled.
+ *
+ * The module is a reporting layer, so tables are the primary surface rather than an
+ * afterthought. Everything here is tuned for reading columns of money.
+ */
+
+:root {
+  --navy: #021a37;
+  --navy-row: #102641;
+  --navy-accent: #3f9ee0;
+  --blue: #026dbd;
+  --blue-deep: #085da0;
+  --blue-bg: #edf7fe;
+  --orange: #fe8e00;
+  --orange-t: #a35c00;
+  --amber-bg: #fff5e6;
+  --green: #1f9d55;
+  --green-bg: #e9fdee;
+  --warn: #b4740a;
+  --red: #d0402a;
+  --red-bg: #feeee9;
+
+  --page: #fcfdfe;
+  --surface: #ffffff;
+  --line: #e6edf3;
+  --line-soft: #f0f4f8;
+  --ink: #0d2136;
+  --ink-2: #5b7080;
+  --ink-3: #93a4b4;
+  --field: #f6f8fb;
+  --thead: #f4f6f6;
+
+  --r-card: 14px;
+  --r-btn: 10px;
+  --r-sm: 8px;
+  --r-pill: 6px;
+
+  --shadow: 0 1px 2px rgba(2, 26, 55, .04), 0 6px 20px rgba(2, 26, 55, .05);
+  --shadow-lift: 0 10px 34px rgba(2, 26, 55, .12);
+  --sans: "Inter", "Cairo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Jost", "Inter", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+#hs-css-check { display: none !important; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0; background: var(--page); color: var(--ink);
+  font-family: var(--sans); font-size: 14px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Money lines up on the decimal wherever it appears. */
+[data-money], .num, .hs-table td.num, .hs-table th.num {
+  font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
+}
+[data-money] { white-space: nowrap; }
+
+:focus-visible { outline: 2px solid var(--navy-accent); outline-offset: 2px; border-radius: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ── Shell ────────────────────────────────────────────────────────────────── */
+.hs-app { display: grid; grid-template-columns: 262px 1fr; min-height: 100vh; }
+.hs-side {
+  background: var(--navy); color: #dbe9f6;
+  display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh;
+}
+.hs-brand {
+  display: flex; align-items: center; gap: 11px; padding: 20px 22px 6px;
+  color: #fff; text-decoration: none;
+  font-family: var(--display); font-weight: 300; letter-spacing: .07em; font-size: 25px; line-height: 1;
+}
+.hs-brand-mark {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: linear-gradient(135deg, var(--navy-accent), var(--blue));
+  display: grid; place-items: center; font-size: 13px; color: #fff; flex: none;
+}
+.hs-brand-sub { padding: 0 22px 16px; margin-inline-start: 37px; font-size: 11.5px; color: #7f9bb8; letter-spacing: .04em; }
+.hs-persona {
+  margin: 0 22px 14px; padding: 9px 11px;
+  background: var(--navy-row); border-radius: var(--r-sm); font-size: 12px; color: #9FB6CC;
+}
+.hs-persona strong { display: block; color: #fff; font-size: 13px; }
+
+.hs-nav { padding: 0; display: flex; flex-direction: column; overflow-y: auto; }
+.hs-nav-label { padding: 16px 22px 8px; font-size: 12.5px; font-weight: 700; color: #fff; }
+.hs-nav a {
+  display: flex; align-items: center; gap: 12px; padding: 11px 22px;
+  border-inline-start: 3px solid transparent;
+  color: #c7d9ea; text-decoration: none; font-size: 13.5px;
+}
+.hs-nav a:hover { background: rgba(255,255,255,.05); color: #fff; }
+.hs-nav a[aria-current="page"] {
+  background: var(--navy-row); border-inline-start-color: var(--navy-accent);
+  color: #fff; font-weight: 600;
+}
+.hs-nav-ico { width: 18px; text-align: center; opacity: .85; flex-shrink: 0; }
+.hs-side-foot { margin-top: auto; padding: 16px 22px 20px; border-top: 1px solid rgba(255,255,255,.11); }
+
+.hs-main { min-width: 0; display: flex; flex-direction: column; }
+.hs-top {
+  background: var(--surface); border-bottom: 1px solid var(--line);
+  padding: 12px 28px; display: flex; align-items: center; gap: 10px 16px;
+  flex-wrap: wrap; position: sticky; top: 0; z-index: 40;
+}
+.hs-top > :first-child { flex: 1 1 320px; min-width: 0; }
+.hs-top h1 { margin: 0; font-size: 23px; font-weight: 700; color: var(--navy); letter-spacing: -.01em; }
+.hs-top-sub { color: var(--orange); font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hs-top-right { margin-left: auto; display: flex; align-items: center; gap: 10px 14px; flex-wrap: wrap; justify-content: flex-end; }
+.hs-content { padding: 24px 28px 72px; max-width: 1500px; width: 100%; }
+
+/* A standing reminder of what this module is and is not. It reports; Finance moves money. */
+.hs-scope {
+  display: flex; gap: 9px; align-items: baseline; flex-wrap: wrap;
+  padding: 7px 28px; font-size: 12.5px;
+  background: var(--navy-row); color: #b9cfe4; border-bottom: 1px solid #1d3a59;
+}
+.hs-scope b { color: #fff; font-weight: 700; }
+
+/* ── Controls ─────────────────────────────────────────────────────────────── */
+.hs-seg { display: inline-flex; background: var(--line-soft); border-radius: var(--r-sm); padding: 3px; gap: 2px; }
+.hs-seg button {
+  border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--ink-2); padding: 5px 11px; border-radius: 6px; cursor: pointer;
+}
+.hs-seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(2,26,55,.12); }
+.hs-filter-label { font-size: 12px; color: var(--ink-3); font-weight: 600; }
+
+.hs-btn {
+  display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+  font: inherit; font-size: 14px; font-weight: 600;
+  border-radius: var(--r-btn); padding: 10px 18px; cursor: pointer;
+  border: 1.5px solid transparent; background: var(--line-soft); color: var(--ink);
+  transition: background .13s, border-color .13s, color .13s; text-decoration: none;
+}
+.hs-btn:hover:not(:disabled) { filter: brightness(.97); }
+.hs-btn--primary { background: var(--blue); color: #fff; box-shadow: 0 2px 8px rgba(2,109,189,.22); }
+.hs-btn--primary:hover:not(:disabled) { background: var(--blue-deep); filter: none; }
+.hs-btn--outline { background: #fff; border-color: var(--blue); color: var(--blue); }
+.hs-btn--outline:hover:not(:disabled) { background: var(--blue-bg); filter: none; }
+.hs-btn--quiet { background: none; color: var(--blue); padding: 6px 8px; font-size: 13.5px; }
+.hs-btn--sm { padding: 6px 12px; font-size: 13px; }
+
+.hs-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 600; color: #c7d9ea;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14);
+  border-radius: var(--r-sm); padding: 6px 11px; cursor: pointer; font-family: inherit;
+}
+.hs-toggle[aria-pressed="true"] { background: var(--navy-accent); border-color: var(--navy-accent); color: #fff; }
+
+.hs-select, .hs-input {
+  font: inherit; font-size: 13.5px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 7px 10px; background: var(--field); color: var(--ink);
+}
+
+/* ── Cards ────────────────────────────────────────────────────────────────── */
+.hs-card { min-width: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); box-shadow: var(--shadow); }
+.hs-card-head {
+  padding: 16px 18px; border-bottom: 1px solid var(--line-soft);
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.hs-card-head h2 { margin: 0; font-size: 16.5px; font-weight: 700; color: var(--navy); }
+.hs-card-head .hs-sub { margin: 0; }
+.hs-card-body { padding: 18px; }
+.hs-card-foot { padding: 14px 18px; border-top: 1px solid var(--line-soft); background: var(--thead); border-radius: 0 0 var(--r-card) var(--r-card); }
+.hs-sub { color: var(--ink-2); font-size: 12.5px; margin: 4px 0 0; }
+.hs-h3 { margin: 0 0 9px; font-size: 13.5px; font-weight: 700; color: var(--navy); }
+.hs-stack { display: grid; gap: 18px; min-width: 0; }
+.hs-cols { display: grid; gap: 18px; min-width: 0; }
+@media (min-width: 1120px) { .hs-cols--2 { grid-template-columns: 1fr 1fr; } .hs-cols--3-2 { grid-template-columns: 3fr 2fr; } }
+
+/* ── Summary figures ──────────────────────────────────────────────────────── */
+.hs-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.hs-fig {
+  border: 1px solid var(--line); border-radius: var(--r-card); background: var(--surface);
+  padding: 15px 17px; position: relative; overflow: hidden;
+}
+.hs-fig::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background: var(--line); }
+.hs-fig--pay::before { background: var(--green); }
+.hs-fig--due::before { background: var(--red); }
+.hs-fig--hold::before { background: var(--orange); }
+.hs-fig--info::before { background: var(--blue); }
+.hs-fig--pay { background: var(--green-bg); border-color: #c9eed6; }
+.hs-fig--due { background: var(--red-bg); border-color: #f6d5cd; }
+.hs-fig--hold { background: var(--amber-bg); border-color: #f6e1bf; }
+.hs-fig--info { background: var(--blue-bg); border-color: #cbe1f5; }
+.hs-fig-label { font-size: 12.5px; font-weight: 700; }
+.hs-fig--pay .hs-fig-label { color: var(--green); }
+.hs-fig--due .hs-fig-label { color: var(--red); }
+.hs-fig--hold .hs-fig-label { color: var(--warn); }
+.hs-fig--info .hs-fig-label { color: var(--blue); }
+.hs-fig-value { font-size: 26px; font-weight: 700; color: var(--navy); letter-spacing: -.02em; margin: 3px 0 2px; }
+.hs-fig-note { font-size: 12px; color: var(--ink-2); }
+.hs-fig-zero { background: var(--surface); border-color: var(--line); }
+.hs-fig-zero::before { background: var(--line); }
+.hs-fig-zero .hs-fig-value, .hs-fig-zero .hs-fig-label { color: var(--ink-3); }
+
+/* ── Tables ───────────────────────────────────────────────────────────────── */
+.hs-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.hs-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+.hs-table--compact { min-width: 400px; }
+.hs-table--wide { min-width: 1180px; }
+.hs-table th {
+  text-align: start; font-size: 12.5px; font-weight: 600; color: var(--navy);
+  padding: 12px 12px; background: var(--thead);
+  border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: bottom;
+}
+/* A date, an order id and an amount are single tokens; wrapping one costs a line and
+   reads as damage. The wrapper scrolls instead. Prose cells opt back out. */
+.hs-table td { padding: 12px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; white-space: nowrap; }
+.hs-table td.wrap, .hs-table td .hs-sub { white-space: normal; }
+.hs-table td.wrap { overflow-wrap: anywhere; }
+.hs-table tbody tr:last-child td { border-bottom: none; }
+.hs-table td.num, .hs-table th.num { text-align: right; }
+.hs-table tbody tr[data-click] { cursor: pointer; }
+.hs-table tbody tr[data-click]:hover { background: var(--blue-bg); }
+.hs-table tbody tr[data-click]:focus-visible { background: var(--blue-bg); }
+.hs-table tfoot td { padding: 13px 12px; font-weight: 700; background: var(--thead); border-top: 1px solid var(--line); white-space: nowrap; }
+.hs-table tfoot td.num { text-align: right; }
+.hs-table .muted { color: var(--ink-3); }
+.hs-table tbody tr.is-group td { background: var(--blue-bg); font-weight: 700; }
+.hs-table tbody tr.is-dropped td { color: var(--ink-3); text-decoration: line-through; }
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+
+/* ── Pills ────────────────────────────────────────────────────────────────── */
+.hs-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  border-radius: var(--r-pill); padding: 3px 9px;
+  font-size: 11.5px; font-weight: 700; white-space: nowrap;
+  background: var(--line-soft); color: var(--ink-2);
+}
+.hs-pill--green { background: var(--green-bg); color: var(--green); }
+.hs-pill--orange { background: var(--amber-bg); color: var(--orange-t); }
+.hs-pill--red { background: var(--red-bg); color: var(--red); }
+.hs-pill--blue { background: var(--blue-bg); color: var(--blue); }
+.hs-pill--navy { background: #E7EDF4; color: var(--navy); }
+
+/* A column whose definition the BRD leaves open is marked wherever it appears, so nobody
+   signs off on a number without seeing that its meaning is still a proposal. */
+.hs-draft {
+  display: inline-grid; place-items: center; width: 15px; height: 15px; margin-inline-start: 5px;
+  border-radius: 50%; background: var(--amber-bg); color: var(--orange-t);
+  font-size: 10px; font-weight: 700; cursor: help; vertical-align: 1px;
+}
+
+/* ── Banners and notes ────────────────────────────────────────────────────── */
+.hs-banner {
+  display: flex; gap: 10px; padding: 12px 14px;
+  border-radius: var(--r-btn); font-size: 13px; border: 1px solid transparent;
+}
+.hs-banner--info { background: var(--blue-bg); border-color: #cbe1f5; color: #0b4a7d; }
+.hs-banner--good { background: var(--green-bg); border-color: #c9eed6; color: #146c3a; }
+.hs-banner--warn { background: var(--amber-bg); border-color: #f6e1bf; color: var(--warn); }
+.hs-banner--bad { background: var(--red-bg); border-color: #f6d5cd; color: #a3301f; }
+.hs-banner strong { display: block; }
+
+/* The arithmetic shown as arithmetic, not as a result to be taken on trust. */
+.hs-calc {
+  background: #f1f7fd; border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 14px 16px; font-variant-numeric: tabular-nums; font-size: 13px;
+}
+.hs-calc-row { display: flex; justify-content: space-between; gap: 20px; padding: 3px 0; }
+.hs-calc-row--rule { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 9px; font-weight: 700; }
+.hs-calc-note { color: var(--ink-3); font-size: 12px; }
+.hs-expr {
+  font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--ink-2);
+  background: var(--line-soft); border-radius: 6px; padding: 10px 12px; margin-top: 10px;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+.hs-kv { display: grid; grid-template-columns: minmax(150px, auto) 1fr; gap: 8px 18px; font-size: 13px; }
+.hs-kv dt { color: var(--ink-2); }
+.hs-kv dd { margin: 0; text-align: end; font-weight: 600; }
+
+/* ── Drawer ───────────────────────────────────────────────────────────────── */
+.hs-scrim {
+  position: fixed; inset: 0; background: rgba(2, 26, 55, .38);
+  z-index: 90; display: flex; justify-content: flex-end; animation: hs-fade .16s ease-out;
+}
+@keyframes hs-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes hs-slide { from { transform: translateX(24px); opacity: .6 } to { transform: none; opacity: 1 } }
+.hs-drawer {
+  background: var(--surface); width: min(640px, 100%); height: 100%;
+  display: flex; flex-direction: column; box-shadow: var(--shadow-lift);
+  animation: hs-slide .2s cubic-bezier(.2, .7, .3, 1);
+}
+.hs-drawer-head { padding: 16px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: flex-start; gap: 12px; }
+.hs-drawer-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.hs-drawer-close {
+  margin-inline-start: auto; border: 0; background: var(--line-soft);
+  width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-size: 15px; color: var(--ink-2); line-height: 1;
+}
+.hs-drawer-body { padding: 20px; overflow-y: auto; flex: 1; }
+
+/* ── Empty / loading ──────────────────────────────────────────────────────── */
+.hs-empty { text-align: center; padding: 34px 20px; color: var(--ink-2); }
+.hs-empty-mark { font-size: 26px; opacity: .5; }
+.hs-empty h3 { margin: 8px 0 4px; font-size: 14px; color: var(--ink); }
+.hs-empty p { margin: 0 auto; max-width: 42ch; font-size: 13px; }
+.hs-skeleton {
+  height: 12px; border-radius: 6px; margin: 9px 0;
+  background: linear-gradient(90deg, var(--line-soft) 25%, #E8EEF5 37%, var(--line-soft) 63%);
+  background-size: 400% 100%; animation: hs-shimmer 1.3s ease infinite;
+}
+@keyframes hs-shimmer { from { background-position: 100% 50% } to { background-position: 0 50% } }
+
+/* ── Open questions ───────────────────────────────────────────────────────── */
+.hs-q { display: grid; gap: 12px; }
+.hs-q-item { border: 1px solid var(--line); border-radius: var(--r-card); padding: 14px 16px; background: var(--surface); }
+.hs-q-item h3 { margin: 0 0 3px; font-size: 14.5px; color: var(--navy); }
+.hs-q-ref { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.hs-q-read { font-size: 13px; color: var(--ink-2); margin-top: 6px; }
+
+/* ── Design notes ─────────────────────────────────────────────────────────── */
+.hs-note {
+  border-inline-start: 3px solid var(--navy-accent); background: #F2F8FD;
+  padding: 10px 12px; border-radius: 0 var(--r-btn) var(--r-btn) 0;
+  font-size: 12.5px; color: #1B4570; margin-bottom: 12px;
+}
+.hs-note b { color: var(--navy); }
+body:not(.hs-notes-on) .hs-note { display: none; }
+
+/* ── Role picker ──────────────────────────────────────────────────────────── */
+.hs-pick { min-height: 100vh; display: grid; place-items: center; padding: 40px 20px; background: var(--navy); }
+.hs-pick-inner { width: min(940px, 100%); }
+.hs-pick h1 { color: #fff; font-family: var(--display); font-weight: 300; letter-spacing: .05em; font-size: 34px; margin: 0 0 10px; }
+.hs-pick-inner > p { color: #9FB6CC; margin: 0 0 26px; font-size: 14px; max-width: 66ch; }
+.hs-pick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.hs-pick-card {
+  background: var(--surface); border-radius: var(--r-card); padding: 20px;
+  text-decoration: none; color: inherit; display: block; border: 1px solid transparent;
+}
+.hs-pick-card:hover { border-color: var(--navy-accent); }
+.hs-pick-card h2 { margin: 10px 0 4px; font-size: 16px; }
+.hs-pick-card p { color: var(--ink-2); font-size: 13px; margin: 0; }
+.hs-pick-mark { font-size: 24px; }
+
+@media (max-width: 1040px) {
+  .hs-app { grid-template-columns: 1fr; }
+  .hs-side { position: static; height: auto; flex-direction: row; align-items: center; flex-wrap: wrap; }
+  .hs-nav { flex-direction: row; flex-wrap: wrap; padding: 0 12px 12px; }
+  .hs-nav-label, .hs-side-foot, .hs-brand-sub { display: none; }
+  .hs-pick-grid { grid-template-columns: 1fr; }
+  .hs-content, .hs-top, .hs-scope { padding-inline: 16px; }
+}
+
+/* Export to PDF is the browser's print dialogue: the chrome goes, the statement stays. */
+@media print {
+  .hs-side, .hs-top-right, .hs-scope, .hs-noprint { display: none !important; }
+  .hs-app { grid-template-columns: 1fr; }
+  .hs-card { box-shadow: none; border-color: #ccc; break-inside: avoid; }
+  .hs-table { min-width: 0 !important; font-size: 11px; }
+  .hs-tablewrap { overflow: visible; }
+  body { background: #fff; }
+}
+
+</style>
+  </head>
+  <body>
+<div id="hs-css-check" style="margin:0;padding:14px 18px;background:#fff5e6;border-bottom:2px solid #fe8e00;color:#a35c00;font:14px/1.5 system-ui,sans-serif">
+<strong style="display:block;color:#021a37">This page's stylesheet did not load.</strong>
+The prototype below is working — every figure is computed — but it is rendering unstyled, which is a problem with how this page is being displayed rather than with the prototype. Opening <code>statements/index.html</code> from the repository shows it as designed.
+</div>
+<script>window.HBS_SINGLE = true</script>
+<script>
+;(function (root, factory) {
+  const api = factory()
+  root.HBS = Object.assign(root.HBS || {}, api)
+  if (typeof module !== 'undefined' && module.exports) module.exports = api
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict'
+
+  /**
+   * HIGHBASE Billing — statements module.
+   *
+   * Built from the BRD dated 7 September 2026 (Andaleeb A. Khogli), and deliberately
+   * scoped to what that document says: this module DOES NOT MOVE MONEY. It is a
+   * calculation and reporting layer. Every screen produces a number Finance acts on by
+   * hand; nothing here triggers a transfer, and no screen claims to.
+   *
+   * Two consequences run through the whole file:
+   *
+   *   1. Credit orders are out of scope (BRD §4). They are not modelled. The BRD flags
+   *      them as an open question and inventing them here would put a number in front of
+   *      a stakeholder that the business has not decided on.
+   *   2. A settlement cycle is *reported*, never executed (BRD §4, §11). `cycle()` returns
+   *      what Finance must pay and collect. It does not clear anything.
+   *
+   * Classic script rather than an ES module so the prototype opens from the filesystem —
+   * a module build needs a server, and a prototype that needs a server is one nobody
+   * double-clicks. One global, `HBS`, plus a Node export so the tests run headless.
+   */
+
+  // ── Money ────────────────────────────────────────────────────────────────
+  // Integer fils throughout. BHD is a three-decimal currency, so fils are exactly the
+  // display precision and nothing is rounded between what is stored and what is shown.
+  const FILS = 1000
+  const bhd = (n) => Math.round(n * FILS)
+  const round3 = (x) => (x < 0 ? -Math.round(-x) : Math.round(x))
+  const sum = (xs) => xs.reduce((a, b) => a + b, 0)
+
+  /** Bahrain VAT. The BRD's illustration says "90 BHD + 10 BHD VAT"; at the statutory
+   *  10% that pairing is 90 + 9. The rate is what the module applies. */
+  const VAT_RATE = 0.10
+
+  /** The one money formatter. Three decimals, always. */
+  function money(fils, opts) {
+    const o = opts || {}
+    const abs = Math.abs(fils)
+    const whole = String(Math.floor(abs / FILS)).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+    const frac = String(abs % FILS).padStart(3, '0')
+    const sign = fils < 0 ? '−' : o.signed && fils > 0 ? '+' : ''
+    return sign + whole + '.' + frac + (o.currency ? ' BHD' : '')
+  }
+
+  const pct = (x, dp) => (x * 100).toFixed(dp === undefined ? 1 : dp) + '%'
+
+  // ── Reporting periods (BRD §7.1) ─────────────────────────────────────────
+  const PERIODS = ['yearly', 'monthly', 'weekly', 'order']
+
+  // ── Subscription plans (BRD §7.5) ────────────────────────────────────────
+  /*
+   * Commission is not a flat platform rule. The BRD is explicit: it is per seller and per
+   * branch, pulled from the Subscription Plan module, and it can step at a volume
+   * threshold. So a rate is a function of (plan, units sold before this order), not a
+   * constant — and the statement records which rate priced each line, because "3% today"
+   * is not an answer to "why was this order charged what it was".
+   */
+  const PLANS = [
+    {
+      id: 'plan-basic', name: 'Basic', fixedFeePerCycle: bhd(0),
+      tiers: [{ fromUnits: 0, rate: 0.03 }],
+      note: 'Platform default — 3% on the pre-VAT base.',
+    },
+    {
+      id: 'plan-growth', name: 'Growth', fixedFeePerCycle: bhd(15),
+      tiers: [{ fromUnits: 0, rate: 0.03 }, { fromUnits: 40, rate: 0.04 }],
+      note: 'Steps to 4% once 40 units have shipped in the agreement year.',
+    },
+    {
+      id: 'plan-zero-rated', name: 'Wholesale agreement', fixedFeePerCycle: bhd(0),
+      tiers: [{ fromUnits: 0, rate: 0.05 }],
+      note: 'Negotiated 5% agreement rate. Goods are zero-rated for VAT.',
+    },
+  ]
+  const plan = (id) => PLANS.find((p) => p.id === id)
+
+  /** The rate that applies to an order, given how many units the seller had already
+   *  shipped before it. Tiers are read highest-threshold-first. */
+  function rateFor(planId, unitsBefore) {
+    const p = plan(planId)
+    const tiers = p.tiers.slice().sort((a, b) => b.fromUnits - a.fromUnits)
+    return (tiers.find((t) => unitsBefore >= t.fromUnits) || tiers[tiers.length - 1]).rate
+  }
+
+  // ── Sellers and branches (BRD §11: a branch is a sub-entity with its own terms) ──
+  const SELLERS = [
+    {
+      id: 'S-100', name: 'Awal Home Goods', planId: 'plan-basic',
+      cadence: 'weekly', vatNumber: '220001234500002',
+      address: 'Shop 14, Road 2827, Manama 428, Kingdom of Bahrain',
+      branches: [
+        { id: 'B-100-1', name: 'Manama branch', planId: 'plan-basic' },
+        { id: 'B-100-2', name: 'Muharraq branch', planId: 'plan-growth' },
+      ],
+    },
+    {
+      id: 'S-200', name: 'Bahrain Fresh Foods', planId: 'plan-zero-rated',
+      cadence: 'five_day', vatNumber: '220004567800002',
+      address: 'Unit 6, Central Market, Manama 305, Kingdom of Bahrain',
+      branches: [{ id: 'B-200-1', name: 'Central Market', planId: 'plan-zero-rated' }],
+      note: 'Carries the BRD §7.8 worked example.',
+    },
+    {
+      id: 'S-300', name: 'Sitra Tools & Hardware', planId: 'plan-growth',
+      cadence: 'weekly', vatNumber: '220007890100002',
+      address: 'Plot 44, Sitra Industrial Area, Kingdom of Bahrain',
+      branches: [{ id: 'B-300-1', name: 'Sitra yard', planId: 'plan-growth' }],
+    },
+  ]
+  const seller = (id) => SELLERS.find((s) => s.id === id)
+  const branch = (sellerId, branchId) =>
+    (seller(sellerId).branches || []).find((b) => b.id === branchId) || null
+
+  /** The plan that prices an order: the branch's if it carries its own, else the seller's. */
+  const planForOrder = (o) => {
+    const b = branch(o.sellerId, o.branchId)
+    return (b && b.planId) || seller(o.sellerId).planId
+  }
+
+  const BUYERS = [
+    { id: 'C-01', name: 'Layla Al Ansari', address: 'Flat 21, Building 930, Road 3319, Mahooz 333' },
+    { id: 'C-02', name: 'Hidd Catering W.L.L.', vatNumber: '220009988700002', address: 'Unit 2, Hidd Industrial Area, Hidd 115' },
+    { id: 'C-03', name: 'Yousif Trading Est.', vatNumber: '220003344500002', address: 'Shop 8, Riffa Souq, Riffa 901' },
+  ]
+  const buyer = (id) => BUYERS.find((b) => b.id === id)
+
+  // ── Orders ───────────────────────────────────────────────────────────────
+  /*
+   * An order carries lines, and a line carries the three factors the BRD names as the
+   * drivers of every statement entry (§7.3): the item price, whether that price is
+   * VAT-inclusive or exclusive, and the item discount.
+   *
+   * `paymentMethod` is a stored field, never inferred from which column holds a number.
+   * It is the fact that decides whether this order pays the seller or bills him.
+   */
+  const L = (o) => Object.assign({
+    qty: 1, vatInclusive: false, vatRate: VAT_RATE,
+    discount: { amount: 0, funder: null, reason: null },
+    status: 'fulfilled',
+  }, o)
+
+  const O = (o) => Object.assign({
+    shipping: 0, penalty: 0, returnFee: 0, unitsBefore: 0,
+  }, o)
+
+  const ORDERS = [
+    // ── S-200 · the BRD §7.8 worked example, reproduced exactly ──
+    /*
+     * The BRD's example gives commission of 10 on a 200 order and 5 on a 100 order — 5%,
+     * charged on the order total. Read against §7.5 (3%, on the pre-VAT base) it does not
+     * reconcile: 3% of a VAT-inclusive 100 is 2.727, not 5.
+     *
+     * Both rules can hold at once, and only one way: the seller is on a negotiated 5%
+     * agreement — which §7.5 explicitly allows — and the goods are zero-rated, so the
+     * pre-VAT base *is* the order total. That is how this seller is set up. It is a
+     * reading, not a fact, and it is listed in the open questions.
+     */
+    O({
+      id: 'ORD-0001', sellerId: 'S-200', branchId: 'B-200-1', buyerId: 'C-02',
+      date: '2026-09-01', paymentMethod: 'cod',
+      lines: [L({ sku: 'RICE-25', name: 'Basmati rice, 25kg', price: bhd(200), vatRate: 0, qty: 1 })],
+      note: 'BRD §7.8 Order A. Courier hands 200.000 to the seller; HB collects nothing.',
+    }),
+    O({
+      id: 'ORD-0002', sellerId: 'S-200', branchId: 'B-200-1', buyerId: 'C-02',
+      date: '2026-09-04', paymentMethod: 'hb_payment',
+      lines: [L({ sku: 'OIL-20', name: 'Sunflower oil, 20L', price: bhd(100), vatRate: 0, qty: 1 })],
+      note: 'BRD §7.8 Order B. Nets its own commission and the debt from Order A.',
+    }),
+
+    // ── S-100 · VAT treatment, discount attribution, rejected lines ──
+    O({
+      id: 'ORD-0010', sellerId: 'S-100', branchId: 'B-100-1', buyerId: 'C-01',
+      date: '2026-09-02', paymentMethod: 'hb_payment',
+      lines: [
+        // The BRD's own illustration: a 90 base with VAT charged on top.
+        L({ sku: 'RUG-3X2', name: 'Wool rug 3×2m', price: bhd(90), vatInclusive: false }),
+      ],
+    }),
+    O({
+      id: 'ORD-0011', sellerId: 'S-100', branchId: 'B-100-1', buyerId: 'C-03',
+      date: '2026-09-03', paymentMethod: 'hb_payment',
+      lines: [
+        // Same money, priced the other way round: 110.000 with the VAT already inside.
+        L({ sku: 'LAMP-BR', name: 'Brass floor lamp', price: bhd(110), vatInclusive: true }),
+      ],
+    }),
+    O({
+      id: 'ORD-0012', sellerId: 'S-100', branchId: 'B-100-1', buyerId: 'C-01',
+      date: '2026-09-05', paymentMethod: 'hb_payment',
+      lines: [
+        L({ sku: 'CUSH-SET', name: 'Cushion set of 4', price: bhd(60), vatInclusive: true,
+          discount: { amount: bhd(6), funder: 'hb', reason: 'HB launch coupon HB-SEP10' } }),
+      ],
+      note: 'HB funded the coupon, so HB absorbs it — the seller is made whole (BRD §7.6).',
+    }),
+    O({
+      id: 'ORD-0013', sellerId: 'S-100', branchId: 'B-100-1', buyerId: 'C-03',
+      date: '2026-09-06', paymentMethod: 'cod',
+      lines: [
+        L({ sku: 'MIRROR-L', name: 'Arched mirror, large', price: bhd(80), vatInclusive: true,
+          discount: { amount: bhd(8), funder: 'seller', reason: 'Seller clearance' } }),
+      ],
+      note: 'Seller-funded discount. It reduces his receivable, not HB’s commission base.',
+    }),
+    O({
+      id: 'ORD-0014', sellerId: 'S-100', branchId: 'B-100-2', buyerId: 'C-02',
+      date: '2026-09-07', paymentMethod: 'hb_payment', shipping: bhd(3.5),
+      lines: [
+        L({ sku: 'CHAIR-OAK', name: 'Oak dining chair', price: bhd(45), vatInclusive: false, qty: 2 }),
+        L({ sku: 'TABLE-OAK', name: 'Oak dining table', price: bhd(160), vatInclusive: false, status: 'rejected',
+          reason: 'Damaged in transit — rejected on delivery' }),
+      ],
+      unitsBefore: 41,
+      note: 'Rejected line carries no commission (BRD §7.7). Branch is on the Growth plan, past its volume step.',
+    }),
+
+    // ── S-300 · a COD run that builds debt, then one prepaid order that clears part of it ──
+    O({
+      id: 'ORD-0020', sellerId: 'S-300', branchId: 'B-300-1', buyerId: 'C-03',
+      date: '2026-09-01', paymentMethod: 'cod',
+      lines: [L({ sku: 'DRILL-18V', name: 'Cordless drill 18V', price: bhd(120), vatInclusive: false })],
+    }),
+    O({
+      id: 'ORD-0021', sellerId: 'S-300', branchId: 'B-300-1', buyerId: 'C-02',
+      date: '2026-09-03', paymentMethod: 'cod',
+      lines: [L({ sku: 'SAW-CIRC', name: 'Circular saw', price: bhd(230), vatInclusive: false })],
+    }),
+    O({
+      id: 'ORD-0022', sellerId: 'S-300', branchId: 'B-300-1', buyerId: 'C-01',
+      date: '2026-09-08', paymentMethod: 'cod', penalty: bhd(5),
+      lines: [
+        L({ sku: 'TOOLBOX', name: 'Steel toolbox', price: bhd(48), vatInclusive: false }),
+        L({ sku: 'GLOVES', name: 'Work gloves', price: bhd(6), vatInclusive: false, status: 'cancelled',
+          reason: 'Cancelled by buyer before dispatch' }),
+      ],
+      note: 'Late-dispatch penalty. The BRD leaves deductions homeless; here they get a column.',
+    }),
+    /*
+     * A seller who sells almost entirely on COD. His one prepaid order is too small to
+     * absorb the debt his COD orders have built, so the netting clears what it can, pays
+     * him nothing, and carries the rest — and the next COD order adds to it again. This
+     * is the shape the BRD's smart offsetting has to survive, and the reason a payout is
+     * floored at zero rather than allowed to run negative.
+     */
+    O({
+      id: 'ORD-0023', sellerId: 'S-300', branchId: 'B-300-1', buyerId: 'C-02',
+      date: '2026-09-10', paymentMethod: 'hb_payment',
+      lines: [L({ sku: 'BIT-SET', name: 'Drill bit set', price: bhd(15), vatInclusive: false })],
+      note: 'Too small to clear the accumulated debt: it nets what it can and pays out nothing.',
+    }),
+    O({
+      id: 'ORD-0024', sellerId: 'S-300', branchId: 'B-300-1', buyerId: 'C-03',
+      date: '2026-09-12', paymentMethod: 'cod',
+      lines: [L({ sku: 'LADDER-3M', name: 'Aluminium ladder 3m', price: bhd(300), vatInclusive: false })],
+      note: 'And the debt starts building again the moment it is nearly cleared.',
+    }),
+  ]
+
+  const order = (id) => ORDERS.find((o) => o.id === id)
+  const ordersFor = (sellerId) => ORDERS.filter((o) => o.sellerId === sellerId).slice().sort(byDate)
+  const ordersForBuyer = (buyerId) => ORDERS.filter((o) => o.buyerId === buyerId).slice().sort(byDate)
+  const byDate = (a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : a.id < b.id ? -1 : 1)
+
+  // ── Per-line arithmetic (BRD §7.3) ───────────────────────────────────────
+  /**
+   * A line resolved into money. `base` is the pre-VAT amount — the figure commission is
+   * charged on, whichever way the price was entered.
+   */
+  function lineAmounts(l) {
+    const gross = l.price * l.qty
+    const rate = l.vatRate === undefined ? VAT_RATE : l.vatRate
+    const base = l.vatInclusive ? round3(gross / (1 + rate)) : gross
+    const vat = l.vatInclusive ? gross - base : round3(gross * rate)
+    const discount = (l.discount && l.discount.amount) || 0
+    const funder = (l.discount && l.discount.funder) || null
+    return {
+      gross, base, vat, rate,
+      total: base + vat,                       // list price the buyer would pay undiscounted
+      discount, funder,
+      buyerPays: base + vat - discount,        // what the buyer actually hands over
+      counts: l.status === 'fulfilled',        // rejected and cancelled lines carry no commission
+    }
+  }
+
+  /**
+   * The commission base for an order.
+   *
+   * Neither kind of discount reduces it. The BRD says an HB-funded coupon is absorbed by
+   * HB, and that a seller-funded discount reduces "the seller's own receivable rather
+   * than HB's commission base" — so in both cases commission is charged on the pre-VAT
+   * base before any discount. Rejected and cancelled lines are excluded entirely (§7.7).
+   */
+  function commissionBase(o) {
+    return sum(o.lines.map(lineAmounts).filter((a) => a.counts).map((a) => a.base))
+  }
+
+  /** Everything derived for one order. The single place any statement figure comes from. */
+  function orderStatement(o) {
+    const amounts = o.lines.map(lineAmounts)
+    const live = amounts.filter((a) => a.counts)
+    const dropped = amounts.filter((a) => !a.counts)
+
+    const rate = rateFor(planForOrder(o), o.unitsBefore || 0)
+    const base = sum(live.map((a) => a.base))
+    const vat = sum(live.map((a) => a.vat))
+    const orderTotal = sum(live.map((a) => a.total))
+    const hbDiscount = sum(live.filter((a) => a.funder === 'hb').map((a) => a.discount))
+    const sellerDiscount = sum(live.filter((a) => a.funder === 'seller').map((a) => a.discount))
+    const buyerPays = sum(live.map((a) => a.buyerPays))
+    const commission = round3(base * rate)
+
+    // Shipping, returns and penalties. The BRD (§8) records that these have no column yet
+    // and asks where they live; this module gives them one rather than folding them into
+    // fixed fees, where they would stop being explicable to the seller.
+    const deduction = (o.shipping || 0) + (o.penalty || 0) + (o.returnFee || 0)
+
+    const cod = o.paymentMethod === 'cod'
+
+    /*
+     * The two directions, kept apart on purpose.
+     *
+     *   HB Payment — HB holds the buyer's cash, so the seller's receivable is what is
+     *                left after commission and deductions. HB funded coupons are added
+     *                back: the buyer paid less, and HB, not the seller, covers the gap.
+     *   COD        — the courier already handed the seller everything. Nothing is
+     *                receivable; what exists is a debt running the other way.
+     */
+    const sellerReceivable = cod ? 0 : buyerPays + hbDiscount - commission - deduction
+    const hbReceivable = cod ? commission + deduction - hbDiscount : 0
+
+    return {
+      id: o.id, date: o.date, sellerId: o.sellerId, branchId: o.branchId, buyerId: o.buyerId,
+      paymentMethod: o.paymentMethod, note: o.note || null,
+      lines: o.lines.map((l, i) => Object.assign({}, l, amounts[i])),
+      droppedCount: dropped.length,
+      droppedValue: sum(dropped.map((a) => a.total)),
+      rate, base, vat, orderTotal, buyerPays,
+      hbDiscount, sellerDiscount, commission, deduction,
+      sellerReceivable, hbReceivable,
+      // "Net Payables" is one of the five definitions the BRD leaves open (§12). Stated
+      // here as one signed number — positive HB owes the seller, negative the seller owes
+      // HB — and labelled as a proposal wherever it is displayed.
+      netPayable: sellerReceivable - hbReceivable,
+    }
+  }
+
+  // ── Smart offsetting (BRD §7.8) ──────────────────────────────────────────
+  /**
+   * The seller's ledger, in order, with the running balance the BRD asks for (§7.2).
+   *
+   * The netting is the point. A COD order books a debt; the next prepaid order pays this
+   * order's commission *and* whatever debt has accumulated, before anything is released.
+   * A payout is never negative — if the debt is larger than the order, the remainder
+   * stays outstanding and is carried to the next one.
+   */
+  function ledger(sellerId, opts) {
+    const k = opts || {}
+    const rows = []
+    let balance = 0        // signed: positive HB owes the seller
+    let outstanding = 0    // backdated COD debt still to be recovered
+
+    for (const o of ordersFor(sellerId)) {
+      const st = orderStatement(o)
+      let offset = 0
+      let payout = 0
+
+      if (o.paymentMethod === 'hb_payment') {
+        offset = Math.min(outstanding, st.sellerReceivable)
+        payout = st.sellerReceivable - offset
+        outstanding -= offset
+      } else {
+        outstanding += st.hbReceivable
+      }
+
+      balance += st.netPayable
+      rows.push(Object.assign({}, st, {
+        offset,                 // prior debt cleared by this order
+        payout,                 // what Finance would transfer for this order
+        outstandingAfter: outstanding,
+        balance,
+      }))
+    }
+    return { sellerId, rows, balance, outstanding, cadence: seller(sellerId).cadence }
+  }
+
+  /** Reporting periods (BRD §7.1). `order` is the ungrouped, per-order view. */
+  function periodKey(dateStr, period) {
+    const d = new Date(dateStr + 'T00:00:00Z')
+    if (period === 'yearly') return String(d.getUTCFullYear())
+    if (period === 'monthly') return dateStr.slice(0, 7)
+    if (period === 'weekly') {
+      const t = new Date(d)
+      t.setUTCDate(t.getUTCDate() - ((t.getUTCDay() + 6) % 7)) // ISO week, Monday start
+      return t.toISOString().slice(0, 10)
+    }
+    return dateStr
+  }
+
+  /** Group ledger rows into a period, summing the columns that are summable. */
+  function group(rows, period) {
+    if (period === 'order') return rows.map((r) => Object.assign({ key: r.id, rows: [r] }, r))
+    const out = []
+    for (const r of rows) {
+      const key = periodKey(r.date, period)
+      let g = out.find((x) => x.key === key)
+      if (!g) {
+        g = { key, rows: [], orderTotal: 0, base: 0, vat: 0, commission: 0, deduction: 0,
+              hbDiscount: 0, sellerDiscount: 0, sellerReceivable: 0, hbReceivable: 0,
+              netPayable: 0, offset: 0, payout: 0 }
+        out.push(g)
+      }
+      g.rows.push(r)
+      for (const f of ['orderTotal', 'base', 'vat', 'commission', 'deduction', 'hbDiscount',
+                       'sellerDiscount', 'sellerReceivable', 'hbReceivable', 'netPayable',
+                       'offset', 'payout']) g[f] += r[f]
+      g.balance = r.balance                    // closing balance of the period
+      g.outstandingAfter = r.outstandingAfter
+    }
+    return out
+  }
+
+  // ── Settlement cycle (BRD §7.9) ──────────────────────────────────────────
+  const CADENCES = {
+    weekly: { id: 'weekly', label: 'Weekly', days: 7 },
+    five_day: { id: 'five_day', label: 'Every 5 days', days: 5 },
+  }
+
+  /**
+   * What Finance has to do this cycle for one seller — and nothing more than that.
+   *
+   * This module has no gateway and executes nothing (BRD §4, §11), so a cycle is a
+   * report: pay this much, collect this much. `sellerDue` only exists when a seller's
+   * debt outlives every prepaid order available to net it against.
+   */
+  function cycle(sellerId) {
+    const l = ledger(sellerId)
+    const s = seller(sellerId)
+    const fee = plan(s.planId).fixedFeePerCycle
+    const payDue = sum(l.rows.map((r) => r.payout))
+    const netPay = Math.max(payDue - fee, 0)
+    return {
+      sellerId, cadence: CADENCES[s.cadence],
+      fixedFee: fee,
+      hbPaymentDue: netPay,                    // HB pays the seller
+      feeUnrecovered: Math.max(fee - payDue, 0),
+      sellerDue: l.outstanding,                // the seller remits to HB
+      recovered: sum(l.rows.map((r) => r.offset)),
+      balance: l.balance,
+      rows: l.rows,
+    }
+  }
+
+  const cycleAll = () => SELLERS.map((s) => cycle(s.id))
+
+  // ── Buyer statement (BRD §7.2, §9) ───────────────────────────────────────
+  /**
+   * Not cumulative, and carrying no commission — both are structural, not cosmetic.
+   *
+   * The returned rows are built from a separate function rather than by filtering the
+   * seller's, so there is no code path on which a commission figure can reach a buyer
+   * screen by being forgotten in an object.
+   */
+  function buyerStatement(buyerId, period) {
+    const rows = ordersForBuyer(buyerId).map((o) => {
+      const st = orderStatement(o)
+      return {
+        id: st.id, date: st.date, sellerId: st.sellerId,
+        sellerName: seller(st.sellerId).name,
+        paymentMethod: st.paymentMethod,
+        base: st.base, vat: st.vat, orderTotal: st.orderTotal,
+        discount: st.hbDiscount + st.sellerDiscount,
+        paid: st.buyerPays,
+        droppedCount: st.droppedCount, droppedValue: st.droppedValue,
+        lines: st.lines.map((l) => ({
+          sku: l.sku, name: l.name, qty: l.qty, status: l.status, reason: l.reason || null,
+          base: l.base, vat: l.vat, total: l.total, discount: l.discount, buyerPays: l.buyerPays,
+        })),
+      }
+    })
+    const p = period || 'order'
+    if (p === 'order') return { buyerId, period: p, rows, total: sum(rows.map((r) => r.paid)) }
+    const groups = []
+    for (const r of rows) {
+      const key = periodKey(r.date, p)
+      let g = groups.find((x) => x.key === key)
+      if (!g) { g = { key, rows: [], base: 0, vat: 0, orderTotal: 0, discount: 0, paid: 0 }; groups.push(g) }
+      g.rows.push(r)
+      for (const f of ['base', 'vat', 'orderTotal', 'discount', 'paid']) g[f] += r[f]
+    }
+    return { buyerId, period: p, rows, groups, total: sum(rows.map((r) => r.paid)) }
+  }
+
+  // ── Open questions (BRD §12), carried in the data rather than in a slide ──
+  /*
+   * The BRD ends on six unresolved items. They are modelled here so the prototype can
+   * show a reviewer exactly where a screen is standing on an undecided definition, and
+   * which way this build read it. A prototype that hides its assumptions is a prototype
+   * that gets signed off on them.
+   */
+  const OPEN_QUESTIONS = [
+    {
+      id: 'credit-orders', ref: '§4, §12', title: 'How are credit orders handled?',
+      status: 'not_modelled',
+      reading: 'Out of scope for Phase 1, so this prototype does not model them at all. No screen shows a credit state.',
+    },
+    {
+      id: 'definitions', ref: '§8, §12',
+      title: 'Final definitions of Net Payables, HB Transaction, Balance, HB Payment Due, Seller Due',
+      status: 'proposed',
+      reading: 'Each is implemented and labelled as a proposal. Net Payables is one signed number: positive means HB owes the seller.',
+    },
+    {
+      id: 'cadence', ref: '§7.9, §12', title: 'Is the 5-day/weekly cadence fixed or per seller?',
+      status: 'proposed',
+      reading: 'Modelled as per-seller. Awal and Sitra are weekly; Bahrain Fresh Foods is on five days.',
+    },
+    {
+      id: 'deduction', ref: '§8, §12', title: 'Where does HB Deduction live?',
+      status: 'proposed',
+      reading: 'Its own column. Folded into fixed fees it stops being explicable to the seller who was charged it.',
+    },
+    {
+      id: 'labels', ref: '§12', title: 'Labels for the seller-facing summary',
+      status: 'proposed',
+      reading: '“Your Balance” and “Your Dues” are used. “My financial status” names a screen, not a number.',
+    },
+    {
+      id: 'notify', ref: '§12', title: 'Are sellers told when a backdated debt is created?',
+      status: 'toggle',
+      reading: 'Built both ways. The switch on the seller statement shows the debt at the COD order, or only at settlement.',
+    },
+    {
+      id: 'worked-example', ref: '§7.5 vs §7.8', title: 'The worked example does not reconcile with the 3% rule',
+      status: 'reading',
+      reading: 'Its commissions are 10 on 200 and 5 on 100 — 5%, charged on the order total. Modelled as a 5% agreement rate on zero-rated goods, which satisfies both clauses. Needs confirming.',
+    },
+    {
+      id: 'hb-coupon-cod', ref: '§8', title: '“HB Receivable (incl. HB coupons)” on a COD order',
+      status: 'reading',
+      reading: 'Read as netting: HB owes the seller the coupon it funded, so it reduces what HB collects. The column name reads the other way and needs settling.',
+    },
+  ]
+
+  return {
+    FILS, VAT_RATE, PERIODS, CADENCES, PLANS, SELLERS, BUYERS, ORDERS, OPEN_QUESTIONS,
+    bhd, round3, sum, money, pct,
+    plan, planForOrder, rateFor, seller, branch, buyer, order,
+    ordersFor, ordersForBuyer,
+    lineAmounts, commissionBase, orderStatement,
+    ledger, group, periodKey,
+    cycle, cycleAll, buyerStatement,
+  }
+})
+
+</script>
+<script>
+;(function (root, factory) {
+  const api = factory()
+  root.HBSStrings = api
+  if (typeof module !== 'undefined' && module.exports) module.exports = api
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict'
+
+  /**
+   * Every display string, in one object.
+   *
+   * The BRD asks for English matching the current product, and flags the seller-facing
+   * labels as an open question (§12): the candidates noted were "Your Balance", "Your
+   * Dues" and "My financial status". This build uses the first two as the names of
+   * amounts and treats the third as the name of a screen, because it describes a place
+   * rather than a figure. Keeping the strings here means an Arabic RTL pass is a change,
+   * not a rewrite.
+   */
+
+  const fill = (tpl, vars) => tpl.replace(/\{(\w+)\}/g, (_, k) => (vars[k] === undefined ? '{' + k + '}' : vars[k]))
+
+  return {
+    fill,
+
+    brand: 'Highbase',
+    brandSub: 'Billing · statements',
+    scope: {
+      lead: 'Reporting only.',
+      body: 'This module calculates and reports. It moves no money — Finance executes every transfer by hand, from these numbers.',
+    },
+
+    common: {
+      export: 'Export',
+      exportCsv: 'Export CSV',
+      exportPdf: 'Print / PDF',
+      period: 'Period',
+      periods: { yearly: 'Yearly', monthly: 'Monthly', weekly: 'Weekly', order: 'Per order' },
+      all: 'All',
+      seller: 'Seller',
+      buyer: 'Buyer',
+      order: 'Order',
+      date: 'Date',
+      total: 'Total',
+      openOrder: 'Open {id}',
+      close: 'Close',
+      designNotes: 'Design notes',
+      loading: 'Loading',
+      draft: 'Definition not yet agreed — see the open questions',
+      notFound: 'Not found',
+      notFoundNote: 'Nothing here matches that address.',
+      empty: 'Nothing to show',
+      backTo: '← {label}',
+    },
+
+    method: {
+      hb_payment: 'HB Payment',
+      cod: 'COD',
+      hb_paymentNote: 'HB collected from the buyer, deducted its commission, and pays the remainder.',
+      codNote: 'The courier handed the full amount to the seller. HB collected nothing, so its commission became a debt.',
+    },
+
+    picker: {
+      title: 'HIGHBASE Billing — statements',
+      lead: 'One calculation layer, three readers. Sellers see a cumulative ledger with a running balance; buyers see their orders standing on their own, with no commission anywhere; HB Admin sees both, plus what Finance has to pay and collect this cycle.',
+      admin: 'HB Admin', adminNote: 'Every seller and buyer statement, the settlement cycle report, and the definitions still open.',
+      seller: 'Seller', sellerNote: 'A running-balance ledger, the backdated COD debt, and the plan that prices it.',
+      buyer: 'Buyer', buyerNote: 'Purchase orders, VAT and discounts. No commission — that is between HB and the seller.',
+    },
+
+    // The four amounts a seller reads. "Your Balance" and "Your Dues" are the BRD's own
+    // candidate labels (§12), used verbatim.
+    figures: {
+      balance: 'Your Balance',
+      balanceNote: 'What HB owes you, net of commission and fees, carried forward order over order.',
+      dues: 'Your Dues',
+      duesNote: 'Commission on COD orders, where you collected the cash and HB collected nothing.',
+      paymentDue: 'HB Payment Due',
+      paymentDueNote: 'What Finance transfers to you when this cycle runs.',
+      sellerDue: 'Seller Due',
+      sellerDueNote: 'What you remit to HB when this cycle runs, if netting has not cleared it.',
+      recovered: 'Recovered by netting',
+      recoveredNote: 'Backdated debt cleared against prepaid orders this period, without an invoice.',
+    },
+
+    seller: {
+      statement: 'My statement',
+      statementSub: 'Every order, with the balance carried forward',
+      financialStatus: 'My financial status',
+      dues: 'My dues',
+      duesSub: 'Backdated COD commission, and what will clear it',
+      plan: 'My plan',
+      planSub: 'The rate that prices each order, and where it comes from',
+      cumulative: 'This statement is cumulative: each order moves a balance that carries into the next.',
+      noDebt: 'No backdated debt',
+      noDebtNote: 'Every COD commission raised has been netted against a prepaid order.',
+      debtHeading: 'Backdated COD commission outstanding',
+      nettingTitle: 'How the debt clears',
+      nettingNote: 'When a prepaid order arrives, HB deducts that order’s commission and any debt still outstanding, then releases the rest. A payout never goes below zero — what is left over waits for the next order.',
+      notifyLabel: 'Tell the seller at the COD order',
+      notifyOn: 'The debt appears the moment a COD order is delivered.',
+      notifyOff: 'The debt appears only when the settlement cycle runs.',
+      notifyOpen: 'The BRD leaves this open (§12). The switch shows both readings.',
+    },
+
+    admin: {
+      sellers: 'Seller statements',
+      sellersSub: 'Level 1 — every seller, with what HB owes and is owed',
+      buyers: 'Buyer statements',
+      buyersSub: 'Level 3 — purchase history per buyer',
+      cycle: 'Settlement cycle',
+      cycleSub: 'What Finance pays and collects — this module reports it, it does not run it',
+      questions: 'Open questions',
+      questionsSub: 'Where this build is standing on a definition the BRD has not settled',
+      cycleWarn: 'Nothing here is executed. Every figure is an instruction to a person.',
+      feeUnrecovered: 'Fixed fee could not be recovered from this cycle’s payout.',
+    },
+
+    buyer: {
+      statement: 'My orders',
+      statementSub: 'Each order stands on its own',
+      notCumulative: 'This statement is not cumulative — there is no running account balance. Each order’s payment is tied to that order alone.',
+      noCommission: 'Commission is a matter between HB and the seller. It does not appear on your statement and does not change what you pay.',
+      paid: 'Paid',
+      orderDetail: 'Order {id}',
+    },
+
+    columns: {
+      orderDate: 'Order date',
+      orderTotal: 'Order total',
+      sellerReceivable: 'Seller receivable',
+      hbReceivable: 'HB receivable',
+      hbReceivableFull: 'HB receivable (incl. HB coupons)',
+      commission: 'HB commission',
+      fixedFees: 'HB fixed fees & subscriptions',
+      deduction: 'HB deduction',
+      netPayable: 'Net payables',
+      hbTransaction: 'HB transaction',
+      balance: 'Balance',
+      paymentDue: 'HB payment due',
+      sellerDue: 'Seller due',
+      method: 'Method',
+      rate: 'Rate',
+      base: 'Pre-VAT base',
+      vat: 'VAT',
+      discount: 'Discount',
+      offset: 'Netted',
+      payout: 'Payout',
+      outstanding: 'Outstanding after',
+      status: 'Status',
+      item: 'Item',
+      qty: 'Qty',
+      price: 'Price',
+    },
+
+    // The five definitions the BRD marks [Draft] (§8) plus the deduction column it says
+    // does not exist yet. Shown on hover wherever the column appears.
+    draftDefs: {
+      netPayable: 'BRD §8 marks this [Draft]. Read here as one signed number: positive means HB owes the seller, negative means the seller owes HB.',
+      hbTransaction: 'BRD §8 marks this [Draft]. Read here as what actually reaches HB’s account on this order — the commission it keeps out of money it collected.',
+      balance: 'BRD §8 marks this [Draft]. Read here as the cumulative net position carried forward until the next settlement.',
+      paymentDue: 'BRD §8 marks this [Draft]. Read here as the amount Finance transfers to the seller when the cycle runs.',
+      sellerDue: 'BRD §8 marks this [Draft]. Read here as the amount the seller remits to HB when the cycle runs.',
+      deduction: 'The BRD notes this has no column yet (§8, §12) and asks where it lives. Given one here: shipping, returns and penalties, itemised.',
+      hbReceivable: 'The column name says "incl. HB coupons". Read here as netting — a coupon HB funded reduces what HB collects from the seller. The name reads the other way; it needs settling.',
+    },
+
+    calc: {
+      title: 'How this order was calculated',
+      base: 'Pre-VAT base',
+      vatLine: 'VAT at {rate}',
+      listTotal: 'Order total',
+      discountHb: 'HB-funded discount',
+      discountSeller: 'Seller-funded discount',
+      buyerPaid: 'Buyer paid',
+      commissionLine: 'HB commission at {rate} on the pre-VAT base',
+      couponBack: 'HB-funded coupon, added back',
+      deductionLine: 'HB deduction',
+      receivable: 'Seller receivable',
+      receivableCod: 'Seller collected directly',
+      debtRaised: 'Booked as HB receivable',
+      offsetLine: 'Prior debt netted',
+      payoutLine: 'Released to the seller',
+      droppedLine: '{n} line not charged commission',
+      droppedLines: '{n} lines not charged commission',
+      droppedNote: 'Rejected and cancelled items carry no commission (BRD §7.7), which is why this order’s commission is not a straight percentage of its listed total.',
+      baseNote: 'Commission is charged on the pre-VAT base, whichever way the item price was entered.',
+      // The same row on a buyer screen. A buyer has no commission, so explaining its base
+      // to them is a seller-side note that wandered onto the wrong surface.
+      baseNoteBuyer: 'The price before VAT. VAT is shown on its own line below.',
+      couponNote: 'HB funded this coupon, so HB absorbs it. It is not deducted from the seller.',
+      sellerDiscNote: 'The seller funded this discount. It reduces what he receives, not the commission base.',
+    },
+  }
+})
+
+</script>
+<script>
+;(function (root, factory) {
+  const api = factory(root.HBS || (typeof require !== 'undefined' ? require('./data.js') : null))
+  root.HBSTest = api
+  if (typeof module !== 'undefined' && module.exports) module.exports = api
+})(typeof globalThis !== 'undefined' ? globalThis : this, function (HBS) {
+  'use strict'
+
+  /**
+   * Acceptance tests for the statements module.
+   *
+   * The BRD commits to exactly one worked example (§7.8) and a handful of stated rules.
+   * Those are the assertions that matter: everything else here guards a rule the document
+   * states in prose, where a quiet regression would otherwise be invisible on screen.
+   */
+
+  const R = []
+  const m = (v) => HBS.money(v, { currency: false })
+
+  function ok(id, pass, detail) { R.push({ id, pass: !!pass, detail: detail === undefined ? '' : String(detail) }) }
+  function eq(id, actual, expected, note) {
+    ok(id, actual === expected, m(actual) + (actual === expected ? '' : ' ≠ ' + m(expected)) + (note ? ' · ' + note : ''))
+  }
+
+  function run() {
+    R.length = 0
+
+    // ── BRD §7.8 · the worked example, the one figure the document commits to ──
+    const l200 = HBS.ledger('S-200')
+    const a = l200.rows[0]
+    const b = l200.rows[1]
+    eq('7.8.1  Order A books a 10.000 HB receivable', a.hbReceivable, HBS.bhd(10))
+    eq('7.8.2  Order A pays the seller nothing', a.payout, 0, 'courier paid him direct')
+    eq('7.8.3  Order B commission is 5.000', b.commission, HBS.bhd(5))
+    eq('7.8.4  Order B offsets the prior 10.000', b.offset, HBS.bhd(10))
+    eq('7.8.5  Order B pays out 85.000', b.payout, HBS.bhd(85))
+    eq('7.8.6  the debt is fully cleared', l200.outstanding, 0)
+
+    // ── §7.5 · commission on the pre-VAT base, whichever way the price was entered ──
+    const excl = HBS.orderStatement(HBS.order('ORD-0010'))   // 90.000 + VAT
+    const incl = HBS.orderStatement(HBS.order('ORD-0011'))   // 110.000 VAT-inclusive
+    eq('7.5.1  VAT-exclusive: base is the price', excl.base, HBS.bhd(90))
+    eq('7.5.2  VAT-exclusive: commission on the base', excl.commission, HBS.bhd(2.7))
+    eq('7.5.3  VAT-inclusive: VAT is taken back out', incl.base, HBS.round3(HBS.bhd(110) / 1.1))
+    ok('7.5.4  commission never touches the VAT',
+      excl.commission === HBS.round3(excl.base * excl.rate) &&
+      incl.commission === HBS.round3(incl.base * incl.rate), 'both orders')
+
+    // ── §7.6 · discount attribution ──
+    const hbCoupon = HBS.orderStatement(HBS.order('ORD-0012'))
+    ok('7.6.1  HB coupon does not reduce the commission base',
+      hbCoupon.base === HBS.round3(HBS.bhd(60) / 1.1), m(hbCoupon.base))
+    eq('7.6.2  HB coupon is added back to the seller’s receivable',
+      hbCoupon.sellerReceivable,
+      hbCoupon.buyerPays + HBS.bhd(6) - hbCoupon.commission - hbCoupon.deduction,
+      'seller made whole')
+    const sellerDisc = HBS.orderStatement(HBS.order('ORD-0013'))
+    ok('7.6.3  seller-funded discount does not reduce the commission base',
+      sellerDisc.base === HBS.round3(HBS.bhd(80) / 1.1), m(sellerDisc.base))
+    eq('7.6.4  seller-funded discount is borne by the seller',
+      sellerDisc.sellerDiscount, HBS.bhd(8))
+
+    // ── §7.7 · rejected and cancelled items carry no commission ──
+    const rej = HBS.orderStatement(HBS.order('ORD-0014'))
+    eq('7.7.1  rejected line is excluded from the base', rej.base, HBS.bhd(90), '2 × 45.000')
+    ok('7.7.2  the order says why the commission is lower',
+      rej.droppedCount === 1 && rej.droppedValue > 0, rej.droppedCount + ' line dropped')
+    const cancelled = HBS.orderStatement(HBS.order('ORD-0022'))
+    eq('7.7.3  cancelled line is excluded too', cancelled.base, HBS.bhd(48))
+
+    // ── §7.5 · the rate comes from the plan, and can step on volume ──
+    ok('7.5.5  branch plan overrides the seller’s',
+      HBS.planForOrder(HBS.order('ORD-0014')) === 'plan-growth', 'Muharraq is on Growth')
+    ok('7.5.6  the volume tier applies past its threshold',
+      rej.rate === 0.04, HBS.pct(rej.rate) + ' at 41 units')
+    ok('7.5.7  below the threshold the base rate applies',
+      HBS.rateFor('plan-growth', 10) === 0.03, HBS.pct(HBS.rateFor('plan-growth', 10)))
+
+    // ── §7.8 · netting never pays out negative, and carries the remainder ──
+    const l300 = HBS.ledger('S-300')
+    ok('7.8.7  every payout is non-negative', l300.rows.every((r) => r.payout >= 0),
+      l300.rows.map((r) => m(r.payout)).join(' · '))
+    ok('7.8.8  debt beyond the prepaid order is carried, not lost',
+      l300.outstanding > 0, m(l300.outstanding) + ' still outstanding')
+    const offsetSum = HBS.sum(l300.rows.map((r) => r.offset))
+    const codSum = HBS.sum(l300.rows.map((r) => r.hbReceivable))
+    eq('7.8.9  recovered + outstanding = debt raised', offsetSum + l300.outstanding, codSum)
+
+    // ── §7.2 · the seller ledger is cumulative, the buyer statement is not ──
+    const cum = l300.rows.map((r) => r.balance)
+    ok('7.2.1  the seller balance carries forward',
+      cum.every((v, i) => i === 0 || v === cum[i - 1] + l300.rows[i].netPayable), cum.map(m).join(' → '))
+    const bs = HBS.buyerStatement('C-02', 'order')
+    ok('7.2.2  the buyer statement carries no running balance',
+      bs.rows.every((r) => !('balance' in r)), bs.rows.length + ' orders')
+
+    // ── §9 · no commission may reach a buyer screen ──
+    const banned = ['commission', 'rate', 'hbReceivable', 'sellerReceivable', 'netPayable', 'offset', 'payout']
+    let leaked = []
+    for (const b of HBS.BUYERS) {
+      const st = HBS.buyerStatement(b.id, 'order')
+      for (const r of st.rows) leaked = leaked.concat(banned.filter((k) => k in r).map((k) => b.id + '.' + k))
+    }
+    ok('9.1  no commission field on any buyer row', leaked.length === 0, leaked.join(', ') || 'clean')
+
+    // ── §7.1 · four reporting periods, all of which reconcile to the same money ──
+    for (const p of ['yearly', 'monthly', 'weekly', 'order']) {
+      const g = HBS.group(l300.rows, p)
+      const tot = HBS.sum(g.map((x) => x.commission))
+      const flat = HBS.sum(l300.rows.map((r) => r.commission))
+      ok('7.1.' + p + '  grouping preserves the total', tot === flat, m(tot))
+    }
+
+    // ── §4, §11 · the module reports, it does not move money ──
+    const c = HBS.cycle('S-300')
+    ok('4.1  a cycle is a report, not an execution',
+      typeof c.hbPaymentDue === 'number' && typeof c.sellerDue === 'number' &&
+      !('execute' in c) && !('paid' in c), 'pay ' + m(c.hbPaymentDue) + ' · collect ' + m(c.sellerDue))
+    ok('4.2  credit orders are not modelled',
+      HBS.ORDERS.every((o) => o.paymentMethod === 'cod' || o.paymentMethod === 'hb_payment'),
+      'only COD and HB Payment exist')
+
+    // ── §7.9 · cadence is per seller ──
+    ok('7.9.1  cadence is carried per seller',
+      HBS.cycle('S-200').cadence.id === 'five_day' && HBS.cycle('S-300').cadence.id === 'weekly',
+      'five_day · weekly')
+
+    // ── Money formatting: three decimals, always ──
+    const samples = [0, 1, HBS.bhd(85), HBS.bhd(-10), HBS.bhd(1234.5)]
+    ok('fmt.1  every amount renders with 3 decimals',
+      samples.every((v) => /^[−+]?[\d,]+\.\d{3}$/.test(HBS.money(v))),
+      samples.map((v) => HBS.money(v)).join(' · '))
+
+    const passed = R.filter((r) => r.pass).length
+    const failed = R.length - passed
+    const line = passed + ' passed · ' + failed + ' failed'
+    if (typeof console !== 'undefined') {
+      for (const r of R) if (!r.pass) console.error('FAIL  ' + r.id + '  ' + r.detail)
+      console.log(line)
+    }
+    return { results: R.slice(), passed, failed, line }
+  }
+
+  return { run, results: () => R.slice() }
+})
+
+</script>
+<script>
+;(function (root) {
+  'use strict'
+
+  /**
+   * Shared components for the statements module.
+   *
+   * The order drawer is the piece that matters: one component, opened from any row on any
+   * of the three surfaces, that withholds the commission stages when the reader is a
+   * buyer. Building it once is what makes "no commission on a buyer screen" a property of
+   * the code rather than a promise in a review.
+   */
+
+  const HBS = root.HBS
+  const S = root.HBSStrings
+
+  // ── DOM ──────────────────────────────────────────────────────────────────
+  function el(tag, attrs, kids) {
+    const n = document.createElement(tag)
+    for (const k in attrs || {}) {
+      const v = attrs[k]
+      if (v === null || v === undefined || v === false) continue
+      if (k === 'style' && typeof v === 'object') Object.assign(n.style, v)
+      else if (k.slice(0, 2) === 'on' && typeof v === 'function') n.addEventListener(k.slice(2), v)
+      else n.setAttribute(k, v === true ? '' : v)
+    }
+    append(n, kids)
+    return n
+  }
+  function append(n, kids) {
+    if (kids === null || kids === undefined || kids === false) return
+    if (Array.isArray(kids)) { for (const k of kids) append(n, k); return }
+    n.appendChild(kids instanceof Node ? kids : document.createTextNode(String(kids)))
+  }
+  const clear = (n) => { while (n.firstChild) n.removeChild(n.firstChild) }
+
+  /**
+   * The one money renderer. Every amount on every screen goes through it, which is what
+   * makes "always three decimals" checkable rather than hoped for — the audit walks
+   * [data-money] and finds anything that did not.
+   */
+  function money(fils, opts) {
+    const o = opts || {}
+    const text = HBS.money(fils, { currency: o.currency, signed: o.signed })
+    const cls = []
+    if (o.tone === 'pos' || (o.tone === 'auto' && fils > 0)) cls.push('pos')
+    if (o.tone === 'neg' || (o.tone === 'auto' && fils < 0)) cls.push('neg')
+    if (o.muted || fils === 0) cls.push('muted')
+    return el('span', { 'data-money': '', class: cls.join(' ') || null }, text)
+  }
+
+  // ── Query-string state ───────────────────────────────────────────────────
+  const params = () => new URLSearchParams(location.search)
+  function setParam(k, v) {
+    const p = params()
+    if (v === null) p.delete(k); else p.set(k, v)
+    location.search = p.toString()
+  }
+  const getParam = (k, dflt) => params().get(k) || dflt
+
+  /** Reporting period, carried on the URL so a link reproduces the view (BRD §7.1). */
+  const period = () => {
+    const p = getParam('period', 'order')
+    return HBS.PERIODS.indexOf(p) < 0 ? 'order' : p
+  }
+  function periodSwitch() {
+    const cur = period()
+    return el('span', { class: 'hs-seg', role: 'group', 'aria-label': S.common.period },
+      HBS.PERIODS.map((p) => el('button', {
+        type: 'button', 'aria-pressed': String(p === cur), onclick: () => setParam('period', p),
+      }, S.common.periods[p])))
+  }
+
+  /** BRD §12: are sellers told at the COD order, or only at settlement? Both, on a switch. */
+  const notifyEarly = () => getParam('notify', 'early') === 'early'
+
+  /**
+   * A link to another role.
+   *
+   * The multi-file build has a page per role; the bundle has one page and switches on
+   * ?role=. Routing every cross-role link through here means neither build knows about
+   * the other's shape.
+   */
+  function pageHref(role) {
+    if (!root.HBS_SINGLE) return role === 'picker' ? 'index.html' : role + '.html'
+    const p = new URLSearchParams(location.search)
+    p.set('role', role)
+    // Carry nothing else across: a seller id means nothing on the buyer surface.
+    for (const k of ['seller', 'buyer']) p.delete(k)
+    return location.pathname + '?' + p.toString()
+  }
+
+  /** In the bundle, switching role is a re-render rather than a navigation. */
+  function goRole(role, href) {
+    if (!root.HBS_SINGLE) { location.href = href; return }
+    history.replaceState(null, '', href)
+    location.hash = ''
+    root.HBSBoot()
+  }
+
+  // ── Shell ────────────────────────────────────────────────────────────────
+  function shell(opts) {
+    document.body.setAttribute('data-role', opts.role)
+    const nav = el('nav', { class: 'hs-nav' })
+    for (const group of opts.nav) {
+      nav.appendChild(el('div', { class: 'hs-nav-label' }, group.label))
+      for (const item of group.items) {
+        nav.appendChild(el('a', {
+          href: item.href, 'aria-current': item.current ? 'page' : null,
+        }, [el('span', { class: 'hs-nav-ico', 'aria-hidden': 'true' }, item.icon), item.label]))
+      }
+    }
+
+    const side = el('aside', { class: 'hs-side' }, [
+      el('a', { class: 'hs-brand', href: pageHref('picker'), onclick: (e) => { if (root.HBS_SINGLE) { e.preventDefault(); goRole('picker', pageHref('picker')) } } }, [
+        el('span', { class: 'hs-brand-mark', 'aria-hidden': 'true' }, 'H'), S.brand,
+      ]),
+      el('div', { class: 'hs-brand-sub' }, S.brandSub),
+      el('div', { class: 'hs-persona' }, [opts.personaRole, el('strong', {}, opts.personaName)]),
+      nav,
+      el('div', { class: 'hs-side-foot' }, [
+        el('button', {
+          class: 'hs-toggle', type: 'button', 'aria-pressed': 'false',
+          onclick: (e) => {
+            const on = document.body.classList.toggle('hs-notes-on')
+            e.currentTarget.setAttribute('aria-pressed', String(on))
+          },
+        }, S.common.designNotes),
+      ]),
+    ])
+
+    const top = el('header', { class: 'hs-top' }, [
+      el('div', {}, [
+        el('h1', {}, opts.title),
+        opts.subtitle ? el('div', { class: 'hs-top-sub' }, opts.subtitle) : null,
+      ]),
+      el('div', { class: 'hs-top-right hs-noprint' }, opts.controls || []),
+    ])
+
+    const scope = el('div', { class: 'hs-scope hs-noprint' }, [
+      el('b', {}, S.scope.lead), el('span', {}, S.scope.body),
+    ])
+
+    const content = el('div', { class: 'hs-content' })
+    const main = el('main', { class: 'hs-main', id: 'main' }, [top, scope, content])
+    document.body.appendChild(el('div', { class: 'hs-app' }, [side, main]))
+    return content
+  }
+
+  // ── Building blocks ──────────────────────────────────────────────────────
+  function card(o) {
+    const head = (o.title || o.actions)
+      ? el('div', { class: 'hs-card-head' }, [
+          el('div', { style: { minWidth: '0' } }, [
+            o.title ? el('h2', {}, o.title) : null,
+            o.note ? el('p', { class: 'hs-sub' }, o.note) : null,
+          ]),
+          o.actions ? el('div', { style: { marginInlineStart: 'auto', display: 'flex', gap: '8px', flexWrap: 'wrap' }, class: 'hs-noprint' }, o.actions) : null,
+        ])
+      : null
+    return el('section', { class: 'hs-card' }, [
+      head,
+      o.flush ? o.body : el('div', { class: 'hs-card-body' }, o.body),
+      o.foot ? el('div', { class: 'hs-card-foot' }, o.foot) : null,
+    ])
+  }
+
+  const figure = (o) => el('div', {
+    class: 'hs-fig hs-fig--' + o.tone + (o.value === 0 ? ' hs-fig-zero' : ''),
+  }, [
+    el('div', { class: 'hs-fig-label' }, o.label),
+    el('div', { class: 'hs-fig-value' }, money(o.value, { currency: true })),
+    el('div', { class: 'hs-fig-note' }, o.note),
+  ])
+
+  const pill = (text, tone) => el('span', { class: 'hs-pill' + (tone ? ' hs-pill--' + tone : '') }, text)
+  const methodPill = (m) => pill(S.method[m], m === 'cod' ? 'orange' : 'blue')
+
+  /** The marker on a column whose definition the BRD has not settled. */
+  const draft = (key) => el('span', {
+    class: 'hs-draft', title: S.draftDefs[key] || S.common.draft,
+    'aria-label': S.draftDefs[key] || S.common.draft,
+  }, '?')
+
+  function table(spec) {
+    const wrap = el('div', { class: 'hs-tablewrap' })
+    const t = el('table', {
+      class: 'hs-table' + (spec.compact ? ' hs-table--compact' : '') + (spec.wide ? ' hs-table--wide' : ''),
+    })
+    t.appendChild(el('thead', {}, el('tr', {}, spec.columns.map((c) =>
+      el('th', { class: c.num ? 'num' : null, scope: 'col' },
+        [c.label, c.draft ? draft(c.draft) : null])))))
+
+    const body = el('tbody')
+    for (const row of spec.rows) {
+      const clickable = spec.onRowClick && spec.rowKey && spec.rowKey(row)
+      const tr = el('tr', Object.assign(
+        { class: spec.rowClass ? spec.rowClass(row) : null },
+        clickable ? {
+          'data-click': '', tabindex: '0', role: 'button',
+          'aria-label': spec.rowLabel ? spec.rowLabel(row) : undefined,
+          onclick: () => spec.onRowClick(row),
+          onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); spec.onRowClick(row) } },
+        } : {}))
+      for (const c of spec.columns) {
+        tr.appendChild(el('td', {
+          class: [c.num ? 'num' : null, c.wrap ? 'wrap' : null].filter(Boolean).join(' ') || null,
+        }, c.cell(row)))
+      }
+      body.appendChild(tr)
+    }
+    t.appendChild(body)
+    if (spec.foot) {
+      t.appendChild(el('tfoot', {}, el('tr', {}, spec.foot.map((f) =>
+        el('td', { class: f.num ? 'num' : null, colspan: f.span || null }, f.cell)))))
+    }
+    wrap.appendChild(t)
+    return wrap
+  }
+
+  const calc = (rows, expr) => el('div', { class: 'hs-calc' }, [
+    rows.map((r) => el('div', { class: 'hs-calc-row' + (r.rule ? ' hs-calc-row--rule' : '') }, [
+      el('span', {}, [r.label, r.note ? el('span', { class: 'hs-calc-note' }, ' · ' + r.note) : null]),
+      r.plain ? el('span', { 'data-money': '' }, HBS.money(r.value, { currency: true }))
+              : money(r.value, { currency: true, tone: r.tone || null, signed: r.signed }),
+    ])),
+    expr ? el('div', { class: 'hs-expr' }, expr) : null,
+  ])
+
+  const banner = (tone, strong, text) => el('div', { class: 'hs-banner hs-banner--' + tone },
+    el('div', {}, [strong ? el('strong', {}, strong) : null, text]))
+
+  const note = (title, text) => el('div', { class: 'hs-note' }, [el('b', {}, title + ' — '), text])
+
+  const empty = (title, text) => el('div', { class: 'hs-empty' }, [
+    el('div', { class: 'hs-empty-mark', 'aria-hidden': 'true' }, '—'),
+    el('h3', {}, title), el('p', {}, text),
+  ])
+
+  // ── Export (BRD §4: view and export at each statement level) ─────────────
+  /*
+   * CSV by download, PDF by the browser's own print dialogue. The module has no server to
+   * render a file on, and a print stylesheet produces a truer statement than a canvas
+   * screenshot would.
+   */
+  function downloadCsv(filename, columns, rows) {
+    const esc = (v) => {
+      const s = v === null || v === undefined ? '' : String(v)
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s
+    }
+    const lines = [columns.map((c) => esc(c.label)).join(',')]
+    for (const r of rows) lines.push(columns.map((c) => esc(c.value(r))).join(','))
+    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = el('a', { href: url, download: filename })
+    document.body.appendChild(a); a.click(); a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 1000)
+  }
+
+  const exportButtons = (filename, columns, rows) => [
+    el('button', { class: 'hs-btn hs-btn--outline hs-btn--sm', type: 'button', onclick: () => downloadCsv(filename, columns, rows) }, S.common.exportCsv),
+    el('button', { class: 'hs-btn hs-btn--sm', type: 'button', onclick: () => window.print() }, S.common.exportPdf),
+  ]
+
+  // ── Drawer ───────────────────────────────────────────────────────────────
+  let openScrim = null
+  function closeDrawer() {
+    if (!openScrim) return
+    openScrim.remove(); openScrim = null
+    document.body.style.overflow = ''
+  }
+  function drawer(title, subtitle, body) {
+    closeDrawer()
+    const scrim = el('div', {
+      class: 'hs-scrim', onclick: (e) => { if (e.target === scrim) closeDrawer() },
+    }, el('div', { class: 'hs-drawer', role: 'dialog', 'aria-modal': 'true', 'aria-label': title }, [
+      el('div', { class: 'hs-drawer-head' }, [
+        el('div', {}, [el('h2', {}, title), subtitle ? el('p', { class: 'hs-sub' }, subtitle) : null]),
+        el('button', { class: 'hs-drawer-close', type: 'button', 'aria-label': S.common.close, onclick: closeDrawer }, '✕'),
+      ]),
+      el('div', { class: 'hs-drawer-body' }, body),
+    ]))
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { closeDrawer(); document.removeEventListener('keydown', esc) }
+    })
+    document.body.appendChild(scrim)
+    document.body.style.overflow = 'hidden'
+    openScrim = scrim
+    const c = scrim.querySelector('.hs-drawer-close')
+    if (c) c.focus()
+  }
+
+  /**
+   * The order breakdown, shared by all three roles.
+   *
+   * `role === 'buyer'` withholds every commission stage. This is the enforcement point
+   * for the BRD's rule that a buyer never sees commission (§7.2, §9): a buyer screen
+   * cannot leak it by accident, because the component never builds it.
+   */
+  function orderBreakdown(orderId, opts) {
+    const o = HBS.order(orderId)
+    const st = HBS.orderStatement(o)
+    const forBuyer = (opts || {}).role === 'buyer'
+    const dropped = st.lines.filter((l) => l.status !== 'fulfilled')
+
+    const lineRows = table({
+      compact: true,
+      columns: [
+        { label: S.columns.item, wrap: true, cell: (l) => el('div', {}, [
+          el('div', {}, l.name),
+          el('div', { class: 'hs-sub' }, l.sku + (l.status !== 'fulfilled' ? ' · ' + (l.reason || l.status) : '')),
+        ]) },
+        { label: S.columns.qty, num: true, cell: (l) => String(l.qty) },
+        { label: S.columns.base, num: true, cell: (l) => money(l.base) },
+        { label: S.columns.vat, num: true, cell: (l) => money(l.vat) },
+        { label: S.columns.discount, num: true, cell: (l) => l.discount ? money(-l.discount) : el('span', { class: 'muted' }, '—') },
+        { label: S.common.total, num: true, cell: (l) => money(l.buyerPays) },
+      ],
+      rows: st.lines,
+      rowClass: (l) => (l.status !== 'fulfilled' ? 'is-dropped' : null),
+    })
+
+    const rows = [
+      { label: S.calc.base, value: st.base, plain: true, note: forBuyer ? S.calc.baseNoteBuyer : S.calc.baseNote },
+      { label: S.fill(S.calc.vatLine, { rate: HBS.pct(st.lines.length ? st.lines[0].rate : HBS.VAT_RATE, 0) }), value: st.vat, plain: true },
+      { label: S.calc.listTotal, value: st.orderTotal, plain: true, rule: true },
+    ]
+    if (st.hbDiscount) rows.push({ label: S.calc.discountHb, value: -st.hbDiscount, tone: 'neg', note: S.calc.couponNote })
+    if (st.sellerDiscount) rows.push({ label: S.calc.discountSeller, value: -st.sellerDiscount, tone: 'neg', note: S.calc.sellerDiscNote })
+    rows.push({ label: S.calc.buyerPaid, value: st.buyerPays, plain: true, rule: true })
+
+    // Everything below this line is a seller/HB concern and is never built for a buyer.
+    if (!forBuyer) {
+      rows.push({ label: S.fill(S.calc.commissionLine, { rate: HBS.pct(st.rate) }), value: -st.commission, tone: 'neg' })
+      if (st.hbDiscount) rows.push({ label: S.calc.couponBack, value: st.hbDiscount, tone: 'pos' })
+      if (st.deduction) rows.push({ label: S.calc.deductionLine, value: -st.deduction, tone: 'neg' })
+      if (o.paymentMethod === 'cod') {
+        rows.push({ label: S.calc.debtRaised, value: -st.hbReceivable, tone: 'neg', rule: true })
+      } else {
+        rows.push({ label: S.calc.receivable, value: st.sellerReceivable, tone: 'pos', rule: true })
+      }
+    }
+
+    const dropNote = dropped.length
+      ? banner('warn',
+          S.fill(dropped.length === 1 ? S.calc.droppedLine : S.calc.droppedLines, { n: dropped.length }),
+          ' ' + S.calc.droppedNote)
+      : null
+
+    return el('div', { class: 'hs-stack' }, [
+      el('div', { style: { display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' } }, [
+        methodPill(o.paymentMethod),
+        pill(o.date, 'navy'),
+        forBuyer ? null : pill(HBS.seller(o.sellerId).name, null),
+        forBuyer ? pill(HBS.seller(o.sellerId).name, null) : pill(HBS.buyer(o.buyerId).name, null),
+      ]),
+      el('p', { class: 'hs-sub' }, forBuyer ? S.buyer.noCommission : S.method[o.paymentMethod + 'Note']),
+      dropNote,
+      el('div', {}, [el('h3', { class: 'hs-h3' }, S.columns.item), lineRows]),
+      el('div', {}, [el('h3', { class: 'hs-h3' }, S.calc.title), calc(rows)]),
+      o.note && !forBuyer ? note('Seed note', o.note) : null,
+    ])
+  }
+
+  const openOrder = (id, opts) => drawer(
+    S.fill(S.buyer.orderDetail, { id }),
+    HBS.order(id) ? HBS.order(id).date : '',
+    orderBreakdown(id, opts))
+
+  /**
+   * The buyer's statement table, used by the buyer surface and by the admin's view of it.
+   * One definition, so the two cannot drift — and so the no-commission rule is enforced in
+   * one place rather than remembered in two.
+   */
+  function buyerTable(st, b, role) {
+    const period = st.period
+    const rows = period === 'order' ? st.rows : st.groups
+    const columns = period === 'order' ? [
+      { label: S.columns.orderDate, cell: (r) => r.date },
+      { label: S.common.order, cell: (r) => el('strong', {}, r.id) },
+      { label: S.common.seller, cell: (r) => r.sellerName },
+      { label: S.columns.method, cell: (r) => methodPill(r.paymentMethod) },
+      { label: S.columns.base, num: true, cell: (r) => money(r.base) },
+      { label: S.columns.vat, num: true, cell: (r) => money(r.vat) },
+      { label: S.columns.discount, num: true, cell: (r) => r.discount ? money(-r.discount, { tone: 'neg' }) : el('span', { class: 'muted' }, '—') },
+      { label: S.buyer.paid, num: true, cell: (r) => el('strong', {}, money(r.paid)) },
+    ] : [
+      { label: S.common.periods[period], cell: (g) => el('strong', {}, g.key) },
+      { label: S.common.order, num: true, cell: (g) => String(g.rows.length) },
+      { label: S.columns.base, num: true, cell: (g) => money(g.base) },
+      { label: S.columns.vat, num: true, cell: (g) => money(g.vat) },
+      { label: S.columns.discount, num: true, cell: (g) => money(-g.discount, { tone: g.discount ? 'neg' : null }) },
+      { label: S.buyer.paid, num: true, cell: (g) => el('strong', {}, money(g.paid)) },
+    ]
+    return card({
+      title: b.name, note: b.address, flush: true,
+      actions: exportButtons(b.id + '-orders-' + period + '.csv', [
+        { label: 'Date', value: (r) => r.date || r.key },
+        { label: 'Order', value: (r) => r.id || '' },
+        { label: 'Pre-VAT base', value: (r) => HBS.money(r.base) },
+        { label: 'VAT', value: (r) => HBS.money(r.vat) },
+        { label: 'Discount', value: (r) => HBS.money(r.discount) },
+        { label: 'Paid', value: (r) => HBS.money(r.paid) },
+      ], rows),
+      body: table({
+        columns, rows,
+        rowKey: (r) => r.id || null,
+        rowLabel: (r) => (r.id ? S.fill(S.common.openOrder, { id: r.id }) : null),
+        onRowClick: (r) => r.id && openOrder(r.id, { role: role === 'admin' ? 'admin' : 'buyer' }),
+      }),
+      foot: el('span', { class: 'hs-sub' }, S.buyer.notCumulative),
+    })
+  }
+
+  // ── Router ───────────────────────────────────────────────────────────────
+  function router(routes, opts) {
+    function go() {
+      closeDrawer()
+      const hash = location.hash.replace(/^#/, '') || opts.home
+      let match = null, params = {}
+      for (const pattern in routes) {
+        const pp = pattern.split('/').filter(Boolean)
+        const hp = hash.split('/').filter(Boolean)
+        if (pp.length !== hp.length) continue
+        const local = {}
+        let hit = true
+        for (let i = 0; i < pp.length; i++) {
+          if (pp[i][0] === ':') local[pp[i].slice(1)] = decodeURIComponent(hp[i])
+          else if (pp[i] !== hp[i]) { hit = false; break }
+        }
+        if (hit) { match = routes[pattern]; params = local; break }
+      }
+      opts.render(match, params, hash)
+    }
+    // One listener, replaced rather than stacked, so switching view twice does not render twice.
+    if (root.__hsRoute) window.removeEventListener('hashchange', root.__hsRoute)
+    root.__hsRoute = go
+    window.addEventListener('hashchange', go)
+    go()
+  }
+
+  const href = (path) => '#' + path
+
+  root.HBSUI = {
+    buyerTable, pageHref, goRole,
+    el, append, clear, money, shell, card, figure, pill, methodPill, draft, table, calc,
+    banner, note, empty, drawer, closeDrawer, orderBreakdown, openOrder, router, href,
+    periodSwitch, period, notifyEarly, setParam, getParam, exportButtons, downloadCsv,
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)
+
+</script>
+<script>
+;(function (root) {
+  'use strict'
+
+  /**
+   * The role picker.
+   *
+   * Its own file rather than an inline script, so the single-file build can carry it like
+   * the other three instead of the bundle needing a fourth shape to special-case.
+   */
+
+  const HBS = root.HBS
+  const S = root.HBSStrings
+  const U = root.HBSUI
+  const el = U.el
+
+  function start() {
+    const l = HBS.ledger('S-200')
+    const orderB = l.rows[1]
+
+    const roleCard = (role, name, note, mark) =>
+      el('a', {
+        class: 'hs-card hs-pick-card', href: U.pageHref(role),
+        onclick: (e) => { if (root.HBS_SINGLE) { e.preventDefault(); U.goRole(role, U.pageHref(role)) } },
+      }, [
+        el('div', { class: 'hs-pick-mark', 'aria-hidden': 'true' }, mark),
+        el('h2', {}, name),
+        el('p', {}, note),
+      ])
+
+    document.body.appendChild(el('div', { class: 'hs-pick' },
+      el('div', { class: 'hs-pick-inner' }, [
+        el('h1', {}, S.picker.title),
+        el('p', {}, S.picker.lead),
+
+        el('div', { class: 'hs-card', style: { padding: '16px 18px', marginBottom: '22px' } }, [
+          el('p', { class: 'hs-sub', style: { marginTop: '0' } }, [
+            el('b', {}, S.scope.lead + ' '), S.scope.body,
+          ]),
+          // The BRD's worked example, computed from the seed rather than typed — the
+          // quickest proof on the page that the model behind it is actually running.
+          el('p', { class: 'hs-sub', style: { marginTop: '10px' } }, [
+            'The BRD’s worked example (§7.8), computed rather than typed: a COD order books ',
+            U.money(l.rows[0].hbReceivable, { currency: true }),
+            ' of backdated commission, and the next prepaid order nets it — deducting ',
+            U.money(orderB.commission + orderB.offset, { currency: true }),
+            ' and releasing ', U.money(orderB.payout, { currency: true }), '.',
+          ]),
+        ]),
+
+        el('div', { class: 'hs-pick-grid' }, [
+          roleCard('buyer', S.picker.buyer, S.picker.buyerNote, '◇'),
+          roleCard('seller', S.picker.seller, S.picker.sellerNote, '◆'),
+          roleCard('admin', S.picker.admin, S.picker.adminNote, '◈'),
+        ]),
+      ])))
+
+    if (root.HBSTest) root.HBSTest.run()
+  }
+
+  root.HBSApps = root.HBSApps || {}
+  root.HBSApps.picker = start
+  if (!root.HBS_SINGLE) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
+    else start()
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)
+
+</script>
+<script>
+;(function (root) {
+  'use strict'
+
+  /**
+   * Seller surface.
+   *
+   * The statement is cumulative — that is the BRD's stated structural difference from the
+   * buyer's (§7.2), and it is why the balance column exists at all. Everything on screen
+   * comes out of HBS.ledger(); nothing is totalled here.
+   */
+
+  const HBS = root.HBS
+  const S = root.HBSStrings
+  const U = root.HBSUI
+  const el = U.el
+
+  function start() {
+    const sellerId = U.getParam('seller', 'S-200')
+    const s = HBS.seller(sellerId)
+    const p = HBS.plan(s.planId)
+
+    const sellerPicker = el('select', {
+      class: 'hs-select', 'aria-label': S.common.seller,
+      onchange: (e) => U.setParam('seller', e.target.value),
+    }, HBS.SELLERS.map((x) => el('option', { value: x.id, selected: x.id === sellerId ? '' : null }, x.name)))
+
+    const nav = [{
+      label: 'Statements',
+      items: [
+        { href: U.href('/statement'), label: S.seller.statement, icon: '≡' },
+        { href: U.href('/dues'), label: S.seller.dues, icon: '◑' },
+      ],
+    }, {
+      label: 'Account',
+      items: [{ href: U.href('/plan'), label: S.seller.plan, icon: '%' }],
+    }]
+
+    U.router({
+      '/statement': { title: S.seller.statement, sub: S.seller.statementSub, nav: '/statement', view: statement },
+      '/dues': { title: S.seller.dues, sub: S.seller.duesSub, nav: '/dues', view: dues },
+      '/plan': { title: S.seller.plan, sub: S.seller.planSub, nav: '/plan', view: planView },
+    }, {
+      home: '/statement',
+      render(route, params) {
+        U.clear(document.body)
+        const r = route || { title: S.common.notFound, sub: '', nav: null, view: () => U.empty(S.common.notFound, S.common.notFoundNote) }
+        const content = U.shell({
+          role: 'seller',
+          personaRole: S.common.seller, personaName: s.name,
+          title: r.title, subtitle: s.name + ' · ' + HBS.CADENCES[s.cadence].label,
+          nav: nav.map((g) => ({ label: g.label, items: g.items.map((i) => Object.assign({}, i, { current: i.href === '#' + r.nav })) })),
+          controls: [
+            el('span', { class: 'hs-filter-label' }, S.common.seller), sellerPicker,
+            el('span', { class: 'hs-filter-label' }, S.common.period), U.periodSwitch(),
+          ],
+        })
+        content.appendChild(r.view(params))
+      },
+    })
+
+    // ── The statement ─────────────────────────────────────────────────────
+    function statement() {
+      const l = HBS.ledger(sellerId)
+      const c = HBS.cycle(sellerId)
+      const period = U.period()
+      const grouped = HBS.group(l.rows, period)
+
+      const figures = el('div', { class: 'hs-figures' }, [
+        U.figure({ tone: 'pay', label: S.figures.balance, value: Math.max(l.balance, 0), note: S.figures.balanceNote }),
+        U.figure({ tone: 'due', label: S.figures.dues, value: U.notifyEarly() ? l.outstanding : c.sellerDue, note: S.figures.duesNote }),
+        U.figure({ tone: 'info', label: S.figures.paymentDue, value: c.hbPaymentDue, note: S.figures.paymentDueNote }),
+        U.figure({ tone: 'hold', label: S.figures.recovered, value: c.recovered, note: S.figures.recoveredNote }),
+      ])
+
+      // The BRD §8 column schema, in its own order, with the [Draft] columns marked.
+      const columns = period === 'order' ? [
+        { label: S.columns.orderDate, cell: (r) => r.date },
+        { label: S.common.order, cell: (r) => el('strong', {}, r.id) },
+        { label: S.columns.method, cell: (r) => U.methodPill(r.paymentMethod) },
+        { label: S.columns.orderTotal, num: true, cell: (r) => U.money(r.orderTotal) },
+        { label: S.columns.sellerReceivable, num: true, cell: (r) => U.money(r.sellerReceivable) },
+        { label: S.columns.hbReceivable, draft: 'hbReceivable', num: true, cell: (r) => U.money(r.hbReceivable, { tone: r.hbReceivable ? 'neg' : null }) },
+        { label: S.columns.commission, num: true, cell: (r) => U.money(r.commission) },
+        { label: S.columns.deduction, draft: 'deduction', num: true, cell: (r) => U.money(r.deduction) },
+        { label: S.columns.netPayable, draft: 'netPayable', num: true, cell: (r) => U.money(r.netPayable, { tone: 'auto', signed: true }) },
+        { label: S.columns.offset, num: true, cell: (r) => U.money(r.offset) },
+        { label: S.columns.balance, draft: 'balance', num: true, cell: (r) => el('strong', {}, U.money(r.balance, { tone: 'auto' })) },
+      ] : [
+        { label: S.common.periods[period], cell: (g) => el('strong', {}, g.key) },
+        { label: S.common.order, num: true, cell: (g) => String(g.rows.length) },
+        { label: S.columns.orderTotal, num: true, cell: (g) => U.money(g.orderTotal) },
+        { label: S.columns.sellerReceivable, num: true, cell: (g) => U.money(g.sellerReceivable) },
+        { label: S.columns.hbReceivable, draft: 'hbReceivable', num: true, cell: (g) => U.money(g.hbReceivable, { tone: g.hbReceivable ? 'neg' : null }) },
+        { label: S.columns.commission, num: true, cell: (g) => U.money(g.commission) },
+        { label: S.columns.deduction, draft: 'deduction', num: true, cell: (g) => U.money(g.deduction) },
+        { label: S.columns.netPayable, draft: 'netPayable', num: true, cell: (g) => U.money(g.netPayable, { tone: 'auto', signed: true }) },
+        { label: S.columns.balance, draft: 'balance', num: true, cell: (g) => el('strong', {}, U.money(g.balance, { tone: 'auto' })) },
+      ]
+
+      const csvCols = [
+        { label: 'Order date', value: (r) => r.date || r.key },
+        { label: 'Order', value: (r) => r.id || '' },
+        { label: 'Method', value: (r) => (r.paymentMethod ? S.method[r.paymentMethod] : '') },
+        { label: 'Order total', value: (r) => HBS.money(r.orderTotal) },
+        { label: 'Seller receivable', value: (r) => HBS.money(r.sellerReceivable) },
+        { label: 'HB receivable', value: (r) => HBS.money(r.hbReceivable) },
+        { label: 'HB commission', value: (r) => HBS.money(r.commission) },
+        { label: 'HB deduction', value: (r) => HBS.money(r.deduction) },
+        { label: 'Net payables', value: (r) => HBS.money(r.netPayable) },
+        { label: 'Balance', value: (r) => HBS.money(r.balance) },
+      ]
+
+      return el('div', { class: 'hs-stack' }, [
+        U.note('Cumulative by design',
+          'The BRD names this as the structural difference from the buyer statement (§7.2): a balance carried forward order over order, like an account ledger.'),
+        figures,
+        l.outstanding > 0
+          ? U.banner('warn', S.seller.debtHeading + ': ' + HBS.money(l.outstanding, { currency: true }) + '. ',
+              U.notifyEarly() ? S.seller.notifyOn : S.seller.notifyOff)
+          : U.banner('good', S.seller.noDebt + '. ', S.seller.noDebtNote),
+        U.card({
+          title: S.seller.statement,
+          note: S.seller.cumulative,
+          flush: true,
+          actions: U.exportButtons(sellerId + '-statement-' + period + '.csv', csvCols, grouped),
+          body: U.table({
+            wide: period === 'order',
+            columns,
+            rows: grouped,
+            rowKey: (r) => r.id || null,
+            rowLabel: (r) => (r.id ? S.fill(S.common.openOrder, { id: r.id }) : null),
+            onRowClick: (r) => r.id && U.openOrder(r.id, { role: 'seller' }),
+          }),
+          foot: el('span', { class: 'hs-sub' },
+            'Every figure is derived from the order lines. Columns marked ? carry a definition the BRD has not settled.'),
+        }),
+      ])
+    }
+
+    // ── Dues: the backdated COD debt, and how it clears ────────────────────
+    function dues() {
+      const l = HBS.ledger(sellerId)
+      const debts = l.rows.filter((r) => r.hbReceivable > 0)
+      const clears = l.rows.filter((r) => r.offset > 0)
+
+      const notifySwitch = el('span', { class: 'hs-seg', role: 'group', 'aria-label': S.seller.notifyLabel },
+        [['early', 'At the COD order'], ['settlement', 'At settlement']].map(([v, label]) =>
+          el('button', {
+            type: 'button', 'aria-pressed': String(U.notifyEarly() === (v === 'early')),
+            onclick: () => U.setParam('notify', v),
+          }, label)))
+
+      return el('div', { class: 'hs-stack' }, [
+        U.note('An open question, built both ways',
+          'The BRD asks whether a seller is told when a backdated debt is created, or only sees it at settlement (§12). The switch below shows each reading.'),
+        el('div', { class: 'hs-figures' }, [
+          U.figure({ tone: 'due', label: S.figures.dues, value: l.outstanding, note: S.figures.duesNote }),
+          U.figure({ tone: 'hold', label: S.figures.recovered, value: HBS.sum(l.rows.map((r) => r.offset)), note: S.figures.recoveredNote }),
+        ]),
+        U.card({
+          title: 'When you see it',
+          note: S.seller.notifyOpen,
+          body: el('div', { style: { display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' } }, [
+            el('span', { class: 'hs-filter-label' }, S.seller.notifyLabel), notifySwitch,
+            el('span', { class: 'hs-sub', style: { margin: '0' } }, U.notifyEarly() ? S.seller.notifyOn : S.seller.notifyOff),
+          ]),
+        }),
+        U.card({
+          title: S.seller.debtHeading,
+          flush: debts.length > 0,
+          body: debts.length === 0
+            ? U.empty(S.seller.noDebt, S.seller.noDebtNote)
+            : U.table({
+                compact: true,
+                columns: [
+                  { label: S.columns.orderDate, cell: (r) => r.date },
+                  { label: S.common.order, cell: (r) => el('strong', {}, r.id) },
+                  { label: S.columns.orderTotal, num: true, cell: (r) => U.money(r.orderTotal) },
+                  { label: S.columns.commission, num: true, cell: (r) => U.money(r.commission) },
+                  { label: S.columns.deduction, draft: 'deduction', num: true, cell: (r) => U.money(r.deduction) },
+                  { label: S.columns.hbReceivable, draft: 'hbReceivable', num: true, cell: (r) => el('strong', {}, U.money(r.hbReceivable, { tone: 'neg' })) },
+                ],
+                rows: debts,
+                rowKey: (r) => r.id,
+                rowLabel: (r) => S.fill(S.common.openOrder, { id: r.id }),
+                onRowClick: (r) => U.openOrder(r.id, { role: 'seller' }),
+              }),
+        }),
+        U.card({
+          title: S.seller.nettingTitle,
+          note: S.seller.nettingNote,
+          body: clears.length === 0
+            ? U.empty('Nothing netted yet', 'A prepaid order has not arrived to clear this debt against.')
+            : el('div', { class: 'hs-stack' }, clears.map((r) => U.calc([
+                { label: 'Order ' + r.id + ' — ' + S.calc.receivable, value: r.sellerReceivable, plain: true },
+                { label: S.calc.offsetLine, value: -r.offset, tone: 'neg' },
+                { label: S.calc.payoutLine, value: r.payout, rule: true, tone: r.payout > 0 ? 'pos' : null },
+              ], r.payout === 0
+                ? 'The debt was larger than this order could cover. The payout floors at 0.000 and ' +
+                  HBS.money(r.outstandingAfter, { currency: true }) + ' stays outstanding.'
+                : null))),
+        }),
+      ])
+    }
+
+    // ── The plan that prices the orders ────────────────────────────────────
+    function planView() {
+      const l = HBS.ledger(sellerId)
+      const rates = {}
+      for (const r of l.rows) rates[r.rate] = (rates[r.rate] || 0) + 1
+
+      return el('div', { class: 'hs-stack' }, [
+        U.note('Pulled from the Subscription Plan module',
+          'The BRD is explicit that commission is per seller and per branch, and can step at a volume threshold (§7.5). It is not a platform-wide constant.'),
+        U.card({
+          title: p.name,
+          note: p.note,
+          body: el('dl', { class: 'hs-kv' }, [
+            el('dt', {}, 'Plan'), el('dd', {}, p.name),
+            el('dt', {}, 'Fixed fee per cycle'), el('dd', {}, U.money(p.fixedFeePerCycle, { currency: true })),
+            el('dt', {}, 'Settlement cadence'), el('dd', {}, HBS.CADENCES[s.cadence].label),
+            el('dt', {}, 'VAT number'), el('dd', {}, s.vatNumber),
+          ]),
+        }),
+        U.card({
+          title: 'Rate tiers',
+          note: 'The rate that applies to an order depends on how many units had already shipped when it was placed.',
+          flush: true,
+          body: U.table({
+            compact: true,
+            columns: [
+              { label: 'From units shipped', num: true, cell: (t) => String(t.fromUnits) },
+              { label: S.columns.rate, num: true, cell: (t) => HBS.pct(t.rate) },
+              { label: 'Orders priced at this rate', num: true, cell: (t) => String(rates[t.rate] || 0) },
+            ],
+            rows: p.tiers,
+          }),
+        }),
+        s.branches && s.branches.length > 1 ? U.card({
+          title: 'Branches',
+          note: 'A branch can carry its own agreement, and then it prices its own orders.',
+          flush: true,
+          body: U.table({
+            compact: true,
+            columns: [
+              { label: 'Branch', cell: (b) => b.name },
+              { label: 'Plan', cell: (b) => HBS.plan(b.planId).name },
+              { label: 'Base rate', num: true, cell: (b) => HBS.pct(HBS.plan(b.planId).tiers[0].rate) },
+            ],
+            rows: s.branches,
+          }),
+        }) : null,
+      ])
+    }
+  }
+
+  // Registered as a named app so one bundled page can start whichever surface the URL
+  // asks for; the multi-file build has no HBS_SINGLE and still starts itself.
+  root.HBSApps = root.HBSApps || {}
+  root.HBSApps.seller = start
+  if (!root.HBS_SINGLE) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
+    else start()
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)
+
+</script>
+<script>
+;(function (root) {
+  'use strict'
+
+  /**
+   * HB Admin surface.
+   *
+   * Carries all three levels the BRD names (§7.2): the list of seller statements, a
+   * seller's statement, and a buyer's. It adds two screens the BRD implies but does not
+   * list — the cycle report Finance actually works from, and the register of definitions
+   * still open — because a stakeholder review needs to see where the numbers stop being
+   * agreed.
+   */
+
+  const HBS = root.HBS
+  const S = root.HBSStrings
+  const U = root.HBSUI
+  const el = U.el
+
+  function start() {
+    const nav = [{
+      label: 'Statements',
+      items: [
+        { href: U.href('/sellers'), label: S.admin.sellers, icon: '≡' },
+        { href: U.href('/buyers'), label: S.admin.buyers, icon: '◇' },
+      ],
+    }, {
+      label: 'Finance',
+      items: [{ href: U.href('/cycle'), label: S.admin.cycle, icon: '↗' }],
+    }, {
+      label: 'Review',
+      items: [{ href: U.href('/questions'), label: S.admin.questions, icon: '?' }],
+    }]
+
+    U.router({
+      '/sellers': { title: S.admin.sellers, sub: S.admin.sellersSub, nav: '/sellers', view: sellerList },
+      '/sellers/:id': { title: 'Seller statement', sub: '', nav: '/sellers', view: (p) => sellerStatement(p.id) },
+      '/buyers': { title: S.admin.buyers, sub: S.admin.buyersSub, nav: '/buyers', view: buyerList },
+      '/buyers/:id': { title: 'Buyer statement', sub: '', nav: '/buyers', view: (p) => buyerStatement(p.id) },
+      '/cycle': { title: S.admin.cycle, sub: S.admin.cycleSub, nav: '/cycle', view: cycleView },
+      '/questions': { title: S.admin.questions, sub: S.admin.questionsSub, nav: '/questions', view: questions },
+    }, {
+      home: '/sellers',
+      render(route, params) {
+        U.clear(document.body)
+        const r = route || { title: S.common.notFound, sub: '', nav: null, view: () => U.empty(S.common.notFound, S.common.notFoundNote) }
+        let subtitle = r.sub
+        if (params.id && HBS.seller(params.id)) subtitle = HBS.seller(params.id).name
+        if (params.id && HBS.buyer(params.id)) subtitle = HBS.buyer(params.id).name
+        const content = U.shell({
+          role: 'admin',
+          personaRole: 'HB Admin', personaName: 'Finance & Ops',
+          title: r.title, subtitle: subtitle,
+          nav: nav.map((g) => ({ label: g.label, items: g.items.map((i) => Object.assign({}, i, { current: i.href === '#' + r.nav })) })),
+          controls: [el('span', { class: 'hs-filter-label' }, S.common.period), U.periodSwitch()],
+        })
+        content.appendChild(r.view(params))
+      },
+    })
+
+    // ── Level 1 · list of seller statements ───────────────────────────────
+    function sellerList() {
+      const rows = HBS.SELLERS.map((s) => {
+        const l = HBS.ledger(s.id)
+        const c = HBS.cycle(s.id)
+        return {
+          id: s.id, name: s.name, orders: l.rows.length,
+          cadence: HBS.CADENCES[s.cadence].label,
+          plan: HBS.plan(s.planId).name,
+          balance: l.balance, outstanding: l.outstanding,
+          paymentDue: c.hbPaymentDue, sellerDue: c.sellerDue, recovered: c.recovered,
+        }
+      })
+      const totals = {
+        paymentDue: HBS.sum(rows.map((r) => r.paymentDue)),
+        sellerDue: HBS.sum(rows.map((r) => r.sellerDue)),
+        recovered: HBS.sum(rows.map((r) => r.recovered)),
+      }
+      const csvCols = [
+        { label: 'Seller', value: (r) => r.name },
+        { label: 'Orders', value: (r) => r.orders },
+        { label: 'Plan', value: (r) => r.plan },
+        { label: 'Cadence', value: (r) => r.cadence },
+        { label: 'Balance', value: (r) => HBS.money(r.balance) },
+        { label: 'HB payment due', value: (r) => HBS.money(r.paymentDue) },
+        { label: 'Seller due', value: (r) => HBS.money(r.sellerDue) },
+      ]
+
+      return el('div', { class: 'hs-stack' }, [
+        el('div', { class: 'hs-figures' }, [
+          U.figure({ tone: 'pay', label: S.figures.paymentDue, value: totals.paymentDue, note: 'Across every seller, this cycle.' }),
+          U.figure({ tone: 'due', label: S.figures.sellerDue, value: totals.sellerDue, note: 'Backdated COD commission netting could not clear.' }),
+          U.figure({ tone: 'hold', label: S.figures.recovered, value: totals.recovered, note: S.figures.recoveredNote }),
+        ]),
+        U.card({
+          title: S.admin.sellers, note: S.admin.sellersSub, flush: true,
+          actions: U.exportButtons('seller-statements.csv', csvCols, rows),
+          body: U.table({
+            columns: [
+              { label: S.common.seller, cell: (r) => el('strong', {}, r.name) },
+              { label: 'Plan', cell: (r) => U.pill(r.plan, 'navy') },
+              { label: 'Cadence', cell: (r) => r.cadence },
+              { label: S.common.order, num: true, cell: (r) => String(r.orders) },
+              { label: S.columns.balance, draft: 'balance', num: true, cell: (r) => U.money(r.balance, { tone: 'auto', signed: true }) },
+              { label: S.columns.paymentDue, draft: 'paymentDue', num: true, cell: (r) => U.money(r.paymentDue, { tone: r.paymentDue ? 'pos' : null }) },
+              { label: S.columns.sellerDue, draft: 'sellerDue', num: true, cell: (r) => U.money(r.sellerDue, { tone: r.sellerDue ? 'neg' : null }) },
+            ],
+            rows,
+            rowKey: (r) => r.id,
+            rowLabel: (r) => 'Open ' + r.name,
+            onRowClick: (r) => { location.hash = '/sellers/' + r.id },
+          }),
+        }),
+      ])
+    }
+
+    // ── Level 2 · a seller's statement ────────────────────────────────────
+    function sellerStatement(id) {
+      const s = HBS.seller(id)
+      if (!s) return U.empty(S.common.notFound, S.common.notFoundNote)
+      const l = HBS.ledger(id)
+      const c = HBS.cycle(id)
+      const period = U.period()
+      const grouped = HBS.group(l.rows, period)
+
+      const csvCols = [
+        { label: 'Order date', value: (r) => r.date || r.key },
+        { label: 'Order', value: (r) => r.id || '' },
+        { label: 'Method', value: (r) => (r.paymentMethod ? S.method[r.paymentMethod] : '') },
+        { label: 'Order total', value: (r) => HBS.money(r.orderTotal) },
+        { label: 'Seller receivable', value: (r) => HBS.money(r.sellerReceivable) },
+        { label: 'HB receivable', value: (r) => HBS.money(r.hbReceivable) },
+        { label: 'HB commission', value: (r) => HBS.money(r.commission) },
+        { label: 'HB deduction', value: (r) => HBS.money(r.deduction) },
+        { label: 'Net payables', value: (r) => HBS.money(r.netPayable) },
+        { label: 'Netted', value: (r) => HBS.money(r.offset) },
+        { label: 'Payout', value: (r) => HBS.money(r.payout) },
+        { label: 'Balance', value: (r) => HBS.money(r.balance) },
+      ]
+
+      const columns = period === 'order' ? [
+        { label: S.columns.orderDate, cell: (r) => r.date },
+        { label: S.common.order, cell: (r) => el('strong', {}, r.id) },
+        { label: S.columns.method, cell: (r) => U.methodPill(r.paymentMethod) },
+        { label: S.columns.rate, num: true, cell: (r) => HBS.pct(r.rate) },
+        { label: S.columns.orderTotal, num: true, cell: (r) => U.money(r.orderTotal) },
+        { label: S.columns.sellerReceivable, num: true, cell: (r) => U.money(r.sellerReceivable) },
+        { label: S.columns.hbReceivable, draft: 'hbReceivable', num: true, cell: (r) => U.money(r.hbReceivable, { tone: r.hbReceivable ? 'neg' : null }) },
+        { label: S.columns.commission, num: true, cell: (r) => U.money(r.commission) },
+        { label: S.columns.deduction, draft: 'deduction', num: true, cell: (r) => U.money(r.deduction) },
+        { label: S.columns.netPayable, draft: 'netPayable', num: true, cell: (r) => U.money(r.netPayable, { tone: 'auto', signed: true }) },
+        { label: S.columns.offset, num: true, cell: (r) => U.money(r.offset) },
+        { label: S.columns.payout, num: true, cell: (r) => U.money(r.payout, { tone: r.payout ? 'pos' : null }) },
+        { label: S.columns.balance, draft: 'balance', num: true, cell: (r) => el('strong', {}, U.money(r.balance, { tone: 'auto' })) },
+      ] : [
+        { label: S.common.periods[period], cell: (g) => el('strong', {}, g.key) },
+        { label: S.common.order, num: true, cell: (g) => String(g.rows.length) },
+        { label: S.columns.orderTotal, num: true, cell: (g) => U.money(g.orderTotal) },
+        { label: S.columns.sellerReceivable, num: true, cell: (g) => U.money(g.sellerReceivable) },
+        { label: S.columns.hbReceivable, draft: 'hbReceivable', num: true, cell: (g) => U.money(g.hbReceivable) },
+        { label: S.columns.commission, num: true, cell: (g) => U.money(g.commission) },
+        { label: S.columns.netPayable, draft: 'netPayable', num: true, cell: (g) => U.money(g.netPayable, { tone: 'auto', signed: true }) },
+        { label: S.columns.offset, num: true, cell: (g) => U.money(g.offset) },
+        { label: S.columns.payout, num: true, cell: (g) => U.money(g.payout) },
+        { label: S.columns.balance, draft: 'balance', num: true, cell: (g) => el('strong', {}, U.money(g.balance, { tone: 'auto' })) },
+      ]
+
+      return el('div', { class: 'hs-stack' }, [
+        el('a', { class: 'hs-btn hs-btn--quiet hs-noprint', href: U.href('/sellers') }, S.fill(S.common.backTo, { label: S.admin.sellers })),
+        el('div', { class: 'hs-figures' }, [
+          U.figure({ tone: 'pay', label: S.figures.balance, value: Math.max(l.balance, 0), note: S.figures.balanceNote }),
+          U.figure({ tone: 'due', label: S.figures.dues, value: l.outstanding, note: S.figures.duesNote }),
+          U.figure({ tone: 'info', label: S.figures.paymentDue, value: c.hbPaymentDue, note: S.figures.paymentDueNote }),
+          U.figure({ tone: 'hold', label: S.figures.recovered, value: c.recovered, note: S.figures.recoveredNote }),
+        ]),
+        U.card({
+          title: s.name, note: s.address + ' · VAT ' + s.vatNumber, flush: true,
+          actions: U.exportButtons(id + '-statement-' + period + '.csv', csvCols, grouped),
+          body: U.table({
+            wide: period === 'order', columns, rows: grouped,
+            rowKey: (r) => r.id || null,
+            rowLabel: (r) => (r.id ? S.fill(S.common.openOrder, { id: r.id }) : null),
+            onRowClick: (r) => r.id && U.openOrder(r.id, { role: 'admin' }),
+          }),
+        }),
+      ])
+    }
+
+    // ── Level 3 · buyers ──────────────────────────────────────────────────
+    function buyerList() {
+      const rows = HBS.BUYERS.map((b) => {
+        const st = HBS.buyerStatement(b.id, 'order')
+        return { id: b.id, name: b.name, orders: st.rows.length, paid: st.total }
+      })
+      return el('div', { class: 'hs-stack' }, [
+        U.note('No commission, by construction',
+          'Buyer rows are built by their own function rather than filtered from the seller ledger, so a commission figure cannot reach a buyer screen by being left in an object.'),
+        U.card({
+          title: S.admin.buyers, note: S.admin.buyersSub, flush: true,
+          actions: U.exportButtons('buyer-statements.csv', [
+            { label: 'Buyer', value: (r) => r.name },
+            { label: 'Orders', value: (r) => r.orders },
+            { label: 'Paid', value: (r) => HBS.money(r.paid) },
+          ], rows),
+          body: U.table({
+            compact: true,
+            columns: [
+              { label: S.common.buyer, cell: (r) => el('strong', {}, r.name) },
+              { label: S.common.order, num: true, cell: (r) => String(r.orders) },
+              { label: S.buyer.paid, num: true, cell: (r) => U.money(r.paid) },
+            ],
+            rows,
+            rowKey: (r) => r.id,
+            rowLabel: (r) => 'Open ' + r.name,
+            onRowClick: (r) => { location.hash = '/buyers/' + r.id },
+          }),
+        }),
+      ])
+    }
+
+    function buyerStatement(id) {
+      const b = HBS.buyer(id)
+      if (!b) return U.empty(S.common.notFound, S.common.notFoundNote)
+      const st = HBS.buyerStatement(id, U.period())
+      return el('div', { class: 'hs-stack' }, [
+        el('a', { class: 'hs-btn hs-btn--quiet hs-noprint', href: U.href('/buyers') }, S.fill(S.common.backTo, { label: S.admin.buyers })),
+        U.banner('info', null, S.buyer.notCumulative),
+        U.buyerTable(st, b, 'admin'),
+      ])
+    }
+
+    // ── The cycle report Finance works from ───────────────────────────────
+    function cycleView() {
+      const cycles = HBS.cycleAll()
+      return el('div', { class: 'hs-stack' }, [
+        U.banner('warn', S.admin.cycleWarn, ' The BRD puts disbursement out of scope for Phase 1 (§4): there is no gateway, and Finance triggers every transfer by hand.'),
+        el('div', { class: 'hs-figures' }, [
+          U.figure({ tone: 'pay', label: 'To pay out', value: HBS.sum(cycles.map((c) => c.hbPaymentDue)), note: 'Total Finance transfers this cycle.' }),
+          U.figure({ tone: 'due', label: 'To collect', value: HBS.sum(cycles.map((c) => c.sellerDue)), note: 'Total Finance invoices or collects.' }),
+          U.figure({ tone: 'hold', label: S.figures.recovered, value: HBS.sum(cycles.map((c) => c.recovered)), note: 'Cleared by netting — no invoice needed.' }),
+        ]),
+        U.card({
+          title: S.admin.cycle, note: S.admin.cycleSub, flush: true,
+          actions: U.exportButtons('settlement-cycle.csv', [
+            { label: 'Seller', value: (c) => HBS.seller(c.sellerId).name },
+            { label: 'Cadence', value: (c) => c.cadence.label },
+            { label: 'Fixed fee', value: (c) => HBS.money(c.fixedFee) },
+            { label: 'HB payment due', value: (c) => HBS.money(c.hbPaymentDue) },
+            { label: 'Seller due', value: (c) => HBS.money(c.sellerDue) },
+            { label: 'Recovered by netting', value: (c) => HBS.money(c.recovered) },
+          ], cycles),
+          body: U.table({
+            columns: [
+              { label: S.common.seller, cell: (c) => el('strong', {}, HBS.seller(c.sellerId).name) },
+              { label: 'Cadence', cell: (c) => U.pill(c.cadence.label, 'navy') },
+              { label: S.columns.fixedFees, num: true, cell: (c) => U.money(c.fixedFee) },
+              { label: S.figures.recovered, num: true, cell: (c) => U.money(c.recovered) },
+              { label: S.columns.paymentDue, draft: 'paymentDue', num: true, cell: (c) => U.money(c.hbPaymentDue, { tone: c.hbPaymentDue ? 'pos' : null }) },
+              { label: S.columns.sellerDue, draft: 'sellerDue', num: true, cell: (c) => U.money(c.sellerDue, { tone: c.sellerDue ? 'neg' : null }) },
+              { label: 'Finance action', wrap: true, cell: (c) => {
+                const acts = []
+                if (c.hbPaymentDue) acts.push('Transfer ' + HBS.money(c.hbPaymentDue, { currency: true }))
+                if (c.sellerDue) acts.push('Collect ' + HBS.money(c.sellerDue, { currency: true }))
+                if (c.feeUnrecovered) acts.push('Fee unrecovered: ' + HBS.money(c.feeUnrecovered, { currency: true }))
+                return acts.length ? acts.join(' · ') : el('span', { class: 'muted' }, 'Nothing to do')
+              } },
+            ],
+            rows: cycles,
+            rowKey: (c) => c.sellerId,
+            rowLabel: (c) => 'Open ' + HBS.seller(c.sellerId).name,
+            onRowClick: (c) => { location.hash = '/sellers/' + c.sellerId },
+          }),
+        }),
+        cycles.some((c) => c.feeUnrecovered > 0) ? U.card({
+          title: 'Fixed fees this cycle could not recover',
+          note: 'A subscription fee is netted out of a payout. When the payout is zero, the fee has nowhere to come from — the BRD does not say what happens next.',
+          flush: true,
+          body: U.table({
+            compact: true,
+            columns: [
+              { label: S.common.seller, cell: (c) => HBS.seller(c.sellerId).name },
+              { label: S.columns.fixedFees, num: true, cell: (c) => U.money(c.fixedFee) },
+              { label: 'Unrecovered', num: true, cell: (c) => U.money(c.feeUnrecovered, { tone: 'neg' }) },
+            ],
+            rows: cycles.filter((c) => c.feeUnrecovered > 0),
+          }),
+        }) : null,
+      ])
+    }
+
+    // ── The register of what is not yet decided ───────────────────────────
+    function questions() {
+      const tone = { not_modelled: 'red', proposed: 'orange', toggle: 'blue', reading: 'orange' }
+      const label = { not_modelled: 'Not modelled', proposed: 'Proposal', toggle: 'Built both ways', reading: 'A reading' }
+      return el('div', { class: 'hs-stack' }, [
+        U.banner('info', 'Every one of these is live in the prototype. ',
+          'Where the BRD leaves a definition open, this build takes a position and marks it — on the screen, next to the number. Nothing here is settled by having been drawn.'),
+        el('div', { class: 'hs-q' }, HBS.OPEN_QUESTIONS.map((q) => el('div', { class: 'hs-q-item' }, [
+          el('div', { style: { display: 'flex', gap: '10px', alignItems: 'baseline', flexWrap: 'wrap' } }, [
+            el('h3', {}, q.title),
+            U.pill(label[q.status], tone[q.status]),
+            el('span', { class: 'hs-q-ref' }, 'BRD ' + q.ref),
+          ]),
+          el('div', { class: 'hs-q-read' }, q.reading),
+        ]))),
+      ])
+    }
+
+  }
+
+  // Registered as a named app so one bundled page can start whichever surface the URL
+  // asks for; the multi-file build has no HBS_SINGLE and still starts itself.
+  root.HBSApps = root.HBSApps || {}
+  root.HBSApps.admin = start
+  if (!root.HBS_SINGLE) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
+    else start()
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)
+
+</script>
+<script>
+;(function (root) {
+  'use strict'
+
+  /**
+   * Buyer surface.
+   *
+   * Two rules from the BRD shape everything here (§7.2, §9): the statement is NOT
+   * cumulative — there is no running balance and no carried figure — and no commission
+   * appears anywhere. Both are enforced upstream: the rows come from
+   * HBS.buyerStatement(), which builds its own objects rather than filtering the seller
+   * ledger, and the shared order drawer is opened with role 'buyer', which never builds a
+   * commission stage.
+   */
+
+  const HBS = root.HBS
+  const S = root.HBSStrings
+  const U = root.HBSUI
+  const el = U.el
+
+  function start() {
+    const buyerId = U.getParam('buyer', 'C-02')
+    const b = HBS.buyer(buyerId)
+
+    const buyerPicker = el('select', {
+      class: 'hs-select', 'aria-label': S.common.buyer,
+      onchange: (e) => U.setParam('buyer', e.target.value),
+    }, HBS.BUYERS.map((x) => el('option', { value: x.id, selected: x.id === buyerId ? '' : null }, x.name)))
+
+    const nav = [{
+      label: 'Orders',
+      items: [{ href: U.href('/orders'), label: S.buyer.statement, icon: '≡' }],
+    }]
+
+    U.router({
+      '/orders': { title: S.buyer.statement, sub: S.buyer.statementSub, nav: '/orders', view: orders },
+      '/orders/:id': { title: 'Order', sub: '', nav: '/orders', view: (p) => orderDetail(p.id) },
+    }, {
+      home: '/orders',
+      render(route, params) {
+        U.clear(document.body)
+        const r = route || { title: S.common.notFound, sub: '', nav: null, view: () => U.empty(S.common.notFound, S.common.notFoundNote) }
+        const content = U.shell({
+          role: 'buyer',
+          personaRole: S.common.buyer, personaName: b.name,
+          title: params.id ? S.fill(S.buyer.orderDetail, { id: params.id }) : r.title,
+          subtitle: b.name,
+          nav: nav.map((g) => ({ label: g.label, items: g.items.map((i) => Object.assign({}, i, { current: i.href === '#' + r.nav })) })),
+          controls: [
+            el('span', { class: 'hs-filter-label' }, S.common.buyer), buyerPicker,
+            el('span', { class: 'hs-filter-label' }, S.common.period), U.periodSwitch(),
+          ],
+        })
+        content.appendChild(r.view(params))
+      },
+    })
+
+    function orders() {
+      const st = HBS.buyerStatement(buyerId, U.period())
+      if (!st.rows.length) return U.empty(S.common.empty, 'This account has no orders yet.')
+      return el('div', { class: 'hs-stack' }, [
+        U.note('Not a ledger',
+          'The BRD names this as the structural difference from the seller statement (§7.2): each order’s payment stands on its own, with no running account balance.'),
+        el('div', { class: 'hs-figures' }, [
+          U.figure({ tone: 'info', label: S.buyer.paid, value: st.total, note: 'Across ' + st.rows.length + ' orders. Not a balance — a sum of what you paid.' }),
+        ]),
+        U.banner('info', null, S.buyer.notCumulative),
+        U.buyerTable(st, b, 'buyer'),
+      ])
+    }
+
+    function orderDetail(id) {
+      const o = HBS.order(id)
+      if (!o || o.buyerId !== buyerId) return U.empty(S.common.notFound, S.common.notFoundNote)
+      return el('div', { class: 'hs-stack' }, [
+        el('a', { class: 'hs-btn hs-btn--quiet hs-noprint', href: U.href('/orders') }, S.fill(S.common.backTo, { label: S.buyer.statement })),
+        U.card({
+          title: S.fill(S.buyer.orderDetail, { id }),
+          note: HBS.seller(o.sellerId).name + ' · ' + o.date,
+          actions: [el('button', { class: 'hs-btn hs-btn--sm', type: 'button', onclick: () => window.print() }, S.common.exportPdf)],
+          body: U.orderBreakdown(id, { role: 'buyer' }),
+        }),
+      ])
+    }
+  }
+
+  // Registered as a named app so one bundled page can start whichever surface the URL
+  // asks for; the multi-file build has no HBS_SINGLE and still starts itself.
+  root.HBSApps = root.HBSApps || {}
+  root.HBSApps.buyer = start
+  if (!root.HBS_SINGLE) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
+    else start()
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : this)
+
+</script>
+<script>
+/*
+ * Start whichever surface the URL asks for, and be able to do it again.
+ *
+ * In the multi-file build the page decides which app runs; here the query does. Because
+ * the bundle switches surface without navigating, starting has to be repeatable: close
+ * any open drawer, tear down what is mounted, and start the next one.
+ */
+window.HBSBoot = function () {
+  HBSUI.closeDrawer()
+  var kids = Array.prototype.slice.call(document.body.children)
+  for (var i = 0; i < kids.length; i++) if (kids[i].tagName !== 'SCRIPT' && kids[i].id !== 'hs-css-check') kids[i].remove()
+  document.body.style.overflow = ''
+  var role = new URLSearchParams(location.search).get('role')
+  if (['buyer', 'seller', 'admin'].indexOf(role) < 0) role = null
+  document.body.setAttribute('data-role', role || 'picker')
+  HBSApps[role || 'picker']()
+}
+window.HBSBoot()
+</script>
+  </body>
+</html>

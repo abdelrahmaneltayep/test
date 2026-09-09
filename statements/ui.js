@@ -73,6 +73,30 @@
   /** BRD §12: are sellers told at the COD order, or only at settlement? Both, on a switch. */
   const notifyEarly = () => getParam('notify', 'early') === 'early'
 
+  /**
+   * A link to another role.
+   *
+   * The multi-file build has a page per role; the bundle has one page and switches on
+   * ?role=. Routing every cross-role link through here means neither build knows about
+   * the other's shape.
+   */
+  function pageHref(role) {
+    if (!root.HBS_SINGLE) return role === 'picker' ? 'index.html' : role + '.html'
+    const p = new URLSearchParams(location.search)
+    p.set('role', role)
+    // Carry nothing else across: a seller id means nothing on the buyer surface.
+    for (const k of ['seller', 'buyer']) p.delete(k)
+    return location.pathname + '?' + p.toString()
+  }
+
+  /** In the bundle, switching role is a re-render rather than a navigation. */
+  function goRole(role, href) {
+    if (!root.HBS_SINGLE) { location.href = href; return }
+    history.replaceState(null, '', href)
+    location.hash = ''
+    root.HBSBoot()
+  }
+
   // ── Shell ────────────────────────────────────────────────────────────────
   function shell(opts) {
     document.body.setAttribute('data-role', opts.role)
@@ -87,7 +111,7 @@
     }
 
     const side = el('aside', { class: 'hs-side' }, [
-      el('a', { class: 'hs-brand', href: 'index.html' }, [
+      el('a', { class: 'hs-brand', href: pageHref('picker'), onclick: (e) => { if (root.HBS_SINGLE) { e.preventDefault(); goRole('picker', pageHref('picker')) } } }, [
         el('span', { class: 'hs-brand-mark', 'aria-hidden': 'true' }, 'H'), S.brand,
       ]),
       el('div', { class: 'hs-brand-sub' }, S.brandSub),
@@ -417,7 +441,7 @@
   const href = (path) => '#' + path
 
   root.HBSUI = {
-    buyerTable,
+    buyerTable, pageHref, goRole,
     el, append, clear, money, shell, card, figure, pill, methodPill, draft, table, calc,
     banner, note, empty, drawer, closeDrawer, orderBreakdown, openOrder, router, href,
     periodSwitch, period, notifyEarly, setParam, getParam, exportButtons, downloadCsv,

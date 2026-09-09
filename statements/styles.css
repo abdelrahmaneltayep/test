@@ -47,6 +47,8 @@
   --mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
+#hs-css-check { display: none !important; }
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {

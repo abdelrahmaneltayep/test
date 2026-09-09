@@ -254,6 +254,12 @@
     }
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
-  else start()
+  // Registered as a named app so one bundled page can start whichever surface the URL
+  // asks for; the multi-file build has no HBS_SINGLE and still starts itself.
+  root.HBSApps = root.HBSApps || {}
+  root.HBSApps.seller = start
+  if (!root.HBS_SINGLE) {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start)
+    else start()
+  }
 })(typeof globalThis !== 'undefined' ? globalThis : this)
