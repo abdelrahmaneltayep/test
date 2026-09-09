@@ -183,6 +183,9 @@
       droppedLines: '{n} lines not charged commission',
       droppedNote: 'Rejected and cancelled items carry no commission (BRD §7.7), which is why this order’s commission is not a straight percentage of its listed total.',
       baseNote: 'Commission is charged on the pre-VAT base, whichever way the item price was entered.',
+      // The same row on a buyer screen. A buyer has no commission, so explaining its base
+      // to them is a seller-side note that wandered onto the wrong surface.
+      baseNoteBuyer: 'The price before VAT. VAT is shown on its own line below.',
       couponNote: 'HB funded this coupon, so HB absorbs it. It is not deducted from the seller.',
       sellerDiscNote: 'The seller funded this discount. It reduces what he receives, not the commission base.',
     },

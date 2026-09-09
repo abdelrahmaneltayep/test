@@ -296,7 +296,7 @@
     })
 
     const rows = [
-      { label: S.calc.base, value: st.base, plain: true, note: S.calc.baseNote },
+      { label: S.calc.base, value: st.base, plain: true, note: forBuyer ? S.calc.baseNoteBuyer : S.calc.baseNote },
       { label: S.fill(S.calc.vatLine, { rate: HBS.pct(st.lines.length ? st.lines[0].rate : HBS.VAT_RATE, 0) }), value: st.vat, plain: true },
       { label: S.calc.listTotal, value: st.orderTotal, plain: true, rule: true },
     ]
