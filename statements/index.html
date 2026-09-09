@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Jost:wght@300;400;500&display=swap" />
+    <link rel="stylesheet" href="styles.css" />
+    <title>HIGHBASE Billing — statements</title>
+  </head>
+  <body>
+    <script src="data.js"></script>
+    <script src="strings.js"></script>
+    <script src="selftest.js"></script>
+    <script src="ui.js"></script>
+    <script>
+      ;(function () {
+        'use strict'
+        // The role picker, and the one live figure that proves the model is running: the
+        // BRD's own worked example, computed rather than typed.
+        const el = HBSUI.el
+        const S = HBSStrings
+        const l = HBS.ledger('S-200')
+        const orderB = l.rows[1]
+
+        const roleCard = (href, name, note, mark) =>
+          el('a', { class: 'hs-card hs-pick-card', href }, [
+            el('div', { class: 'hs-pick-mark', 'aria-hidden': 'true' }, mark),
+            el('h2', {}, name),
+            el('p', {}, note),
+          ])
+
+        document.body.appendChild(el('div', { class: 'hs-pick' },
+          el('div', { class: 'hs-pick-inner' }, [
+            el('h1', {}, S.picker.title),
+            el('p', {}, S.picker.lead),
+
+            el('div', { class: 'hs-card', style: { padding: '16px 18px', marginBottom: '22px' } }, [
+              el('p', { class: 'hs-sub', style: { marginTop: '0' } }, [
+                el('b', {}, S.scope.lead + ' '), S.scope.body,
+              ]),
+              el('p', { class: 'hs-sub', style: { marginTop: '10px' } }, [
+                'The BRD’s worked example (§7.8), computed from the seed rather than typed: a COD order books ',
+                HBSUI.money(l.rows[0].hbReceivable, { currency: true }),
+                ' of backdated commission, and the next prepaid order nets it — deducting ',
+                HBSUI.money(orderB.commission + orderB.offset, { currency: true }),
+                ' and releasing ', HBSUI.money(orderB.payout, { currency: true }), '.',
+              ]),
+            ]),
+
+            el('div', { class: 'hs-pick-grid' }, [
+              roleCard('buyer.html', S.picker.buyer, S.picker.buyerNote, '◇'),
+              roleCard('seller.html', S.picker.seller, S.picker.sellerNote, '◆'),
+              roleCard('admin.html', S.picker.admin, S.picker.adminNote, '◈'),
+            ]),
+          ])))
+
+        if (window.HBSTest) window.HBSTest.run()
+      })()
+    </script>
+  </body>
+</html>
