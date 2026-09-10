@@ -1,8 +1,16 @@
 # HIGHBASE checkout — heuristic evaluation deck
 
-`HIGHBASE-checkout-evaluation.pptx` — 40 slides for a PM / CEO audience: the
-26 findings from the heuristic evaluation, one slide each, with what happens
-today, what the prototype changes, and what the problem costs commercially.
+Same 40 slides in two formats, both generated from `findings.js`:
+
+- `HIGHBASE-checkout-evaluation.pptx` — PowerPoint, for presenting and editing.
+- `highbase-checkout-findings.html` — web deck, for sharing as a link.
+  Arrow keys or the on-screen controls to navigate, `O` for the slide grid,
+  `#12` in the URL to deep-link a slide, and it prints one slide per page.
+  Stacks and reflows on a phone.
+
+Content: the 26 findings from the heuristic evaluation, one slide each, with
+what happens today, what the prototype changes, and what the problem costs
+commercially.
 
 ## Rebuilding
 
