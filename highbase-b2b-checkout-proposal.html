@@ -1,0 +1,1616 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HIGHBASE — B2B Checkout Proposal</title>
+<style>
+/* ============================================================
+   HIGHBASE B2B checkout — redesign proposal prototype
+   Self-contained. No build step, no network requests.
+   Open the file directly in a browser.
+   ============================================================ */
+
+:root{
+  /* Brand — sampled from the live HIGHBASE storefront */
+  --navy-900:#0a2540;
+  --navy-800:#0e3357;
+  --blue-700:#0f5c9e;
+  --blue-600:#1470bd;
+  --blue-500:#2b8ad6;
+  --blue-050:#eef6fd;
+  --blue-100:#d9ebfa;
+  --amber-600:#9c5c00; /* 5.3:1 on white, 5.0:1 on amber-050 */
+  --amber-500:#f0a020;
+  --amber-050:#fff7e8;
+  --green-700:#136c3c;
+  --green-600:#1b7f4b;
+  --green-050:#eefaf2;
+  --red-700:#b3261e;
+  --red-050:#fdeceb;
+
+  /* Neutrals */
+  --ink-900:#0f1c2b;
+  --ink-700:#33475b;
+  --ink-500:#5c728a;
+  --ink-400:#627488;   /* 4.8:1 on white */
+  --line-200:#e3e9f0;
+  --line-100:#eef2f7;
+  --surface:#ffffff;
+  --canvas:#f4f7fb;
+
+  --radius-sm:8px;
+  --radius:12px;
+  --radius-lg:16px;
+  --shadow-1:0 1px 2px rgba(15,28,43,.06), 0 1px 3px rgba(15,28,43,.04);
+  --shadow-2:0 4px 16px rgba(15,28,43,.08);
+  --shadow-3:0 12px 32px rgba(15,28,43,.14);
+
+  --font:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+  --font-ar:"SF Arabic","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --tnum:"tnum" 1,"lnum" 1;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:var(--font);
+  background:var(--canvas);
+  color:var(--ink-900);
+  font-size:14px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+html[dir="rtl"] body{font-family:var(--font-ar)}
+html[dir="rtl"] :is(.line__name,.line__sku,.line__pack,.line__unit,.supplier__meta,
+  .opt__desc,.opt__title,.hint,.doc__name,.doc__meta,.timeline h4,.timeline p,
+  .sum__row dt,.copyrow dd,.slot,.shipment span,.moq__row > span,
+  .line-alert > span,.page-head p,.hero-ok p,.verify p,.principle p,.tbl td){
+  unicode-bidi:plaintext;
+  text-align:right;
+}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--blue-700)}
+[hidden]{display:none !important}
+
+/* Money and quantities always align and never reflow in RTL */
+.num{font-variant-numeric:tabular-nums lining-nums;font-feature-settings:var(--tnum);direction:ltr;unicode-bidi:isolate}
+
+/* Focus — visible on every interactive element (WCAG 2.4.7) */
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--blue-600);
+  outline-offset:2px;
+  border-radius:4px;
+}
+
+.sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+/* ============================================================
+   1. Prototype chrome (not part of the product UI)
+   ============================================================ */
+.proto-bar{
+  position:sticky;top:0;z-index:80;
+  background:var(--navy-900);
+  color:#fff;
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+.proto-bar__in{
+  max-width:1320px;margin:0 auto;
+  padding:10px 20px;
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+}
+.proto-brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:.02em}
+.proto-brand small{
+  font-weight:600;font-size:10px;letter-spacing:.10em;text-transform:uppercase;
+  background:rgba(255,255,255,.14);padding:3px 8px;border-radius:999px;
+  color:#cfe4f7;
+}
+.proto-nav{display:flex;gap:4px;background:rgba(255,255,255,.08);padding:4px;border-radius:999px;flex-wrap:wrap}
+.proto-nav button{
+  background:transparent;border:0;color:#c9dcef;
+  padding:6px 14px;border-radius:999px;font-size:13px;font-weight:600;
+  transition:background .15s,color .15s;
+}
+.proto-nav button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.proto-nav button[aria-current="true"]{background:#fff;color:var(--navy-900)}
+.proto-tools{margin-inline-start:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.proto-toggle{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  color:#e6f0fa;padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:600;
+}
+.proto-toggle[aria-pressed="true"]{background:var(--amber-500);border-color:var(--amber-500);color:#3a2600}
+.proto-toggle .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.55}
+.proto-toggle[aria-pressed="true"] .dot{opacity:1}
+
+/* ============================================================
+   2. Simulated storefront shell
+   ============================================================ */
+.site{max-width:1320px;margin:0 auto;padding:0 20px 72px}
+.site-header{
+  display:flex;align-items:center;gap:20px;
+  padding:14px 0;border-bottom:1px solid var(--line-200);margin-bottom:24px;
+}
+.logo{font-weight:800;font-size:19px;letter-spacing:.06em;color:var(--navy-800)}
+.logo span{color:var(--blue-600)}
+.site-header nav{display:flex;gap:18px;font-size:13.5px;font-weight:600;color:var(--ink-700)}
+.site-header .acct{
+  margin-inline-start:auto;display:flex;align-items:center;gap:10px;
+  font-size:12.5px;color:var(--ink-500);
+}
+.avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--blue-050);color:var(--blue-700);
+  display:grid;place-items:center;font-weight:700;font-size:12px;
+}
+
+/* ============================================================
+   3. Layout primitives
+   ============================================================ */
+.page-head{margin-bottom:20px}
+.page-head h1{font-size:24px;line-height:1.25;margin:0 0 4px;letter-spacing:-.01em}
+.page-head p{margin:0;color:var(--ink-500);font-size:13.5px}
+
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 348px;gap:24px;align-items:start}
+.rail{position:sticky;top:88px;display:flex;flex-direction:column;gap:16px}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--line-200);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-1);
+}
+.card + .card{margin-top:16px}
+.card__head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:16px 18px;border-bottom:1px solid var(--line-100);
+}
+.card__head h2{font-size:15px;margin:0;letter-spacing:-.005em}
+.card__body{padding:18px}
+.card__foot{padding:14px 18px;border-top:1px solid var(--line-100);background:#fbfcfe;border-radius:0 0 var(--radius-lg) var(--radius-lg)}
+
+/* ============================================================
+   4. Buttons, chips, form controls
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  border-radius:10px;border:1px solid transparent;
+  padding:11px 18px;font-size:14px;font-weight:650;
+  text-decoration:none;transition:background .15s,border-color .15s,box-shadow .15s;
+  white-space:nowrap;
+}
+.btn--primary{background:var(--blue-600);color:#fff;box-shadow:var(--shadow-1)}
+.btn--primary:hover{background:var(--blue-700)}
+.btn--primary:disabled{background:#b9cbdd;box-shadow:none;cursor:not-allowed}
+.btn--ghost{background:#fff;border-color:var(--line-200);color:var(--ink-700)}
+.btn--ghost:hover{border-color:var(--blue-500);color:var(--blue-700)}
+.btn--link{background:none;border:0;padding:0;color:var(--blue-700);font-weight:650;font-size:13px;text-decoration:underline;text-underline-offset:2px}
+.btn--block{width:100%}
+.btn--lg{padding:14px 20px;font-size:15px}
+
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 10px;border-radius:999px;
+  font-size:11.5px;font-weight:650;letter-spacing:.01em;
+  border:1px solid transparent;
+}
+.chip--ok{background:var(--green-050);color:var(--green-700);border-color:#bfe6cf}
+.chip--warn{background:var(--amber-050);color:var(--amber-600);border-color:#f4dcae}
+.chip--info{background:var(--blue-050);color:var(--blue-700);border-color:var(--blue-100)}
+.chip--bad{background:var(--red-050);color:var(--red-700);border-color:#f4c7c3}
+.chip--mute{background:var(--line-100);color:var(--ink-500);border-color:var(--line-200)}
+
+.field{display:block;margin-bottom:14px}
+.field > label,.label{
+  display:block;font-size:12.5px;font-weight:650;color:var(--ink-700);margin-bottom:6px;
+}
+.hint{font-size:12px;color:var(--ink-500);margin-top:5px}
+.input,select.input,textarea.input{
+  width:100%;padding:10px 12px;font-size:14px;font-family:inherit;
+  border:1px solid #cdd8e4;border-radius:10px;background:#fff;color:var(--ink-900);
+  transition:border-color .15s,box-shadow .15s;
+}
+.input:hover{border-color:#b0c1d4}
+.input:focus{border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(20,112,189,.14);outline:none}
+.input::placeholder{color:#9fb0c2}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+
+/* ============================================================
+   5. Annotation pins — the "why" layer
+   ============================================================ */
+.pin{
+  display:none;
+  position:relative;
+  width:20px;height:20px;flex:0 0 20px;
+  border-radius:50%;border:0;
+  background:var(--amber-500);color:#3a2600;
+  font-size:11px;font-weight:800;line-height:20px;text-align:center;
+  vertical-align:middle;margin-inline-start:6px;
+  box-shadow:0 0 0 3px rgba(240,160,32,.22);
+}
+body.notes-on .pin{display:inline-block}
+.pin__tip{
+  display:none;position:absolute;z-index:60;
+  inset-inline-start:26px;top:-6px;width:264px;
+  background:var(--navy-900);color:#e8f1fa;
+  padding:11px 13px;border-radius:10px;
+  font-size:12.5px;font-weight:500;line-height:1.5;text-align:start;
+  box-shadow:var(--shadow-3);
+}
+.pin:hover .pin__tip,.pin:focus-visible .pin__tip{display:block}
+.pin__tip b{color:var(--amber-500);display:block;margin-bottom:2px;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+@media (max-width:900px){
+  .pin__tip{inset-inline-start:auto;inset-inline-end:0;top:26px;width:min(264px,72vw)}
+}
+
+/* ============================================================
+   6. Cart — supplier groups
+   ============================================================ */
+.cart-toolbar{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 14px;margin-bottom:16px;
+  background:#fff;border:1px solid var(--line-200);border-radius:var(--radius);
+}
+.cart-toolbar .spacer{margin-inline-start:auto}
+.checkbox{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-700)}
+.checkbox input{width:16px;height:16px;accent-color:var(--blue-600);cursor:pointer}
+
+.supplier{margin-bottom:16px}
+.supplier__head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 18px;border-bottom:1px solid var(--line-100);
+}
+.supplier__logo{
+  width:36px;height:36px;border-radius:9px;flex:0 0 36px;
+  background:linear-gradient(135deg,var(--blue-500),var(--blue-700));
+  color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;
+}
+.supplier__name{font-size:14.5px;font-weight:700;margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.supplier__meta{font-size:12px;color:var(--ink-500);margin:1px 0 0}
+
+/* Minimum-order progress — one per supplier, never per line item */
+.moq{padding:12px 18px;background:var(--amber-050);border-bottom:1px solid #f4e2bf}
+.moq--met{background:var(--green-050);border-bottom-color:#c9e9d7}
+.moq__row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--amber-600);font-weight:600}
+.moq--met .moq__row{color:var(--green-700)}
+.moq__row .spacer{margin-inline-start:auto;font-weight:700}
+.moq__track{height:6px;border-radius:999px;background:#fff;margin-top:8px;overflow:hidden;border:1px solid rgba(0,0,0,.05)}
+.moq__fill{height:100%;background:var(--amber-500);border-radius:999px;transition:width .35s ease}
+.moq--met .moq__fill{background:var(--green-600)}
+
+/* Line items — a dense procurement list, not a marketing grid */
+.line{
+  display:grid;
+  grid-template-columns:20px 56px minmax(0,1fr) 132px 128px 96px 32px;
+  align-items:center;gap:14px;
+  padding:14px 18px;border-bottom:1px solid var(--line-100);
+}
+.line:last-child{border-bottom:0}
+.line--head{
+  padding-top:9px;padding-bottom:9px;background:#fbfcfe;
+  font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-400);
+}
+.line__thumb{
+  width:56px;height:56px;border-radius:8px;border:1px solid var(--line-200);
+  background:#fff;display:grid;place-items:center;font-size:22px;
+}
+.line__name{font-size:13.5px;font-weight:650;margin:0 0 2px;line-height:1.4}
+.line__sku{font-size:11.5px;color:var(--ink-400);font-variant-numeric:tabular-nums}
+.line__pack{font-size:12.5px;color:var(--ink-700)}
+.line__unit{font-size:11.5px;color:var(--ink-500);margin-top:2px}
+.line__total{font-size:14px;font-weight:700;text-align:end}
+.line__was{font-size:11.5px;color:var(--ink-400);text-decoration:line-through;text-align:end}
+.icon-btn{
+  width:30px;height:30px;border-radius:8px;border:1px solid transparent;
+  background:transparent;color:var(--ink-400);display:grid;place-items:center;font-size:15px;
+}
+.icon-btn:hover{background:var(--red-050);color:var(--red-700)}
+
+.stepper{display:inline-flex;align-items:stretch;border:1px solid #cdd8e4;border-radius:9px;overflow:hidden;background:#fff}
+.stepper button{width:32px;border:0;background:#fff;color:var(--ink-700);font-size:16px;line-height:1}
+.stepper button:hover:not(:disabled){background:var(--blue-050);color:var(--blue-700)}
+.stepper button:disabled{color:#c3cfdb;cursor:not-allowed}
+.stepper input{
+  width:52px;border:0;border-inline:1px solid #cdd8e4;text-align:center;
+  font-size:13.5px;font-weight:650;font-variant-numeric:tabular-nums;
+  -moz-appearance:textfield;
+}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+/* Inline problem + one-tap resolution, attached to the item it concerns */
+.line-alert{
+  grid-column:1/-1;
+  display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  margin:2px 0 0;padding:8px 11px;border-radius:9px;
+  background:var(--red-050);color:var(--red-700);font-size:12.5px;font-weight:600;
+}
+.line-alert .btn--link{color:var(--red-700)}
+
+.supplier__foot{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 18px;background:#fbfcfe;font-size:12.5px;color:var(--ink-500);
+  border-top:1px solid var(--line-100);border-radius:0 0 var(--radius-lg) var(--radius-lg);
+}
+.supplier__foot .spacer{margin-inline-start:auto}
+.supplier__foot b{color:var(--ink-900);font-size:13.5px}
+
+/* ============================================================
+   7. Order summary rail
+   ============================================================ */
+.sum__row{display:flex;align-items:baseline;gap:12px;padding:6px 0;font-size:13.5px;color:var(--ink-700)}
+.sum__row .spacer{margin-inline-start:auto;font-weight:650;color:var(--ink-900)}
+.sum__row--sub{font-size:12.5px;color:var(--ink-500);padding-inline-start:12px}
+.sum__row--sub .spacer{font-weight:600;color:var(--ink-500)}
+.sum__row--save .spacer{color:var(--green-700)}
+.sum__rule{height:1px;background:var(--line-100);margin:10px 0}
+.sum__total{display:flex;align-items:flex-start;gap:12px;padding-top:4px}
+.sum__total dt{font-size:14px;font-weight:700;padding-top:5px}
+.sum__total dd{margin:0;margin-inline-start:auto;text-align:end}
+.sum__total .amount{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.15}
+.sum__total .vat{font-size:11.5px;color:var(--ink-500);font-weight:500}
+
+.coupon{display:flex;gap:8px;margin-bottom:12px}
+.coupon .input{flex:1;min-width:0}
+.applied{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:9px;background:var(--green-050);
+  border:1px solid #c9e9d7;font-size:12.5px;color:var(--green-700);font-weight:650;
+  margin-bottom:8px;
+}
+.applied .spacer{margin-inline-start:auto}
+.applied button{background:none;border:0;color:var(--green-700);font-size:15px;line-height:1;padding:0 2px}
+
+.trust{display:flex;flex-direction:column;gap:7px;margin-top:14px;font-size:12px;color:var(--ink-500)}
+.trust div{display:flex;align-items:center;gap:8px}
+.trust svg{flex:0 0 15px;color:var(--green-600)}
+
+/* ============================================================
+   8. Checkout
+   ============================================================ */
+.steps{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:14px 18px;margin-bottom:20px;
+  background:#fff;border:1px solid var(--line-200);border-radius:var(--radius);
+}
+.step{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:650;color:var(--ink-400)}
+.step__no{
+  width:24px;height:24px;border-radius:50%;flex:0 0 24px;
+  display:grid;place-items:center;font-size:12px;font-weight:700;
+  background:var(--line-100);color:var(--ink-400);
+}
+.step--done{color:var(--green-700)}
+.step--done .step__no{background:var(--green-600);color:#fff}
+.step--now{color:var(--blue-700)}
+.step--now .step__no{background:var(--blue-600);color:#fff;box-shadow:0 0 0 3px rgba(20,112,189,.16)}
+.step__bar{flex:1;min-width:20px;height:2px;background:var(--line-200);border-radius:2px}
+.step--done + .step__bar{background:var(--green-600)}
+
+/* Verification banner — the compliance state, resolved once at account level */
+.verify{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 16px;margin-bottom:20px;border-radius:var(--radius);
+  border:1px solid #c9e9d7;background:var(--green-050);
+}
+.verify--pending{border-color:#f4dcae;background:var(--amber-050)}
+.verify__icon{
+  width:30px;height:30px;border-radius:50%;flex:0 0 30px;display:grid;place-items:center;
+  background:var(--green-600);color:#fff;font-size:15px;font-weight:800;
+}
+.verify--pending .verify__icon{background:var(--amber-500);color:#3a2600}
+.verify h3{margin:0 0 2px;font-size:13.5px;color:var(--green-700)}
+.verify--pending h3{color:var(--amber-600)}
+.verify p{margin:0;font-size:12.5px;color:var(--ink-700)}
+.verify .spacer{margin-inline-start:auto}
+
+.opt{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px;border:1px solid var(--line-200);border-radius:var(--radius);
+  margin-bottom:10px;background:#fff;transition:border-color .15s,box-shadow .15s;cursor:pointer;
+}
+.opt:hover{border-color:var(--blue-500)}
+.opt:has(input:checked){border-color:var(--blue-600);box-shadow:0 0 0 3px rgba(20,112,189,.12);background:#fbfdff}
+.opt input{margin-top:2px;width:17px;height:17px;flex:0 0 17px;accent-color:var(--blue-600)}
+.opt__title{font-size:13.5px;font-weight:650;margin:0 0 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.opt__desc{font-size:12.5px;color:var(--ink-500);margin:0}
+.opt--disabled{opacity:.6;cursor:not-allowed}
+.opt__price{margin-inline-start:auto;font-size:13px;font-weight:700;white-space:nowrap}
+
+.slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.slot{
+  padding:9px 14px;border:1px solid var(--line-200);border-radius:10px;background:#fff;
+  font-size:12.5px;font-weight:650;color:var(--ink-700);text-align:center;line-height:1.35;
+}
+.slot small{display:block;font-weight:500;color:var(--ink-400);font-size:11px}
+.slot:hover{border-color:var(--blue-500)}
+.slot[aria-pressed="true"]{border-color:var(--blue-600);background:var(--blue-050);color:var(--blue-700);box-shadow:0 0 0 3px rgba(20,112,189,.12)}
+.slot:disabled{opacity:.45;cursor:not-allowed;text-decoration:line-through}
+
+.map{
+  height:104px;border-radius:10px;border:1px solid var(--line-200);
+  background:
+    linear-gradient(0deg,rgba(255,255,255,.6),rgba(255,255,255,.6)),
+    repeating-linear-gradient(90deg,#dfe8f1 0 1px,transparent 1px 28px),
+    repeating-linear-gradient(0deg,#dfe8f1 0 1px,transparent 1px 28px),
+    #eef3f8;
+  display:grid;place-items:center;position:relative;overflow:hidden;
+}
+.map__pin{font-size:26px;filter:drop-shadow(0 3px 4px rgba(0,0,0,.22))}
+.map__label{
+  position:absolute;inset-inline-start:10px;bottom:8px;
+  background:rgba(255,255,255,.94);border:1px solid var(--line-200);
+  padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:650;color:var(--ink-700);
+}
+
+.shipment{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:11px 13px;border:1px solid var(--line-200);border-radius:10px;margin-bottom:8px;
+  font-size:12.5px;
+}
+.shipment .spacer{margin-inline-start:auto;color:var(--ink-500)}
+
+/* ============================================================
+   9. Confirmation
+   ============================================================ */
+.hero-ok{text-align:center;padding:26px 20px 6px}
+.hero-ok__mark{
+  width:56px;height:56px;border-radius:50%;margin:0 auto 14px;
+  background:var(--green-600);color:#fff;display:grid;place-items:center;font-size:27px;
+  box-shadow:0 6px 18px rgba(27,127,75,.28);
+}
+.hero-ok h1{font-size:23px;margin:0 0 6px;letter-spacing:-.01em}
+.hero-ok p{margin:0;color:var(--ink-500);font-size:13.5px}
+.order-ref{
+  display:inline-flex;align-items:center;gap:10px;margin-top:14px;
+  padding:8px 14px;border-radius:999px;border:1px solid var(--line-200);background:#fff;
+  font-size:13px;font-weight:650;
+}
+
+.pay{border:1px solid var(--amber-500) !important;box-shadow:0 6px 22px rgba(240,160,32,.14) !important}
+.pay__head{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:14px 18px;background:var(--amber-050);border-bottom:1px solid #f4e2bf;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.pay__head h2{margin:0;font-size:15px;color:var(--amber-600)}
+.countdown{
+  margin-inline-start:auto;display:inline-flex;align-items:center;gap:7px;
+  background:#fff;border:1px solid #f4dcae;border-radius:999px;
+  padding:5px 12px;font-size:12.5px;font-weight:700;color:var(--amber-600);
+}
+.copyrow{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 13px;border:1px solid var(--line-200);border-radius:10px;margin-bottom:8px;background:#fff;
+}
+.copyrow dt{font-size:12px;color:var(--ink-500);margin:0;flex:0 0 108px}
+.copyrow dd{margin:0;font-size:13.5px;font-weight:650;flex:1;min-width:0;word-break:break-all}
+.copyrow button{
+  border:1px solid var(--line-200);background:#fff;border-radius:8px;
+  padding:5px 10px;font-size:11.5px;font-weight:650;color:var(--blue-700);white-space:nowrap;
+}
+.copyrow button:hover{border-color:var(--blue-500);background:var(--blue-050)}
+.amount-due{
+  padding:14px;border-radius:12px;background:var(--green-050);border:1px solid #c9e9d7;margin-bottom:14px;
+}
+.amount-due span{display:block;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--green-700)}
+.amount-due strong{font-size:27px;font-weight:800;letter-spacing:-.02em;color:var(--green-700);line-height:1.2}
+
+.qr{
+  border:1px dashed #cdd8e4;border-radius:12px;padding:16px;
+  display:grid;place-items:center;gap:10px;background:#fbfdff;
+}
+.qr__code{width:132px;height:132px;background:#fff;padding:8px;border-radius:8px;box-shadow:var(--shadow-1)}
+
+.drop{
+  border:2px dashed #b9cbdd;border-radius:12px;padding:22px 16px;text-align:center;
+  background:#fbfdff;transition:border-color .15s,background .15s;
+}
+.drop:hover{border-color:var(--blue-500);background:var(--blue-050)}
+.drop__icon{font-size:26px;margin-bottom:6px}
+.drop h3{margin:0 0 3px;font-size:13.5px}
+.drop p{margin:0 0 12px;font-size:12.5px;color:var(--ink-500)}
+
+/* Uploaded evidence renders as a fixed-height card — never full-bleed */
+.doc{
+  display:flex;align-items:center;gap:12px;
+  padding:11px;border:1px solid var(--line-200);border-radius:11px;background:#fff;
+}
+.doc__prev{
+  width:46px;height:56px;flex:0 0 46px;border-radius:7px;border:1px solid var(--line-200);
+  background:linear-gradient(160deg,#f4f7fb,#e6eef7);display:grid;place-items:center;font-size:19px;
+}
+.doc__name{font-size:13px;font-weight:650;margin:0;word-break:break-all}
+.doc__meta{font-size:11.5px;color:var(--ink-500);margin:1px 0 0}
+.doc .spacer{margin-inline-start:auto}
+
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.timeline li:last-child{padding-bottom:0}
+.timeline li::before{
+  content:"";position:absolute;inset-inline-start:10px;top:22px;bottom:0;width:2px;background:var(--line-200);
+}
+.timeline li:last-child::before{display:none}
+.timeline__dot{
+  width:22px;height:22px;border-radius:50%;flex:0 0 22px;z-index:1;
+  background:#fff;border:2px solid var(--line-200);display:grid;place-items:center;
+  font-size:11px;color:var(--ink-400);
+}
+.timeline li.is-done .timeline__dot{background:var(--green-600);border-color:var(--green-600);color:#fff}
+.timeline li.is-now .timeline__dot{border-color:var(--amber-500);color:var(--amber-600);box-shadow:0 0 0 3px rgba(240,160,32,.18)}
+.timeline h4{margin:0;font-size:13px;font-weight:650}
+.timeline p{margin:1px 0 0;font-size:12px;color:var(--ink-500)}
+.timeline li.is-done h4,.timeline li.is-now h4{color:var(--ink-900)}
+.timeline li:not(.is-done):not(.is-now) h4{color:var(--ink-400)}
+
+/* ============================================================
+   10. Rationale sheet
+   ============================================================ */
+.doc-page{max-width:960px;margin:0 auto}
+.doc-page h2{font-size:19px;margin:32px 0 6px;letter-spacing:-.01em}
+.doc-page h2:first-child{margin-top:0}
+.doc-page > p{color:var(--ink-700);font-size:14px;max-width:72ch}
+.tbl{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border:1px solid var(--line-200);border-radius:var(--radius);overflow:hidden}
+.tbl th{
+  text-align:start;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-400);
+  padding:10px 14px;background:#fbfcfe;border-bottom:1px solid var(--line-200);font-weight:700;
+}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--line-100);font-size:13px;vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td:first-child{font-weight:650;white-space:nowrap}
+.principles{display:grid;grid-template-columns:repeat(auto-fit,minmax(248px,1fr));gap:14px;margin-top:16px}
+.principle{background:#fff;border:1px solid var(--line-200);border-radius:var(--radius);padding:16px}
+.principle h3{margin:0 0 6px;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.principle p{margin:0;font-size:12.5px;color:var(--ink-500);line-height:1.6}
+.metric{display:flex;gap:14px;flex-wrap:wrap;margin-top:16px}
+.metric div{flex:1;min-width:150px;background:#fff;border:1px solid var(--line-200);border-radius:var(--radius);padding:14px 16px}
+.metric strong{display:block;font-size:22px;font-weight:800;letter-spacing:-.02em;color:var(--blue-700)}
+.metric span{font-size:12px;color:var(--ink-500)}
+
+/* Narrow screens: keep the total and the commit action always reachable */
+.mobile-bar{display:none}
+@media (max-width:1080px){
+  .mobile-bar{
+    display:flex;align-items:center;gap:14px;
+    position:fixed;inset-inline:0;bottom:0;z-index:70;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(8px);
+    border-top:1px solid var(--line-200);
+    box-shadow:0 -4px 20px rgba(15,28,43,.08);
+  }
+  .mobile-bar__amt{line-height:1.2}
+  .mobile-bar__amt span{display:block;font-size:11px;color:var(--ink-500)}
+  .mobile-bar__amt b{font-size:18px;font-weight:800;letter-spacing:-.02em}
+  .mobile-bar .btn{margin-inline-start:auto}
+  .site{padding-bottom:96px}
+}
+
+/* ============================================================
+   11. Responsive
+   ============================================================ */
+@media (max-width:1080px){
+  .cols{grid-template-columns:1fr}
+  .rail{position:static;order:2}
+  .cols > :first-child{order:1}
+}
+@media (max-width:860px){
+  .line{grid-template-columns:20px 52px minmax(0,1fr) auto;grid-template-areas:"c t n n" ". . p p" ". . q m";gap:8px 12px;padding:14px}
+  .line__c{grid-area:c}.line__t{grid-area:t}.line__n{grid-area:n}
+  .line__p{grid-area:p}.line__q{grid-area:q}.line__m{grid-area:m;text-align:end}
+  .line--head{display:none}
+  .line__rm{position:absolute;inset-inline-end:8px;top:8px}
+  .line__n{padding-inline-end:26px}
+  .line{position:relative}
+  .grid-2{grid-template-columns:1fr}
+  .site-header nav{display:none}
+}
+@media (max-width:560px){
+  .site{padding:0 14px 56px}
+  .proto-bar__in{padding:8px 12px;gap:8px}
+  .proto-brand{font-size:12.5px}
+  .proto-nav button{padding:5px 10px;font-size:12px}
+  .proto-toggle{padding:5px 10px;font-size:11.5px}
+  .page-head h1{font-size:20px}
+  .card__body{padding:14px}
+  .copyrow{flex-wrap:wrap}
+  .copyrow dt{flex:0 0 100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+@media print{
+  .proto-bar,.cart-toolbar,.pin{display:none !important}
+}
+</style>
+</head>
+<body class="notes-on">
+
+<!-- ============================================================
+     Prototype chrome — this bar is NOT part of the proposed UI
+     ============================================================ -->
+<header class="proto-bar">
+  <div class="proto-bar__in">
+    <div class="proto-brand">HIGHBASE <small>Proposal v1</small></div>
+
+    <nav class="proto-nav" aria-label="Prototype screens">
+      <button type="button" data-screen="cart"    aria-current="true">1 · Cart</button>
+      <button type="button" data-screen="checkout" aria-current="false">2 · Checkout</button>
+      <button type="button" data-screen="confirm"  aria-current="false">3 · Confirmation</button>
+      <button type="button" data-screen="why"      aria-current="false">Rationale</button>
+    </nav>
+
+    <div class="proto-tools">
+      <button type="button" class="proto-toggle" id="t-notes" aria-pressed="true">
+        <span class="dot" aria-hidden="true"></span> Annotations
+      </button>
+      <button type="button" class="proto-toggle" id="t-dir" aria-pressed="false">
+        <span class="dot" aria-hidden="true"></span> العربية / RTL
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="site">
+
+  <!-- Simulated storefront header -->
+  <header class="site-header">
+    <div class="logo">HIGH<span>BASE</span></div>
+    <nav aria-label="Main">
+      <span>Categories</span><span>Brands</span><span>Suppliers</span><span>My lists</span>
+    </nav>
+    <div class="acct">
+      <span class="chip chip--ok">Verified buyer</span>
+      <div class="avatar">BB</div>
+      <div>
+        <div style="font-weight:650;color:var(--ink-900)">Buyer Bahrain</div>
+        <div>Branch · Manama</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       SCREEN 1 — CART
+       ============================================================ -->
+  <main id="screen-cart" class="screen">
+    <div class="page-head">
+      <h1 data-ar="سلة المشتريات">Your cart</h1>
+      <p><span class="num">5</span> items from <span class="num">2</span> suppliers · Prices exclude VAT</p>
+    </div>
+
+    <div class="cols">
+      <div>
+        <div class="cart-toolbar">
+          <label class="checkbox"><input type="checkbox" checked> Select all</label>
+          <button type="button" class="btn--link">Remove selected</button>
+          <button type="button" class="btn--link">Save as list</button>
+          <div class="spacer"></div>
+          <button type="button" class="btn btn--ghost" style="padding:7px 13px;font-size:12.5px">
+            ⌨ Quick add by SKU
+          </button>
+          <button type="button" class="pin" aria-label="Design note 7">7
+            <span class="pin__tip"><b>Repeat purchasing</b>B2B buyers reorder the same basket weekly. Quick-add by SKU, saved lists and one-click reorder remove the whole browse step for the 70%+ of orders that are repeats.</span>
+          </button>
+        </div>
+
+        <!-- ---------- Supplier 1: minimum met ---------- -->
+        <section class="card supplier" aria-labelledby="sup-1">
+          <div class="supplier__head">
+            <label class="checkbox"><input type="checkbox" checked aria-label="Select all from Al Manar Trading"></label>
+            <div class="supplier__logo" aria-hidden="true">AM</div>
+            <div>
+              <h2 class="supplier__name" id="sup-1">
+                Al Manar Trading
+                <span class="chip chip--ok">✓ Verified supplier</span>
+                <button type="button" class="pin" aria-label="Design note 1">1
+                  <span class="pin__tip"><b>Group by supplier</b>Minimum order, delivery fee, coupons and dispatch are all per supplier on HIGHBASE — so the cart must be shaped that way too. One flat list forces the buyer to hold that grouping in their head.</span>
+                </button>
+              </h2>
+              <p class="supplier__meta">Nadec authorised distributor · Delivers Sun–Thu · Manama &amp; Muharraq</p>
+            </div>
+            <div class="spacer" style="margin-inline-start:auto"></div>
+            <span class="chip chip--info">Ships separately</span>
+          </div>
+
+          <div class="moq moq--met">
+            <div class="moq__row">
+              <span>✓ Minimum order met</span>
+              <span class="spacer"><span class="num">BHD 10.000</span> / <span class="num">BHD 10.000</span></span>
+              <button type="button" class="pin" aria-label="Design note 2">2
+                <span class="pin__tip"><b>One minimum-order bar, not twelve</b>Today the same MOQ warning is repeated on every product card in the group. It is a property of the supplier, so it belongs once on the supplier header — as progress toward a target, with the exact remaining amount.</span>
+              </button>
+            </div>
+            <div class="moq__track"><div class="moq__fill" style="width:100%"></div></div>
+            <div class="moq__row" style="margin-top:7px;color:var(--ink-500);font-weight:500">
+              <span>Add <b class="num">BHD 15.000</b> more for free delivery on this supplier</span>
+              <a href="#" class="btn--link" style="margin-inline-start:auto">Browse Al Manar →</a>
+            </div>
+          </div>
+
+          <div class="line line--head" aria-hidden="true">
+            <span></span><span></span><span>Product</span><span>Pack &amp; unit price</span><span>Quantity</span>
+            <span style="text-align:end">Line total</span><span></span>
+          </div>
+
+          <div class="line">
+            <label class="line__c"><input type="checkbox" checked aria-label="Select Long Life Low Fat UHT Milk"></label>
+            <div class="line__thumb line__t" aria-hidden="true">🥛</div>
+            <div class="line__n">
+              <p class="line__name">Nadec Long Life Low Fat UHT Milk 200ml</p>
+              <div class="line__sku">SKU NDC-LF200-18 · <span class="chip chip--ok" style="padding:1px 7px">In stock</span></div>
+            </div>
+            <div class="line__p">
+              <div class="line__pack">Case of <span class="num">18</span></div>
+              <div class="line__unit"><span class="num">BHD 1.000</span> / case · <span class="num">BHD 0.056</span> / piece
+                <button type="button" class="pin" aria-label="Design note 3">3
+                  <span class="pin__tip"><b>Unit economics</b>A procurement buyer compares cost per piece across pack sizes and suppliers. Showing only "BHD 1.000" next to "18pcs" makes them do that arithmetic themselves, on every line.</span>
+                </button>
+              </div>
+            </div>
+            <div class="line__q">
+              <div class="stepper">
+                <button type="button" aria-label="Decrease quantity">−</button>
+                <input type="text" inputmode="numeric" value="8" aria-label="Quantity, cases">
+                <button type="button" aria-label="Increase quantity">+</button>
+              </div>
+              <div class="line__unit" style="margin-top:3px"><span class="num">144</span> pieces</div>
+            </div>
+            <div class="line__m"><div class="line__total num">BHD 8.000</div></div>
+            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
+          </div>
+
+          <div class="line">
+            <label class="line__c"><input type="checkbox" checked aria-label="Select Long Life Skimmed UHT Milk"></label>
+            <div class="line__thumb line__t" aria-hidden="true">🧃</div>
+            <div class="line__n">
+              <p class="line__name">Nadec Long Life Skimmed UHT Milk 1L</p>
+              <div class="line__sku">SKU NDC-SK1L · <span class="chip chip--ok" style="padding:1px 7px">In stock</span></div>
+            </div>
+            <div class="line__p">
+              <div class="line__pack">Single · <span class="num">1L</span></div>
+              <div class="line__unit"><span class="num">BHD 1.000</span> / unit</div>
+            </div>
+            <div class="line__q">
+              <div class="stepper">
+                <button type="button" aria-label="Decrease quantity">−</button>
+                <input type="text" inputmode="numeric" value="1" aria-label="Quantity">
+                <button type="button" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+            <div class="line__m"><div class="line__total num">BHD 1.000</div></div>
+            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
+          </div>
+
+          <div class="line">
+            <label class="line__c"><input type="checkbox" checked aria-label="Select Fresh Mango Flavoured Milk"></label>
+            <div class="line__thumb line__t" aria-hidden="true">🥭</div>
+            <div class="line__n">
+              <p class="line__name">Nadec Fresh Mango Flavoured Milk 200ml</p>
+              <div class="line__sku">SKU NDC-MG200 · <span class="chip chip--warn" style="padding:1px 7px">Low stock · 24 left</span></div>
+            </div>
+            <div class="line__p">
+              <div class="line__pack">Single · <span class="num">200ml</span></div>
+              <div class="line__unit"><span class="num">BHD 1.000</span> / unit</div>
+            </div>
+            <div class="line__q">
+              <div class="stepper">
+                <button type="button" aria-label="Decrease quantity">−</button>
+                <input type="text" inputmode="numeric" value="1" aria-label="Quantity">
+                <button type="button" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+            <div class="line__m"><div class="line__total num">BHD 1.000</div></div>
+            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
+          </div>
+
+          <div class="supplier__foot">
+            <span>Supplier subtotal</span>
+            <b class="num">BHD 10.000</b>
+            <span class="chip chip--mute">Delivery <span class="num">BHD 2.000</span></span>
+            <span class="chip chip--ok">Coupon ALMANAR2 · −<span class="num">BHD 2.000</span></span>
+            <div class="spacer"></div>
+            <span class="chip chip--ok">✓ Ready to order</span>
+          </div>
+        </section>
+
+        <!-- ---------- Supplier 2: minimum NOT met + stock conflict ---------- -->
+        <section class="card supplier" aria-labelledby="sup-2">
+          <div class="supplier__head">
+            <label class="checkbox"><input type="checkbox" aria-label="Select all from Gulf Fresh Foods"></label>
+            <div class="supplier__logo" style="background:linear-gradient(135deg,#5aa17f,#1b7f4b)" aria-hidden="true">GF</div>
+            <div>
+              <h2 class="supplier__name" id="sup-2">
+                Gulf Fresh Foods
+                <span class="chip chip--ok">✓ Verified supplier</span>
+              </h2>
+              <p class="supplier__meta">Chilled &amp; fresh · Delivers Mon, Wed, Sat · Capital Governorate</p>
+            </div>
+            <div class="spacer" style="margin-inline-start:auto"></div>
+            <span class="chip chip--warn">Not ready</span>
+          </div>
+
+          <div class="moq">
+            <div class="moq__row">
+              <span>⚠ <b class="num">BHD 13.000</b> below this supplier's minimum order</span>
+              <span class="spacer"><span class="num">BHD 2.000</span> / <span class="num">BHD 15.000</span></span>
+            </div>
+            <div class="moq__track"><div class="moq__fill" style="width:13.3%"></div></div>
+            <div class="moq__row" style="margin-top:9px;font-weight:600">
+              <a href="#" class="btn--link">Add items from Gulf Fresh Foods →</a>
+              <span style="color:var(--ink-400);font-weight:500">or</span>
+              <button type="button" class="btn--link">Move to a saved list</button>
+              <span class="spacer" style="font-weight:500;color:var(--ink-500)">You can still order from Al Manar now</span>
+            </div>
+          </div>
+
+          <div class="line">
+            <label class="line__c"><input type="checkbox" aria-label="Select Fresh Full Fat Milk"></label>
+            <div class="line__thumb line__t" aria-hidden="true">🍼</div>
+            <div class="line__n">
+              <p class="line__name">Nadec Fresh Full Fat Milk 360ml</p>
+              <div class="line__sku">SKU NDC-FF360 · <span class="chip chip--ok" style="padding:1px 7px">In stock</span></div>
+            </div>
+            <div class="line__p">
+              <div class="line__pack">Single · <span class="num">360ml</span></div>
+              <div class="line__unit"><span class="num">BHD 1.000</span> / unit</div>
+            </div>
+            <div class="line__q">
+              <div class="stepper">
+                <button type="button" aria-label="Decrease quantity">−</button>
+                <input type="text" inputmode="numeric" value="1" aria-label="Quantity">
+                <button type="button" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+            <div class="line__m"><div class="line__total num">BHD 1.000</div></div>
+            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
+          </div>
+
+          <div class="line">
+            <label class="line__c"><input type="checkbox" aria-label="Select Vanilla Flavoured Milk"></label>
+            <div class="line__thumb line__t" aria-hidden="true">🍦</div>
+            <div class="line__n">
+              <p class="line__name">Nadec Vanilla Flavoured Milk 125ml</p>
+              <div class="line__sku">SKU NDC-VN125-18 · <span class="chip chip--bad" style="padding:1px 7px">Only 1 case left</span></div>
+            </div>
+            <div class="line__p">
+              <div class="line__pack">Case of <span class="num">18</span></div>
+              <div class="line__unit"><span class="num">BHD 1.000</span> / case · <span class="num">BHD 0.056</span> / piece</div>
+            </div>
+            <div class="line__q">
+              <div class="stepper">
+                <button type="button" aria-label="Decrease quantity">−</button>
+                <input type="text" inputmode="numeric" value="7" aria-label="Quantity, cases" style="color:var(--red-700)">
+                <button type="button" aria-label="Increase quantity" disabled>+</button>
+              </div>
+            </div>
+            <div class="line__m"><div class="line__total num" style="color:var(--ink-400)">—</div></div>
+            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
+
+            <p class="line-alert">
+              <span>You asked for <b class="num">7</b> cases — the supplier has <b class="num">1</b>.</span>
+              <button type="button" class="btn--link">Reduce to 1</button>
+              <span aria-hidden="true">·</span>
+              <button type="button" class="btn--link">Notify me when restocked</button>
+              <button type="button" class="pin" aria-label="Design note 4">4
+                <span class="pin__tip"><b>Resolve the conflict where it happens</b>Today the cart shows "Only 1 item in stock" while the quantity stays at 7 and the total is still calculated. State the conflict, block the total, and offer the one-tap fix — don't let it surface at the payment step.</span>
+              </button>
+            </p>
+          </div>
+
+          <div class="supplier__foot">
+            <span>Supplier subtotal</span>
+            <b class="num">BHD 2.000</b>
+            <div class="spacer"></div>
+            <span class="chip chip--warn">Excluded from this order</span>
+          </div>
+        </section>
+      </div>
+
+      <!-- ---------- Sticky summary ---------- -->
+      <aside class="rail" aria-label="Order summary">
+        <div class="card">
+          <div class="card__head">
+            <h2 data-ar="ملخص الطلب">Order summary</h2>
+            <button type="button" class="pin" aria-label="Design note 5">5
+              <span class="pin__tip"><b>No late cost surprises</b>Today subtotal equals total in the cart and a <b>BHD 10.000</b> delivery fee only appears on the review page. Unexpected shipping cost is the single largest cause of checkout abandonment. Show delivery, discounts and VAT from the first screen.</span>
+            </button>
+          </div>
+          <div class="card__body">
+            <div class="applied">
+              <span>✓ ALMANAR2 — supplier coupon</span>
+              <span class="spacer num">−BHD 2.000</span>
+              <button type="button" aria-label="Remove coupon ALMANAR2">✕</button>
+            </div>
+            <div class="coupon">
+              <label class="sr-only" for="cpn">Coupon code</label>
+              <input class="input" id="cpn" placeholder="Add coupon code">
+              <button type="button" class="btn btn--ghost">Apply</button>
+            </div>
+
+            <div class="sum__rule"></div>
+
+            <dl style="margin:0">
+              <div class="sum__row"><dt>Items (<span class="num">3</span> lines)</dt><dd class="spacer num">BHD 10.000</dd></div>
+              <div class="sum__row"><dt>Delivery — Al Manar</dt><dd class="spacer num">BHD 2.000</dd></div>
+              <div class="sum__row sum__row--save"><dt>Coupon ALMANAR2</dt><dd class="spacer num">−BHD 2.000</dd></div>
+              <div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+              <div class="sum__rule"></div>
+              <div class="sum__total">
+                <dt data-ar="الإجمالي">Total</dt>
+                <dd>
+                  <div class="amount num">BHD 11.000</div>
+                  <div class="vat">VAT reclaimable · CR 5056050560-1</div>
+                </dd>
+              </div>
+            </dl>
+
+            <div style="margin-top:16px">
+              <button type="button" class="btn btn--primary btn--block btn--lg" data-goto="checkout">
+                Checkout · <span class="num">BHD 11.000</span>
+              </button>
+              <p class="hint" style="text-align:center;margin-top:9px">
+                Al Manar Trading only.
+                <button type="button" class="btn--link">Gulf Fresh Foods stays in your cart</button>
+                <button type="button" class="pin" aria-label="Design note 6">6
+                  <span class="pin__tip"><b>Partial checkout</b>One supplier below its minimum should not hold the whole basket hostage. Let the ready supplier ship now and keep the rest in the cart — the buyer gets their stock, HIGHBASE gets the revenue.</span>
+                </button>
+              </p>
+            </div>
+
+            <div class="trust">
+              <div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> Bank transfer, card or Net 30 terms</div>
+              <div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> Tax invoice issued on dispatch</div>
+              <div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> Damaged goods returnable for 48h</div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mobile-bar">
+      <div class="mobile-bar__amt">
+        <span>Total incl. VAT</span>
+        <b class="num">BHD 11.000</b>
+      </div>
+      <button type="button" class="btn btn--primary" data-goto="checkout">Checkout</button>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       SCREEN 2 — CHECKOUT
+       ============================================================ -->
+  <main id="screen-checkout" class="screen" hidden>
+    <div class="page-head">
+      <h1 data-ar="إتمام الطلب">Checkout</h1>
+      <p>Al Manar Trading · <span class="num">3</span> lines · <span class="num">146</span> pieces</p>
+    </div>
+
+    <!-- Honest, countable progress -->
+    <ol class="steps" style="list-style:none;margin:0 0 20px;padding:14px 18px">
+      <li class="step step--done"><span class="step__no">✓</span> Cart</li>
+      <li class="step__bar" aria-hidden="true"></li>
+      <li class="step step--now"><span class="step__no">2</span> Delivery &amp; purchase details</li>
+      <li class="step__bar" aria-hidden="true"></li>
+      <li class="step"><span class="step__no">3</span> Payment</li>
+      <li style="margin-inline-start:auto">
+        <button type="button" class="pin" aria-label="Design note 8">8
+          <span class="pin__tip"><b>Say where the buyer is</b>The live flow shows a box labelled "Step / Address &amp; Documents" and a separate "Step 2" chip further down, with no total. A step indicator has to answer "how many are left" or it is decoration.</span>
+        </button>
+      </li>
+    </ol>
+
+    <!-- Compliance resolved once, at account level -->
+    <div class="verify">
+      <div class="verify__icon" aria-hidden="true">✓</div>
+      <div>
+        <h3>Business verified — nothing to upload</h3>
+        <p>CR <span class="num">5056050560-1</span> · VAT <span class="num">220012345600002</span> · Verified <span class="num">14 Mar 2026</span>, valid to <span class="num">31 Dec 2026</span></p>
+      </div>
+      <div class="spacer"></div>
+      <a href="#" class="btn--link">Manage business documents</a>
+      <button type="button" class="pin" aria-label="Design note 9">9
+        <span class="pin__tip"><b>Verify the buyer, not the order</b>Today CR, VAT and personal ID uploads sit between the buyer and the Place Order button, on every purchase. Trade documents belong to the account: collect them once at onboarding, re-prompt only on expiry, and never inside a live basket.</span>
+      </button>
+    </div>
+
+    <details class="card" style="margin-bottom:20px">
+      <summary style="padding:12px 18px;cursor:pointer;font-size:12.5px;font-weight:650;color:var(--ink-500)">
+        Prototype: preview the unverified-buyer state
+      </summary>
+      <div style="padding:0 18px 18px">
+        <div class="verify verify--pending" style="margin:0">
+          <div class="verify__icon" aria-hidden="true">!</div>
+          <div>
+            <h3>Documents needed before dispatch</h3>
+            <p>You can place this order now. Al Manar will hold it while we verify your CR — usually under <span class="num">2</span> working hours.</p>
+          </div>
+          <div class="spacer"></div>
+          <a href="#" class="btn btn--ghost" style="padding:8px 14px;font-size:13px">Upload now</a>
+        </div>
+        <p class="hint" style="margin-top:10px">
+          The order is never blocked by paperwork — dispatch is. The buyer keeps momentum, and compliance still holds.
+        </p>
+      </div>
+    </details>
+
+    <div class="cols">
+      <div>
+        <!-- Deliver to -->
+        <section class="card">
+          <div class="card__head"><h2 data-ar="عنوان التوصيل">Deliver to</h2>
+            <span class="spacer" style="margin-inline-start:auto"></span>
+            <button type="button" class="btn--link">Change branch</button>
+          </div>
+          <div class="card__body">
+            <label class="opt">
+              <input type="radio" name="addr" checked>
+              <div style="flex:1">
+                <p class="opt__title">Buyer Bahrain — Manama branch <span class="chip chip--info">Default</span></p>
+                <p class="opt__desc">Building <span class="num">19</span>, Road <span class="num">18</span>, Block <span class="num">460</span>, Manama, Capital Governorate <span class="num">11111</span>, Bahrain</p>
+                <p class="opt__desc" style="margin-top:4px">Contact: Ahmed Khalil · <span class="num">+973 9080 7060</span> · branch@highbaseco.com</p>
+                <div style="display:flex;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap">
+                  <div class="map" style="flex:1;min-width:220px">
+                    <span class="map__pin" aria-hidden="true">📍</span>
+                    <span class="map__label">Pin saved · <span class="num">26.2361</span>, <span class="num">50.5831</span></span>
+                  </div>
+                  <button type="button" class="btn btn--ghost" style="padding:8px 13px;font-size:12.5px">Adjust pin</button>
+                </div>
+                <p class="hint">Drivers use the pin, not the typed address. Confirm it once — we'll remember it for this branch.</p>
+              </div>
+            </label>
+
+            <label class="opt">
+              <input type="radio" name="addr">
+              <div style="flex:1">
+                <p class="opt__title">Buyer Bahrain — Muharraq warehouse</p>
+                <p class="opt__desc">Gate <span class="num">4</span>, Industrial Area, Muharraq · Goods-in <span class="num">07:00–14:00</span></p>
+              </div>
+            </label>
+
+            <button type="button" class="btn--link">+ Deliver to a new address</button>
+          </div>
+        </section>
+
+        <!-- Delivery window -->
+        <section class="card">
+          <div class="card__head">
+            <h2 data-ar="موعد التوصيل">Delivery window</h2>
+            <button type="button" class="pin" aria-label="Design note 11">11
+              <span class="pin__tip"><b>Receiving is scheduled work</b>A business needs someone on the loading bay. Letting the buyer pick the slot cuts failed deliveries, and naming the shipment count sets expectations before the order splits.</span>
+            </button>
+          </div>
+          <div class="card__body">
+            <div class="shipment">
+              <span class="chip chip--info">Shipment <span class="num">1</span> of <span class="num">1</span></span>
+              <span>Al Manar Trading · <span class="num">3</span> lines</span>
+              <span class="spacer">Dispatched from Sitra</span>
+            </div>
+
+            <p class="label" style="margin-top:14px">Choose a delivery day</p>
+            <div class="slots">
+              <button type="button" class="slot" aria-pressed="false">Sun<small><span class="num">13 Sep</span></small></button>
+              <button type="button" class="slot" aria-pressed="true">Mon<small><span class="num">14 Sep</span></small></button>
+              <button type="button" class="slot" aria-pressed="false">Tue<small><span class="num">15 Sep</span></small></button>
+              <button type="button" class="slot" aria-pressed="false">Wed<small><span class="num">16 Sep</span></small></button>
+              <button type="button" class="slot" disabled>Thu<small>Full</small></button>
+            </div>
+
+            <p class="label" style="margin-top:16px">Time window</p>
+            <div class="slots">
+              <button type="button" class="slot" aria-pressed="true"><span class="num">08:00 – 12:00</span><small>Free</small></button>
+              <button type="button" class="slot" aria-pressed="false"><span class="num">12:00 – 16:00</span><small>Free</small></button>
+              <button type="button" class="slot" aria-pressed="false"><span class="num">16:00 – 20:00</span><small class="num">+BHD 1.500</small></button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Purchase details -->
+        <section class="card">
+          <div class="card__head">
+            <h2 data-ar="بيانات الشراء">Purchase details</h2>
+            <span class="chip chip--mute">Optional</span>
+            <button type="button" class="pin" aria-label="Design note 12">12
+              <span class="pin__tip"><b>Procurement fields</b>A PO number and cost centre are how the buyer's own finance team reconciles the invoice. Without them the buyer re-keys everything into their ERP — the fastest way to lose a repeat account.</span>
+            </button>
+          </div>
+          <div class="card__body">
+            <div class="grid-2">
+              <div class="field">
+                <label for="po">Purchase order number</label>
+                <input class="input" id="po" placeholder="e.g. PO-2026-0914" value="PO-2026-0914">
+                <p class="hint">Printed on the tax invoice</p>
+              </div>
+              <div class="field">
+                <label for="cc">Cost centre</label>
+                <select class="input" id="cc">
+                  <option>Manama branch — F&amp;B</option>
+                  <option>Muharraq warehouse — Stock</option>
+                  <option>Head office — Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="field">
+              <label for="notes">Delivery instructions</label>
+              <textarea class="input" id="notes" rows="2" placeholder="Gate code, receiving contact, pallet requirements…"></textarea>
+            </div>
+            <label class="checkbox"><input type="checkbox" checked> Email the tax invoice to accounts@buyerbahrain.com</label>
+          </div>
+        </section>
+
+        <!-- Payment -->
+        <section class="card">
+          <div class="card__head"><h2 data-ar="طريقة الدفع">Payment method</h2></div>
+          <div class="card__body">
+            <label class="opt">
+              <input type="radio" name="pay" checked>
+              <div style="flex:1">
+                <p class="opt__title">Bank transfer <span class="chip chip--ok">No fee</span></p>
+                <p class="opt__desc">Transfer to HIGHBASE and upload the receipt. Stock is reserved for <span class="num">48</span> hours.</p>
+              </div>
+            </label>
+            <label class="opt">
+              <input type="radio" name="pay">
+              <div style="flex:1">
+                <p class="opt__title">Debit or credit card</p>
+                <p class="opt__desc">Benefit Pay, Visa, Mastercard · charged on dispatch</p>
+              </div>
+              <span class="opt__price num">+2.5%</span>
+            </label>
+            <label class="opt opt--disabled">
+              <input type="radio" name="pay" disabled>
+              <div style="flex:1">
+                <p class="opt__title">Net <span class="num">30</span> credit terms <span class="chip chip--mute">Not enabled</span></p>
+                <p class="opt__desc">Pay <span class="num">30</span> days after delivery. Requires a credit check — <a href="#">apply in 3 minutes</a>.</p>
+              </div>
+              <button type="button" class="pin" aria-label="Design note 13">13
+                <span class="pin__tip"><b>Terms are the B2B differentiator</b>Trade buyers choose the marketplace that finances their working capital. Even when a buyer isn't yet approved, showing Net 30 in the flow is the highest-intent moment to get the application started.</span>
+              </button>
+            </label>
+          </div>
+        </section>
+      </div>
+
+      <!-- Summary rail with the total on the button -->
+      <aside class="rail" aria-label="Order summary">
+        <div class="card">
+          <div class="card__head">
+            <h2 data-ar="ملخص الطلب">Order summary</h2>
+            <button type="button" class="btn--link" style="margin-inline-start:auto" data-goto="cart">Edit cart</button>
+            <button type="button" class="pin" aria-label="Design note 10">10
+              <span class="pin__tip"><b>Never ask for a signature on an unseen bill</b>The live address-and-documents page has no order summary anywhere on it — the buyer presses "Place Order" without the total in view. Keep the full breakdown pinned to the last screen.</span>
+            </button>
+          </div>
+          <div class="card__body">
+            <dl style="margin:0">
+            <div class="sum__row" style="font-weight:650;color:var(--ink-900)"><dt>Al Manar Trading</dt></div>
+            <div class="sum__row sum__row--sub"><dt>Low Fat UHT 200ml × <span class="num">8</span> cases</dt><dd class="spacer num">BHD 8.000</dd></div>
+            <div class="sum__row sum__row--sub"><dt>Skimmed UHT 1L × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+            <div class="sum__row sum__row--sub"><dt>Mango Flavoured 200ml × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+            <div class="sum__rule"></div>
+            <div class="sum__row"><dt>Items subtotal</dt><dd class="spacer num">BHD 10.000</dd></div>
+            <div class="sum__row"><dt>Delivery · Mon <span class="num">14 Sep</span>, <span class="num">08:00–12:00</span></dt><dd class="spacer num">BHD 2.000</dd></div>
+            <div class="sum__row sum__row--save"><dt>Coupon ALMANAR2</dt><dd class="spacer num">−BHD 2.000</dd></div>
+            <div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+            <div class="sum__rule"></div>
+            <div class="sum__total">
+              <dt data-ar="الإجمالي">Total due<button type="button" class="pin" aria-label="Design note 14">14<span class="pin__tip"><b>Put the amount on the button</b>"Place Order" alone asks the buyer to trust a number they last saw two screens ago. The amount on the commit control is the cheapest reassurance in checkout.</span></button></dt>
+              <dd>
+                <div class="amount num">BHD 11.000</div>
+                <div class="vat">Includes <span class="num">BHD 1.000</span> reclaimable VAT</div>
+              </dd>
+            </div>
+            </dl>
+
+            <button type="button" class="btn btn--primary btn--block btn--lg" style="margin-top:16px" data-goto="confirm">
+              Place order · <span class="num">BHD 11.000</span>
+            </button>
+            <p class="hint" style="text-align:center;margin-top:9px">
+              By placing this order you accept the <a href="#">supplier's terms</a>. Cancellable free until dispatch.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="mobile-bar">
+      <div class="mobile-bar__amt">
+        <span>Total due</span>
+        <b class="num">BHD 11.000</b>
+      </div>
+      <button type="button" class="btn btn--primary" data-goto="confirm">Place order</button>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       SCREEN 3 — CONFIRMATION & PAYMENT
+       ============================================================ -->
+  <main id="screen-confirm" class="screen" hidden>
+    <div class="hero-ok">
+      <div class="hero-ok__mark" aria-hidden="true">✓</div>
+      <h1 data-ar="تم استلام طلبك">Order received</h1>
+      <p>Al Manar Trading is preparing <span class="num">3</span> lines for Mon <span class="num">14 Sep</span>, <span class="num">08:00–12:00</span>.</p>
+      <div class="order-ref">
+        <span>Order <b class="num">ORD-1788951602914</b></span>
+        <button type="button" class="btn--link" data-copy="ORD-1788951602914">Copy</button>
+      </div>
+    </div>
+
+    <div class="cols" style="margin-top:26px">
+      <div>
+        <!-- Payment: the actual outstanding task, completable here -->
+        <section class="card pay">
+          <div class="pay__head">
+            <h2 data-ar="أكمل الدفع">Complete your payment</h2>
+            <span class="countdown" id="countdown">⏱ <span class="num">47:58:12</span> left</span>
+            <button type="button" class="pin" aria-label="Design note 17">17
+              <span class="pin__tip"><b>Give the deadline a consequence</b>"Please transfer the amount" has no clock and no stated risk. Naming the reservation window — and what happens when it lapses — is what actually converts a manual bank transfer.</span>
+            </button>
+          </div>
+          <div class="card__body">
+            <p style="margin:0 0 14px;color:var(--ink-700)">
+              Transfer <b class="num">BHD 11.000</b> to the HIGHBASE account below, then upload the receipt here.
+              Your stock stays reserved until <b class="num">Sat 12 Sep, 11:00</b>.
+            </p>
+
+            <div class="cols" style="grid-template-columns:minmax(0,1fr) 200px;gap:18px">
+              <div>
+                <div class="amount-due">
+                  <span>Amount to transfer</span>
+                  <strong class="num">BHD 11.000</strong>
+                </div>
+                <dl style="margin:0">
+                  <div class="copyrow"><dt>Account name</dt><dd>HIGHBASE TRADING W.L.L.</dd><button type="button" data-copy="HIGHBASE TRADING WLL">Copy</button></div>
+                  <div class="copyrow"><dt>IBAN</dt><dd class="num">BH29 ALSA 0016 5212 1001 01</dd><button type="button" data-copy="BH29ALSA00165212100101">Copy</button></div>
+                  <div class="copyrow"><dt>SWIFT</dt><dd class="num">ALSABHBM</dd><button type="button" data-copy="ALSABHBM">Copy</button></div>
+                  <div class="copyrow"><dt>Reference</dt><dd class="num">ORD-1788951602914</dd><button type="button" data-copy="ORD-1788951602914">Copy</button></div>
+                </dl>
+                <p class="hint">Put the order number in the transfer reference — it is how we match your payment automatically.</p>
+              </div>
+
+              <div class="qr">
+                <div class="qr__code" id="qr" role="img" aria-label="Payment QR code for order ORD-1788951602914"></div>
+                <p class="hint" style="text-align:center;margin:0">Scan in your bank app —<br>amount and reference pre-filled</p>
+              </div>
+            </div>
+
+            <div class="sum__rule" style="margin:18px 0"></div>
+
+            <h3 style="font-size:14px;margin:0 0 4px">Upload your transfer receipt
+              <button type="button" class="pin" aria-label="Design note 16">16
+                <span class="pin__tip"><b>Finish the job on the page that asked for it</b>Today the confirmation says "Click on Track Your Order to upload the transaction receipt" — sending the buyer to a different screen to complete the step this screen just created. Every hop is a chance to drop out.</span>
+              </button>
+            </h3>
+            <p class="hint" style="margin:0 0 12px">PDF, JPG or PNG · up to 10 MB · we verify within one working hour</p>
+
+            <div class="drop">
+              <div class="drop__icon" aria-hidden="true">📄</div>
+              <h3>Drop your receipt here</h3>
+              <p>or choose a file from your device</p>
+              <button type="button" class="btn btn--primary">Choose file</button>
+            </div>
+
+            <p class="label" style="margin-top:14px">Attached</p>
+            <div class="doc">
+              <div class="doc__prev" aria-hidden="true">🧾</div>
+              <div>
+                <p class="doc__name">bank-transfer-receipt.pdf</p>
+                <p class="doc__meta"><span class="num">248 KB</span> · uploaded <span class="num">11:04</span></p>
+              </div>
+              <div class="spacer"></div>
+              <button type="button" class="btn--link">Preview</button>
+              <button type="button" class="icon-btn" aria-label="Remove receipt">✕</button>
+              <button type="button" class="pin" aria-label="Design note 18">18
+                <span class="pin__tip"><b>An attachment is a row, not a wallpaper</b>The live documents step renders the uploaded ID at its natural size, pushing the Place Order button thousands of pixels down the page. Files belong in a fixed-height row with a thumbnail, name, size and a preview action.</span>
+              </button>
+            </div>
+          </div>
+          <div class="card__foot" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button type="button" class="btn btn--primary">Submit receipt</button>
+            <button type="button" class="btn btn--ghost">I'll pay later</button>
+            <span class="hint" style="margin-inline-start:auto">Or <a href="#">pay by card instead</a> — instant confirmation</span>
+          </div>
+        </section>
+
+        <!-- What happens next -->
+        <section class="card">
+          <div class="card__head"><h2 data-ar="حالة الطلب">Order status</h2>
+            <button type="button" class="pin" aria-label="Design note 19">19
+              <span class="pin__tip"><b>Answer "when do I get my stock?"</b>The current confirmation ends at the bank details. A buyer restocking a shop needs the dated path from payment to delivery, and a way to reach the supplier without opening a ticket.</span>
+            </button>
+          </div>
+          <div class="card__body">
+            <ol class="timeline">
+              <li class="is-done">
+                <span class="timeline__dot" aria-hidden="true">✓</span>
+                <div><h4>Order placed</h4><p>Today, <span class="num">11:00</span></p></div>
+              </li>
+              <li class="is-now">
+                <span class="timeline__dot" aria-hidden="true">●</span>
+                <div><h4>Awaiting your payment</h4><p>Reserved until Sat <span class="num">12 Sep, 11:00</span></p></div>
+              </li>
+              <li>
+                <span class="timeline__dot" aria-hidden="true">3</span>
+                <div><h4>Supplier confirms &amp; picks</h4><p>Within <span class="num">4</span> working hours of payment</p></div>
+              </li>
+              <li>
+                <span class="timeline__dot" aria-hidden="true">4</span>
+                <div><h4>Out for delivery</h4><p>Mon <span class="num">14 Sep</span>, <span class="num">08:00–12:00</span> · driver details sent by SMS</p></div>
+              </li>
+              <li>
+                <span class="timeline__dot" aria-hidden="true">5</span>
+                <div><h4>Delivered &amp; invoiced</h4><p>Tax invoice emailed to accounts@buyerbahrain.com</p></div>
+              </li>
+            </ol>
+          </div>
+          <div class="card__foot" style="display:flex;gap:10px;flex-wrap:wrap">
+            <button type="button" class="btn btn--ghost">Track order</button>
+            <button type="button" class="btn btn--ghost">Download proforma invoice</button>
+            <button type="button" class="btn btn--ghost">Message Al Manar Trading</button>
+          </div>
+        </section>
+      </div>
+
+      <aside class="rail" aria-label="Order details">
+        <div class="card">
+          <div class="card__head"><h2>What you ordered</h2></div>
+          <div class="card__body">
+            <dl style="margin:0">
+            <div class="sum__row sum__row--sub"><dt>Low Fat UHT 200ml × <span class="num">8</span> cases</dt><dd class="spacer num">BHD 8.000</dd></div>
+            <div class="sum__row sum__row--sub"><dt>Skimmed UHT 1L × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+            <div class="sum__row sum__row--sub"><dt>Mango Flavoured 200ml × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+            <div class="sum__rule"></div>
+            <div class="sum__row"><dt>Delivery</dt><dd class="spacer num">BHD 2.000</dd></div>
+            <div class="sum__row sum__row--save"><dt>Coupon ALMANAR2</dt><dd class="spacer num">−BHD 2.000</dd></div>
+            <div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">BHD 1.000</dd></div>
+            <div class="sum__rule"></div>
+            <div class="sum__total"><dt>Total</dt><dd><div class="amount num">BHD 11.000</div></dd></div>
+            </dl>
+          </div>
+          <div class="card__foot">
+            <p style="margin:0 0 8px;font-size:12.5px;color:var(--ink-500)">Still in your cart</p>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="supplier__logo" style="width:28px;height:28px;flex:0 0 28px;font-size:11px;background:linear-gradient(135deg,#5aa17f,#1b7f4b)" aria-hidden="true">GF</div>
+              <div style="font-size:12.5px">
+                <div style="font-weight:650">Gulf Fresh Foods</div>
+                <div style="color:var(--ink-500)"><span class="num">BHD 13.000</span> below minimum</div>
+              </div>
+              <button type="button" class="btn--link" style="margin-inline-start:auto" data-goto="cart">Open</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card__body" style="display:flex;gap:12px;align-items:flex-start">
+            <div style="font-size:22px" aria-hidden="true">🔁</div>
+            <div>
+              <p style="margin:0 0 4px;font-weight:650;font-size:13.5px">Order this again next week?</p>
+              <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-500)">Save these <span class="num">3</span> lines as a recurring basket and reorder in one tap.</p>
+              <button type="button" class="btn btn--ghost" style="padding:8px 14px;font-size:12.5px">Save as "Weekly milk"</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- ============================================================
+       RATIONALE — findings, fixes and the principles behind them
+       ============================================================ -->
+  <main id="screen-why" class="screen doc-page" hidden>
+    <h2>What this proposal changes, and why</h2>
+    <p>
+      Findings come from the recorded walkthrough of <b>qa.highbasemarket.com</b> (cart → review →
+      address-confirmation → order placed) and the two confirmation screenshots. Each fix maps to an
+      established e-commerce or B2B procurement practice, not to taste.
+    </p>
+
+    <div class="metric">
+      <div><strong class="num">4 → 3</strong><span>screens from cart to paid</span></div>
+      <div><strong class="num">3 → 0</strong><span>document uploads inside the order</span></div>
+      <div><strong>Screen <span class="num">2</span> → <span class="num">1</span></strong><span>where the delivery fee first appears</span></div>
+      <div><strong class="num">19</strong><span>issues addressed</span></div>
+    </div>
+
+    <h2>Cart</h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>What happens today</th><th>Change</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>One flat product grid, though minimums, delivery and coupons are all per supplier.</td><td>Group the cart by supplier, with a header carrying that supplier's terms.</td><td>Marketplace carts must mirror how the order will actually split, or the buyer can't predict cost or delivery.</td></tr>
+        <tr><td>2</td><td>"Minimum order for this product supplier: BHD 10.000. Add BHD 6.000 more…" repeated on <em>every</em> card in the group.</td><td>One progress bar per supplier showing amount reached, target and exact gap.</td><td>Repetition of an identical message trains buyers to ignore it. Progress toward a threshold both informs and motivates.</td></tr>
+        <tr><td>3</td><td>"18pcs" sits next to "BHD 1.000" with no per-piece figure.</td><td>Show price per case and per piece on every line, plus total pieces.</td><td>Procurement buyers compare cost per unit across pack sizes. Doing that arithmetic for them is the core job of a B2B catalogue.</td></tr>
+        <tr><td>4</td><td>"Only 1 item in stock" shown while quantity stays at 7 and the line total still calculates.</td><td>Flag the conflict on the line, suppress the total, offer "Reduce to 1" and a restock alert.</td><td>An error the system can fix should come with the fix attached. Surfacing it later, at payment, costs the whole order.</td></tr>
+        <tr><td>5</td><td>Order Summary shows Subtotal = Total. A <b>BHD 10.000</b> delivery fee first appears on the next page.</td><td>Itemise delivery, coupons and VAT in the cart summary.</td><td>Unexpected extra cost at checkout is the most cited reason for abandonment in every published cart study.</td></tr>
+        <tr><td>6</td><td>One supplier under its minimum stalls the whole basket.</td><td>Check out the ready suppliers now; keep the rest in the cart.</td><td>Partial fulfilment converts today's revenue instead of deferring all of it.</td></tr>
+        <tr><td>7</td><td>No reorder, saved list or SKU entry.</td><td>Quick-add by SKU, saved lists, "save as recurring basket".</td><td>B2B demand is repetitive. The winning flow for a repeat order skips browsing entirely.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Checkout</h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>What happens today</th><th>Change</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>8</td><td>A panel labelled "Step / Address &amp; Documents", plus a "Step 2" chip lower down. No count, no sequence.</td><td>A three-step indicator: Cart → Delivery &amp; details → Payment.</td><td>Progress indicators reduce abandonment only when they show position <em>and</em> remaining length.</td></tr>
+        <tr><td>9</td><td>CR number, commercial licence and personal ID are uploaded inside the order, before Place Order.</td><td>Verify the business once at account level; checkout shows a verified chip. Unverified buyers can still order — dispatch waits, not the order.</td><td>Compliance is a property of the buyer, not the basket. Repeating it per order taxes exactly the customers who buy most often.</td></tr>
+        <tr><td>10</td><td>The address-and-documents page contains no order summary at all.</td><td>Sticky summary with the full breakdown on every checkout screen.</td><td>Nobody should commit to a payment they cannot see.</td></tr>
+        <tr><td>11</td><td>No delivery date, window or shipment count.</td><td>Day and time-slot pickers per shipment, with capacity shown.</td><td>Businesses staff their goods-in. Chosen windows cut failed deliveries and redelivery cost.</td></tr>
+        <tr><td>12</td><td>No PO number, cost centre or invoice recipient.</td><td>Optional PO, cost centre and invoice email, printed on the tax invoice.</td><td>Without them the buyer re-keys the order into their own finance system.</td></tr>
+        <tr><td>13</td><td>Bank transfer is the only route, discovered after the order is placed.</td><td>Payment method chosen before commitment; Net 30 shown with an application path.</td><td>Credit terms are the main reason a trade buyer picks one marketplace over another.</td></tr>
+        <tr><td>14</td><td>"Place Order" with no amount anywhere on screen.</td><td>"Place order · BHD 11.000".</td><td>The amount on the commit control is the cheapest reassurance available.</td></tr>
+        <tr><td>15</td><td>Field values rendered in orange on white (<span style="color:#f0a020">Bahrain</span>, <span style="color:#f0a020">Manama</span>, <span style="color:#f0a020">18</span>) — roughly 2:1 contrast, and orange reads as a warning.</td><td>Values in near-black at 17:1; orange reserved for genuine attention states.</td><td>WCAG 1.4.3 requires 4.5:1 for body text, and colour must not carry a meaning it doesn't have.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Confirmation &amp; payment</h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>What happens today</th><th>Change</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>16</td><td>"Click on Track Your Order to upload the transaction receipt" — the payment step ends on a different page.</td><td>Receipt upload sits directly under the bank details.</td><td>Every navigation hop between a task and its completion loses users.</td></tr>
+        <tr><td>17</td><td>No payment deadline and no stated consequence.</td><td>A stock-reservation window with a live countdown and a named expiry.</td><td>Manual bank transfer needs a deadline to convert; without one it becomes "later".</td></tr>
+        <tr><td>18</td><td>The uploaded ID renders full-bleed at natural size, pushing Place Order far below the fold.</td><td>Attachments render as fixed-height rows: thumbnail, name, size, preview, remove.</td><td>User content must never dictate page layout.</td></tr>
+        <tr><td>19</td><td>The confirmation ends at bank details — no delivery date, no next steps.</td><td>Dated status timeline through to invoicing, plus supplier contact and proforma download.</td><td>"When does my stock arrive" is the only question the buyer has after paying.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Principles applied</h2>
+    <div class="principles">
+      <div class="principle"><h3>💰 Total cost, from the first screen</h3><p>Delivery, VAT and discounts are visible in the cart and stay pinned through checkout. No number changes between screens.</p></div>
+      <div class="principle"><h3>🏭 The supplier is the unit</h3><p>Minimums, fees, coupons, dispatch and delivery windows all belong to a supplier group, and the cart is shaped that way.</p></div>
+      <div class="principle"><h3>📋 Verify the buyer, not the order</h3><p>Trade documents live on the account and are collected once. Paperwork can delay dispatch; it can never block placing an order.</p></div>
+      <div class="principle"><h3>🔁 Repeat buying is the default</h3><p>SKU entry, saved lists and recurring baskets treat the second order as the main event, not the first.</p></div>
+      <div class="principle"><h3>🧾 Speaks procurement</h3><p>PO numbers, cost centres, reclaimable VAT, proforma invoices and Net 30 terms — the vocabulary a finance team already uses.</p></div>
+      <div class="principle"><h3>♿ Legible and reachable</h3><p>4.5:1 minimum contrast, visible focus rings, real labels, tabular figures, keyboard-operable steppers, and full RTL support via logical properties.</p></div>
+    </div>
+
+    <h2>Not covered here</h2>
+    <p>
+      Deliberately out of scope for v1: catalogue and product pages, supplier onboarding, the credit-terms
+      application, returns, and the buyer's order-history area. Arabic copy in this prototype is
+      illustrative — the RTL toggle demonstrates layout mirroring, not final translation.
+    </p>
+  </main>
+
+</div><!-- /.site -->
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Screen switching ---------- */
+  var screens = ["cart", "checkout", "confirm", "why"];
+
+  function show(name) {
+    if (screens.indexOf(name) === -1) { name = "cart"; }
+    screens.forEach(function (s) {
+      document.getElementById("screen-" + s).hidden = (s !== name);
+    });
+    document.querySelectorAll(".proto-nav button").forEach(function (b) {
+      b.setAttribute("aria-current", String(b.dataset.screen === name));
+    });
+    window.scrollTo(0, 0);
+    if (location.hash.slice(1) !== name) { history.replaceState(null, "", "#" + name); }
+  }
+
+  document.querySelectorAll(".proto-nav button").forEach(function (b) {
+    b.addEventListener("click", function () { show(b.dataset.screen); });
+  });
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-goto]");
+    if (t) { e.preventDefault(); show(t.dataset.goto); }
+  });
+
+  /* ---------- Annotations ---------- */
+  var notes = document.getElementById("t-notes");
+  notes.addEventListener("click", function () {
+    var on = notes.getAttribute("aria-pressed") !== "true";
+    notes.setAttribute("aria-pressed", String(on));
+    document.body.classList.toggle("notes-on", on);
+  });
+
+  /* ---------- Direction / language ---------- */
+  var dirBtn = document.getElementById("t-dir");
+  dirBtn.addEventListener("click", function () {
+    var rtl = dirBtn.getAttribute("aria-pressed") !== "true";
+    dirBtn.setAttribute("aria-pressed", String(rtl));
+    document.documentElement.dir = rtl ? "rtl" : "ltr";
+    document.documentElement.lang = rtl ? "ar" : "en";
+    document.querySelectorAll("[data-ar]").forEach(function (el) {
+      if (!el.dataset.en) { el.dataset.en = el.textContent; }
+      el.textContent = rtl ? el.dataset.ar : el.dataset.en;
+    });
+  });
+
+  /* ---------- Quantity steppers ---------- */
+  document.querySelectorAll(".stepper").forEach(function (s) {
+    var input = s.querySelector("input");
+    var btns = s.querySelectorAll("button");
+    btns[0].addEventListener("click", function () {
+      var v = Math.max(1, (parseInt(input.value, 10) || 1) - 1);
+      input.value = v;
+    });
+    btns[1].addEventListener("click", function () {
+      if (btns[1].disabled) { return; }
+      input.value = (parseInt(input.value, 10) || 0) + 1;
+    });
+  });
+
+  /* ---------- Slot pickers (single-select within a row) ---------- */
+  document.querySelectorAll(".slots").forEach(function (row) {
+    row.addEventListener("click", function (e) {
+      var b = e.target.closest(".slot");
+      if (!b || b.disabled) { return; }
+      row.querySelectorAll(".slot").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true");
+    });
+  });
+
+  /* ---------- Copy-to-clipboard ---------- */
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-copy]");
+    if (!b) { return; }
+    var done = function () {
+      var was = b.textContent;
+      b.textContent = "Copied ✓";
+      setTimeout(function () { b.textContent = was; }, 1400);
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(b.dataset.copy).then(done, done);
+    } else { done(); }
+  });
+
+  /* ---------- Payment countdown ---------- */
+  var cd = document.getElementById("countdown");
+  if (cd) {
+    var left = 47 * 3600 + 58 * 60 + 12;
+    var out = cd.querySelector(".num");
+    setInterval(function () {
+      if (left <= 0) { return; }
+      left -= 1;
+      var h = Math.floor(left / 3600), m = Math.floor((left % 3600) / 60), s = left % 60;
+      var pad = function (n) { return String(n).padStart(2, "0"); };
+      out.textContent = pad(h) + ":" + pad(m) + ":" + pad(s);
+    }, 1000);
+  }
+
+  /* ---------- Decorative payment QR (illustrative, not a real code) ---------- */
+  var qr = document.getElementById("qr");
+  if (qr) {
+    var N = 25, seed = 20260909;
+    var rand = function () { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+    var finder = function (r, c) {
+      // three 7×7 position markers, as a real QR symbol carries
+      return [[0, 0], [0, N - 7], [N - 7, 0]].some(function (o) {
+        var dr = r - o[0], dc = c - o[1];
+        if (dr < 0 || dr > 6 || dc < 0 || dc > 6) { return false; }
+        var ring = Math.max(Math.abs(dr - 3), Math.abs(dc - 3));
+        return ring !== 2;
+      });
+    };
+    var isNear = function (r, c) {
+      return [[0, 0], [0, N - 7], [N - 7, 0]].some(function (o) {
+        return r >= o[0] - 1 && r <= o[0] + 7 && c >= o[1] - 1 && c <= o[1] + 7;
+      });
+    };
+    var cells = "";
+    for (var r = 0; r < N; r++) {
+      for (var c = 0; c < N; c++) {
+        if (finder(r, c) || (!isNear(r, c) && rand() > 0.5)) {
+          cells += '<rect x="' + c + '" y="' + r + '" width="1" height="1"/>';
+        }
+      }
+    }
+    qr.innerHTML = '<svg viewBox="0 0 ' + N + ' ' + N + '" width="100%" height="100%" ' +
+      'shape-rendering="crispEdges" fill="#0f1c2b" aria-hidden="true">' + cells + "</svg>";
+  }
+
+  /* ---------- Deep links (back/forward and pasted #anchors) ---------- */
+  window.addEventListener("hashchange", function () {
+    show(location.hash.slice(1) || "cart");
+  });
+  show(location.hash.slice(1) || "cart");
+})();
+</script>
+</body>
+</html>
