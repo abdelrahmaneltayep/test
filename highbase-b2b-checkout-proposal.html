@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HIGHBASE — B2B Checkout Proposal</title>
+<title>HIGHBASE Checkout Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
 /* ============================================================
    HIGHBASE B2B checkout — redesign proposal prototype
@@ -46,9 +49,13 @@
   --shadow-2:0 4px 16px rgba(15,28,43,.08);
   --shadow-3:0 12px 32px rgba(15,28,43,.14);
 
-  --font:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
-  --font-ar:"SF Arabic","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --font:"Plus Jakarta Sans",ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --font-ar:"IBM Plex Sans Arabic","SF Arabic","Noto Sans Arabic","Segoe UI",Tahoma,sans-serif;
   --tnum:"tnum" 1,"lnum" 1;
+
+  /* This page simulates a light storefront UI, so it commits to one theme.
+     Pinning color-scheme stops a dark host from recolouring native controls. */
+  color-scheme:light;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -286,7 +293,7 @@ body.notes-on .pin{display:inline-block}
 /* Line items — a dense procurement list, not a marketing grid */
 .line{
   display:grid;
-  grid-template-columns:20px 56px minmax(0,1fr) 132px 128px 96px 32px;
+  grid-template-columns:20px 56px minmax(0,1fr) 136px 132px 100px 32px;
   align-items:center;gap:14px;
   padding:14px 18px;border-bottom:1px solid var(--line-100);
 }
@@ -547,9 +554,37 @@ body.notes-on .pin{display:inline-block}
 .timeline li:not(.is-done):not(.is-now) h4{color:var(--ink-400)}
 
 /* ============================================================
-   10. Rationale sheet
+   10. Heuristic evaluation sheet
    ============================================================ */
-.doc-page{max-width:960px;margin:0 auto}
+.sev{
+  display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+  font-size:11.5px;font-weight:700;
+}
+.sev::before{
+  content:"";width:4px;height:15px;border-radius:2px;background:currentColor;
+}
+.sev--4{color:var(--red-700)}
+.sev--3{color:var(--amber-600)}
+.sev--2{color:var(--blue-700)}
+.heur{
+  display:inline-block;font-size:11px;font-weight:650;line-height:1.45;
+  color:var(--ink-700);background:var(--line-100);
+  border-radius:6px;padding:2px 7px;margin:0 3px 3px 0;
+}
+.legend{display:flex;gap:18px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;background:#fff;border:1px solid var(--line-200);border-radius:var(--radius)}
+.legend div{font-size:12.5px;color:var(--ink-500)}
+.legend b{display:block;font-size:13px}
+.tally{width:100%;border-collapse:collapse;margin-top:14px;background:#fff;border:1px solid var(--line-200);border-radius:var(--radius);overflow:hidden}
+.tally td{padding:9px 14px;border-bottom:1px solid var(--line-100);font-size:13px;vertical-align:middle}
+.tally tr:last-child td{border-bottom:0}
+.tally td:first-child{font-weight:650}
+.tally td:last-child{width:56%}
+.bar{height:8px;border-radius:999px;background:var(--blue-600);min-width:8px}
+.bar--none{background:var(--line-200)}
+.evidence{display:block;margin-top:5px;color:var(--ink-500);font-size:12px;font-style:italic}
+
+
+.doc-page{max-width:1080px;margin:0 auto}
 .doc-page h2{font-size:19px;margin:32px 0 6px;letter-spacing:-.01em}
 .doc-page h2:first-child{margin-top:0}
 .doc-page > p{color:var(--ink-700);font-size:14px;max-width:72ch}
@@ -627,7 +662,7 @@ body.notes-on .pin{display:inline-block}
 }
 </style>
 </head>
-<body class="notes-on">
+<body>
 
 <!-- ============================================================
      Prototype chrome — this bar is NOT part of the proposed UI
@@ -640,7 +675,7 @@ body.notes-on .pin{display:inline-block}
       <button type="button" data-screen="cart"    aria-current="true">1 · Cart</button>
       <button type="button" data-screen="checkout" aria-current="false">2 · Checkout</button>
       <button type="button" data-screen="confirm"  aria-current="false">3 · Confirmation</button>
-      <button type="button" data-screen="why"      aria-current="false">Rationale</button>
+      <button type="button" data-screen="why"      aria-current="false">Evaluation</button>
     </nav>
 
     <div class="proto-tools">
@@ -1399,74 +1434,303 @@ body.notes-on .pin{display:inline-block}
   <!-- ============================================================
        RATIONALE — findings, fixes and the principles behind them
        ============================================================ -->
+  <!-- ============================================================
+       HEURISTIC EVALUATION — findings, severity and the fix applied
+       ============================================================ -->
   <main id="screen-why" class="screen doc-page" hidden>
-    <h2>What this proposal changes, and why</h2>
+    <h2>Heuristic evaluation of the current checkout</h2>
     <p>
-      Findings come from the recorded walkthrough of <b>qa.highbasemarket.com</b> (cart → review →
-      address-confirmation → order placed) and the two confirmation screenshots. Each fix maps to an
-      established e-commerce or B2B procurement practice, not to taste.
+      <b>26 findings</b>, evaluated against <b>Nielsen's ten usability heuristics</b>. Evidence is the recorded walkthrough of
+      <b>qa.highbasemarket.com</b> — cart → review → address-confirmation → order placed — and the two
+      confirmation screenshots. Every finding names the heuristic it breaks, a severity, and the change
+      made in this prototype. Findings are ordered by severity within each screen.
     </p>
 
+    <div class="legend">
+      <div><b class="sev sev--4"><span class="num">4</span> · Catastrophic</b>Blocks or misleads on the path to purchase. Fix before release.</div>
+      <div><b class="sev sev--3"><span class="num">3</span> · Major</b>Causes real friction or rework. High priority.</div>
+      <div><b class="sev sev--2"><span class="num">2</span> · Minor</b>Costs time or clarity. Low priority.</div>
+    </div>
+
+    <div class="metric">
+      <div><strong class="num">26</strong><span>findings</span></div>
+      <div><strong class="num">6</strong><span>rated catastrophic</span></div>
+      <div><strong class="num">10 / 10</strong><span>heuristics breached</span></div>
+      <div><strong class="num">26</strong><span>addressed in this prototype</span></div>
+    </div>
+
+    <h2>Cart — <span class="num">/storefront/cart</span></h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Finding</th><th>Heuristic breached</th><th>Severity</th><th>Fix in this prototype</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>C1</td>
+          <td>Quantity stays at <span class="num">7</span> on an item flagged "Only 1 item in stock", and the line total still calculates as <span class="num">BHD 7.000</span>.
+            <span class="evidence">Cart, Nadec Vanilla Flavored Milk 125ml.</span></td>
+          <td><span class="heur">5 · Error prevention</span><span class="heur">9 · Recover from errors</span></td>
+          <td><span class="sev sev--4"><span class="num">4</span></span></td>
+          <td>The line states the conflict, suppresses its total, and offers "Reduce to 1" plus a restock alert.</td>
+        </tr>
+        <tr>
+          <td>C2</td>
+          <td>Order Summary shows Subtotal <span class="num">BHD 11.000</span> = Total <span class="num">BHD 11.000</span>. A <span class="num">BHD 10.000</span> delivery fee — <span class="num">91%</span> of the basket — only appears on the next page.
+            <span class="evidence">Cart summary vs. review page.</span></td>
+          <td><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--4"><span class="num">4</span></span></td>
+          <td>Delivery, coupons and VAT are itemised in the cart summary. No figure changes between screens.</td>
+        </tr>
+        <tr>
+          <td>C3</td>
+          <td>A flat product grid, though minimum order, delivery fee, coupons and dispatch are all per supplier.
+            <span class="evidence">Cart shows five items with no supplier boundary; the review page then splits them.</span></td>
+          <td><span class="heur">2 · Match the real world</span><span class="heur">6 · Recognition over recall</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>Items sit in supplier groups carrying that supplier's terms, subtotal and readiness.</td>
+        </tr>
+        <tr>
+          <td>C4</td>
+          <td>"Minimum order for this product supplier: BHD 10.000. Add BHD 6.000 more or other items to proceed." repeated verbatim on every card in the group.
+            <span class="evidence">Four identical blocks in one viewport.</span></td>
+          <td><span class="heur">8 · Aesthetic and minimalist design</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>One progress bar per supplier: amount reached, target, exact gap, and a link that closes it.</td>
+        </tr>
+        <tr>
+          <td>C5</td>
+          <td>"18pcs" sits beside "BHD 1.000" with no per-piece figure, so comparing pack sizes is manual arithmetic.
+            <span class="evidence">Nadec Long Life Low Fat UHT Milk 200ml 18pcs.</span></td>
+          <td><span class="heur">6 · Recognition over recall</span><span class="heur">7 · Flexibility and efficiency</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>Every line shows price per case, price per piece, and total pieces.</td>
+        </tr>
+        <tr>
+          <td>C6</td>
+          <td>One supplier below its minimum stalls the entire basket; the only routes out are buying more or deleting items.
+            <span class="evidence">Cart total drops from BHD 11.000 to BHD 4.000 as items are removed to get under way.</span></td>
+          <td><span class="heur">3 · User control and freedom</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>Ready suppliers check out now; the rest stays in the cart, named on the button's helper text.</td>
+        </tr>
+        <tr>
+          <td>C7</td>
+          <td>Deselecting items changes the header total silently, with no statement of what is included in the order.
+            <span class="evidence">"Select All" and per-card checkboxes.</span></td>
+          <td><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>The summary counts the lines it covers, and each supplier group states "Ready to order" or "Excluded from this order".</td>
+        </tr>
+        <tr>
+          <td>C8</td>
+          <td>No reorder, saved list or SKU entry anywhere in the flow.</td>
+          <td><span class="heur">7 · Flexibility and efficiency</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>Quick-add by SKU, "Save as list", and a recurring-basket prompt on the confirmation.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Review — <span class="num">/storefront/review</span></h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Finding</th><th>Heuristic breached</th><th>Severity</th><th>Fix in this prototype</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>R1</td>
+          <td>"Seller Total <span class="num">BHD 10.000</span>" appears after three discounts, with no order total beside it — it is unclear whether this is what will be charged.
+            <span class="evidence">Subtotal BHD 11.000, delivery BHD 10.000, three discounts, then "Seller Total".</span></td>
+          <td><span class="heur">4 · Consistency and standards</span><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>One summary, one hierarchy: items → delivery → discounts → VAT → <b>Total</b>, identical on all three screens.</td>
+        </tr>
+        <tr>
+          <td>R2</td>
+          <td>Discounts are labelled with raw internal codes — "Mahmmod_Seller_code", "jpre", "10Dinar" — that carry no meaning for the buyer.</td>
+          <td><span class="heur">2 · Match the real world</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>Each discount names its source and value: "Coupon ALMANAR2 — supplier coupon, −BHD 2.000".</td>
+        </tr>
+        <tr>
+          <td>R3</td>
+          <td>The coupon entry field sits below the totals, at the bottom of the page, after the decision it affects.</td>
+          <td><span class="heur">7 · Flexibility and efficiency</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>Coupon entry sits at the top of the summary, above the figures it changes.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Address &amp; documents — <span class="num">/storefront/address-confirmation</span></h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Finding</th><th>Heuristic breached</th><th>Severity</th><th>Fix in this prototype</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>A1</td>
+          <td>The page carries no order summary and no total. The buyer presses "Place Order" with nothing on screen saying what is being bought or for how much.
+            <span class="evidence">Full page: verification header, branch details, address, documents, button.</span></td>
+          <td><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--4"><span class="num">4</span></span></td>
+          <td>A sticky summary with the full breakdown, present on every checkout screen.</td>
+        </tr>
+        <tr>
+          <td>A2</td>
+          <td>CR number, commercial licence and personal ID are uploaded inside the order — on every purchase, including repeat ones.</td>
+          <td><span class="heur">7 · Flexibility and efficiency</span><span class="heur">3 · User control and freedom</span></td>
+          <td><span class="sev sev--4"><span class="num">4</span></span></td>
+          <td>Verification moves to the account: checkout shows a verified chip with CR, VAT and expiry. Unverified buyers still order — dispatch waits, not the order.</td>
+        </tr>
+        <tr>
+          <td>A3</td>
+          <td>The uploaded ID renders full-bleed at its natural size, pushing "Place Order" thousands of pixels below the fold. A larger file pushes it further.
+            <span class="evidence">Screenshot 1: the image fills the viewport and continues past it.</span></td>
+          <td><span class="heur">8 · Aesthetic and minimalist design</span><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--4"><span class="num">4</span></span></td>
+          <td>Attachments render as fixed-height rows — thumbnail, name, size, preview, remove. User content never sets page height.</td>
+        </tr>
+        <tr>
+          <td>A4</td>
+          <td>A panel labelled "Step / Address &amp; Documents" sits above the fold; a separate "Step 2" chip sits further down. Neither says how many steps exist.</td>
+          <td><span class="heur">1 · Visibility of system status</span><span class="heur">4 · Consistency and standards</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>One indicator, three counted steps: Cart → Delivery &amp; purchase details → Payment.</td>
+        </tr>
+        <tr>
+          <td>A5</td>
+          <td>Field values are set in orange on white — <span style="color:#f0a020">Bahrain</span>, <span style="color:#f0a020">Manama</span>, <span style="color:#f0a020">18</span>, <span style="color:#f0a020">11111</span>. Measured contrast is <span class="num">2.03:1</span>, and orange elsewhere in the interface means "warning", so settled values read as either links or problems.</td>
+          <td><span class="heur">4 · Consistency and standards</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>Values in near-black at <span class="num">17.2:1</span>. Amber is reserved for genuine attention states; the whole palette is audited to <span class="num">4.5:1</span> minimum.</td>
+        </tr>
+        <tr>
+          <td>A6</td>
+          <td>"Place Order" carries no amount, and no amount is visible anywhere on the page.</td>
+          <td><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>"Place order · <span class="num">BHD 11.000</span>" on the button itself.</td>
+        </tr>
+        <tr>
+          <td>A7</td>
+          <td>No delivery date, time window or shipment count is offered or shown, though the order will split by supplier.</td>
+          <td><span class="heur">1 · Visibility of system status</span><span class="heur">2 · Match the real world</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>Day and time-slot pickers per shipment, with capacity and the shipment count stated.</td>
+        </tr>
+        <tr>
+          <td>A8</td>
+          <td>No purchase order number, cost centre or invoice recipient — the fields a buyer's finance team reconciles against.</td>
+          <td><span class="heur">2 · Match the real world</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>Optional PO number, cost centre and invoice email, stated as printed on the tax invoice.</td>
+        </tr>
+        <tr>
+          <td>A9</td>
+          <td>"Have VAT certificate" is an unchecked box beside a large empty panel — roughly a third of the section is blank with no explanation of what checking it does.
+            <span class="evidence">Screenshot 1, Business Documents.</span></td>
+          <td><span class="heur">8 · Aesthetic and minimalist design</span><span class="heur">10 · Help and documentation</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>VAT status is part of the account verification line, stated as a value rather than an empty container.</td>
+        </tr>
+        <tr>
+          <td>A10</td>
+          <td>The map pin is required but never resolved back to anything — no confirmation of what address it corresponds to, and no way to tell a correct pin from a default one.</td>
+          <td><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>The pin shows saved coordinates, is labelled as what drivers actually use, and is adjustable in place.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Order placed — confirmation</h2>
+    <table class="tbl">
+      <thead><tr><th>#</th><th>Finding</th><th>Heuristic breached</th><th>Severity</th><th>Fix in this prototype</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>P1</td>
+          <td>"Click on Track Your Order to upload the transaction receipt" — the page that creates the payment task sends the buyer elsewhere to complete it.
+            <span class="evidence">Screenshot 4, below the bank details.</span></td>
+          <td><span class="heur">7 · Flexibility and efficiency</span><span class="heur">10 · Help and documentation</span></td>
+          <td><span class="sev sev--4"><span class="num">4</span></span></td>
+          <td>The receipt dropzone sits directly under the bank details, with "I'll pay later" as the explicit alternative.</td>
+        </tr>
+        <tr>
+          <td>P2</td>
+          <td>"Your order has been placed successfully" while payment is still outstanding — two contradictory states in one screen.</td>
+          <td><span class="heur">1 · Visibility of system status</span><span class="heur">4 · Consistency and standards</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>"Order received", with the outstanding payment as the page's most prominent card and the current stage marked on a status timeline.</td>
+        </tr>
+        <tr>
+          <td>P3</td>
+          <td>No payment deadline, no reservation window, no stated consequence of not transferring.</td>
+          <td><span class="heur">1 · Visibility of system status</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>A named expiry with a live countdown, and the stock-reservation rule stated in the first sentence.</td>
+        </tr>
+        <tr>
+          <td>P4</td>
+          <td>No delivery date, no next steps, no route to the supplier. The page ends at the bank details.</td>
+          <td><span class="heur">1 · Visibility of system status</span><span class="heur">10 · Help and documentation</span></td>
+          <td><span class="sev sev--3"><span class="num">3</span></span></td>
+          <td>A dated timeline through to invoicing, plus track, proforma download and message-supplier actions.</td>
+        </tr>
+        <tr>
+          <td>P5</td>
+          <td>The transfer reference is not stated, so a buyer paying from their bank app has no instruction on how the payment gets matched to the order.</td>
+          <td><span class="heur">10 · Help and documentation</span></td>
+          <td><span class="sev sev--2"><span class="num">2</span></span></td>
+          <td>Reference is a copyable field of its own, with the matching rule stated beneath it.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Breaches by heuristic</h2>
+    <p>All ten heuristics are breached at least once, but the distribution is the finding: <b>visibility of
+      system status</b> accounts for <span class="num">12</span> of the <span class="num">38</span> breaches —
+      nearly a third. The flow's characteristic failure is withholding cost, progress and state until after
+      the buyer has committed.</p>
+    <table class="tally">
+      <tbody>
+        <tr><td><span class="num">1</span> · Visibility of system status</td><td class="num">12</td><td><div class="bar" style="width:100%"></div></td></tr>
+        <tr><td><span class="num">7</span> · Flexibility and efficiency of use</td><td class="num">5</td><td><div class="bar" style="width:42%"></div></td></tr>
+        <tr><td><span class="num">2</span> · Match between system and the real world</td><td class="num">4</td><td><div class="bar" style="width:33%"></div></td></tr>
+        <tr><td><span class="num">4</span> · Consistency and standards</td><td class="num">4</td><td><div class="bar" style="width:33%"></div></td></tr>
+        <tr><td><span class="num">10</span> · Help and documentation</td><td class="num">4</td><td><div class="bar" style="width:33%"></div></td></tr>
+        <tr><td><span class="num">8</span> · Aesthetic and minimalist design</td><td class="num">3</td><td><div class="bar" style="width:25%"></div></td></tr>
+        <tr><td><span class="num">3</span> · User control and freedom</td><td class="num">2</td><td><div class="bar" style="width:17%"></div></td></tr>
+        <tr><td><span class="num">6</span> · Recognition rather than recall</td><td class="num">2</td><td><div class="bar" style="width:17%"></div></td></tr>
+        <tr><td><span class="num">5</span> · Error prevention</td><td class="num">1</td><td><div class="bar" style="width:8%"></div></td></tr>
+        <tr><td><span class="num">9</span> · Recognise, diagnose and recover from errors</td><td class="num">1</td><td><div class="bar" style="width:8%"></div></td></tr>
+      </tbody>
+    </table>
+
+    <h2>What changed, in four numbers</h2>
     <div class="metric">
       <div><strong class="num">4 → 3</strong><span>screens from cart to paid</span></div>
       <div><strong class="num">3 → 0</strong><span>document uploads inside the order</span></div>
       <div><strong>Screen <span class="num">2</span> → <span class="num">1</span></strong><span>where the delivery fee first appears</span></div>
-      <div><strong class="num">19</strong><span>issues addressed</span></div>
+      <div><strong class="num">2.03 → 17.2</strong><span>contrast ratio on field values</span></div>
     </div>
 
-    <h2>Cart</h2>
-    <table class="tbl">
-      <thead><tr><th>#</th><th>What happens today</th><th>Change</th><th>Why</th></tr></thead>
-      <tbody>
-        <tr><td>1</td><td>One flat product grid, though minimums, delivery and coupons are all per supplier.</td><td>Group the cart by supplier, with a header carrying that supplier's terms.</td><td>Marketplace carts must mirror how the order will actually split, or the buyer can't predict cost or delivery.</td></tr>
-        <tr><td>2</td><td>"Minimum order for this product supplier: BHD 10.000. Add BHD 6.000 more…" repeated on <em>every</em> card in the group.</td><td>One progress bar per supplier showing amount reached, target and exact gap.</td><td>Repetition of an identical message trains buyers to ignore it. Progress toward a threshold both informs and motivates.</td></tr>
-        <tr><td>3</td><td>"18pcs" sits next to "BHD 1.000" with no per-piece figure.</td><td>Show price per case and per piece on every line, plus total pieces.</td><td>Procurement buyers compare cost per unit across pack sizes. Doing that arithmetic for them is the core job of a B2B catalogue.</td></tr>
-        <tr><td>4</td><td>"Only 1 item in stock" shown while quantity stays at 7 and the line total still calculates.</td><td>Flag the conflict on the line, suppress the total, offer "Reduce to 1" and a restock alert.</td><td>An error the system can fix should come with the fix attached. Surfacing it later, at payment, costs the whole order.</td></tr>
-        <tr><td>5</td><td>Order Summary shows Subtotal = Total. A <b>BHD 10.000</b> delivery fee first appears on the next page.</td><td>Itemise delivery, coupons and VAT in the cart summary.</td><td>Unexpected extra cost at checkout is the most cited reason for abandonment in every published cart study.</td></tr>
-        <tr><td>6</td><td>One supplier under its minimum stalls the whole basket.</td><td>Check out the ready suppliers now; keep the rest in the cart.</td><td>Partial fulfilment converts today's revenue instead of deferring all of it.</td></tr>
-        <tr><td>7</td><td>No reorder, saved list or SKU entry.</td><td>Quick-add by SKU, saved lists, "save as recurring basket".</td><td>B2B demand is repetitive. The winning flow for a repeat order skips browsing entirely.</td></tr>
-      </tbody>
-    </table>
-
-    <h2>Checkout</h2>
-    <table class="tbl">
-      <thead><tr><th>#</th><th>What happens today</th><th>Change</th><th>Why</th></tr></thead>
-      <tbody>
-        <tr><td>8</td><td>A panel labelled "Step / Address &amp; Documents", plus a "Step 2" chip lower down. No count, no sequence.</td><td>A three-step indicator: Cart → Delivery &amp; details → Payment.</td><td>Progress indicators reduce abandonment only when they show position <em>and</em> remaining length.</td></tr>
-        <tr><td>9</td><td>CR number, commercial licence and personal ID are uploaded inside the order, before Place Order.</td><td>Verify the business once at account level; checkout shows a verified chip. Unverified buyers can still order — dispatch waits, not the order.</td><td>Compliance is a property of the buyer, not the basket. Repeating it per order taxes exactly the customers who buy most often.</td></tr>
-        <tr><td>10</td><td>The address-and-documents page contains no order summary at all.</td><td>Sticky summary with the full breakdown on every checkout screen.</td><td>Nobody should commit to a payment they cannot see.</td></tr>
-        <tr><td>11</td><td>No delivery date, window or shipment count.</td><td>Day and time-slot pickers per shipment, with capacity shown.</td><td>Businesses staff their goods-in. Chosen windows cut failed deliveries and redelivery cost.</td></tr>
-        <tr><td>12</td><td>No PO number, cost centre or invoice recipient.</td><td>Optional PO, cost centre and invoice email, printed on the tax invoice.</td><td>Without them the buyer re-keys the order into their own finance system.</td></tr>
-        <tr><td>13</td><td>Bank transfer is the only route, discovered after the order is placed.</td><td>Payment method chosen before commitment; Net 30 shown with an application path.</td><td>Credit terms are the main reason a trade buyer picks one marketplace over another.</td></tr>
-        <tr><td>14</td><td>"Place Order" with no amount anywhere on screen.</td><td>"Place order · BHD 11.000".</td><td>The amount on the commit control is the cheapest reassurance available.</td></tr>
-        <tr><td>15</td><td>Field values rendered in orange on white (<span style="color:#f0a020">Bahrain</span>, <span style="color:#f0a020">Manama</span>, <span style="color:#f0a020">18</span>) — roughly 2:1 contrast, and orange reads as a warning.</td><td>Values in near-black at 17:1; orange reserved for genuine attention states.</td><td>WCAG 1.4.3 requires 4.5:1 for body text, and colour must not carry a meaning it doesn't have.</td></tr>
-      </tbody>
-    </table>
-
-    <h2>Confirmation &amp; payment</h2>
-    <table class="tbl">
-      <thead><tr><th>#</th><th>What happens today</th><th>Change</th><th>Why</th></tr></thead>
-      <tbody>
-        <tr><td>16</td><td>"Click on Track Your Order to upload the transaction receipt" — the payment step ends on a different page.</td><td>Receipt upload sits directly under the bank details.</td><td>Every navigation hop between a task and its completion loses users.</td></tr>
-        <tr><td>17</td><td>No payment deadline and no stated consequence.</td><td>A stock-reservation window with a live countdown and a named expiry.</td><td>Manual bank transfer needs a deadline to convert; without one it becomes "later".</td></tr>
-        <tr><td>18</td><td>The uploaded ID renders full-bleed at natural size, pushing Place Order far below the fold.</td><td>Attachments render as fixed-height rows: thumbnail, name, size, preview, remove.</td><td>User content must never dictate page layout.</td></tr>
-        <tr><td>19</td><td>The confirmation ends at bank details — no delivery date, no next steps.</td><td>Dated status timeline through to invoicing, plus supplier contact and proforma download.</td><td>"When does my stock arrive" is the only question the buyer has after paying.</td></tr>
-      </tbody>
-    </table>
-
-    <h2>Principles applied</h2>
+    <h2>Principles behind the fixes</h2>
     <div class="principles">
-      <div class="principle"><h3>💰 Total cost, from the first screen</h3><p>Delivery, VAT and discounts are visible in the cart and stay pinned through checkout. No number changes between screens.</p></div>
-      <div class="principle"><h3>🏭 The supplier is the unit</h3><p>Minimums, fees, coupons, dispatch and delivery windows all belong to a supplier group, and the cart is shaped that way.</p></div>
-      <div class="principle"><h3>📋 Verify the buyer, not the order</h3><p>Trade documents live on the account and are collected once. Paperwork can delay dispatch; it can never block placing an order.</p></div>
-      <div class="principle"><h3>🔁 Repeat buying is the default</h3><p>SKU entry, saved lists and recurring baskets treat the second order as the main event, not the first.</p></div>
-      <div class="principle"><h3>🧾 Speaks procurement</h3><p>PO numbers, cost centres, reclaimable VAT, proforma invoices and Net 30 terms — the vocabulary a finance team already uses.</p></div>
-      <div class="principle"><h3>♿ Legible and reachable</h3><p>4.5:1 minimum contrast, visible focus rings, real labels, tabular figures, keyboard-operable steppers, and full RTL support via logical properties.</p></div>
+      <div class="principle"><h3>Total cost, from the first screen</h3><p>Delivery, VAT and discounts are visible in the cart and stay pinned through checkout. No number changes between screens.</p></div>
+      <div class="principle"><h3>The supplier is the unit</h3><p>Minimums, fees, coupons, dispatch and delivery windows all belong to a supplier group, and the cart is shaped that way.</p></div>
+      <div class="principle"><h3>Verify the buyer, not the order</h3><p>Trade documents live on the account and are collected once. Paperwork can delay dispatch; it can never block placing an order.</p></div>
+      <div class="principle"><h3>Repeat buying is the default</h3><p>SKU entry, saved lists and recurring baskets treat the second order as the main event, not the first.</p></div>
+      <div class="principle"><h3>Speaks procurement</h3><p>PO numbers, cost centres, reclaimable VAT, proforma invoices and Net 30 terms — the vocabulary a finance team already uses.</p></div>
+      <div class="principle"><h3>Legible and reachable</h3><p>4.5:1 minimum contrast, visible focus rings, real labels, tabular figures, keyboard-operable steppers, and full RTL support via logical properties.</p></div>
     </div>
 
-    <h2>Not covered here</h2>
+    <h2>Method and limits</h2>
     <p>
-      Deliberately out of scope for v1: catalogue and product pages, supplier onboarding, the credit-terms
+      This is an expert inspection by a single evaluator, not a usability test — it predicts where buyers will
+      struggle, it does not measure that they do. Nielsen's own guidance is that one evaluator finds roughly a
+      third of the problems in an interface, so treat the count as a floor. Severity here weighs frequency,
+      impact and persistence, but no evaluator-agreement pass has been run, so ratings are one considered
+      opinion. The findings worth validating with real buyers first are <b>A2</b> (documents inside the order)
+      and <b>P1</b> (receipt upload on a separate page), because both trade against compliance and finance
+      constraints this evaluation cannot see.
+    </p>
+    <p>
+      Deliberately out of scope: catalogue and product pages, supplier onboarding, the credit-terms
       application, returns, and the buyer's order-history area. Arabic copy in this prototype is
       illustrative — the RTL toggle demonstrates layout mirroring, not final translation.
     </p>
@@ -1490,7 +1754,9 @@ body.notes-on .pin{display:inline-block}
       b.setAttribute("aria-current", String(b.dataset.screen === name));
     });
     window.scrollTo(0, 0);
-    if (location.hash.slice(1) !== name) { history.replaceState(null, "", "#" + name); }
+    if (location.hash.slice(1) !== name) {
+      try { history.replaceState(null, "", "#" + name); } catch (err) { /* sandboxed frame */ }
+    }
   }
 
   document.querySelectorAll(".proto-nav button").forEach(function (b) {
@@ -1502,6 +1768,7 @@ body.notes-on .pin{display:inline-block}
   });
 
   /* ---------- Annotations ---------- */
+  document.body.classList.add("notes-on");
   var notes = document.getElementById("t-notes");
   notes.addEventListener("click", function () {
     var on = notes.getAttribute("aria-pressed") !== "true";
