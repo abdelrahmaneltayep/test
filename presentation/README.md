@@ -22,3 +22,17 @@ node build.js HIGHBASE-checkout-evaluation.pptx
 `findings.js` holds the 26 findings as data — edit the copy there rather than
 in the generator. Severity and heuristic tags must stay in sync with the
 `Evaluation` tab of `../highbase-b2b-checkout-proposal.html`.
+
+## Before/after evidence (web deck only)
+
+Each finding slide carries two screenshots of the same region:
+
+- **before** — a frame from the recorded walkthrough of qa.highbasemarket.com
+- **after** — the same region of `../highbase-b2b-checkout-proposal.html`
+
+`evidence/` holds the cropped images, `shots.json` maps each finding id to its
+pair, and `crops.py` regenerates the crops. The after images come from
+full-page captures of the prototype plus measured region boxes, so both sides
+get identical crop treatment (same aspect, same output width, same quality).
+Rebuilding the deck inlines them as data URIs — the artifact CSP blocks
+external images, so they cannot be referenced by URL.

@@ -1,0 +1,106 @@
+{
+ "C1": [
+  "b_cart_stock",
+  "a_cart_stock"
+ ],
+ "C2": [
+  "b_cart_summary",
+  "a_cart_summary"
+ ],
+ "C3": [
+  "b_cart_flat",
+  "a_cart_group"
+ ],
+ "C4": [
+  "b_cart_moq",
+  "a_cart_moq"
+ ],
+ "C5": [
+  "b_cart_units",
+  "a_cart_units"
+ ],
+ "C6": [
+  "b_cart_moq",
+  "a_cart_partial"
+ ],
+ "C7": [
+  "b_cart_flat",
+  "a_cart_chips"
+ ],
+ "C8": [
+  "b_cart_flat",
+  "a_cart_toolbar"
+ ],
+ "R1": [
+  "b_review_costs",
+  "a_cart_summary"
+ ],
+ "R2": [
+  "b_review_costs",
+  "a_cart_coupon"
+ ],
+ "R3": [
+  "b_review_costs",
+  "a_cart_coupon"
+ ],
+ "A1": [
+  "b_verify_top",
+  "a_co_summary"
+ ],
+ "A2": [
+  "b_docs",
+  "a_co_verify"
+ ],
+ "A3": [
+  "b_giant",
+  "a_doc_row"
+ ],
+ "A4": [
+  "b_verify_top",
+  "a_co_steps"
+ ],
+ "A5": [
+  "b_verify_top",
+  "a_co_addr"
+ ],
+ "A6": [
+  "b_docs",
+  "a_co_cta"
+ ],
+ "A7": [
+  "b_verify_top",
+  "a_co_window"
+ ],
+ "A8": [
+  "b_verify_top",
+  "a_co_purchase"
+ ],
+ "A9": [
+  "b_docs",
+  "a_co_verify"
+ ],
+ "A10": [
+  "b_pin",
+  "a_co_addr"
+ ],
+ "P1": [
+  "b_attach",
+  "a_cf_drop"
+ ],
+ "P2": [
+  "b_pay",
+  "a_cf_ref"
+ ],
+ "P3": [
+  "b_attach",
+  "a_cf_countdown"
+ ],
+ "P4": [
+  "b_pay",
+  "a_cf_timeline"
+ ],
+ "P5": [
+  "b_pay",
+  "a_cf_pay"
+ ]
+}

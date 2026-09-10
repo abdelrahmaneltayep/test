@@ -1,0 +1,326 @@
+<div id="progress" style="width:0"></div>
+<div id="viewport"><div id="deck" role="region" aria-label="Presentation slides"></div></div>
+
+<div id="grid" role="dialog" aria-label="All slides" aria-modal="true"></div>
+
+<nav id="bar" aria-label="Slide navigation">
+  <button type="button" id="prev" aria-label="Previous slide">← Prev</button>
+  <span id="count" aria-live="polite"></span>
+  <button type="button" id="next" aria-label="Next slide">Next →</button>
+  <span id="title-now"></span>
+  <button type="button" id="overview" aria-label="Show all slides">All slides</button>
+</nav>
+
+<script>
+(function(){
+"use strict";
+
+var FINDINGS = __FINDINGS__;
+var SHOTS = __SHOTS__;
+
+var HEUR_IDS = {
+  "1":["C2","C7","R1","A1","A3","A4","A6","A7","A10","P2","P3","P4"],
+  "7":["C5","C8","R3","A2","P1"],
+  "2":["C3","R2","A7","A8"],
+  "4":["R1","A4","A5","P2"],
+  "10":["A9","P1","P4","P5"],
+  "8":["C4","A3","A9"],
+  "3":["C6","A2"],
+  "6":["C3","C5"],
+  "5":["C1"],
+  "9":["C1"]
+};
+var HEUR_NAME = {
+  "1":"Visibility of system status","2":"Match the real world",
+  "3":"User control and freedom","4":"Consistency and standards",
+  "5":"Error prevention","6":"Recognition over recall",
+  "7":"Flexibility and efficiency","8":"Aesthetic and minimalist design",
+  "9":"Recognise and recover from errors","10":"Help and documentation"
+};
+var SECTIONS = {
+  cart  :{n:"01",t:"Cart",sub:"/storefront/cart",
+          blurb:"Eight findings. The basket hides what the order will cost, and sells stock it does not have."},
+  review:{n:"02",t:"Review",sub:"/storefront/review",
+          blurb:"Three findings. The totals are stated in language the buyer cannot verify."},
+  addr  :{n:"03",t:"Address &amp; documents",sub:"/storefront/address-confirmation",
+          blurb:"Ten findings — the densest section. Paperwork stands between the buyer and the order."},
+  pay   :{n:"04",t:"Order placed",sub:"confirmation &amp; payment",
+          blurb:"Five findings. The order is declared complete while the money is still outstanding."}
+};
+
+function esc(s){ return String(s).replace(/&(?![a-z]+;)/g,"&amp;").replace(/</g,"&lt;"); }
+
+/* ---------- Slide builders ---------- */
+var slides = [];
+function add(o){ slides.push(o); }
+
+add({ nav:"Title", dark:true, html:
+  '<div style="margin:auto 0">'+
+    '<p class="eyebrow">HIGHBASE · B2B marketplace · Bahrain</p>'+
+    '<h1 style="margin-top:22px;max-width:19ch">Where the checkout loses orders</h1>'+
+    '<p class="lede" style="margin-top:26px;font-size:23px">A heuristic evaluation of the live buyer flow — '+
+      '<b style="color:#fff">26 findings</b>, and the fix built for each one.</p>'+
+    '<p style="margin-top:34px;font-size:15px;color:#8fa9c4">'+
+      'Evaluated against Nielsen\'s ten usability heuristics · September 2026</p>'+
+  '</div>' });
+
+add({ nav:"What we did", title:"What we did",
+  lede:"Three steps, in order. Each one depends on the one before it.", html:
+  '<div class="steps">'+
+    [["1","Recorded the live flow","A full buyer journey on qa.highbasemarket.com — cart, review, address and documents, order placed — plus the two confirmation screenshots."],
+     ["2","Inspected it against a standard","Nielsen's ten usability heuristics, the industry-standard inspection method. Each finding names the heuristic it breaks and carries a severity rating."],
+     ["3","Built the fix, not just the critique","A working prototype of all three screens. Every one of the 26 findings has a corresponding change you can click through."]]
+    .map(function(s){ return '<div class="step"><div class="step-n">'+s[0]+'</div><div>'+
+      '<h3>'+s[1]+'</h3><p class="card-body" style="font-size:17px;margin-top:8px">'+s[2]+'</p></div></div>'; }).join("")+
+  '</div>' });
+
+add({ nav:"The headline", title:"The headline",
+  lede:"26 findings. Six of them are costing you orders today.", html:
+  '<div class="cards c4" style="flex:0 0 auto;margin-bottom:24px">'+
+    [["26","findings across four screens","var(--navy)"],
+     ["6","rated catastrophic — they block or mislead on the path to purchase","var(--red)"],
+     ["10/10","heuristics breached at least once","var(--navy-2)"],
+     ["12","of the 38 breaches are one heuristic: the flow hides its own state","var(--blue)"]]
+    .map(function(s){ return '<div class="card"><div class="stat" style="color:'+s[2]+'">'+s[0]+
+      '</div><p class="stat-cap">'+s[1]+'</p></div>'; }).join("")+
+  '</div>'+
+  '<div class="card" style="background:var(--navy);flex:1;display:flex;flex-direction:column;justify-content:center">'+
+    '<h3 style="color:#fff">The pattern behind the numbers</h3>'+
+    '<p class="card-body" style="color:var(--ice);font-size:18px;max-width:none">The checkout consistently withholds cost, '+
+    'progress and state until after the buyer has committed. The delivery fee arrives a page late, the order total is '+
+    'absent from the screen that asks for the order, and the confirmation announces success while the money is still outstanding.</p>'+
+  '</div>' });
+
+add({ nav:"Where it costs money", title:"Where it costs money",
+  lede:"The 26 findings cluster into four commercial problems.", html:
+  '<div class="cards c22">'+
+    [["Cost arrives too late","A BHD 10 delivery fee lands a page after the basket, and the screen that asks for the order shows no total at all. Buyers abandon at exactly the point they discover the real number.","C2 · R1 · A1 · A6"],
+     ["Paperwork on every order","Trade documents are demanded inside each purchase rather than once per account — the tax falls hardest on the buyers who order most often.","A2 · A3 · A9"],
+     ["Payment left unfinished","The order is declared successful while unpaid, with no deadline, no reference, and the receipt upload on a different page entirely.","P1 · P2 · P3 · P5"],
+     ["Nothing built for repeat buying","No reorder, no saved lists, no per-unit pricing, none of the fields a procurement team reconciles against.","C5 · C8 · A8"]]
+    .map(function(t){ return '<div class="card" style="display:flex;flex-direction:column">'+
+      '<h3 style="color:var(--navy)">'+t[0]+'</h3><p class="card-body">'+t[1]+'</p>'+
+      '<p style="margin:auto 0 0;padding-top:14px;font-size:14px;font-weight:700;color:var(--blue)">'+t[2]+'</p></div>'; }).join("")+
+  '</div>' });
+
+add({ nav:"How to read this", title:"How to read the next 26 slides",
+  lede:"One finding per slide, in the same shape every time: what happens today, what we changed, and what it costs you.", html:
+  '<div style="flex:1;display:flex;flex-direction:column;justify-content:center">'+
+    [["4 · Catastrophic","sev4","Blocks or misleads on the path to purchase. Fix before anything else. 6 findings."],
+     ["3 · Major","sev3","Causes real friction, rework or support load. High priority. 13 findings."],
+     ["2 · Minor","sev2","Costs time or clarity. Worth doing, not urgent. 7 findings."]]
+    .map(function(l){ return '<div class="legend-row"><span class="sev '+l[1]+'">'+l[0]+'</span><span>'+l[2]+'</span></div>'; }).join("")+
+    '<div class="card" style="margin-top:14px"><p class="card-body" style="margin:0;max-width:none">'+
+      'Severity weighs how often buyers hit it, how badly it hurts when they do, and whether it gets easier the '+
+      'second time. Ratings are one evaluator\'s considered judgement, not a measurement.</p></div>'+
+  '</div>' });
+
+/* ---------- Section dividers + the 26 findings ---------- */
+["cart","review","addr","pay"].forEach(function(key){
+  var sec = SECTIONS[key];
+  add({ nav:sec.t, dark:true, html:
+    '<div style="margin:auto 0">'+
+      '<div class="divider-n">'+sec.n+'</div>'+
+      '<h2 style="color:#fff;font-size:52px">'+sec.t+'</h2>'+
+      '<p style="margin:12px 0 0;font-size:16px;color:#8fa9c4">'+sec.sub+'</p>'+
+      '<p class="lede" style="margin-top:20px">'+sec.blurb+'</p>'+
+    '</div>' });
+
+  FINDINGS.filter(function(f){ return f.sec === key; }).forEach(function(f){
+    add({ nav:f.id+" · "+f.title, foot:sec.t+" · finding "+f.id, html:
+      '<div class="f-top">'+
+        '<span class="f-id">'+f.id+'</span>'+
+        '<h2 class="f-title">'+esc(f.title)+'</h2>'+
+        '<span class="sev sev'+f.sev+'">'+["","","2 · Minor","3 · Major","4 · Catastrophic"][f.sev]+'</span>'+
+      '</div>'+
+      '<p class="f-heur">Heuristic breached: '+f.h.map(esc).join(" &nbsp;·&nbsp; ")+'</p>'+
+      '<div class="f-cols">'+
+        '<div class="f-col today">'+
+          '<div class="f-labrow"><p class="f-lab">What happens today</p>'+
+            '<span class="f-src">Recorded walkthrough</span></div>'+
+          (SHOTS[f.before] ? '<img class="f-shot" src="'+SHOTS[f.before]+'" alt="The live HIGHBASE checkout: '+esc(f.title).replace(/"/g,"")+'">' : "")+
+          '<p class="f-text">'+esc(f.today)+'</p>'+
+          '<p class="f-ev">'+esc(f.ev)+'</p></div>'+
+        '<div class="f-col fixed">'+
+          '<div class="f-labrow"><p class="f-lab">What we changed</p>'+
+            '<span class="f-src">Prototype</span></div>'+
+          (SHOTS[f.after] ? '<img class="f-shot" src="'+SHOTS[f.after]+'" alt="The redesigned screen: fix for '+esc(f.title).replace(/"/g,"")+'">' : "")+
+          '<p class="f-text">'+esc(f.fixed)+'</p>'+
+          '<p class="f-live">Live in the prototype</p></div>'+
+      '</div>'+
+      '<div class="f-cost"><p class="f-lab">What it costs</p><p class="cost-text">'+esc(f.cost)+'</p></div>' });
+  });
+});
+
+/* ---------- Chart: one measure across ten categories, so one hue.
+     Every bar is direct-labelled and named, so colour encodes nothing.
+     Hover reveals which findings sit behind each count. ---------- */
+add({ nav:"Breaches by heuristic", title:"Breaches by heuristic",
+  lede:"All ten are breached. One accounts for nearly a third of them.", html:
+  '<div style="display:grid;grid-template-columns:1fr 320px;gap:34px;flex:1;min-height:0">'+
+    '<div class="chart">'+
+      Object.keys(HEUR_IDS).sort(function(a,b){
+        return HEUR_IDS[b].length - HEUR_IDS[a].length || (+a) - (+b);
+      }).map(function(k,i){
+        var v = HEUR_IDS[k].length, pct = v/12*100;
+        return '<div class="row'+(i===0?" lead":"")+'" tabindex="0">'+
+          '<div class="row-lab">'+k+' · '+HEUR_NAME[k]+'</div>'+
+          '<div class="track">'+
+            '<div class="bar" style="width:'+pct.toFixed(1)+'%"></div>'+
+            '<span class="bar-val num">'+v+'</span>'+
+            '<span class="row-ids">'+HEUR_IDS[k].join(" ")+'</span>'+
+          '</div></div>';
+      }).join("")+
+    '</div>'+
+    '<div class="card" style="display:flex;flex-direction:column;justify-content:center">'+
+      '<h3 style="color:var(--navy);font-size:23px">What this says</h3>'+
+      '<p class="card-body" style="font-weight:700;color:var(--ink)">Visibility of system status is not one bug — it is the flow\'s habit.</p>'+
+      '<p class="card-body">Twelve of the 38 breaches are the interface failing to tell the buyer where they stand: what the order will cost, how many steps remain, whether the payment landed.</p>'+
+      '<p class="card-body">That is good news for sequencing. A single principle — show cost and state before asking for commitment — closes a third of the findings.</p>'+
+    '</div>'+
+  '</div>' });
+
+add({ nav:"What the prototype changes", title:"What the prototype changes",
+  lede:"Measured against the flow in the recording.", html:
+  '<div class="cards c4" style="flex:0 0 auto;margin-bottom:22px">'+
+    [["4 → 3","screens between cart and paid","One page absorbs delivery, purchase details and payment method.",0],
+     ["3 → 0","document uploads inside the order","Verification is an account property, collected once and re-checked on expiry.",0],
+     ["2 → 1","the screen where the delivery fee appears","Full cost breakdown from the basket onward, unchanged through checkout.",0],
+     ["2.0 → 17.2","contrast ratio on field values","Above the 4.5:1 the accessibility standard requires, up from roughly half of it.",1]]
+    .map(function(n){ return '<div class="card"'+(n[3]?' style="background:var(--navy)"':'')+'>'+
+      '<div class="stat" style="font-size:40px'+(n[3]?';color:#fff':'')+'">'+n[0]+'</div>'+
+      '<p class="stat-cap" style="font-weight:700;color:'+(n[3]?"var(--ice)":"var(--ink)")+'">'+n[1]+'</p>'+
+      '<p class="stat-cap" style="margin-top:8px'+(n[3]?';color:var(--ice)':'')+'">'+n[2]+'</p></div>'; }).join("")+
+  '</div>'+
+  '<div class="card" style="background:var(--green-bg);flex:0 0 auto">'+
+    '<p style="margin:0;font-size:18px;font-weight:700;color:var(--green)">All 26 findings have a corresponding '+
+    'change in the prototype. None of them is a mock-up — every screen is clickable.</p></div>' });
+
+add({ nav:"Where we would start", title:"Where we would start",
+  lede:"Three waves, ordered by what they cost you rather than by what they cost to build.", html:
+  '<div class="cards c3">'+
+    [["Wave 1","Stop the bleeding","sev4",
+      ["<b>C2 · A1 · A6</b> — put the true cost and the running total in front of the buyer, everywhere.",
+       "<b>C1</b> — reconcile quantity against stock before payment, not after.",
+       "<b>A3</b> — cap attachment height so the buy button stays reachable."],
+      "Six catastrophic findings. Mostly presentational, no new services."],
+     ["Wave 2","Remove the paperwork wall","sev3",
+      ["<b>A2</b> — move CR, VAT and ID verification to the account, collected once.",
+       "<b>P1 · P2 · P3 · P5</b> — finish payment on the page that asks for it, with a deadline and a reference."],
+      "The two structural changes. Needs compliance and finance in the room."],
+     ["Wave 3","Make it a trade tool","sev2",
+      ["<b>C3 · C4 · C6</b> — supplier grouping, one minimum-order bar, partial checkout.",
+       "<b>C5 · C8 · A7 · A8</b> — per-unit pricing, reorder, delivery windows, PO and cost centre."],
+      "Where repeat-purchase growth actually comes from."]]
+    .map(function(w){ return '<div class="card" style="background:#fbfcfe;display:flex;flex-direction:column">'+
+      '<span class="wave-tag '+w[2]+'">'+w[0]+'</span>'+
+      '<h3 style="color:var(--navy);margin-top:16px">'+w[1]+'</h3>'+
+      '<ul class="wave-list">'+w[3].map(function(x){ return '<li>'+x+'</li>'; }).join("")+'</ul>'+
+      '<p class="wave-note">'+w[4]+'</p></div>'; }).join("")+
+  '</div>' });
+
+add({ nav:"Two things to check first", title:"Two things to check before building",
+  lede:"Both trade against constraints a design inspection cannot see from the outside.", html:
+  '<div class="cards c2">'+
+    [["A2","Documents inside every order",
+      "We propose verifying the business once, at account level, and letting an unverified buyer place an order while dispatch waits on the check.",
+      "Does Bahrain trade regulation, or your own supplier agreements, require the documents to sit against each individual order? If so, the fix becomes “collect once, attach automatically” rather than “collect once, skip afterwards”."],
+     ["P1","Receipt upload on a separate page",
+      "We propose completing the transfer receipt on the confirmation page, where the payment is requested.",
+      "Was the split deliberate — a finance workflow that needs the receipt tied to a tracked order record? If so, the page can still host the upload and post it to the same record."]]
+    .map(function(r){ return '<div class="card" style="display:flex;flex-direction:column">'+
+      '<div style="display:flex;align-items:center;gap:14px"><span class="f-id">'+r[0]+'</span>'+
+      '<h3 style="color:var(--navy)">'+r[1]+'</h3></div>'+
+      '<p class="f-lab" style="color:var(--muted);margin-top:22px">What we propose</p>'+
+      '<p class="card-body" style="color:var(--ink);margin-top:10px">'+r[2]+'</p>'+
+      '<p class="f-lab" style="color:var(--amber);margin-top:22px">What we need you to confirm</p>'+
+      '<p class="card-body" style="color:var(--ink);margin-top:10px">'+r[3]+'</p></div>'; }).join("")+
+  '</div>' });
+
+add({ nav:"The prototype", dark:true, html:
+  '<div style="margin:auto 0">'+
+    '<h2 style="color:#fff;font-size:52px">The prototype</h2>'+
+    '<p class="lede" style="margin-top:22px;font-size:21px">Every fix in this deck is clickable — cart, checkout '+
+      'and payment, with an annotations layer that puts each finding next to the change it produced, and the '+
+      'full evaluation as a fourth tab.</p>'+
+    '<a class="link-box" style="display:block;margin-top:30px;text-decoration:none;max-width:820px" '+
+      'href="https://claude.ai/code/artifact/3347569c-c1ae-4db3-ab55-23807cda4690" target="_blank" rel="noopener">'+
+      'claude.ai/code/artifact/3347569c-c1ae-4db3-ab55-23807cda4690</a>'+
+    '<p style="margin-top:18px;font-size:15px;color:#8fa9c4">Open the Evaluation tab for the full findings table '+
+      'with evidence, heuristics and severities.</p>'+
+  '</div>' });
+
+/* ---------- Render ---------- */
+var deck = document.getElementById("deck"), gridEl = document.getElementById("grid");
+var N = slides.length, cur = 0;
+
+deck.innerHTML = slides.map(function(s,i){
+  var head = s.title ? '<div class="slide-head"><h2>'+s.title+'</h2>'+
+        (s.lede ? '<p class="lede">'+s.lede+'</p>' : '')+'</div>' : '';
+  return '<section class="slide'+(s.dark?" dark":"")+'" id="s'+(i+1)+'" aria-hidden="true" '+
+    'aria-label="Slide '+(i+1)+' of '+N+': '+esc(s.nav).replace(/"/g,"")+'">'+
+    head + s.html +
+    '<div class="foot"><span>'+(s.foot || "HIGHBASE checkout — heuristic evaluation")+'</span>'+
+    '<span>'+(i+1)+'</span></div></section>';
+}).join("");
+
+gridEl.innerHTML = slides.map(function(s,i){
+  var sev = (s.nav.match(/^([CRAP]\d+) /) || [])[1];
+  var f = sev && FINDINGS.filter(function(x){ return x.id===sev; })[0];
+  return '<button type="button" class="thumb'+(s.dark?" dark":"")+'" data-go="'+i+'">'+
+    '<span class="thumb-in"><span class="thumb-n">'+(i+1)+'</span>'+
+    '<span class="thumb-t">'+esc(s.title || s.nav)+'</span>'+
+    (f ? '<span class="thumb-s sev'+f.sev+'">'+["","","Minor","Major","Catastrophic"][f.sev]+'</span>' : '')+
+    '</span></button>';
+}).join("");
+
+var els = Array.prototype.slice.call(deck.children);
+
+function fit(){
+  if (window.innerWidth <= 900) { deck.style.transform = ""; return; }
+  var k = Math.min(1, (window.innerWidth - 56) / 1280, (window.innerHeight - 140) / 720);
+  deck.style.transform = "scale(" + k.toFixed(4) + ")";
+  deck.style.height = (720 * k) + "px";
+  deck.style.width  = "1280px";
+}
+
+function show(i, push){
+  cur = Math.max(0, Math.min(N - 1, i));
+  els.forEach(function(el,j){
+    el.classList.toggle("on", j === cur);
+    el.setAttribute("aria-hidden", String(j !== cur));
+  });
+  document.getElementById("count").textContent = (cur+1) + " / " + N;
+  document.getElementById("title-now").textContent = slides[cur].nav;
+  document.getElementById("prev").disabled = cur === 0;
+  document.getElementById("next").disabled = cur === N - 1;
+  document.getElementById("progress").style.width = ((cur+1)/N*100) + "%";
+  if (push !== false) { try { history.replaceState(null,"","#"+(cur+1)); } catch(e){} }
+  fit();
+}
+
+document.getElementById("prev").addEventListener("click", function(){ show(cur-1); });
+document.getElementById("next").addEventListener("click", function(){ show(cur+1); });
+document.getElementById("overview").addEventListener("click", function(){ gridEl.classList.toggle("on"); });
+gridEl.addEventListener("click", function(e){
+  var b = e.target.closest("[data-go]");
+  if (b) { gridEl.classList.remove("on"); show(+b.dataset.go); }
+});
+
+document.addEventListener("keydown", function(e){
+  if (e.metaKey || e.ctrlKey || e.altKey) return;
+  var k = e.key;
+  if (k === "Escape") { gridEl.classList.remove("on"); return; }
+  if (k === "o" || k === "O") { gridEl.classList.toggle("on"); return; }
+  if (gridEl.classList.contains("on")) return;
+  if (k === "ArrowRight" || k === "PageDown" || k === " ") { e.preventDefault(); show(cur+1); }
+  else if (k === "ArrowLeft" || k === "PageUp") { e.preventDefault(); show(cur-1); }
+  else if (k === "Home") { e.preventDefault(); show(0); }
+  else if (k === "End")  { e.preventDefault(); show(N-1); }
+});
+
+window.addEventListener("resize", fit);
+window.addEventListener("hashchange", function(){ show((parseInt(location.hash.slice(1),10)||1)-1, false); });
+show((parseInt(location.hash.slice(1),10)||1)-1, false);
+})();
+</script>
