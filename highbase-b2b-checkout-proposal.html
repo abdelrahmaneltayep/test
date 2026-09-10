@@ -617,11 +617,90 @@ body.notes-on .pin{display:inline-block}
     border-top:1px solid var(--line-200);
     box-shadow:0 -4px 20px rgba(15,28,43,.08);
   }
+  #toasts{bottom:86px}
   .mobile-bar__amt{line-height:1.2}
   .mobile-bar__amt span{display:block;font-size:11px;color:var(--ink-500)}
   .mobile-bar__amt b{font-size:18px;font-weight:800;letter-spacing:-.02em}
   .mobile-bar .btn{margin-inline-start:auto}
   .site{padding-bottom:96px}
+}
+
+/* ============================================================
+   10b. Interactive layer — toasts, dialogs, add-items drawer
+   ============================================================ */
+#toasts{
+  position:fixed;inset-inline-start:18px;bottom:18px;z-index:90;
+  display:flex;flex-direction:column;gap:9px;align-items:flex-start;
+  pointer-events:none;
+}
+.toast{
+  display:flex;align-items:center;gap:12px;max-width:min(380px,92vw);
+  background:var(--navy-900);color:#eaf2fa;
+  padding:11px 15px;border-radius:11px;box-shadow:var(--shadow-3);
+  font-size:13px;line-height:1.45;pointer-events:none;
+  animation:toast-in .18s ease-out;
+}
+.toast--ok{background:#0d5c36}
+.toast--bad{background:#8c1d18}
+.toast button{
+  background:rgba(255,255,255,.16);border:0;color:#fff;pointer-events:auto;
+  padding:5px 11px;border-radius:7px;font-size:12px;font-weight:700;white-space:nowrap;
+}
+.toast button:hover{background:rgba(255,255,255,.3)}
+@keyframes toast-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+dialog.modal{
+  border:0;padding:0;border-radius:var(--radius-lg);
+  max-width:min(620px,92vw);width:100%;
+  box-shadow:var(--shadow-3);color:var(--ink-900);background:var(--surface);
+}
+dialog.modal::backdrop{background:rgba(10,37,64,.55)}
+.modal__head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-100)}
+.modal__head h2{margin:0;font-size:16px}
+.modal__body{padding:18px;max-height:min(66vh,560px);overflow:auto}
+.modal__foot{display:flex;gap:10px;padding:14px 18px;border-top:1px solid var(--line-100);background:#fbfcfe;flex-wrap:wrap}
+.modal__foot .spacer{margin-inline-start:auto}
+.modal__x{
+  margin-inline-start:auto;width:30px;height:30px;border-radius:8px;border:0;
+  background:transparent;color:var(--ink-400);font-size:16px;display:grid;place-items:center;
+}
+.modal__x:hover{background:var(--line-100);color:var(--ink-900)}
+
+.catalog{display:flex;flex-direction:column;gap:8px}
+.catalog__row{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border:1px solid var(--line-200);border-radius:11px;
+}
+.catalog__row .thumb{width:38px;height:38px;flex:0 0 38px;border-radius:8px;
+  border:1px solid var(--line-200);display:grid;place-items:center;font-size:18px}
+.catalog__row .spacer{margin-inline-start:auto}
+.catalog__name{font-size:13px;font-weight:650;margin:0}
+.catalog__meta{font-size:11.5px;color:var(--ink-500);margin:1px 0 0}
+
+.invoice{font-size:12.5px}
+.invoice h3{margin:0 0 3px;font-size:15px}
+.invoice table{width:100%;border-collapse:collapse;margin-top:12px}
+.invoice th{
+  text-align:start;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--ink-400);border-bottom:1px solid var(--line-200);padding:6px 0;font-weight:700;
+}
+.invoice td{padding:7px 0;border-bottom:1px solid var(--line-100)}
+.invoice td:last-child,.invoice th:last-child{text-align:end}
+.invoice tfoot td{border:0;padding:3px 0}
+.invoice tfoot tr:last-child td{font-weight:800;font-size:14px;padding-top:8px}
+
+.drop.is-over{border-color:var(--blue-600);background:var(--blue-050)}
+.drop.is-busy{opacity:.6;pointer-events:none}
+.empty{
+  padding:22px 16px;text-align:center;color:var(--ink-500);font-size:13px;
+  border:1px dashed var(--line-200);border-radius:var(--radius);background:#fbfcfe;
+}
+.sku-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.sku-form .field{flex:1;min-width:150px;margin:0}
+.paid-note{
+  display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:11px;
+  background:var(--green-050);border:1px solid #c9e9d7;color:var(--green-700);
+  font-size:13px;font-weight:650;
 }
 
 /* ============================================================
@@ -713,17 +792,17 @@ body.notes-on .pin{display:inline-block}
   <main id="screen-cart" class="screen">
     <div class="page-head">
       <h1 data-ar="سلة المشتريات">Your cart</h1>
-      <p><span class="num">5</span> items from <span class="num">2</span> suppliers · Prices exclude VAT</p>
+      <p id="cart-sub"></p>
     </div>
 
     <div class="cols">
       <div>
         <div class="cart-toolbar">
-          <label class="checkbox"><input type="checkbox" checked> Select all</label>
-          <button type="button" class="btn--link">Remove selected</button>
-          <button type="button" class="btn--link">Save as list</button>
+          <label class="checkbox"><input type="checkbox" id="sel-all"> Select all</label>
+          <button type="button" class="btn--link" data-act="remove-selected">Remove selected</button>
+          <button type="button" class="btn--link" data-act="save-list">Save as list</button>
           <div class="spacer"></div>
-          <button type="button" class="btn btn--ghost" style="padding:7px 13px;font-size:12.5px">
+          <button type="button" class="btn btn--ghost" data-act="quick-add" style="padding:7px 13px;font-size:12.5px">
             ⌨ Quick add by SKU
           </button>
           <button type="button" class="pin" aria-label="Design note 7">7
@@ -731,220 +810,9 @@ body.notes-on .pin{display:inline-block}
           </button>
         </div>
 
-        <!-- ---------- Supplier 1: minimum met ---------- -->
-        <section class="card supplier" aria-labelledby="sup-1">
-          <div class="supplier__head">
-            <label class="checkbox"><input type="checkbox" checked aria-label="Select all from Al Manar Trading"></label>
-            <div class="supplier__logo" aria-hidden="true">AM</div>
-            <div>
-              <h2 class="supplier__name" id="sup-1">
-                Al Manar Trading
-                <span class="chip chip--ok">✓ Verified supplier</span>
-                <button type="button" class="pin" aria-label="Design note 1">1
-                  <span class="pin__tip"><b>Group by supplier</b>Minimum order, delivery fee, coupons and dispatch are all per supplier on HIGHBASE — so the cart must be shaped that way too. One flat list forces the buyer to hold that grouping in their head.</span>
-                </button>
-              </h2>
-              <p class="supplier__meta">Nadec authorised distributor · Delivers Sun–Thu · Manama &amp; Muharraq</p>
-            </div>
-            <div class="spacer" style="margin-inline-start:auto"></div>
-            <span class="chip chip--info">Ships separately</span>
-          </div>
-
-          <div class="moq moq--met">
-            <div class="moq__row">
-              <span>✓ Minimum order met</span>
-              <span class="spacer"><span class="num">BHD 10.000</span> / <span class="num">BHD 10.000</span></span>
-              <button type="button" class="pin" aria-label="Design note 2">2
-                <span class="pin__tip"><b>One minimum-order bar, not twelve</b>Today the same MOQ warning is repeated on every product card in the group. It is a property of the supplier, so it belongs once on the supplier header — as progress toward a target, with the exact remaining amount.</span>
-              </button>
-            </div>
-            <div class="moq__track"><div class="moq__fill" style="width:100%"></div></div>
-            <div class="moq__row" style="margin-top:7px;color:var(--ink-500);font-weight:500">
-              <span>Add <b class="num">BHD 15.000</b> more for free delivery on this supplier</span>
-              <a href="#" class="btn--link" style="margin-inline-start:auto">Browse Al Manar →</a>
-            </div>
-          </div>
-
-          <div class="line line--head" aria-hidden="true">
-            <span></span><span></span><span>Product</span><span>Pack &amp; unit price</span><span>Quantity</span>
-            <span style="text-align:end">Line total</span><span></span>
-          </div>
-
-          <div class="line">
-            <label class="line__c"><input type="checkbox" checked aria-label="Select Long Life Low Fat UHT Milk"></label>
-            <div class="line__thumb line__t" aria-hidden="true">🥛</div>
-            <div class="line__n">
-              <p class="line__name">Nadec Long Life Low Fat UHT Milk 200ml</p>
-              <div class="line__sku">SKU NDC-LF200-18 · <span class="chip chip--ok" style="padding:1px 7px">In stock</span></div>
-            </div>
-            <div class="line__p">
-              <div class="line__pack">Case of <span class="num">18</span></div>
-              <div class="line__unit"><span class="num">BHD 1.000</span> / case · <span class="num">BHD 0.056</span> / piece
-                <button type="button" class="pin" aria-label="Design note 3">3
-                  <span class="pin__tip"><b>Unit economics</b>A procurement buyer compares cost per piece across pack sizes and suppliers. Showing only "BHD 1.000" next to "18pcs" makes them do that arithmetic themselves, on every line.</span>
-                </button>
-              </div>
-            </div>
-            <div class="line__q">
-              <div class="stepper">
-                <button type="button" aria-label="Decrease quantity">−</button>
-                <input type="text" inputmode="numeric" value="8" aria-label="Quantity, cases">
-                <button type="button" aria-label="Increase quantity">+</button>
-              </div>
-              <div class="line__unit" style="margin-top:3px"><span class="num">144</span> pieces</div>
-            </div>
-            <div class="line__m"><div class="line__total num">BHD 8.000</div></div>
-            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
-          </div>
-
-          <div class="line">
-            <label class="line__c"><input type="checkbox" checked aria-label="Select Long Life Skimmed UHT Milk"></label>
-            <div class="line__thumb line__t" aria-hidden="true">🧃</div>
-            <div class="line__n">
-              <p class="line__name">Nadec Long Life Skimmed UHT Milk 1L</p>
-              <div class="line__sku">SKU NDC-SK1L · <span class="chip chip--ok" style="padding:1px 7px">In stock</span></div>
-            </div>
-            <div class="line__p">
-              <div class="line__pack">Single · <span class="num">1L</span></div>
-              <div class="line__unit"><span class="num">BHD 1.000</span> / unit</div>
-            </div>
-            <div class="line__q">
-              <div class="stepper">
-                <button type="button" aria-label="Decrease quantity">−</button>
-                <input type="text" inputmode="numeric" value="1" aria-label="Quantity">
-                <button type="button" aria-label="Increase quantity">+</button>
-              </div>
-            </div>
-            <div class="line__m"><div class="line__total num">BHD 1.000</div></div>
-            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
-          </div>
-
-          <div class="line">
-            <label class="line__c"><input type="checkbox" checked aria-label="Select Fresh Mango Flavoured Milk"></label>
-            <div class="line__thumb line__t" aria-hidden="true">🥭</div>
-            <div class="line__n">
-              <p class="line__name">Nadec Fresh Mango Flavoured Milk 200ml</p>
-              <div class="line__sku">SKU NDC-MG200 · <span class="chip chip--warn" style="padding:1px 7px">Low stock · 24 left</span></div>
-            </div>
-            <div class="line__p">
-              <div class="line__pack">Single · <span class="num">200ml</span></div>
-              <div class="line__unit"><span class="num">BHD 1.000</span> / unit</div>
-            </div>
-            <div class="line__q">
-              <div class="stepper">
-                <button type="button" aria-label="Decrease quantity">−</button>
-                <input type="text" inputmode="numeric" value="1" aria-label="Quantity">
-                <button type="button" aria-label="Increase quantity">+</button>
-              </div>
-            </div>
-            <div class="line__m"><div class="line__total num">BHD 1.000</div></div>
-            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
-          </div>
-
-          <div class="supplier__foot">
-            <span>Supplier subtotal</span>
-            <b class="num">BHD 10.000</b>
-            <span class="chip chip--mute">Delivery <span class="num">BHD 2.000</span></span>
-            <span class="chip chip--ok">Coupon ALMANAR2 · −<span class="num">BHD 2.000</span></span>
-            <div class="spacer"></div>
-            <span class="chip chip--ok">✓ Ready to order</span>
-          </div>
-        </section>
-
-        <!-- ---------- Supplier 2: minimum NOT met + stock conflict ---------- -->
-        <section class="card supplier" aria-labelledby="sup-2">
-          <div class="supplier__head">
-            <label class="checkbox"><input type="checkbox" aria-label="Select all from Gulf Fresh Foods"></label>
-            <div class="supplier__logo" style="background:linear-gradient(135deg,#5aa17f,#1b7f4b)" aria-hidden="true">GF</div>
-            <div>
-              <h2 class="supplier__name" id="sup-2">
-                Gulf Fresh Foods
-                <span class="chip chip--ok">✓ Verified supplier</span>
-              </h2>
-              <p class="supplier__meta">Chilled &amp; fresh · Delivers Mon, Wed, Sat · Capital Governorate</p>
-            </div>
-            <div class="spacer" style="margin-inline-start:auto"></div>
-            <span class="chip chip--warn">Not ready</span>
-          </div>
-
-          <div class="moq">
-            <div class="moq__row">
-              <span>⚠ <b class="num">BHD 13.000</b> below this supplier's minimum order</span>
-              <span class="spacer"><span class="num">BHD 2.000</span> / <span class="num">BHD 15.000</span></span>
-            </div>
-            <div class="moq__track"><div class="moq__fill" style="width:13.3%"></div></div>
-            <div class="moq__row" style="margin-top:9px;font-weight:600">
-              <a href="#" class="btn--link">Add items from Gulf Fresh Foods →</a>
-              <span style="color:var(--ink-400);font-weight:500">or</span>
-              <button type="button" class="btn--link">Move to a saved list</button>
-              <span class="spacer" style="font-weight:500;color:var(--ink-500)">You can still order from Al Manar now</span>
-            </div>
-          </div>
-
-          <div class="line">
-            <label class="line__c"><input type="checkbox" aria-label="Select Fresh Full Fat Milk"></label>
-            <div class="line__thumb line__t" aria-hidden="true">🍼</div>
-            <div class="line__n">
-              <p class="line__name">Nadec Fresh Full Fat Milk 360ml</p>
-              <div class="line__sku">SKU NDC-FF360 · <span class="chip chip--ok" style="padding:1px 7px">In stock</span></div>
-            </div>
-            <div class="line__p">
-              <div class="line__pack">Single · <span class="num">360ml</span></div>
-              <div class="line__unit"><span class="num">BHD 1.000</span> / unit</div>
-            </div>
-            <div class="line__q">
-              <div class="stepper">
-                <button type="button" aria-label="Decrease quantity">−</button>
-                <input type="text" inputmode="numeric" value="1" aria-label="Quantity">
-                <button type="button" aria-label="Increase quantity">+</button>
-              </div>
-            </div>
-            <div class="line__m"><div class="line__total num">BHD 1.000</div></div>
-            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
-          </div>
-
-          <div class="line">
-            <label class="line__c"><input type="checkbox" aria-label="Select Vanilla Flavoured Milk"></label>
-            <div class="line__thumb line__t" aria-hidden="true">🍦</div>
-            <div class="line__n">
-              <p class="line__name">Nadec Vanilla Flavoured Milk 125ml</p>
-              <div class="line__sku">SKU NDC-VN125-18 · <span class="chip chip--bad" style="padding:1px 7px">Only 1 case left</span></div>
-            </div>
-            <div class="line__p">
-              <div class="line__pack">Case of <span class="num">18</span></div>
-              <div class="line__unit"><span class="num">BHD 1.000</span> / case · <span class="num">BHD 0.056</span> / piece</div>
-            </div>
-            <div class="line__q">
-              <div class="stepper">
-                <button type="button" aria-label="Decrease quantity">−</button>
-                <input type="text" inputmode="numeric" value="7" aria-label="Quantity, cases" style="color:var(--red-700)">
-                <button type="button" aria-label="Increase quantity" disabled>+</button>
-              </div>
-            </div>
-            <div class="line__m"><div class="line__total num" style="color:var(--ink-400)">—</div></div>
-            <button type="button" class="icon-btn line__rm" aria-label="Remove item">✕</button>
-
-            <p class="line-alert">
-              <span>You asked for <b class="num">7</b> cases — the supplier has <b class="num">1</b>.</span>
-              <button type="button" class="btn--link">Reduce to 1</button>
-              <span aria-hidden="true">·</span>
-              <button type="button" class="btn--link">Notify me when restocked</button>
-              <button type="button" class="pin" aria-label="Design note 4">4
-                <span class="pin__tip"><b>Resolve the conflict where it happens</b>Today the cart shows "Only 1 item in stock" while the quantity stays at 7 and the total is still calculated. State the conflict, block the total, and offer the one-tap fix — don't let it surface at the payment step.</span>
-              </button>
-            </p>
-          </div>
-
-          <div class="supplier__foot">
-            <span>Supplier subtotal</span>
-            <b class="num">BHD 2.000</b>
-            <div class="spacer"></div>
-            <span class="chip chip--warn">Excluded from this order</span>
-          </div>
-        </section>
+        <div id="cart-groups"></div>
       </div>
 
-      <!-- ---------- Sticky summary ---------- -->
       <aside class="rail" aria-label="Order summary">
         <div class="card">
           <div class="card__head">
@@ -953,54 +821,7 @@ body.notes-on .pin{display:inline-block}
               <span class="pin__tip"><b>No late cost surprises</b>Today subtotal equals total in the cart and a <b>BHD 10.000</b> delivery fee only appears on the review page. Unexpected shipping cost is the single largest cause of checkout abandonment. Show delivery, discounts and VAT from the first screen.</span>
             </button>
           </div>
-          <div class="card__body">
-            <div class="applied">
-              <span>✓ ALMANAR2 — supplier coupon</span>
-              <span class="spacer num">−BHD 2.000</span>
-              <button type="button" aria-label="Remove coupon ALMANAR2">✕</button>
-            </div>
-            <div class="coupon">
-              <label class="sr-only" for="cpn">Coupon code</label>
-              <input class="input" id="cpn" placeholder="Add coupon code">
-              <button type="button" class="btn btn--ghost">Apply</button>
-            </div>
-
-            <div class="sum__rule"></div>
-
-            <dl style="margin:0">
-              <div class="sum__row"><dt>Items (<span class="num">3</span> lines)</dt><dd class="spacer num">BHD 10.000</dd></div>
-              <div class="sum__row"><dt>Delivery — Al Manar</dt><dd class="spacer num">BHD 2.000</dd></div>
-              <div class="sum__row sum__row--save"><dt>Coupon ALMANAR2</dt><dd class="spacer num">−BHD 2.000</dd></div>
-              <div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-              <div class="sum__rule"></div>
-              <div class="sum__total">
-                <dt data-ar="الإجمالي">Total</dt>
-                <dd>
-                  <div class="amount num">BHD 11.000</div>
-                  <div class="vat">VAT reclaimable · CR 5056050560-1</div>
-                </dd>
-              </div>
-            </dl>
-
-            <div style="margin-top:16px">
-              <button type="button" class="btn btn--primary btn--block btn--lg" data-goto="checkout">
-                Checkout · <span class="num">BHD 11.000</span>
-              </button>
-              <p class="hint" style="text-align:center;margin-top:9px">
-                Al Manar Trading only.
-                <button type="button" class="btn--link">Gulf Fresh Foods stays in your cart</button>
-                <button type="button" class="pin" aria-label="Design note 6">6
-                  <span class="pin__tip"><b>Partial checkout</b>One supplier below its minimum should not hold the whole basket hostage. Let the ready supplier ship now and keep the rest in the cart — the buyer gets their stock, HIGHBASE gets the revenue.</span>
-                </button>
-              </p>
-            </div>
-
-            <div class="trust">
-              <div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> Bank transfer, card or Net 30 terms</div>
-              <div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> Tax invoice issued on dispatch</div>
-              <div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> Damaged goods returnable for 48h</div>
-            </div>
-          </div>
+          <div class="card__body" id="cart-summary"></div>
         </div>
       </aside>
     </div>
@@ -1008,9 +829,9 @@ body.notes-on .pin{display:inline-block}
     <div class="mobile-bar">
       <div class="mobile-bar__amt">
         <span>Total incl. VAT</span>
-        <b class="num">BHD 11.000</b>
+        <b class="num" id="mb-cart-total">BHD 0.000</b>
       </div>
-      <button type="button" class="btn btn--primary" data-goto="checkout">Checkout</button>
+      <button type="button" class="btn btn--primary" data-act="to-checkout">Checkout</button>
     </div>
   </main>
 
@@ -1020,7 +841,7 @@ body.notes-on .pin{display:inline-block}
   <main id="screen-checkout" class="screen" hidden>
     <div class="page-head">
       <h1 data-ar="إتمام الطلب">Checkout</h1>
-      <p>Al Manar Trading · <span class="num">3</span> lines · <span class="num">146</span> pieces</p>
+      <p id="co-sub"></p>
     </div>
 
     <!-- Honest, countable progress -->
@@ -1045,7 +866,7 @@ body.notes-on .pin{display:inline-block}
         <p>CR <span class="num">5056050560-1</span> · VAT <span class="num">220012345600002</span> · Verified <span class="num">14 Mar 2026</span>, valid to <span class="num">31 Dec 2026</span></p>
       </div>
       <div class="spacer"></div>
-      <a href="#" class="btn--link">Manage business documents</a>
+      <a href="#" class="btn--link" data-act="manage-docs">Manage business documents</a>
       <button type="button" class="pin" aria-label="Design note 9">9
         <span class="pin__tip"><b>Verify the buyer, not the order</b>Today CR, VAT and personal ID uploads sit between the buyer and the Place Order button, on every purchase. Trade documents belong to the account: collect them once at onboarding, re-prompt only on expiry, and never inside a live basket.</span>
       </button>
@@ -1063,7 +884,7 @@ body.notes-on .pin{display:inline-block}
             <p>You can place this order now. Al Manar will hold it while we verify your CR — usually under <span class="num">2</span> working hours.</p>
           </div>
           <div class="spacer"></div>
-          <a href="#" class="btn btn--ghost" style="padding:8px 14px;font-size:13px">Upload now</a>
+          <a href="#" class="btn btn--ghost" style="padding:8px 14px;font-size:13px" data-act="manage-docs">Upload now</a>
         </div>
         <p class="hint" style="margin-top:10px">
           The order is never blocked by paperwork — dispatch is. The buyer keeps momentum, and compliance still holds.
@@ -1077,35 +898,12 @@ body.notes-on .pin{display:inline-block}
         <section class="card">
           <div class="card__head"><h2 data-ar="عنوان التوصيل">Deliver to</h2>
             <span class="spacer" style="margin-inline-start:auto"></span>
-            <button type="button" class="btn--link">Change branch</button>
+            <button type="button" class="btn--link" data-act="change-branch">Change branch</button>
           </div>
           <div class="card__body">
-            <label class="opt">
-              <input type="radio" name="addr" checked>
-              <div style="flex:1">
-                <p class="opt__title">Buyer Bahrain — Manama branch <span class="chip chip--info">Default</span></p>
-                <p class="opt__desc">Building <span class="num">19</span>, Road <span class="num">18</span>, Block <span class="num">460</span>, Manama, Capital Governorate <span class="num">11111</span>, Bahrain</p>
-                <p class="opt__desc" style="margin-top:4px">Contact: Ahmed Khalil · <span class="num">+973 9080 7060</span> · branch@highbaseco.com</p>
-                <div style="display:flex;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap">
-                  <div class="map" style="flex:1;min-width:220px">
-                    <span class="map__pin" aria-hidden="true">📍</span>
-                    <span class="map__label">Pin saved · <span class="num">26.2361</span>, <span class="num">50.5831</span></span>
-                  </div>
-                  <button type="button" class="btn btn--ghost" style="padding:8px 13px;font-size:12.5px">Adjust pin</button>
-                </div>
-                <p class="hint">Drivers use the pin, not the typed address. Confirm it once — we'll remember it for this branch.</p>
-              </div>
-            </label>
+            <div id="addr-list"></div>
 
-            <label class="opt">
-              <input type="radio" name="addr">
-              <div style="flex:1">
-                <p class="opt__title">Buyer Bahrain — Muharraq warehouse</p>
-                <p class="opt__desc">Gate <span class="num">4</span>, Industrial Area, Muharraq · Goods-in <span class="num">07:00–14:00</span></p>
-              </div>
-            </label>
-
-            <button type="button" class="btn--link">+ Deliver to a new address</button>
+            <button type="button" class="btn--link" data-act="add-address">+ Deliver to a new address</button>
           </div>
         </section>
 
@@ -1118,27 +916,13 @@ body.notes-on .pin{display:inline-block}
             </button>
           </div>
           <div class="card__body">
-            <div class="shipment">
-              <span class="chip chip--info">Shipment <span class="num">1</span> of <span class="num">1</span></span>
-              <span>Al Manar Trading · <span class="num">3</span> lines</span>
-              <span class="spacer">Dispatched from Sitra</span>
-            </div>
+            <div id="ship-list"></div>
 
             <p class="label" style="margin-top:14px">Choose a delivery day</p>
-            <div class="slots">
-              <button type="button" class="slot" aria-pressed="false">Sun<small><span class="num">13 Sep</span></small></button>
-              <button type="button" class="slot" aria-pressed="true">Mon<small><span class="num">14 Sep</span></small></button>
-              <button type="button" class="slot" aria-pressed="false">Tue<small><span class="num">15 Sep</span></small></button>
-              <button type="button" class="slot" aria-pressed="false">Wed<small><span class="num">16 Sep</span></small></button>
-              <button type="button" class="slot" disabled>Thu<small>Full</small></button>
-            </div>
+            <div class="slots" id="day-slots"></div>
 
             <p class="label" style="margin-top:16px">Time window</p>
-            <div class="slots">
-              <button type="button" class="slot" aria-pressed="true"><span class="num">08:00 – 12:00</span><small>Free</small></button>
-              <button type="button" class="slot" aria-pressed="false"><span class="num">12:00 – 16:00</span><small>Free</small></button>
-              <button type="button" class="slot" aria-pressed="false"><span class="num">16:00 – 20:00</span><small class="num">+BHD 1.500</small></button>
-            </div>
+            <div class="slots" id="time-slots"></div>
           </div>
         </section>
 
@@ -1155,12 +939,12 @@ body.notes-on .pin{display:inline-block}
             <div class="grid-2">
               <div class="field">
                 <label for="po">Purchase order number</label>
-                <input class="input" id="po" placeholder="e.g. PO-2026-0914" value="PO-2026-0914">
+                <input class="input" id="po" placeholder="e.g. PO-2026-0914" value="PO-2026-0914" data-bind="po">
                 <p class="hint">Printed on the tax invoice</p>
               </div>
               <div class="field">
                 <label for="cc">Cost centre</label>
-                <select class="input" id="cc">
+                <select class="input" id="cc" data-bind="costCentre">
                   <option>Manama branch — F&amp;B</option>
                   <option>Muharraq warehouse — Stock</option>
                   <option>Head office — Admin</option>
@@ -1169,9 +953,9 @@ body.notes-on .pin{display:inline-block}
             </div>
             <div class="field">
               <label for="notes">Delivery instructions</label>
-              <textarea class="input" id="notes" rows="2" placeholder="Gate code, receiving contact, pallet requirements…"></textarea>
+              <textarea class="input" id="notes" rows="2" placeholder="Gate code, receiving contact, pallet requirements…" data-bind="notes"></textarea>
             </div>
-            <label class="checkbox"><input type="checkbox" checked> Email the tax invoice to accounts@buyerbahrain.com</label>
+            <label class="checkbox"><input type="checkbox" id="inv-email" checked data-bind="invoiceEmail"> Email the tax invoice to accounts@buyerbahrain.com</label>
           </div>
         </section>
 
@@ -1180,14 +964,14 @@ body.notes-on .pin{display:inline-block}
           <div class="card__head"><h2 data-ar="طريقة الدفع">Payment method</h2></div>
           <div class="card__body">
             <label class="opt">
-              <input type="radio" name="pay" checked>
+              <input type="radio" name="pay" value="transfer" checked>
               <div style="flex:1">
                 <p class="opt__title">Bank transfer <span class="chip chip--ok">No fee</span></p>
                 <p class="opt__desc">Transfer to HIGHBASE and upload the receipt. Stock is reserved for <span class="num">48</span> hours.</p>
               </div>
             </label>
             <label class="opt">
-              <input type="radio" name="pay">
+              <input type="radio" name="pay" value="card">
               <div style="flex:1">
                 <p class="opt__title">Debit or credit card</p>
                 <p class="opt__desc">Benefit Pay, Visa, Mastercard · charged on dispatch</p>
@@ -1195,10 +979,10 @@ body.notes-on .pin{display:inline-block}
               <span class="opt__price num">+2.5%</span>
             </label>
             <label class="opt opt--disabled">
-              <input type="radio" name="pay" disabled>
+              <input type="radio" name="pay" value="net30" disabled>
               <div style="flex:1">
                 <p class="opt__title">Net <span class="num">30</span> credit terms <span class="chip chip--mute">Not enabled</span></p>
-                <p class="opt__desc">Pay <span class="num">30</span> days after delivery. Requires a credit check — <a href="#">apply in 3 minutes</a>.</p>
+                <p class="opt__desc">Pay <span class="num">30</span> days after delivery. Requires a credit check — <a href="#" data-act="apply-net30">apply in 3 minutes</a>.</p>
               </div>
               <button type="button" class="pin" aria-label="Design note 13">13
                 <span class="pin__tip"><b>Terms are the B2B differentiator</b>Trade buyers choose the marketplace that finances their working capital. Even when a buyer isn't yet approved, showing Net 30 in the flow is the highest-intent moment to get the application started.</span>
@@ -1218,34 +1002,7 @@ body.notes-on .pin{display:inline-block}
               <span class="pin__tip"><b>Never ask for a signature on an unseen bill</b>The live address-and-documents page has no order summary anywhere on it — the buyer presses "Place Order" without the total in view. Keep the full breakdown pinned to the last screen.</span>
             </button>
           </div>
-          <div class="card__body">
-            <dl style="margin:0">
-            <div class="sum__row" style="font-weight:650;color:var(--ink-900)"><dt>Al Manar Trading</dt></div>
-            <div class="sum__row sum__row--sub"><dt>Low Fat UHT 200ml × <span class="num">8</span> cases</dt><dd class="spacer num">BHD 8.000</dd></div>
-            <div class="sum__row sum__row--sub"><dt>Skimmed UHT 1L × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-            <div class="sum__row sum__row--sub"><dt>Mango Flavoured 200ml × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-            <div class="sum__rule"></div>
-            <div class="sum__row"><dt>Items subtotal</dt><dd class="spacer num">BHD 10.000</dd></div>
-            <div class="sum__row"><dt>Delivery · Mon <span class="num">14 Sep</span>, <span class="num">08:00–12:00</span></dt><dd class="spacer num">BHD 2.000</dd></div>
-            <div class="sum__row sum__row--save"><dt>Coupon ALMANAR2</dt><dd class="spacer num">−BHD 2.000</dd></div>
-            <div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-            <div class="sum__rule"></div>
-            <div class="sum__total">
-              <dt data-ar="الإجمالي">Total due<button type="button" class="pin" aria-label="Design note 14">14<span class="pin__tip"><b>Put the amount on the button</b>"Place Order" alone asks the buyer to trust a number they last saw two screens ago. The amount on the commit control is the cheapest reassurance in checkout.</span></button></dt>
-              <dd>
-                <div class="amount num">BHD 11.000</div>
-                <div class="vat">Includes <span class="num">BHD 1.000</span> reclaimable VAT</div>
-              </dd>
-            </div>
-            </dl>
-
-            <button type="button" class="btn btn--primary btn--block btn--lg" style="margin-top:16px" data-goto="confirm">
-              Place order · <span class="num">BHD 11.000</span>
-            </button>
-            <p class="hint" style="text-align:center;margin-top:9px">
-              By placing this order you accept the <a href="#">supplier's terms</a>. Cancellable free until dispatch.
-            </p>
-          </div>
+          <div class="card__body" id="co-summary"></div>
         </div>
       </aside>
     </div>
@@ -1253,9 +1010,9 @@ body.notes-on .pin{display:inline-block}
     <div class="mobile-bar">
       <div class="mobile-bar__amt">
         <span>Total due</span>
-        <b class="num">BHD 11.000</b>
+        <b class="num" id="mb-co-total">BHD 0.000</b>
       </div>
-      <button type="button" class="btn btn--primary" data-goto="confirm">Place order</button>
+      <button type="button" class="btn btn--primary" data-act="place-order">Place order</button>
     </div>
   </main>
 
@@ -1266,124 +1023,38 @@ body.notes-on .pin{display:inline-block}
     <div class="hero-ok">
       <div class="hero-ok__mark" aria-hidden="true">✓</div>
       <h1 data-ar="تم استلام طلبك">Order received</h1>
-      <p>Al Manar Trading is preparing <span class="num">3</span> lines for Mon <span class="num">14 Sep</span>, <span class="num">08:00–12:00</span>.</p>
+      <p id="cf-sub"></p>
       <div class="order-ref">
-        <span>Order <b class="num">ORD-1788951602914</b></span>
-        <button type="button" class="btn--link" data-copy="ORD-1788951602914">Copy</button>
+        <span>Order <b class="num" id="cf-ref">—</b></span>
+        <button type="button" class="btn--link" data-copy-ref>Copy</button>
       </div>
     </div>
 
     <div class="cols" style="margin-top:26px">
       <div>
-        <!-- Payment: the actual outstanding task, completable here -->
-        <section class="card pay">
+        <section class="card pay" id="pay-card">
           <div class="pay__head">
             <h2 data-ar="أكمل الدفع">Complete your payment</h2>
-            <span class="countdown" id="countdown">⏱ <span class="num">47:58:12</span> left</span>
+            <span class="countdown" id="countdown">⏱ <span class="num">48:00:00</span> left</span>
             <button type="button" class="pin" aria-label="Design note 17">17
               <span class="pin__tip"><b>Give the deadline a consequence</b>"Please transfer the amount" has no clock and no stated risk. Naming the reservation window — and what happens when it lapses — is what actually converts a manual bank transfer.</span>
             </button>
           </div>
-          <div class="card__body">
-            <p style="margin:0 0 14px;color:var(--ink-700)">
-              Transfer <b class="num">BHD 11.000</b> to the HIGHBASE account below, then upload the receipt here.
-              Your stock stays reserved until <b class="num">Sat 12 Sep, 11:00</b>.
-            </p>
-
-            <div class="cols" style="grid-template-columns:minmax(0,1fr) 200px;gap:18px">
-              <div>
-                <div class="amount-due">
-                  <span>Amount to transfer</span>
-                  <strong class="num">BHD 11.000</strong>
-                </div>
-                <dl style="margin:0">
-                  <div class="copyrow"><dt>Account name</dt><dd>HIGHBASE TRADING W.L.L.</dd><button type="button" data-copy="HIGHBASE TRADING WLL">Copy</button></div>
-                  <div class="copyrow"><dt>IBAN</dt><dd class="num">BH29 ALSA 0016 5212 1001 01</dd><button type="button" data-copy="BH29ALSA00165212100101">Copy</button></div>
-                  <div class="copyrow"><dt>SWIFT</dt><dd class="num">ALSABHBM</dd><button type="button" data-copy="ALSABHBM">Copy</button></div>
-                  <div class="copyrow"><dt>Reference</dt><dd class="num">ORD-1788951602914</dd><button type="button" data-copy="ORD-1788951602914">Copy</button></div>
-                </dl>
-                <p class="hint">Put the order number in the transfer reference — it is how we match your payment automatically.</p>
-              </div>
-
-              <div class="qr">
-                <div class="qr__code" id="qr" role="img" aria-label="Payment QR code for order ORD-1788951602914"></div>
-                <p class="hint" style="text-align:center;margin:0">Scan in your bank app —<br>amount and reference pre-filled</p>
-              </div>
-            </div>
-
-            <div class="sum__rule" style="margin:18px 0"></div>
-
-            <h3 style="font-size:14px;margin:0 0 4px">Upload your transfer receipt
-              <button type="button" class="pin" aria-label="Design note 16">16
-                <span class="pin__tip"><b>Finish the job on the page that asked for it</b>Today the confirmation says "Click on Track Your Order to upload the transaction receipt" — sending the buyer to a different screen to complete the step this screen just created. Every hop is a chance to drop out.</span>
-              </button>
-            </h3>
-            <p class="hint" style="margin:0 0 12px">PDF, JPG or PNG · up to 10 MB · we verify within one working hour</p>
-
-            <div class="drop">
-              <div class="drop__icon" aria-hidden="true">📄</div>
-              <h3>Drop your receipt here</h3>
-              <p>or choose a file from your device</p>
-              <button type="button" class="btn btn--primary">Choose file</button>
-            </div>
-
-            <p class="label" style="margin-top:14px">Attached</p>
-            <div class="doc">
-              <div class="doc__prev" aria-hidden="true">🧾</div>
-              <div>
-                <p class="doc__name">bank-transfer-receipt.pdf</p>
-                <p class="doc__meta"><span class="num">248 KB</span> · uploaded <span class="num">11:04</span></p>
-              </div>
-              <div class="spacer"></div>
-              <button type="button" class="btn--link">Preview</button>
-              <button type="button" class="icon-btn" aria-label="Remove receipt">✕</button>
-              <button type="button" class="pin" aria-label="Design note 18">18
-                <span class="pin__tip"><b>An attachment is a row, not a wallpaper</b>The live documents step renders the uploaded ID at its natural size, pushing the Place Order button thousands of pixels down the page. Files belong in a fixed-height row with a thumbnail, name, size and a preview action.</span>
-              </button>
-            </div>
-          </div>
-          <div class="card__foot" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-            <button type="button" class="btn btn--primary">Submit receipt</button>
-            <button type="button" class="btn btn--ghost">I'll pay later</button>
-            <span class="hint" style="margin-inline-start:auto">Or <a href="#">pay by card instead</a> — instant confirmation</span>
-          </div>
+          <div class="card__body" id="pay-body"></div>
+          <div class="card__foot" id="pay-foot"></div>
         </section>
 
-        <!-- What happens next -->
         <section class="card">
           <div class="card__head"><h2 data-ar="حالة الطلب">Order status</h2>
             <button type="button" class="pin" aria-label="Design note 19">19
               <span class="pin__tip"><b>Answer "when do I get my stock?"</b>The current confirmation ends at the bank details. A buyer restocking a shop needs the dated path from payment to delivery, and a way to reach the supplier without opening a ticket.</span>
             </button>
           </div>
-          <div class="card__body">
-            <ol class="timeline">
-              <li class="is-done">
-                <span class="timeline__dot" aria-hidden="true">✓</span>
-                <div><h4>Order placed</h4><p>Today, <span class="num">11:00</span></p></div>
-              </li>
-              <li class="is-now">
-                <span class="timeline__dot" aria-hidden="true">●</span>
-                <div><h4>Awaiting your payment</h4><p>Reserved until Sat <span class="num">12 Sep, 11:00</span></p></div>
-              </li>
-              <li>
-                <span class="timeline__dot" aria-hidden="true">3</span>
-                <div><h4>Supplier confirms &amp; picks</h4><p>Within <span class="num">4</span> working hours of payment</p></div>
-              </li>
-              <li>
-                <span class="timeline__dot" aria-hidden="true">4</span>
-                <div><h4>Out for delivery</h4><p>Mon <span class="num">14 Sep</span>, <span class="num">08:00–12:00</span> · driver details sent by SMS</p></div>
-              </li>
-              <li>
-                <span class="timeline__dot" aria-hidden="true">5</span>
-                <div><h4>Delivered &amp; invoiced</h4><p>Tax invoice emailed to accounts@buyerbahrain.com</p></div>
-              </li>
-            </ol>
-          </div>
+          <div class="card__body"><ol class="timeline" id="timeline"></ol></div>
           <div class="card__foot" style="display:flex;gap:10px;flex-wrap:wrap">
-            <button type="button" class="btn btn--ghost">Track order</button>
-            <button type="button" class="btn btn--ghost">Download proforma invoice</button>
-            <button type="button" class="btn btn--ghost">Message Al Manar Trading</button>
+            <button type="button" class="btn btn--ghost" data-act="track">Track order</button>
+            <button type="button" class="btn btn--ghost" data-act="proforma">View proforma invoice</button>
+            <button type="button" class="btn btn--ghost" data-act="message-supplier">Message supplier</button>
           </div>
         </section>
       </div>
@@ -1391,30 +1062,8 @@ body.notes-on .pin{display:inline-block}
       <aside class="rail" aria-label="Order details">
         <div class="card">
           <div class="card__head"><h2>What you ordered</h2></div>
-          <div class="card__body">
-            <dl style="margin:0">
-            <div class="sum__row sum__row--sub"><dt>Low Fat UHT 200ml × <span class="num">8</span> cases</dt><dd class="spacer num">BHD 8.000</dd></div>
-            <div class="sum__row sum__row--sub"><dt>Skimmed UHT 1L × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-            <div class="sum__row sum__row--sub"><dt>Mango Flavoured 200ml × <span class="num">1</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-            <div class="sum__rule"></div>
-            <div class="sum__row"><dt>Delivery</dt><dd class="spacer num">BHD 2.000</dd></div>
-            <div class="sum__row sum__row--save"><dt>Coupon ALMANAR2</dt><dd class="spacer num">−BHD 2.000</dd></div>
-            <div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">BHD 1.000</dd></div>
-            <div class="sum__rule"></div>
-            <div class="sum__total"><dt>Total</dt><dd><div class="amount num">BHD 11.000</div></dd></div>
-            </dl>
-          </div>
-          <div class="card__foot">
-            <p style="margin:0 0 8px;font-size:12.5px;color:var(--ink-500)">Still in your cart</p>
-            <div style="display:flex;align-items:center;gap:10px">
-              <div class="supplier__logo" style="width:28px;height:28px;flex:0 0 28px;font-size:11px;background:linear-gradient(135deg,#5aa17f,#1b7f4b)" aria-hidden="true">GF</div>
-              <div style="font-size:12.5px">
-                <div style="font-weight:650">Gulf Fresh Foods</div>
-                <div style="color:var(--ink-500)"><span class="num">BHD 13.000</span> below minimum</div>
-              </div>
-              <button type="button" class="btn--link" style="margin-inline-start:auto" data-goto="cart">Open</button>
-            </div>
-          </div>
+          <div class="card__body" id="cf-summary"></div>
+          <div class="card__foot" id="cf-rest"></div>
         </div>
 
         <div class="card">
@@ -1422,8 +1071,8 @@ body.notes-on .pin{display:inline-block}
             <div style="font-size:22px" aria-hidden="true">🔁</div>
             <div>
               <p style="margin:0 0 4px;font-weight:650;font-size:13.5px">Order this again next week?</p>
-              <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-500)">Save these <span class="num">3</span> lines as a recurring basket and reorder in one tap.</p>
-              <button type="button" class="btn btn--ghost" style="padding:8px 14px;font-size:12.5px">Save as "Weekly milk"</button>
+              <p style="margin:0 0 10px;font-size:12.5px;color:var(--ink-500)" id="cf-reorder-desc"></p>
+              <button type="button" class="btn btn--ghost" style="padding:8px 14px;font-size:12.5px" data-act="save-recurring">Save as a recurring basket</button>
             </div>
           </div>
         </div>
@@ -1431,9 +1080,6 @@ body.notes-on .pin{display:inline-block}
     </div>
   </main>
 
-  <!-- ============================================================
-       RATIONALE — findings, fixes and the principles behind them
-       ============================================================ -->
   <!-- ============================================================
        HEURISTIC EVALUATION — findings, severity and the fix applied
        ============================================================ -->
@@ -1742,129 +1388,1003 @@ body.notes-on .pin{display:inline-block}
 (function () {
   "use strict";
 
-  /* ---------- Screen switching ---------- */
-  var screens = ["cart", "checkout", "confirm", "why"];
+  /* ============================================================
+     State — one source of truth. Everything on screen is derived
+     from this, so a change in the cart reaches checkout and the
+     confirmation without any of them being told about it.
+     ============================================================ */
+  var VAT = 0.10;
 
-  function show(name) {
-    if (screens.indexOf(name) === -1) { name = "cart"; }
-    screens.forEach(function (s) {
-      document.getElementById("screen-" + s).hidden = (s !== name);
+  var state = {
+    suppliers: [
+      {
+        id: "almanar", name: "Al Manar Trading", initials: "AM",
+        meta: "Nadec authorised distributor · Delivers Sun–Thu · Manama & Muharraq",
+        from: "Sitra", moq: 10, delivery: 2, freeOver: 25,
+        coupon: { code: "ALMANAR2", label: "supplier coupon", off: 2 },
+        items: [
+          { sku:"NDC-LF200-18", name:"Nadec Long Life Low Fat UHT Milk 200ml", emoji:"🥛",
+            per:18, unitLabel:"case", price:1, qty:8, stock:60, sel:true },
+          { sku:"NDC-SK1L", name:"Nadec Long Life Skimmed UHT Milk 1L", emoji:"🧃",
+            per:1, unitLabel:"1L", price:1, qty:1, stock:40, sel:true },
+          { sku:"NDC-MG200", name:"Nadec Fresh Mango Flavoured Milk 200ml", emoji:"🥭",
+            per:1, unitLabel:"200ml", price:1, qty:1, stock:24, sel:true }
+        ]
+      },
+      {
+        id: "gulf", name: "Gulf Fresh Foods", initials: "GF", tint:"#1b7f4b",
+        meta: "Chilled & fresh · Delivers Mon, Wed, Sat · Capital Governorate",
+        from: "Muharraq", moq: 15, delivery: 2.5, freeOver: 30, coupon: null,
+        items: [
+          { sku:"NDC-FF360", name:"Nadec Fresh Full Fat Milk 360ml", emoji:"🍼",
+            per:1, unitLabel:"360ml", price:1, qty:1, stock:80, sel:true },
+          { sku:"NDC-VN125-18", name:"Nadec Vanilla Flavoured Milk 125ml", emoji:"🍦",
+            per:18, unitLabel:"case", price:1, qty:7, stock:1, sel:true }
+        ]
+      }
+    ],
+    catalog: {
+      almanar: [
+        { sku:"NDC-LB1L", name:"Nadec Laban 1L", emoji:"🥛", per:1, unitLabel:"1L", price:1.2, stock:50 },
+        { sku:"NDC-YG170-12", name:"Nadec Fresh Yoghurt 170g", emoji:"🍶", per:12, unitLabel:"case", price:2.4, stock:30 },
+        { sku:"NDC-CR250", name:"Nadec Cooking Cream 250ml", emoji:"🥄", per:1, unitLabel:"250ml", price:0.9, stock:65 }
+      ],
+      gulf: [
+        { sku:"GF-EGG30", name:"Gulf Farm Eggs, tray of 30", emoji:"🥚", per:30, unitLabel:"tray", price:2.1, stock:40 },
+        { sku:"GF-BTR200", name:"Gulf Fresh Butter 200g", emoji:"🧈", per:1, unitLabel:"200g", price:1.6, stock:35 },
+        { sku:"GF-CHS400", name:"Gulf White Cheese 400g", emoji:"🧀", per:1, unitLabel:"400g", price:2.2, stock:28 },
+        { sku:"GF-JUI1L-6", name:"Gulf Orange Juice 1L", emoji:"🍊", per:6, unitLabel:"case", price:4.5, stock:22 }
+      ]
+    },
+    coupons: [
+      { code:"HIGHBASE5", label:"marketplace credit", off:5, min:20 }
+    ],
+    applied: [],
+    notify: {},
+    savedLists: 0,
+    addresses: [
+      { id:"manama", name:"Buyer Bahrain — Manama branch", def:true,
+        line:"Building 19, Road 18, Block 460, Manama, Capital Governorate 11111, Bahrain",
+        contact:"Ahmed Khalil · +973 9080 7060 · branch@highbaseco.com",
+        lat:26.2361, lng:50.5831 },
+      { id:"muharraq", name:"Buyer Bahrain — Muharraq warehouse",
+        line:"Gate 4, Industrial Area, Muharraq · Goods-in 07:00–14:00",
+        contact:"Goods-in desk · +973 1745 0022", lat:26.2572, lng:50.6119 }
+    ],
+    checkout: {
+      addr:"manama", day:1, time:0, payment:"transfer",
+      po:"PO-2026-0914", costCentre:"Manama branch — F&B", notes:"", invoiceEmail:true
+    },
+    days: [
+      { lab:"Sun", date:"13 Sep" }, { lab:"Mon", date:"14 Sep" },
+      { lab:"Tue", date:"15 Sep" }, { lab:"Wed", date:"16 Sep" },
+      { lab:"Thu", date:"Full", full:true }
+    ],
+    times: [
+      { lab:"08:00 – 12:00", note:"Free", fee:0 },
+      { lab:"12:00 – 16:00", note:"Free", fee:0 },
+      { lab:"16:00 – 20:00", note:"+BHD 1.500", fee:1.5 }
+    ],
+    order: null,
+    undo: null
+  };
+
+  /* ---------- Helpers ---------- */
+  function bhd(n) { return "BHD " + (Math.round(n * 1000) / 1000).toFixed(3); }
+  function esc(v) { return String(v).replace(/&(?![a-z#]+;)/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+  function $(sel, root) { return (root || document).querySelector(sel); }
+  function $$(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  function pieces(it) { return it.qty * it.per; }
+  function short(name) { return name.replace(/^Nadec\s+|^Gulf\s+/, "").replace(/\s+(UHT|Flavoured|Fresh)\s+/g, " "); }
+
+  /* ---------- Derived values ---------- */
+  function conflicted(it) { return it.qty > it.stock; }
+  function lineTotal(it) { return conflicted(it) ? null : it.qty * it.price; }
+
+  function supplierSubtotal(sup) {
+    return sup.items.reduce(function (t, it) {
+      return t + (it.sel && !conflicted(it) ? it.qty * it.price : 0);
+    }, 0);
+  }
+  function supplierHasBlocker(sup) {
+    return sup.items.some(function (it) { return it.sel && conflicted(it); });
+  }
+  function supplierReady(sup) {
+    return sup.items.some(function (it) { return it.sel; }) &&
+           !supplierHasBlocker(sup) &&
+           supplierSubtotal(sup) >= sup.moq;
+  }
+  function supplierDelivery(sup) {
+    return supplierSubtotal(sup) >= sup.freeOver ? 0 : sup.delivery;
+  }
+
+  function totals() {
+    var ready = state.suppliers.filter(supplierReady);
+    var items = 0, delivery = 0, discount = 0, lines = 0, pcs = 0;
+    ready.forEach(function (sup) {
+      items += supplierSubtotal(sup);
+      delivery += supplierDelivery(sup);
+      if (sup.coupon) { discount += sup.coupon.off; }
+      sup.items.forEach(function (it) { if (it.sel) { lines++; pcs += pieces(it); } });
     });
-    document.querySelectorAll(".proto-nav button").forEach(function (b) {
-      b.setAttribute("aria-current", String(b.dataset.screen === name));
+    var slotFee = ready.length ? state.times[state.checkout.time].fee : 0;
+    state.applied.forEach(function (c) { if (items >= (c.min || 0)) { discount += c.off; } });
+    discount = Math.min(discount, items + delivery + slotFee);
+    var net = items + delivery + slotFee - discount;
+    var vat = net * VAT;
+    return { ready: ready, items: items, delivery: delivery, slotFee: slotFee,
+             discount: discount, vat: vat, total: net + vat, lines: lines, pieces: pcs };
+  }
+
+  /* ============================================================
+     Toasts and dialogs
+     ============================================================ */
+  var toastHost = document.createElement("div");
+  toastHost.id = "toasts";
+  document.body.appendChild(toastHost);
+
+  function toast(msg, opts) {
+    opts = opts || {};
+    var el = document.createElement("div");
+    el.className = "toast" + (opts.kind ? " toast--" + opts.kind : "");
+    el.setAttribute("role", "status");
+    el.innerHTML = "<span>" + esc(msg) + "</span>";
+    if (opts.action) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = opts.action;
+      b.addEventListener("click", function () { el.remove(); opts.onAction(); });
+      el.appendChild(b);
+    }
+    toastHost.appendChild(el);
+    while (toastHost.children.length > 3) { toastHost.firstChild.remove(); }
+    setTimeout(function () { el.remove(); }, opts.ms || 5200);
+  }
+
+  var dlg = document.createElement("dialog");
+  dlg.className = "modal";
+  document.body.appendChild(dlg);
+
+  function modal(title, bodyHTML, footHTML) {
+    dlg.innerHTML =
+      '<form method="dialog" class="modal__head"><h2>' + esc(title) + '</h2>' +
+      '<button class="modal__x" aria-label="Close" value="close">✕</button></form>' +
+      '<div class="modal__body">' + bodyHTML + '</div>' +
+      (footHTML ? '<div class="modal__foot">' + footHTML + '</div>' : "");
+    delete dlg.dataset.catalog;
+    if (!dlg.open) { dlg.showModal(); }
+    return dlg;
+  }
+  function closeModal() { if (dlg.open) { dlg.close(); } }
+  dlg.addEventListener("close", function () { delete dlg.dataset.catalog; });
+  dlg.addEventListener("click", function (e) { if (e.target === dlg) { closeModal(); } });
+
+  /* ============================================================
+     Cart rendering
+     ============================================================ */
+  var PIN = {
+    1: '<b>Group by supplier</b>Minimum order, delivery fee, coupons and dispatch are all per supplier on HIGHBASE — so the cart must be shaped that way too. One flat list forces the buyer to hold that grouping in their head.',
+    2: '<b>One minimum-order bar, not twelve</b>Today the same MOQ warning is repeated on every product card in the group. It is a property of the supplier, so it belongs once on the supplier header — as progress toward a target, with the exact remaining amount.',
+    3: '<b>Unit economics</b>A procurement buyer compares cost per piece across pack sizes and suppliers. Showing only "BHD 1.000" next to "18pcs" makes them do that arithmetic themselves, on every line.',
+    4: '<b>Resolve the conflict where it happens</b>Today the cart shows "Only 1 item in stock" while the quantity stays at 7 and the total is still calculated. State the conflict, block the total, and offer the one-tap fix — don\'t let it surface at the payment step.',
+    6: '<b>Partial checkout</b>One supplier below its minimum should not hold the whole basket hostage. Let the ready supplier ship now and keep the rest in the cart — the buyer gets their stock, HIGHBASE gets the revenue.'
+  };
+  function pin(n) {
+    if (!PIN[n]) { return ""; }
+    return '<button type="button" class="pin" aria-label="Design note ' + n + '">' + n +
+           '<span class="pin__tip">' + PIN[n] + '</span></button>';
+  }
+
+  function renderCart() {
+    var host = $("#cart-groups");
+    var anySelected = state.suppliers.some(function (s) { return s.items.some(function (i) { return i.sel; }); });
+    var allSelected = state.suppliers.every(function (s) { return s.items.every(function (i) { return i.sel; }); }) &&
+                      state.suppliers.some(function (s) { return s.items.length; });
+    var selAll = $("#sel-all");
+    selAll.checked = allSelected;
+    selAll.indeterminate = anySelected && !allSelected;
+
+    var totalItems = state.suppliers.reduce(function (n, s) { return n + s.items.length; }, 0);
+    var liveSuppliers = state.suppliers.filter(function (s) { return s.items.length; }).length;
+    $("#cart-sub").innerHTML = totalItems
+      ? '<span class="num">' + totalItems + '</span> item' + (totalItems === 1 ? "" : "s") +
+        ' from <span class="num">' + liveSuppliers + '</span> supplier' + (liveSuppliers === 1 ? "" : "s") +
+        ' · Prices exclude VAT'
+      : "Nothing here yet.";
+
+    if (!totalItems) {
+      host.innerHTML = '<div class="empty">Your cart is empty. ' +
+        '<button type="button" class="btn--link" data-act="restock-demo">Reload the example basket</button></div>';
+      return;
+    }
+
+    host.innerHTML = state.suppliers.filter(function (s) { return s.items.length; }).map(function (sup, si) {
+      var sub = supplierSubtotal(sup);
+      var ready = supplierReady(sup);
+      var gap = Math.max(0, sup.moq - sub);
+      var pct = Math.min(100, sub / sup.moq * 100);
+      var allSup = sup.items.every(function (i) { return i.sel; });
+      var freeGap = Math.max(0, sup.freeOver - sub);
+      var del = supplierDelivery(sup);
+
+      var head =
+        '<div class="supplier__head">' +
+          '<label class="checkbox"><input type="checkbox" data-sup-sel="' + sup.id + '"' +
+            (allSup ? " checked" : "") + ' aria-label="Select all from ' + esc(sup.name) + '"></label>' +
+          '<div class="supplier__logo"' + (sup.tint ? ' style="background:linear-gradient(135deg,#5aa17f,' + sup.tint + ')"' : "") +
+            ' aria-hidden="true">' + sup.initials + '</div>' +
+          '<div><h2 class="supplier__name">' + esc(sup.name) +
+            '<span class="chip chip--ok">✓ Verified supplier</span>' + (si === 0 ? pin(1) : "") + '</h2>' +
+            '<p class="supplier__meta">' + esc(sup.meta) + '</p></div>' +
+          '<div class="spacer" style="margin-inline-start:auto"></div>' +
+          (ready ? '<span class="chip chip--info">Ships separately</span>'
+                 : '<span class="chip chip--warn">Not ready</span>') +
+        '</div>';
+
+      var moq = ready
+        ? '<div class="moq moq--met"><div class="moq__row"><span>✓ Minimum order met</span>' +
+            '<span class="spacer"><span class="num">' + bhd(sub) + '</span> / <span class="num">' + bhd(sup.moq) + '</span></span>' +
+            (si === 0 ? pin(2) : "") + '</div>' +
+            '<div class="moq__track"><div class="moq__fill" style="width:' + pct + '%"></div></div>' +
+            (freeGap > 0
+              ? '<div class="moq__row" style="margin-top:7px;color:var(--ink-500);font-weight:500">' +
+                '<span>Add <b class="num">' + bhd(freeGap) + '</b> more for free delivery on this supplier</span>' +
+                '<button type="button" class="btn--link" style="margin-inline-start:auto" data-act="browse" data-sup="' + sup.id + '">Browse ' + esc(sup.name) + ' →</button></div>'
+              : '<div class="moq__row" style="margin-top:7px;color:var(--green-700);font-weight:600"><span>✓ Free delivery unlocked</span></div>') +
+          '</div>'
+        : '<div class="moq"><div class="moq__row">' +
+            '<span>⚠ <b class="num">' + bhd(gap) + '</b> below this supplier\'s minimum order</span>' +
+            '<span class="spacer"><span class="num">' + bhd(sub) + '</span> / <span class="num">' + bhd(sup.moq) + '</span></span></div>' +
+            '<div class="moq__track"><div class="moq__fill" style="width:' + pct + '%"></div></div>' +
+            '<div class="moq__row" style="margin-top:9px;font-weight:600">' +
+              '<button type="button" class="btn--link" data-act="browse" data-sup="' + sup.id + '">Add items from ' + esc(sup.name) + ' →</button>' +
+              '<span style="color:var(--ink-400);font-weight:500">or</span>' +
+              '<button type="button" class="btn--link" data-act="move-list" data-sup="' + sup.id + '">Move to a saved list</button>' +
+            '</div>' +
+          '</div>';
+
+      var header = '<div class="line line--head" aria-hidden="true">' +
+        '<span></span><span></span><span>Product</span><span>Pack &amp; unit price</span>' +
+        '<span>Quantity</span><span style="text-align:end">Line total</span><span></span></div>';
+
+      var rows = sup.items.map(function (it, ii) {
+        var bad = conflicted(it);
+        var lt = lineTotal(it);
+        var stockChip = bad
+          ? '<span class="chip chip--bad" style="padding:1px 7px">Only ' + it.stock + ' ' + (it.per > 1 ? "case" : "unit") + (it.stock === 1 ? "" : "s") + ' left</span>'
+          : it.stock - it.qty <= 25
+            ? '<span class="chip chip--warn" style="padding:1px 7px">Low stock · ' + it.stock + ' left</span>'
+            : '<span class="chip chip--ok" style="padding:1px 7px">In stock</span>';
+        var perPiece = it.per > 1
+          ? ' · <span class="num">' + bhd(it.price / it.per).replace("BHD ", "BHD ") + '</span> / piece'
+          : "";
+        return '<div class="line">' +
+          '<label class="line__c"><input type="checkbox" data-item-sel="' + sup.id + ':' + it.sku + '"' +
+            (it.sel ? " checked" : "") + ' aria-label="Select ' + esc(it.name) + '"></label>' +
+          '<div class="line__thumb line__t" aria-hidden="true">' + it.emoji + '</div>' +
+          '<div class="line__n"><p class="line__name">' + esc(it.name) + '</p>' +
+            '<div class="line__sku">SKU ' + it.sku + ' · ' + stockChip +
+            (state.notify[it.sku] ? ' <span class="chip chip--info" style="padding:1px 7px">Restock alert on</span>' : "") + '</div></div>' +
+          '<div class="line__p"><div class="line__pack">' +
+            (it.per > 1 ? 'Case of <span class="num">' + it.per + '</span>' : 'Single · <span class="num">' + it.unitLabel + '</span>') +
+            '</div><div class="line__unit"><span class="num">' + bhd(it.price) + '</span> / ' +
+            (it.per > 1 ? "case" : "unit") + perPiece + (si === 0 && ii === 0 ? pin(3) : "") + '</div></div>' +
+          '<div class="line__q"><div class="stepper" data-step="' + sup.id + ':' + it.sku + '">' +
+              '<button type="button" aria-label="Decrease quantity"' + (it.qty <= 1 ? " disabled" : "") + '>−</button>' +
+              '<input type="text" inputmode="numeric" value="' + it.qty + '" aria-label="Quantity"' +
+                (bad ? ' style="color:var(--red-700)"' : "") + '>' +
+              '<button type="button" aria-label="Increase quantity"' + (it.qty >= it.stock ? " disabled" : "") + '>+</button>' +
+            '</div>' +
+            (it.per > 1 ? '<div class="line__unit" style="margin-top:3px"><span class="num">' + pieces(it) + '</span> pieces</div>' : "") +
+          '</div>' +
+          '<div class="line__m"><div class="line__total num"' + (lt === null ? ' style="color:var(--ink-400)"' : "") + '>' +
+            (lt === null ? "—" : bhd(lt)) + '</div></div>' +
+          '<button type="button" class="icon-btn line__rm" data-act="remove" data-ref="' + sup.id + ':' + it.sku + '" aria-label="Remove ' + esc(it.name) + '">✕</button>' +
+          (bad
+            ? '<p class="line-alert"><span>You asked for <b class="num">' + it.qty + '</b> ' +
+                (it.per > 1 ? "cases" : "units") + ' — the supplier has <b class="num">' + it.stock + '</b>.</span>' +
+                '<button type="button" class="btn--link" data-act="clamp" data-ref="' + sup.id + ':' + it.sku + '">Reduce to ' + it.stock + '</button>' +
+                '<span aria-hidden="true">·</span>' +
+                '<button type="button" class="btn--link" data-act="notify" data-ref="' + sup.id + ':' + it.sku + '">' +
+                  (state.notify[it.sku] ? "Restock alert on ✓" : "Notify me when restocked") + '</button>' + pin(4) + '</p>'
+            : "") +
+        '</div>';
+      }).join("");
+
+      var foot = '<div class="supplier__foot"><span>Supplier subtotal</span><b class="num">' + bhd(sub) + '</b>' +
+        (ready
+          ? '<span class="chip chip--mute">Delivery ' + (del ? '<span class="num">' + bhd(del) + '</span>' : "free") + '</span>' +
+            (sup.coupon ? '<span class="chip chip--ok">Coupon ' + sup.coupon.code + ' · −<span class="num">' + bhd(sup.coupon.off) + '</span></span>' : "")
+          : "") +
+        '<div class="spacer"></div>' +
+        (ready ? '<span class="chip chip--ok">✓ Ready to order</span>'
+               : '<span class="chip chip--warn">Excluded from this order</span>') +
+        '</div>';
+
+      return '<section class="card supplier">' + head + moq + header + rows + foot + '</section>';
+    }).join("");
+  }
+
+  function renderCartSummary() {
+    var t = totals();
+    var notReady = state.suppliers.filter(function (s) { return s.items.length && !supplierReady(s); });
+    var rows = "";
+
+    state.applied.forEach(function (c) {
+      rows += '<div class="applied"><span>✓ ' + c.code + ' — ' + esc(c.label) + '</span>' +
+        '<span class="spacer num">−' + bhd(c.off) + '</span>' +
+        '<button type="button" data-act="uncoupon" data-code="' + c.code + '" aria-label="Remove coupon ' + c.code + '">✕</button></div>';
     });
-    window.scrollTo(0, 0);
-    if (location.hash.slice(1) !== name) {
-      try { history.replaceState(null, "", "#" + name); } catch (err) { /* sandboxed frame */ }
+    t.ready.forEach(function (sup) {
+      if (sup.coupon) {
+        rows += '<div class="applied"><span>✓ ' + sup.coupon.code + ' — ' + sup.coupon.label + '</span>' +
+          '<span class="spacer num">−' + bhd(sup.coupon.off) + '</span></div>';
+      }
+    });
+
+    var body =
+      rows +
+      '<div class="coupon"><label class="sr-only" for="cpn">Coupon code</label>' +
+        '<input class="input" id="cpn" placeholder="Add coupon code" autocomplete="off">' +
+        '<button type="button" class="btn btn--ghost" data-act="coupon">Apply</button></div>' +
+      '<p class="hint" id="cpn-msg" style="margin:-6px 0 10px" hidden></p>' +
+      '<div class="sum__rule"></div><dl style="margin:0">';
+
+    if (!t.ready.length) {
+      body += '<div class="sum__row"><dt>No supplier is ready to order yet</dt></div></dl>' +
+        '<p class="hint" style="margin-top:10px">Reach a supplier\'s minimum order, or resolve a stock conflict, to check out.</p>';
+      $("#cart-summary").innerHTML = body;
+      $("#mb-cart-total").textContent = bhd(0);
+      return;
+    }
+
+    body +=
+      '<div class="sum__row"><dt>Items (<span class="num">' + t.lines + '</span> lines)</dt><dd class="spacer num">' + bhd(t.items) + '</dd></div>' +
+      t.ready.map(function (sup) {
+        var d = supplierDelivery(sup);
+        return '<div class="sum__row"><dt>Delivery — ' + esc(sup.name) + '</dt><dd class="spacer num">' +
+          (d ? bhd(d) : "Free") + '</dd></div>';
+      }).join("") +
+      (t.slotFee ? '<div class="sum__row"><dt>Evening delivery window</dt><dd class="spacer num">' + bhd(t.slotFee) + '</dd></div>' : "") +
+      (t.discount ? '<div class="sum__row sum__row--save"><dt>Discounts</dt><dd class="spacer num">−' + bhd(t.discount) + '</dd></div>' : "") +
+      '<div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">' + bhd(t.vat) + '</dd></div>' +
+      '<div class="sum__rule"></div>' +
+      '<div class="sum__total"><dt data-ar="الإجمالي">Total</dt><dd>' +
+        '<div class="amount num">' + bhd(t.total) + '</div>' +
+        '<div class="vat">VAT reclaimable · CR 5056050560-1</div></dd></div></dl>' +
+      '<div style="margin-top:16px">' +
+        '<button type="button" class="btn btn--primary btn--block btn--lg" data-act="to-checkout">' +
+          'Checkout · <span class="num">' + bhd(t.total) + '</span></button>' +
+        '<p class="hint" style="text-align:center;margin-top:9px">' +
+          t.ready.map(function (s) { return esc(s.name); }).join(" and ") + ' only.' +
+          (notReady.length
+            ? ' <button type="button" class="btn--link" data-act="browse" data-sup="' + notReady[0].id + '">' +
+              esc(notReady[0].name) + ' stays in your cart</button>' + pin(6)
+            : "") +
+        '</p></div>' +
+      '<div class="trust">' +
+        ['Bank transfer, card or Net 30 terms', 'Tax invoice issued on dispatch', 'Damaged goods returnable for 48h']
+          .map(function (x) {
+            return '<div><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+              '<path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5l-9-4Zm-1 15-4-4 1.4-1.4L11 13.2l5.6-5.6L18 9l-7 7Z"/></svg> ' + x + '</div>';
+          }).join("") +
+      '</div>';
+
+    $("#cart-summary").innerHTML = body;
+    $("#mb-cart-total").textContent = bhd(t.total);
+  }
+
+  /* ============================================================
+     Checkout rendering
+     ============================================================ */
+  function renderCheckout() {
+    var t = totals();
+    var c = state.checkout;
+
+    $("#co-sub").innerHTML = t.ready.length
+      ? t.ready.map(function (s) { return esc(s.name); }).join(" · ") +
+        ' · <span class="num">' + t.lines + '</span> lines · <span class="num">' + t.pieces + '</span> pieces'
+      : "Nothing is ready to order.";
+
+    $("#addr-list").innerHTML = state.addresses.map(function (a) {
+      var on = a.id === c.addr;
+      return '<label class="opt"><input type="radio" name="addr" value="' + a.id + '"' + (on ? " checked" : "") + '>' +
+        '<div style="flex:1"><p class="opt__title">' + esc(a.name) +
+          (a.def ? ' <span class="chip chip--info">Default</span>' : "") + '</p>' +
+        '<p class="opt__desc">' + esc(a.line) + '</p>' +
+        '<p class="opt__desc" style="margin-top:4px">' + esc(a.contact) + '</p>' +
+        (on
+          ? '<div style="display:flex;gap:12px;align-items:center;margin-top:10px;flex-wrap:wrap">' +
+              '<div class="map" style="flex:1;min-width:220px"><span class="map__pin" aria-hidden="true">📍</span>' +
+              '<span class="map__label">Pin saved · <span class="num">' + a.lat.toFixed(4) + '</span>, <span class="num">' + a.lng.toFixed(4) + '</span></span></div>' +
+              '<button type="button" class="btn btn--ghost" style="padding:8px 13px;font-size:12.5px" data-act="pin" data-ref="' + a.id + '">Adjust pin</button>' +
+            '</div>' +
+            '<p class="hint">Drivers use the pin, not the typed address. Confirm it once — we\'ll remember it for this branch.</p>'
+          : "") +
+        '</div></label>';
+    }).join("");
+
+    $("#ship-list").innerHTML = t.ready.map(function (sup, i) {
+      var n = sup.items.filter(function (it) { return it.sel; }).length;
+      return '<div class="shipment"><span class="chip chip--info">Shipment <span class="num">' + (i + 1) +
+        '</span> of <span class="num">' + t.ready.length + '</span></span>' +
+        '<span>' + esc(sup.name) + ' · <span class="num">' + n + '</span> lines</span>' +
+        '<span class="spacer">Dispatched from ' + esc(sup.from) + '</span></div>';
+    }).join("") || '<div class="empty">No shipments — nothing is ready to order.</div>';
+
+    $("#day-slots").innerHTML = state.days.map(function (d, i) {
+      return '<button type="button" class="slot" data-day="' + i + '"' +
+        (d.full ? " disabled" : ' aria-pressed="' + (i === c.day) + '"') + '>' + d.lab +
+        '<small>' + (d.full ? "Full" : '<span class="num">' + d.date + '</span>') + '</small></button>';
+    }).join("");
+
+    $("#time-slots").innerHTML = state.times.map(function (w, i) {
+      return '<button type="button" class="slot" data-time="' + i + '" aria-pressed="' + (i === c.time) + '">' +
+        '<span class="num">' + w.lab + '</span><small' + (w.fee ? ' class="num"' : "") + '>' + w.note + '</small></button>';
+    }).join("");
+
+    $$('input[name="pay"]').forEach(function (r) { r.checked = r.value === c.payment; });
+    $("#po").value = c.po;
+    $("#cc").value = c.costCentre;
+    $("#notes").value = c.notes;
+    $("#inv-email").checked = c.invoiceEmail;
+
+    var day = state.days[c.day], win = state.times[c.time];
+    var body;
+    if (!t.ready.length) {
+      body = '<div class="empty">Nothing is ready to order. <button type="button" class="btn--link" data-goto="cart">Back to the cart</button></div>';
+      $("#mb-co-total").textContent = bhd(0);
+    } else {
+      body = '<dl style="margin:0">' +
+        t.ready.map(function (sup) {
+          return '<div class="sum__row" style="font-weight:650;color:var(--ink-900)"><dt>' + esc(sup.name) + '</dt></div>' +
+            sup.items.filter(function (it) { return it.sel; }).map(function (it) {
+              return '<div class="sum__row sum__row--sub"><dt>' + esc(short(it.name)) + ' × <span class="num">' + it.qty + '</span>' +
+                (it.per > 1 ? " cases" : "") + '</dt><dd class="spacer num">' + bhd(it.qty * it.price) + '</dd></div>';
+            }).join("");
+        }).join("") +
+        '<div class="sum__rule"></div>' +
+        '<div class="sum__row"><dt>Items subtotal</dt><dd class="spacer num">' + bhd(t.items) + '</dd></div>' +
+        '<div class="sum__row"><dt>Delivery · ' + day.lab + ' <span class="num">' + day.date + '</span>, <span class="num">' + win.lab + '</span></dt>' +
+          '<dd class="spacer num">' + bhd(t.delivery + t.slotFee) + '</dd></div>' +
+        (t.discount ? '<div class="sum__row sum__row--save"><dt>Discounts</dt><dd class="spacer num">−' + bhd(t.discount) + '</dd></div>' : "") +
+        '<div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">' + bhd(t.vat) + '</dd></div>' +
+        '<div class="sum__rule"></div>' +
+        '<div class="sum__total"><dt data-ar="الإجمالي">Total due' +
+          '<button type="button" class="pin" aria-label="Design note 14">14<span class="pin__tip">' +
+          '<b>Put the amount on the button</b>"Place Order" alone asks the buyer to trust a number they last saw two screens ago. ' +
+          'The amount on the commit control is the cheapest reassurance in checkout.</span></button></dt>' +
+          '<dd><div class="amount num">' + bhd(t.total) + '</div>' +
+          '<div class="vat">Includes <span class="num">' + bhd(t.vat) + '</span> reclaimable VAT</div></dd></div></dl>' +
+        '<button type="button" class="btn btn--primary btn--block btn--lg" style="margin-top:16px" data-act="place-order">' +
+          'Place order · <span class="num">' + bhd(t.total) + '</span></button>' +
+        '<p class="hint" style="text-align:center;margin-top:9px">By placing this order you accept the ' +
+          '<a href="#" data-act="terms">supplier\'s terms</a>. Cancellable free until dispatch.</p>';
+      $("#mb-co-total").textContent = bhd(t.total);
+    }
+    $("#co-summary").innerHTML = body;
+  }
+
+  /* ============================================================
+     Confirmation rendering
+     ============================================================ */
+  function renderConfirm() {
+    var o = state.order;
+    if (!o) { return; }
+    var day = state.days[o.day], win = state.times[o.time];
+
+    $("#cf-ref").textContent = o.ref;
+    $("#cf-sub").innerHTML = o.groups.map(function (g) { return esc(g.name); }).join(" and ") +
+      ' ' + (o.groups.length > 1 ? "are" : "is") + ' preparing <span class="num">' + o.lines +
+      '</span> lines for ' + day.lab + ' <span class="num">' + day.date + '</span>, <span class="num">' + win.lab + '</span>.';
+    $("#cf-reorder-desc").innerHTML = 'Save these <span class="num">' + o.lines +
+      '</span> lines as a recurring basket and reorder in one tap.';
+
+    var card = $("#pay-card"), head = $(".pay__head h2", card);
+    if (o.payment === "card") {
+      head.textContent = "Payment authorised";
+      $("#countdown").hidden = true;
+      $("#pay-body").innerHTML =
+        '<div class="paid-note">✓ Card charged on dispatch — nothing further to do. ' +
+        'A receipt will be emailed when the order ships.</div>' +
+        '<p class="hint" style="margin-top:12px">Card ending <span class="num">4242</span> · ' +
+        '<span class="num">' + bhd(o.total) + '</span> authorised, captured when Al Manar dispatches.</p>';
+      $("#pay-foot").innerHTML = '<button type="button" class="btn btn--ghost" data-act="proforma">View proforma invoice</button>';
+    } else if (o.paid) {
+      head.textContent = "Payment received";
+      $("#countdown").hidden = true;
+      $("#pay-body").innerHTML =
+        '<div class="paid-note">✓ Receipt submitted at <span class="num">' + o.paidAt + '</span>. ' +
+        'We are matching it against reference ' + o.ref + ' — usually within one working hour.</div>' +
+        (o.receipt ? '<p class="label" style="margin-top:16px">Submitted</p>' + docRow(o.receipt, false) : "");
+      $("#pay-foot").innerHTML =
+        '<span class="hint">Al Manar will confirm and pick as soon as the payment clears.</span>';
+    } else {
+      head.textContent = "Complete your payment";
+      $("#countdown").hidden = false;
+      $("#pay-body").innerHTML =
+        '<p style="margin:0 0 14px;color:var(--ink-700)">Transfer <b class="num">' + bhd(o.total) +
+          '</b> to the HIGHBASE account below, then upload the receipt here. Your stock stays reserved until <b>' + o.expiry + '</b>.</p>' +
+        '<div class="cols" style="grid-template-columns:minmax(0,1fr) 200px;gap:18px"><div>' +
+          '<div class="amount-due"><span>Amount to transfer</span><strong class="num">' + bhd(o.total) + '</strong></div>' +
+          '<dl style="margin:0">' +
+            copyRow("Account name", "HIGHBASE TRADING W.L.L.", "HIGHBASE TRADING WLL") +
+            copyRow("IBAN", "BH29 ALSA 0016 5212 1001 01", "BH29ALSA00165212100101") +
+            copyRow("SWIFT", "ALSABHBM", "ALSABHBM") +
+            copyRow("Reference", o.ref, o.ref) +
+          '</dl>' +
+          '<p class="hint">Put the order number in the transfer reference — it is how we match your payment automatically.</p>' +
+        '</div>' +
+        '<div class="qr"><div class="qr__code" id="qr" role="img" aria-label="Payment QR code for order ' + o.ref + '"></div>' +
+          '<p class="hint" style="text-align:center;margin:0">Scan in your bank app —<br>amount and reference pre-filled</p></div>' +
+        '</div>' +
+        '<div class="sum__rule" style="margin:18px 0"></div>' +
+        '<h3 style="font-size:14px;margin:0 0 4px">Upload your transfer receipt' +
+          '<button type="button" class="pin" aria-label="Design note 16">16<span class="pin__tip">' +
+          '<b>Finish the job on the page that asked for it</b>Today the confirmation says "Click on Track Your Order to upload the ' +
+          'transaction receipt" — sending the buyer to a different screen to complete the step this screen just created. ' +
+          'Every hop is a chance to drop out.</span></button></h3>' +
+        '<p class="hint" style="margin:0 0 12px">PDF, JPG or PNG · up to 10 MB · we verify within one working hour</p>' +
+        (o.receipt
+          ? '<p class="label">Attached</p>' + docRow(o.receipt, true)
+          : '<div class="drop" id="drop"><div class="drop__icon" aria-hidden="true">📄</div>' +
+            '<h3>Drop your receipt here</h3><p>or choose a file from your device</p>' +
+            '<button type="button" class="btn btn--primary" data-act="pick">Choose file</button></div>');
+      $("#pay-foot").innerHTML =
+        '<button type="button" class="btn btn--primary" data-act="submit-receipt"' + (o.receipt ? "" : " disabled") + '>Submit receipt</button>' +
+        '<button type="button" class="btn btn--ghost" data-act="pay-later">I\'ll pay later</button>' +
+        '<span class="hint" style="margin-inline-start:auto">Or <a href="#" data-act="switch-card">pay by card instead</a> — instant confirmation</span>';
+      drawQR(o.ref);
+      wireDrop();
+    }
+
+    var stages = [
+      { t: "Order placed", d: "Today, " + o.placedAt, done: true },
+      { t: o.paid ? "Payment submitted" : "Awaiting your payment",
+        d: o.paid ? "Receipt uploaded at " + o.paidAt : "Reserved until " + o.expiry,
+        done: o.paid, now: !o.paid },
+      { t: "Supplier confirms & picks", d: "Within " + '<span class="num">4</span>' + " working hours of payment", now: o.paid },
+      { t: "Out for delivery", d: day.lab + ' <span class="num">' + day.date + '</span>, <span class="num">' + win.lab + '</span> · driver details sent by SMS' },
+      { t: "Delivered & invoiced", d: "Tax invoice emailed to accounts@buyerbahrain.com" }
+    ];
+    $("#timeline").innerHTML = stages.map(function (st, i) {
+      var cls = st.done ? "is-done" : st.now ? "is-now" : "";
+      var dot = st.done ? "✓" : st.now ? "●" : String(i + 1);
+      return '<li class="' + cls + '"><span class="timeline__dot" aria-hidden="true">' + dot + '</span>' +
+        '<div><h4>' + esc(st.t) + '</h4><p>' + st.d + '</p></div></li>';
+    }).join("");
+
+    $("#cf-summary").innerHTML = '<dl style="margin:0">' +
+      o.groups.map(function (g) {
+        return g.items.map(function (it) {
+          return '<div class="sum__row sum__row--sub"><dt>' + esc(short(it.name)) + ' × <span class="num">' + it.qty + '</span>' +
+            (it.per > 1 ? " cases" : "") + '</dt><dd class="spacer num">' + bhd(it.qty * it.price) + '</dd></div>';
+        }).join("");
+      }).join("") +
+      '<div class="sum__rule"></div>' +
+      '<div class="sum__row"><dt>Delivery</dt><dd class="spacer num">' + bhd(o.delivery) + '</dd></div>' +
+      (o.discount ? '<div class="sum__row sum__row--save"><dt>Discounts</dt><dd class="spacer num">−' + bhd(o.discount) + '</dd></div>' : "") +
+      '<div class="sum__row"><dt>VAT <span class="num">10%</span></dt><dd class="spacer num">' + bhd(o.vat) + '</dd></div>' +
+      (o.po ? '<div class="sum__row"><dt>PO number</dt><dd class="spacer">' + esc(o.po) + '</dd></div>' : "") +
+      '<div class="sum__rule"></div>' +
+      '<div class="sum__total"><dt>Total</dt><dd><div class="amount num">' + bhd(o.total) + '</div></dd></div></dl>';
+
+    var rest = state.suppliers.filter(function (s) { return s.items.length && !supplierReady(s); });
+    $("#cf-rest").innerHTML = rest.length
+      ? '<p style="margin:0 0 8px;font-size:12.5px;color:var(--ink-500)">Still in your cart</p>' +
+        rest.map(function (s) {
+          var gap = Math.max(0, s.moq - supplierSubtotal(s));
+          return '<div style="display:flex;align-items:center;gap:10px">' +
+            '<div class="supplier__logo" style="width:28px;height:28px;flex:0 0 28px;font-size:11px' +
+              (s.tint ? ";background:linear-gradient(135deg,#5aa17f," + s.tint + ")" : "") + '" aria-hidden="true">' + s.initials + '</div>' +
+            '<div style="font-size:12.5px"><div style="font-weight:650">' + esc(s.name) + '</div>' +
+            '<div style="color:var(--ink-500)"><span class="num">' + bhd(gap) + '</span> below minimum</div></div>' +
+            '<button type="button" class="btn--link" style="margin-inline-start:auto" data-goto="cart">Open</button></div>';
+        }).join("")
+      : '<p style="margin:0;font-size:12.5px;color:var(--ink-500)">Your cart is now empty.</p>';
+  }
+
+  function copyRow(label, shown, copy) {
+    return '<div class="copyrow"><dt>' + label + '</dt><dd class="num">' + esc(shown) + '</dd>' +
+      '<button type="button" data-copy="' + esc(copy) + '">Copy</button></div>';
+  }
+  function docRow(f, removable) {
+    return '<div class="doc"><div class="doc__prev" aria-hidden="true">' + (f.isImage ? "🖼" : "🧾") + '</div>' +
+      '<div><p class="doc__name">' + esc(f.name) + '</p>' +
+      '<p class="doc__meta"><span class="num">' + f.size + '</span> · uploaded <span class="num">' + f.at + '</span></p></div>' +
+      '<div class="spacer"></div>' +
+      '<button type="button" class="btn--link" data-act="preview">Preview</button>' +
+      (removable ? '<button type="button" class="icon-btn" data-act="drop-receipt" aria-label="Remove receipt">✕</button>' : "") +
+      '<button type="button" class="pin" aria-label="Design note 18">18<span class="pin__tip">' +
+      '<b>An attachment is a row, not a wallpaper</b>The live documents step renders the uploaded ID at its natural size, ' +
+      'pushing the Place Order button thousands of pixels down the page. Files belong in a fixed-height row with a ' +
+      'thumbnail, name, size and a preview action.</span></button></div>';
+  }
+
+  /* ============================================================
+     Lookups and mutations
+     ============================================================ */
+  function find(ref) {
+    var parts = ref.split(":"), sup = null, item = null;
+    state.suppliers.forEach(function (sp) {
+      if (sp.id === parts[0]) {
+        sup = sp;
+        sp.items.forEach(function (it) { if (it.sku === parts[1]) { item = it; } });
+      }
+    });
+    return { sup: sup, item: item };
+  }
+
+  function render() {
+    renderCart();
+    renderCartSummary();
+    renderCheckout();
+    if (state.order) { renderConfirm(); }
+    applyLang();
+  }
+
+  function setQty(ref, qty) {
+    var f = find(ref);
+    if (!f.item) { return; }
+    f.item.qty = Math.max(1, Math.min(999, qty || 1));
+    render();
+  }
+
+  function removeItem(ref, silent) {
+    var f = find(ref);
+    if (!f.item) { return; }
+    var idx = f.sup.items.indexOf(f.item);
+    state.undo = { sup: f.sup, items: [{ item: f.item, idx: idx }] };
+    f.sup.items.splice(idx, 1);
+    render();
+    if (!silent) {
+      toast("Removed " + short(f.item.name) + ".", { action: "Undo", onAction: undoRemove });
     }
   }
-
-  document.querySelectorAll(".proto-nav button").forEach(function (b) {
-    b.addEventListener("click", function () { show(b.dataset.screen); });
-  });
-  document.addEventListener("click", function (e) {
-    var t = e.target.closest("[data-goto]");
-    if (t) { e.preventDefault(); show(t.dataset.goto); }
-  });
-
-  /* ---------- Annotations ---------- */
-  document.body.classList.add("notes-on");
-  var notes = document.getElementById("t-notes");
-  notes.addEventListener("click", function () {
-    var on = notes.getAttribute("aria-pressed") !== "true";
-    notes.setAttribute("aria-pressed", String(on));
-    document.body.classList.toggle("notes-on", on);
-  });
-
-  /* ---------- Direction / language ---------- */
-  var dirBtn = document.getElementById("t-dir");
-  dirBtn.addEventListener("click", function () {
-    var rtl = dirBtn.getAttribute("aria-pressed") !== "true";
-    dirBtn.setAttribute("aria-pressed", String(rtl));
-    document.documentElement.dir = rtl ? "rtl" : "ltr";
-    document.documentElement.lang = rtl ? "ar" : "en";
-    document.querySelectorAll("[data-ar]").forEach(function (el) {
-      if (!el.dataset.en) { el.dataset.en = el.textContent; }
-      el.textContent = rtl ? el.dataset.ar : el.dataset.en;
+  function undoRemove() {
+    if (!state.undo) { return; }
+    state.undo.items.slice().reverse().forEach(function (e) {
+      state.undo.sup.items.splice(Math.min(e.idx, state.undo.sup.items.length), 0, e.item);
     });
-  });
-
-  /* ---------- Quantity steppers ---------- */
-  document.querySelectorAll(".stepper").forEach(function (s) {
-    var input = s.querySelector("input");
-    var btns = s.querySelectorAll("button");
-    btns[0].addEventListener("click", function () {
-      var v = Math.max(1, (parseInt(input.value, 10) || 1) - 1);
-      input.value = v;
-    });
-    btns[1].addEventListener("click", function () {
-      if (btns[1].disabled) { return; }
-      input.value = (parseInt(input.value, 10) || 0) + 1;
-    });
-  });
-
-  /* ---------- Slot pickers (single-select within a row) ---------- */
-  document.querySelectorAll(".slots").forEach(function (row) {
-    row.addEventListener("click", function (e) {
-      var b = e.target.closest(".slot");
-      if (!b || b.disabled) { return; }
-      row.querySelectorAll(".slot").forEach(function (x) { x.setAttribute("aria-pressed", "false"); });
-      b.setAttribute("aria-pressed", "true");
-    });
-  });
-
-  /* ---------- Copy-to-clipboard ---------- */
-  document.addEventListener("click", function (e) {
-    var b = e.target.closest("[data-copy]");
-    if (!b) { return; }
-    var done = function () {
-      var was = b.textContent;
-      b.textContent = "Copied ✓";
-      setTimeout(function () { b.textContent = was; }, 1400);
-    };
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(b.dataset.copy).then(done, done);
-    } else { done(); }
-  });
-
-  /* ---------- Payment countdown ---------- */
-  var cd = document.getElementById("countdown");
-  if (cd) {
-    var left = 47 * 3600 + 58 * 60 + 12;
-    var out = cd.querySelector(".num");
-    setInterval(function () {
-      if (left <= 0) { return; }
-      left -= 1;
-      var h = Math.floor(left / 3600), m = Math.floor((left % 3600) / 60), s = left % 60;
-      var pad = function (n) { return String(n).padStart(2, "0"); };
-      out.textContent = pad(h) + ":" + pad(m) + ":" + pad(s);
-    }, 1000);
+    state.undo = null;
+    render();
+    toast("Restored.", { kind: "ok" });
   }
 
-  /* ---------- Decorative payment QR (illustrative, not a real code) ---------- */
-  var qr = document.getElementById("qr");
-  if (qr) {
-    var N = 25, seed = 20260909;
+  /* ============================================================
+     Dialogs: catalogue, SKU entry, address, pin, proforma, preview
+     ============================================================ */
+  function catalogBody(sup) {
+    var sub = supplierSubtotal(sup);
+    var gap = Math.max(0, sup.moq - sub);
+    return (gap > 0
+        ? '<p class="hint" id="cat-gap" style="margin:0 0 12px">Add <b class="num">' + bhd(gap) +
+          '</b> more to reach this supplier\'s minimum order — currently <span class="num">' + bhd(sub) + '</span>.</p>'
+        : '<p class="hint" id="cat-gap" style="margin:0 0 12px;color:var(--green-700);font-weight:650">' +
+          '✓ Minimum order met at <span class="num">' + bhd(sub) + '</span>. Anything else you add ships in the same delivery.</p>') +
+      '<div class="catalog">' + state.catalog[sup.id].map(function (c) {
+        var inCart = sup.items.filter(function (it) { return it.sku === c.sku; })[0];
+        var maxed = inCart && inCart.qty >= c.stock;
+        return '<div class="catalog__row"><div class="thumb" aria-hidden="true">' + c.emoji + '</div>' +
+          '<div><p class="catalog__name">' + esc(c.name) + '</p>' +
+          '<p class="catalog__meta">SKU ' + c.sku + ' · ' +
+            (c.per > 1 ? "Case of " + c.per : "Single · " + c.unitLabel) + ' · ' + bhd(c.price) +
+            (inCart ? ' · <b style="color:var(--green-700)">' + inCart.qty + ' in cart</b>' : "") + '</p></div>' +
+          '<div class="spacer"></div>' +
+          '<button type="button" class="btn btn--ghost" style="padding:7px 13px;font-size:12.5px" ' +
+            'data-act="add-sku" data-sup="' + sup.id + '" data-sku="' + c.sku + '"' + (maxed ? " disabled" : "") + '>' +
+            (maxed ? "All stock added" : inCart ? "Add another" : "Add") + '</button></div>';
+      }).join("") + '</div>';
+  }
+
+  function openCatalog(supId) {
+    var sup = state.suppliers.filter(function (s) { return s.id === supId; })[0];
+    if (!sup) { return; }
+    modal("Add items from " + sup.name, catalogBody(sup),
+      '<button class="btn btn--primary" data-act="close-modal">Done</button>');
+    dlg.dataset.catalog = supId;
+  }
+
+  // Refresh the open catalogue in place, so adding a line does not tear the
+  // dialog down under the pointer.
+  function refreshCatalog() {
+    if (!dlg.open || !dlg.dataset.catalog) { return; }
+    var sup = state.suppliers.filter(function (s) { return s.id === dlg.dataset.catalog; })[0];
+    var body = dlg.querySelector(".modal__body");
+    if (sup && body) { body.innerHTML = catalogBody(sup); }
+  }
+
+  function addSku(supId, sku, qty) {
+    var sup = state.suppliers.filter(function (s) { return s.id === supId; })[0];
+    var src = (state.catalog[supId] || []).filter(function (c) { return c.sku === sku; })[0];
+    if (!sup || !src) { return false; }
+    var existing = sup.items.filter(function (it) { return it.sku === sku; })[0];
+    if (existing) {
+      existing.qty = Math.min(existing.stock, existing.qty + (qty || 1));
+    } else {
+      sup.items.push({ sku: src.sku, name: src.name, emoji: src.emoji, per: src.per,
+        unitLabel: src.unitLabel, price: src.price, qty: qty || 1, stock: src.stock, sel: true });
+    }
+    render();
+    toast("Added " + short(src.name) + " to " + sup.name + ".", { kind: "ok" });
+    return true;
+  }
+
+  function openSkuEntry() {
+    var all = [];
+    Object.keys(state.catalog).forEach(function (k) {
+      state.catalog[k].forEach(function (c) { all.push({ sup: k, sku: c.sku, name: c.name }); });
+    });
+    modal("Quick add by SKU",
+      '<form class="sku-form" id="sku-form">' +
+        '<div class="field"><label for="sku-in">SKU</label>' +
+        '<input class="input" id="sku-in" placeholder="e.g. GF-EGG30" autocomplete="off" list="sku-opts">' +
+        '<datalist id="sku-opts">' + all.map(function (a) {
+          return '<option value="' + a.sku + '">' + esc(a.name) + '</option>';
+        }).join("") + '</datalist></div>' +
+        '<div class="field" style="flex:0 0 96px"><label for="sku-qty">Qty</label>' +
+        '<input class="input" id="sku-qty" type="number" min="1" value="1"></div>' +
+        '<button type="submit" class="btn btn--primary">Add</button>' +
+      '</form>' +
+      '<p class="hint" id="sku-msg" style="margin-top:10px">Paste a line from your order sheet, or start typing to search.</p>',
+      '<button class="btn btn--ghost" data-act="close-modal">Done</button>');
+    var form = $("#sku-form");
+    $("#sku-in").focus();
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var code = $("#sku-in").value.trim().toUpperCase();
+      var qty = parseInt($("#sku-qty").value, 10) || 1;
+      var hit = all.filter(function (a) { return a.sku === code; })[0];
+      var msg = $("#sku-msg");
+      if (!hit) {
+        var inCart = null;
+        state.suppliers.forEach(function (sp) {
+          sp.items.forEach(function (it) { if (it.sku === code) { inCart = { sp: sp, it: it }; } });
+        });
+        if (inCart) {
+          inCart.it.qty = Math.min(inCart.it.stock, inCart.it.qty + qty);
+          render();
+          msg.textContent = "Increased " + short(inCart.it.name) + " to " + inCart.it.qty + ".";
+          msg.style.color = "var(--green-700)";
+        } else {
+          msg.textContent = code ? 'No product with SKU "' + code + '".' : "Enter a SKU.";
+          msg.style.color = "var(--red-700)";
+        }
+      } else {
+        addSku(hit.sup, hit.sku, qty);
+        msg.textContent = "Added " + hit.sku + " × " + qty + ".";
+        msg.style.color = "var(--green-700)";
+      }
+      $("#sku-in").value = ""; $("#sku-qty").value = "1"; $("#sku-in").focus();
+    });
+  }
+
+  function openAddressForm() {
+    modal("Deliver to a new address",
+      '<form id="addr-form">' +
+        '<div class="field"><label for="a-name">Location name</label>' +
+          '<input class="input" id="a-name" placeholder="e.g. Riffa outlet" required></div>' +
+        '<div class="field"><label for="a-line">Address</label>' +
+          '<input class="input" id="a-line" placeholder="Building, road, block, city" required></div>' +
+        '<div class="field"><label for="a-contact">Receiving contact</label>' +
+          '<input class="input" id="a-contact" placeholder="Name · phone"></div>' +
+        '<p class="hint">We\'ll ask you to drop a map pin once, on the first delivery here.</p>' +
+      '</form>',
+      '<button type="button" class="btn btn--primary" data-act="save-address">Save address</button>' +
+      '<button class="btn btn--ghost" data-act="close-modal">Cancel</button>');
+    $("#a-name").focus();
+  }
+
+  function openPin(addrId) {
+    var a = state.addresses.filter(function (x) { return x.id === addrId; })[0];
+    if (!a) { return; }
+    modal("Adjust the delivery pin",
+      '<p class="hint" style="margin:0 0 12px">Click anywhere on the map to move the pin. Drivers navigate to this point, not the typed address.</p>' +
+      '<div class="map" id="pin-map" style="height:230px;cursor:crosshair">' +
+        '<span class="map__pin" id="pin-mark" aria-hidden="true" style="position:absolute;transform:translate(-50%,-100%)">📍</span>' +
+        '<span class="map__label">Pin · <span class="num" id="pin-co">' + a.lat.toFixed(4) + ', ' + a.lng.toFixed(4) + '</span></span>' +
+      '</div>',
+      '<button type="button" class="btn btn--primary" data-act="save-pin" data-ref="' + a.id + '">Save pin</button>' +
+      '<button class="btn btn--ghost" data-act="close-modal">Cancel</button>');
+    var map = $("#pin-map"), mark = $("#pin-mark");
+    mark.style.left = "50%"; mark.style.top = "50%";
+    map.addEventListener("click", function (e) {
+      var r = map.getBoundingClientRect();
+      var x = e.clientX - r.left, y = e.clientY - r.top;
+      mark.style.left = (x / r.width * 100) + "%";
+      mark.style.top = (y / r.height * 100) + "%";
+      var lat = 26.2361 + (0.5 - y / r.height) * 0.06;
+      var lng = 50.5831 + (x / r.width - 0.5) * 0.06;
+      map.dataset.lat = lat.toFixed(4); map.dataset.lng = lng.toFixed(4);
+      $("#pin-co").textContent = lat.toFixed(4) + ", " + lng.toFixed(4);
+    });
+  }
+
+  function openProforma() {
+    var o = state.order;
+    if (!o) { return; }
+    var day = state.days[o.day];
+    modal("Proforma invoice " + o.ref,
+      '<div class="invoice">' +
+        '<h3>HIGHBASE TRADING W.L.L.</h3>' +
+        '<p style="margin:0;color:var(--ink-500)">CR 5056050560-1 · VAT 220012345600002</p>' +
+        '<div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:14px">' +
+          '<div><p class="label" style="margin-bottom:2px">Billed to</p>' +
+            '<p style="margin:0">Buyer Bahrain<br>' + esc(o.address.line) + '</p></div>' +
+          '<div><p class="label" style="margin-bottom:2px">Order</p>' +
+            '<p style="margin:0" class="num">' + o.ref + '<br>' + o.placedOn + '</p></div>' +
+          (o.po ? '<div><p class="label" style="margin-bottom:2px">PO number</p>' +
+            '<p style="margin:0">' + esc(o.po) + '<br>' + esc(o.costCentre) + '</p></div>' : "") +
+        '</div>' +
+        '<table><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Amount</th></tr></thead><tbody>' +
+        o.groups.map(function (g) {
+          return g.items.map(function (it) {
+            return '<tr><td>' + esc(it.name) + '<br><span style="color:var(--ink-400)">' + it.sku + '</span></td>' +
+              '<td class="num">' + it.qty + '</td><td class="num">' + bhd(it.price) + '</td>' +
+              '<td class="num">' + bhd(it.qty * it.price) + '</td></tr>';
+          }).join("");
+        }).join("") +
+        '</tbody><tfoot>' +
+          '<tr><td colspan="3">Items</td><td class="num">' + bhd(o.items) + '</td></tr>' +
+          '<tr><td colspan="3">Delivery · ' + day.lab + " " + day.date + '</td><td class="num">' + bhd(o.delivery) + '</td></tr>' +
+          (o.discount ? '<tr><td colspan="3">Discounts</td><td class="num">−' + bhd(o.discount) + '</td></tr>' : "") +
+          '<tr><td colspan="3">VAT 10%</td><td class="num">' + bhd(o.vat) + '</td></tr>' +
+          '<tr><td colspan="3">Total due</td><td class="num">' + bhd(o.total) + '</td></tr>' +
+        '</tfoot></table>' +
+        '<p class="hint" style="margin-top:14px">Proforma only — a tax invoice is issued on dispatch.</p>' +
+      '</div>',
+      '<button type="button" class="btn btn--ghost" data-act="print-invoice">Print</button>' +
+      '<button class="btn btn--primary" data-act="close-modal">Close</button>');
+  }
+
+  /* ============================================================
+     Receipt handling — a real file, previewed from the browser
+     ============================================================ */
+  var fileInput = document.createElement("input");
+  fileInput.type = "file";
+  fileInput.accept = ".pdf,.jpg,.jpeg,.png,application/pdf,image/*";
+  fileInput.style.display = "none";
+  document.body.appendChild(fileInput);
+  fileInput.addEventListener("change", function () {
+    if (fileInput.files && fileInput.files[0]) { takeFile(fileInput.files[0]); }
+    fileInput.value = "";
+  });
+
+  function takeFile(file) {
+    if (file.size > 10 * 1024 * 1024) {
+      toast("That file is over 10 MB. Try a smaller scan or a PDF.", { kind: "bad" });
+      return;
+    }
+    var ok = /pdf$/i.test(file.type) || /^image\//.test(file.type) || /\.(pdf|jpe?g|png)$/i.test(file.name);
+    if (!ok) {
+      toast("Receipts must be a PDF, JPG or PNG.", { kind: "bad" });
+      return;
+    }
+    if (state.order.receipt && state.order.receipt.url) { URL.revokeObjectURL(state.order.receipt.url); }
+    state.order.receipt = {
+      name: file.name,
+      size: file.size < 1024 * 1024
+        ? Math.max(1, Math.round(file.size / 1024)) + " KB"
+        : (file.size / 1024 / 1024).toFixed(1) + " MB",
+      at: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      isImage: /^image\//.test(file.type),
+      url: URL.createObjectURL(file)
+    };
+    renderConfirm();
+    toast("Receipt attached. Submit it to finish the payment.", { kind: "ok" });
+  }
+
+  function wireDrop() {
+    var drop = $("#drop");
+    if (!drop) { return; }
+    ["dragenter", "dragover"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); });
+    });
+    ["dragleave", "drop"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-over"); });
+    });
+    drop.addEventListener("drop", function (e) {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) { takeFile(e.dataTransfer.files[0]); }
+    });
+  }
+
+  function previewReceipt() {
+    var r = state.order && state.order.receipt;
+    if (!r) { return; }
+    modal(r.name,
+      r.isImage
+        ? '<img src="' + r.url + '" alt="Uploaded receipt" style="max-height:60vh;margin:0 auto;border-radius:8px">'
+        : '<div class="empty" style="padding:36px 20px">📄<br><br><b>' + esc(r.name) + '</b><br>' +
+          '<span class="num">' + r.size + '</span> · PDF<br><br>' +
+          'PDFs open in your own reader — the prototype shows the file card rather than embedding it.</div>',
+      '<button class="btn btn--primary" data-act="close-modal">Close</button>');
+  }
+
+  /* ============================================================
+     Placing the order — snapshot the cart, then clear what shipped
+     ============================================================ */
+  function placeOrder() {
+    var t = totals();
+    if (!t.ready.length) {
+      toast("Nothing is ready to order yet.", { kind: "bad" });
+      return;
+    }
+    var now = new Date();
+    var expiry = new Date(now.getTime() + 48 * 3600 * 1000);
+    var addr = state.addresses.filter(function (a) { return a.id === state.checkout.addr; })[0];
+
+    state.order = {
+      ref: "ORD-" + String(Date.now()).slice(-13),
+      placedAt: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      placedOn: now.toLocaleDateString([], { day: "2-digit", month: "short", year: "numeric" }),
+      expiry: expiry.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" }) + ", " +
+              expiry.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      deadline: expiry.getTime(),
+      groups: t.ready.map(function (sup) {
+        return { name: sup.name, items: sup.items.filter(function (it) { return it.sel; })
+          .map(function (it) { return { sku: it.sku, name: it.name, qty: it.qty, per: it.per, price: it.price }; }) };
+      }),
+      lines: t.lines, items: t.items, delivery: t.delivery + t.slotFee,
+      discount: t.discount, vat: t.vat, total: t.total,
+      day: state.checkout.day, time: state.checkout.time,
+      payment: state.checkout.payment, po: state.checkout.po,
+      costCentre: state.checkout.costCentre, address: addr,
+      paid: false, paidAt: null, receipt: null
+    };
+
+    // What shipped leaves the cart; what wasn't ready stays.
+    t.ready.forEach(function (sup) {
+      sup.items = sup.items.filter(function (it) { return !it.sel; });
+    });
+    state.applied = [];
+    render();
+    show("confirm");
+    startCountdown();
+  }
+
+  var cdTimer = null;
+  function startCountdown() {
+    if (cdTimer) { clearInterval(cdTimer); cdTimer = null; }
+    var out = $("#countdown") && $("#countdown").querySelector(".num");
+    if (!out || !state.order || state.order.paid) { return; }
+    var tick = function () {
+      if (!state.order || state.order.paid) { clearInterval(cdTimer); cdTimer = null; return; }
+      var left = Math.max(0, Math.floor((state.order.deadline - Date.now()) / 1000));
+      var pad = function (n) { return String(n).padStart(2, "0"); };
+      out.textContent = pad(Math.floor(left / 3600)) + ":" + pad(Math.floor((left % 3600) / 60)) + ":" + pad(left % 60);
+      if (left === 0) { clearInterval(cdTimer); cdTimer = null; }
+    };
+    tick();
+    cdTimer = setInterval(tick, 1000);
+  }
+
+  /* ============================================================
+     Decorative payment QR (illustrative, not a scannable code)
+     ============================================================ */
+  function drawQR(seedRef) {
+    var qr = $("#qr");
+    if (!qr) { return; }
+    var N = 25, seed = 0;
+    for (var c = 0; c < seedRef.length; c++) { seed = (seed * 31 + seedRef.charCodeAt(c)) % 2147483647; }
     var rand = function () { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
-    var finder = function (r, c) {
-      // three 7×7 position markers, as a real QR symbol carries
-      return [[0, 0], [0, N - 7], [N - 7, 0]].some(function (o) {
-        var dr = r - o[0], dc = c - o[1];
+    var corners = [[0, 0], [0, N - 7], [N - 7, 0]];
+    var finder = function (r, c2) {
+      return corners.some(function (o) {
+        var dr = r - o[0], dc = c2 - o[1];
         if (dr < 0 || dr > 6 || dc < 0 || dc > 6) { return false; }
-        var ring = Math.max(Math.abs(dr - 3), Math.abs(dc - 3));
-        return ring !== 2;
+        return Math.max(Math.abs(dr - 3), Math.abs(dc - 3)) !== 2;
       });
     };
-    var isNear = function (r, c) {
-      return [[0, 0], [0, N - 7], [N - 7, 0]].some(function (o) {
-        return r >= o[0] - 1 && r <= o[0] + 7 && c >= o[1] - 1 && c <= o[1] + 7;
+    var near = function (r, c2) {
+      return corners.some(function (o) {
+        return r >= o[0] - 1 && r <= o[0] + 7 && c2 >= o[1] - 1 && c2 <= o[1] + 7;
       });
     };
     var cells = "";
     for (var r = 0; r < N; r++) {
-      for (var c = 0; c < N; c++) {
-        if (finder(r, c) || (!isNear(r, c) && rand() > 0.5)) {
-          cells += '<rect x="' + c + '" y="' + r + '" width="1" height="1"/>';
+      for (var cc = 0; cc < N; cc++) {
+        if (finder(r, cc) || (!near(r, cc) && rand() > 0.5)) {
+          cells += '<rect x="' + cc + '" y="' + r + '" width="1" height="1"/>';
         }
       }
     }
@@ -1872,12 +2392,335 @@ body.notes-on .pin{display:inline-block}
       'shape-rendering="crispEdges" fill="#0f1c2b" aria-hidden="true">' + cells + "</svg>";
   }
 
-  /* ---------- Deep links (back/forward and pasted #anchors) ---------- */
-  window.addEventListener("hashchange", function () {
-    show(location.hash.slice(1) || "cart");
+  /* ============================================================
+     Screens, annotations, language
+     ============================================================ */
+  var screens = ["cart", "checkout", "confirm", "why"];
+  function show(name) {
+    if (screens.indexOf(name) === -1) { name = "cart"; }
+    if (name === "confirm" && !state.order) { name = "cart"; }
+    screens.forEach(function (sc) { $("#screen-" + sc).hidden = (sc !== name); });
+    $$(".proto-nav button").forEach(function (b) {
+      b.setAttribute("aria-current", String(b.dataset.screen === name));
+    });
+    window.scrollTo(0, 0);
+    if (location.hash.slice(1) !== name) {
+      try { history.replaceState(null, "", "#" + name); } catch (err) { /* sandboxed frame */ }
+    }
+    if (name === "confirm") { startCountdown(); }
+  }
+
+  var LANG = null;
+  function applyLang() {
+    if (!LANG) { return; }
+    $$("[data-ar]").forEach(function (el) {
+      if (!el.dataset.en) { el.dataset.en = el.textContent; }
+      el.textContent = LANG === "ar" ? el.dataset.ar : el.dataset.en;
+    });
+  }
+
+  /* ============================================================
+     Events — one delegated listener, so re-rendered markup stays live
+     ============================================================ */
+  var ACTS = {
+    "to-checkout": function () {
+      if (!totals().ready.length) { toast("Nothing is ready to order yet.", { kind: "bad" }); return; }
+      show("checkout");
+    },
+    "place-order": placeOrder,
+    "remove": function (el) { removeItem(el.dataset.ref); },
+    "clamp": function (el) {
+      var f = find(el.dataset.ref);
+      setQty(el.dataset.ref, f.item.stock);
+      toast("Quantity reduced to what the supplier has.", { kind: "ok" });
+    },
+    "notify": function (el) {
+      var f = find(el.dataset.ref);
+      state.notify[f.item.sku] = !state.notify[f.item.sku];
+      render();
+      toast(state.notify[f.item.sku]
+        ? "We'll email you when " + short(f.item.name) + " is back in stock."
+        : "Restock alert turned off.", { kind: state.notify[f.item.sku] ? "ok" : undefined });
+    },
+    "remove-selected": function () {
+      var picked = [];
+      state.suppliers.forEach(function (sp) {
+        sp.items.forEach(function (it, i) { if (it.sel) { picked.push({ sup: sp, item: it, idx: i }); } });
+      });
+      if (!picked.length) { toast("Nothing is selected.", { kind: "bad" }); return; }
+      state.undo = { sup: null, entries: picked };
+      picked.forEach(function (e) {
+        var i = e.sup.items.indexOf(e.item);
+        if (i > -1) { e.sup.items.splice(i, 1); }
+      });
+      render();
+      toast("Removed " + picked.length + " line" + (picked.length === 1 ? "" : "s") + ".", {
+        action: "Undo",
+        onAction: function () {
+          picked.forEach(function (e) { e.sup.items.splice(Math.min(e.idx, e.sup.items.length), 0, e.item); });
+          render();
+          toast("Restored.", { kind: "ok" });
+        }
+      });
+    },
+    "save-list": function () {
+      var n = state.suppliers.reduce(function (t, sp) {
+        return t + sp.items.filter(function (i) { return i.sel; }).length;
+      }, 0);
+      if (!n) { toast("Select some lines first.", { kind: "bad" }); return; }
+      state.savedLists++;
+      toast("Saved " + n + " line" + (n === 1 ? "" : "s") + " as a list you can reorder in one tap.", { kind: "ok" });
+    },
+    "move-list": function (el) {
+      var sup = state.suppliers.filter(function (x) { return x.id === el.dataset.sup; })[0];
+      var kept = sup.items.slice();
+      sup.items = [];
+      state.savedLists++;
+      render();
+      toast("Moved " + kept.length + " line" + (kept.length === 1 ? "" : "s") + " to a saved list.", {
+        action: "Undo",
+        onAction: function () { sup.items = kept; state.savedLists--; render(); }
+      });
+    },
+    "quick-add": openSkuEntry,
+    "browse": function (el) { openCatalog(el.dataset.sup); },
+    "add-sku": function (el) { addSku(el.dataset.sup, el.dataset.sku); refreshCatalog(); },
+    "restock-demo": function () { location.reload(); },
+    "coupon": function () {
+      var input = $("#cpn"), msg = $("#cpn-msg");
+      var code = (input.value || "").trim().toUpperCase();
+      msg.hidden = false;
+      if (!code) { msg.textContent = "Enter a code."; msg.style.color = "var(--red-700)"; return; }
+      if (state.applied.some(function (c) { return c.code === code; })) {
+        msg.textContent = code + " is already applied."; msg.style.color = "var(--amber-600)"; return;
+      }
+      var hit = state.coupons.filter(function (c) { return c.code === code; })[0];
+      if (!hit) {
+        msg.textContent = '"' + code + '" is not a valid code.'; msg.style.color = "var(--red-700)"; return;
+      }
+      if (totals().items < (hit.min || 0)) {
+        msg.textContent = code + " needs a basket of " + bhd(hit.min) + " or more.";
+        msg.style.color = "var(--amber-600)"; return;
+      }
+      state.applied.push(hit);
+      render();
+      toast(code + " applied — " + bhd(hit.off) + " off.", { kind: "ok" });
+    },
+    "uncoupon": function (el) {
+      state.applied = state.applied.filter(function (c) { return c.code !== el.dataset.code; });
+      render();
+      toast("Coupon removed.");
+    },
+    "add-address": openAddressForm,
+    "save-address": function () {
+      var name = $("#a-name").value.trim(), line = $("#a-line").value.trim();
+      if (!name || !line) { toast("Give the address a name and a street line.", { kind: "bad" }); return; }
+      var id = "addr" + (state.addresses.length + 1);
+      state.addresses.push({ id: id, name: name, line: line,
+        contact: $("#a-contact").value.trim() || "No contact given", lat: 26.2361, lng: 50.5831 });
+      state.checkout.addr = id;
+      closeModal(); render();
+      toast("Address saved and selected.", { kind: "ok" });
+    },
+    "pin": function (el) { openPin(el.dataset.ref); },
+    "save-pin": function (el) {
+      var map = $("#pin-map");
+      var a = state.addresses.filter(function (x) { return x.id === el.dataset.ref; })[0];
+      if (a && map && map.dataset.lat) { a.lat = parseFloat(map.dataset.lat); a.lng = parseFloat(map.dataset.lng); }
+      closeModal(); render();
+      toast("Pin saved for this branch.", { kind: "ok" });
+    },
+    "change-branch": function () {
+      toast("Branch switching lives in account settings — the addresses below belong to the current branch.");
+    },
+    "manage-docs": function () {
+      modal("Business documents",
+        '<p class="hint" style="margin:0 0 14px">Collected once, checked on expiry. None of this is asked for again inside an order.</p>' +
+        '<div class="catalog">' +
+          [["Commercial registration (CR)", "5056050560-1", "Valid to 31 Dec 2026", "ok"],
+           ["VAT certificate", "220012345600002", "Valid to 31 Dec 2026", "ok"],
+           ["Authorised signatory ID", "Ahmed Khalil", "Verified 14 Mar 2026", "ok"]]
+          .map(function (d) {
+            return '<div class="catalog__row"><div class="thumb" aria-hidden="true">🧾</div>' +
+              '<div><p class="catalog__name">' + d[0] + '</p>' +
+              '<p class="catalog__meta">' + d[1] + ' · ' + d[2] + '</p></div>' +
+              '<div class="spacer"></div><span class="chip chip--' + d[3] + '">✓ Verified</span></div>';
+          }).join("") + '</div>',
+        '<button class="btn btn--primary" data-act="close-modal">Close</button>');
+    },
+    "apply-net30": function (e) { toast("Credit application opens here — three minutes, no effect on this order."); },
+    "terms": function () {
+      modal("Supplier terms",
+        '<p style="margin:0 0 10px">Cancellable free of charge until the supplier dispatches. ' +
+        'Damaged or short-delivered goods are reportable for 48 hours after delivery.</p>' +
+        '<p style="margin:0;color:var(--ink-500)">Placeholder copy — the real terms come from each supplier\'s agreement.</p>',
+        '<button class="btn btn--primary" data-act="close-modal">Close</button>');
+    },
+    "pick": function () { fileInput.click(); },
+    "drop-receipt": function () {
+      if (state.order.receipt && state.order.receipt.url) { URL.revokeObjectURL(state.order.receipt.url); }
+      state.order.receipt = null;
+      renderConfirm();
+      toast("Receipt removed.");
+    },
+    "preview": previewReceipt,
+    "submit-receipt": function () {
+      if (!state.order.receipt) { toast("Attach the receipt first.", { kind: "bad" }); return; }
+      state.order.paid = true;
+      state.order.paidAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      renderConfirm();
+      toast("Receipt submitted. We'll match it against " + state.order.ref + ".", { kind: "ok" });
+    },
+    "pay-later": function () {
+      toast("Saved. We'll remind you before the reservation expires on " + state.order.expiry + ".");
+    },
+    "switch-card": function () {
+      state.order.payment = "card";
+      renderConfirm();
+      toast("Switched to card — charged when the supplier dispatches.", { kind: "ok" });
+    },
+    "track": function () {
+      $("#timeline").scrollIntoView({ behavior: "smooth", block: "center" });
+    },
+    "proforma": openProforma,
+    "print-invoice": function () { window.print(); },
+    "message-supplier": function () {
+      modal("Message " + state.order.groups[0].name,
+        '<div class="field"><label for="msg">Your message</label>' +
+        '<textarea class="input" id="msg" rows="4" placeholder="e.g. Please deliver to the rear gate — the front bay is closed on Mondays."></textarea></div>' +
+        '<p class="hint">Goes to the supplier with order ' + state.order.ref + ' attached.</p>',
+        '<button type="button" class="btn btn--primary" data-act="send-message">Send</button>' +
+        '<button class="btn btn--ghost" data-act="close-modal">Cancel</button>');
+      $("#msg").focus();
+    },
+    "send-message": function () {
+      var v = ($("#msg").value || "").trim();
+      closeModal();
+      toast(v ? "Message sent to the supplier." : "Nothing to send.", { kind: v ? "ok" : "bad" });
+    },
+    "save-recurring": function () {
+      state.savedLists++;
+      toast("Saved as a recurring basket. Reorder it in one tap from My lists.", { kind: "ok" });
+    },
+    "close-modal": closeModal
+  };
+
+  document.addEventListener("click", function (e) {
+    var goto = e.target.closest("[data-goto]");
+    if (goto) { e.preventDefault(); show(goto.dataset.goto); return; }
+
+    var act = e.target.closest("[data-act]");
+    if (act && ACTS[act.dataset.act]) {
+      if (act.tagName === "A" || act.type === "submit") { e.preventDefault(); }
+      ACTS[act.dataset.act](act, e);
+      return;
+    }
+
+    var copyRef = e.target.closest("[data-copy-ref]");
+    if (copyRef && state.order) { copyText(copyRef, state.order.ref); return; }
+    var copy = e.target.closest("[data-copy]");
+    if (copy) { copyText(copy, copy.dataset.copy); return; }
+
+    var stepBtn = e.target.closest(".stepper button");
+    if (stepBtn) {
+      var wrap = stepBtn.closest(".stepper");
+      var f = find(wrap.dataset.step);
+      if (!f.item) { return; }
+      var dir = wrap.querySelectorAll("button")[0] === stepBtn ? -1 : 1;
+      setQty(wrap.dataset.step, f.item.qty + dir);
+      return;
+    }
+
+    var day = e.target.closest("[data-day]");
+    if (day && !day.disabled) { state.checkout.day = +day.dataset.day; render(); return; }
+    var time = e.target.closest("[data-time]");
+    if (time) { state.checkout.time = +time.dataset.time; render(); return; }
   });
+
+  function copyText(btn, text) {
+    var done = function () {
+      var was = btn.textContent;
+      btn.textContent = "Copied ✓";
+      setTimeout(function () { btn.textContent = was; }, 1400);
+    };
+    if (navigator.clipboard) { navigator.clipboard.writeText(text).then(done, done); } else { done(); }
+  }
+
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.id === "sel-all") {
+      state.suppliers.forEach(function (sp) { sp.items.forEach(function (it) { it.sel = t.checked; }); });
+      render(); return;
+    }
+    if (t.dataset.supSel) {
+      var sup = state.suppliers.filter(function (x) { return x.id === t.dataset.supSel; })[0];
+      sup.items.forEach(function (it) { it.sel = t.checked; });
+      render(); return;
+    }
+    if (t.dataset.itemSel) {
+      var f = find(t.dataset.itemSel);
+      if (f.item) { f.item.sel = t.checked; }
+      render(); return;
+    }
+    if (t.name === "addr") { state.checkout.addr = t.value; render(); return; }
+    if (t.name === "pay") { state.checkout.payment = t.value; return; }
+    if (t.dataset.bind) {
+      // Record the value only. Re-rendering here would rebuild the summary on
+      // the blur that a click on "Place order" causes, destroying that button
+      // between mousedown and mouseup so the click never lands. None of these
+      // fields feed the summary anyway — they are read when the order is placed.
+      state.checkout[t.dataset.bind] = t.type === "checkbox" ? t.checked : t.value;
+    }
+  });
+
+  document.addEventListener("input", function (e) {
+    var wrap = e.target.closest(".stepper");
+    if (!wrap) { return; }
+    var raw = e.target.value.replace(/[^\d]/g, "");
+    e.target.value = raw;
+    if (!raw) { return; }
+    var f = find(wrap.dataset.step);
+    if (!f.item) { return; }
+    f.item.qty = Math.max(1, Math.min(999, parseInt(raw, 10)));
+    var key = wrap.dataset.step, pos = e.target.selectionStart;
+    render();
+    var again = document.querySelector('.stepper[data-step="' + key + '"] input');
+    if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (err) {} }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && e.target.id === "cpn") { e.preventDefault(); ACTS.coupon(); }
+  });
+
+  /* ---------- Prototype chrome ---------- */
+  $$(".proto-nav button").forEach(function (b) {
+    b.addEventListener("click", function () { show(b.dataset.screen); });
+  });
+
+  document.body.classList.add("notes-on");
+  var notes = $("#t-notes");
+  notes.addEventListener("click", function () {
+    var on = notes.getAttribute("aria-pressed") !== "true";
+    notes.setAttribute("aria-pressed", String(on));
+    document.body.classList.toggle("notes-on", on);
+  });
+
+  var dirBtn = $("#t-dir");
+  dirBtn.addEventListener("click", function () {
+    var rtl = dirBtn.getAttribute("aria-pressed") !== "true";
+    dirBtn.setAttribute("aria-pressed", String(rtl));
+    document.documentElement.dir = rtl ? "rtl" : "ltr";
+    document.documentElement.lang = rtl ? "ar" : "en";
+    LANG = rtl ? "ar" : "en";
+    applyLang();
+  });
+
+  window.addEventListener("hashchange", function () { show(location.hash.slice(1) || "cart"); });
+
+  render();
   show(location.hash.slice(1) || "cart");
 })();
 </script>
+
 </body>
 </html>
