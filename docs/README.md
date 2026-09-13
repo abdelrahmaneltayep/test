@@ -36,7 +36,7 @@ Sections 3 and 4 are the ones that need a human decision. Nothing in them is set
 - **10 atoms**, **27 molecules** across 24 pages, **16 organism components** across 8 pages
 - **35 component pages** carry the same 14-section documentation — anatomy diagram with numbered
   callouts, specs, behaviour, usage, accessibility, RTL, code, related, open questions
-- **475 variables** across four collections, and **zero unbound paints** anywhere
+- **Zero unbound paints** anywhere — every colour in the file resolves to a variable
 
 ### Three caveats that matter
 
