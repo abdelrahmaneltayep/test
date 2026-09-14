@@ -686,7 +686,11 @@
    Anchor on a parent with .hb-badge-anchor for the corner position. */
 .hb-badge { --badge-bg: var(--hb-color-primary-light); --badge-text: var(--hb-color-on-primary); display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; background: var(--badge-bg); color: var(--badge-text); border-radius: var(--hb-radius-full); font-family: var(--hb-font-family-latin); font-size: var(--hb-font-size-10); line-height: 1; font-weight: var(--hb-font-weight-medium); font-variant-numeric: tabular-nums; }
 .hb-badge[data-variant="dot"], .hb-badge:empty { width: var(--hb-component-badge-dot); height: var(--hb-component-badge-dot); padding: 0; }
-.hb-badge[data-variant="count"], .hb-badge:not(:empty) { min-width: var(--hb-component-badge-count-min-width); height: var(--hb-component-badge-count-height); padding-inline: var(--hb-component-badge-count-padding-x); }
+/* The COUNT badge carries text, so it takes color/primary (primary/600) rather than
+   color/primary-light: measured 14 Sep, white on primary/500 at 10px is 3.62:1, below the
+   4.5 AA threshold. color/primary is the lightest role that clears it, at 5.32:1. The DOT
+   variants have no text and stay on primary-light, which passes the 3:1 non-text threshold. */
+.hb-badge[data-variant="count"], .hb-badge:not(:empty) { --badge-bg: var(--hb-color-primary); min-width: var(--hb-component-badge-count-min-width); height: var(--hb-component-badge-count-height); padding-inline: var(--hb-component-badge-count-padding-x); }
 .hb-badge[data-color="neutral"] { --badge-bg: var(--hb-color-surface-container-high); --badge-text: var(--hb-color-on-surface); }
 .hb-badge-anchor { position: relative; display: inline-flex; }
 .hb-badge-anchor > .hb-badge { position: absolute; top: 0; inset-inline-end: 0; transform: translate(50%, -50%); box-shadow: 0 0 0 2px var(--hb-color-surface); }
@@ -1759,10 +1763,6 @@ body.notes-on .pin{display:inline-block}
 .hb-header{position:sticky;top:calc(var(--proto-bar-h) + var(--proto-hairline));z-index:70}
 /* the compressed SearchField is 44 wide, so the bar must not stretch it */
 .hb-header__search:has(.hb-search[data-style="compressed"]){flex:0 0 auto}
-/* DS finding, not a fix to the library: the count Badge is on-primary over color/primary-light
-   (#188bdf) — 3.62:1 at 10 px, below AA. Held at color/primary here (5.30:1) so the screens
-   are legible, and recorded against the Badge atom. (proposal) */
-.hb-header .hb-badge[data-color="primary"]{--badge-bg:var(--hb-color-primary)}
 
 /* ---------- Page composition: Header — body — Footer ----------
    The Footer organism is full-bleed dark; its regions, rule and copyright bar are

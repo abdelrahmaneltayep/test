@@ -363,10 +363,6 @@ body.notes-on .pin{display:inline-block}
 .hb-header{position:sticky;top:calc(var(--proto-bar-h) + var(--proto-hairline));z-index:70}
 /* the compressed SearchField is 44 wide, so the bar must not stretch it */
 .hb-header__search:has(.hb-search[data-style="compressed"]){flex:0 0 auto}
-/* DS finding, not a fix to the library: the count Badge is on-primary over color/primary-light
-   (#188bdf) — 3.62:1 at 10 px, below AA. Held at color/primary here (5.30:1) so the screens
-   are legible, and recorded against the Badge atom. (proposal) */
-.hb-header .hb-badge[data-color="primary"]{--badge-bg:var(--hb-color-primary)}
 
 /* ---------- Page composition: Header — body — Footer ----------
    The Footer organism is full-bleed dark; its regions, rule and copyright bar are

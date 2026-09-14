@@ -87,12 +87,29 @@ repo and in Figma.
   component defines the collapse but not this trigger's visibility
 - the review bar re-colours its own Buttons against `surface-dark` (see below)
 
-## Found while building this pass — reported, not silently fixed
+## Found while building this pass
 
-- **The count Badge fails AA.** `hb-badge` is `on-primary` (white) over
-  `color/primary-light` (`#188bdf`) — **3.62 : 1** at 10 px. It is held at
-  `color/primary` here (5.30 : 1) so the Header is legible, tagged
-  `(proposal)`; the fix belongs in `atoms/Badge`.
+Two of these were fixed at source — in the Figma file and the `highbase-ds`
+repo together — rather than worked around here. The rest are reported.
+
+### Fixed in the design system
+
+- **The Footer component set was missing a variant.** `View=marketplace,
+  Size=expanded` — the primary desktop footer — was not in the set at all; it
+  sat on the page as a standalone component, so no instance could select it,
+  and the other three variants still carried the pre-rebuild brief (Gulf blurb,
+  Saudi contact details, old links) under a description of the rebuilt design.
+  The orphan is back in the set, the compact variant is rebuilt from the
+  expanded one, and the copyright is normalised across all four variants and on
+  the exposed text property, whose default was itself stale.
+- **The count Badge failed AA.** `hb-badge` was `on-primary` (white) over
+  `color/primary-light` (`#188bdf`) — **3.62 : 1** at 10 px. Re-bound to
+  `color/primary` (**5.32 : 1**), the lightest role that clears AA. The dot
+  variants keep `primary-light`; they carry no text and 3.62 clears the 3 : 1
+  non-text threshold. This prototype no longer overrides anything — it renders
+  the corrected component.
+
+### Still reported, not fixed
 - **The Button atom is unusable on a dark ground.** Every intent resolves to a
   colour meant for `surface`: primary ghost on `surface-dark` measures
   **2.27 : 1**, and an outlined Button keeps its white fill, so a white label on
@@ -108,6 +125,10 @@ repo and in Figma.
   the live storefront and the component's own README present it as a link with a
   trailing chevron. It is a link here, which needs the same colour and
   underline reset the Quick Links get.
+- **Segmented Control is *not* broken**, though a variant-grid check says 9 of
+  12. Its axes are interdependent — you cannot select the third segment of two —
+  so the grid is triangular and complete. Noted so the next audit doesn't chase
+  it.
 - **`.hb-footer__gap`** — the note style the Footer uses to flag its missing
   glyphs — is `surface-dark-container` on `surface-dark`, **1.55 : 1**. It is not
   used here; the missing glyphs are flagged through the prototype's own
