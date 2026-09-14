@@ -20,6 +20,10 @@
   --proto-rail-w:344px;
   --proto-hairline:1px;
   --proto-thumb:56px;
+  --proto-cart-table-min:784px; /* (proposal) 48+240+152+140+132+72 — the width the cart
+                                   columns need before they start colliding */
+  --proto-bar-h:48px;        /* (proposal) the review bar's own height, so the Header can stick beneath it */
+  --proto-footer-logo:43px;   /* (proposal) Logo README: "footer: lockup 43 (proposal — confirm)" */
 }
 *,*::before,*::after{box-sizing:border-box}
 body{
@@ -66,6 +70,13 @@ dialog.hb-drawer-layer:not([open]){display:none}
 }
 .proto-brand{display:flex;align-items:center;gap:var(--hb-space-8)}
 .proto-nav{display:flex;gap:var(--hb-space-4);flex-wrap:wrap}
+/* On the dark review bar the Button atom's own intent colours land at 2.27:1, so the
+   chrome re-colours its own buttons against surface-dark. Prototype chrome only —
+   no Highbase product surface is dark behind a Button. (proposal) */
+.proto-bar .hb-btn{background:transparent;color:var(--hb-color-on-surface-dark);border-color:var(--hb-color-on-surface-dark)}
+.proto-bar .hb-btn:hover{background:var(--hb-color-surface-dark-container)}
+.proto-nav .hb-btn[aria-current="true"]{background:var(--hb-color-on-surface-dark);color:var(--hb-color-surface-dark)}
+.proto-bar .hb-btn[aria-pressed="true"]{background:var(--hb-color-on-surface-dark);color:var(--hb-color-surface-dark)}
 
 /* ---------- Page shell ---------- */
 .site{max-width:var(--proto-page-max);margin:0 auto;padding:0 var(--hb-space-20) var(--hb-space-72)}
@@ -344,6 +355,38 @@ body.notes-on .pin{display:inline-block}
 .pin:hover .pin__tip,.pin:focus-visible .pin__tip{display:block}
 .pin__tip b{display:block;margin-bottom:var(--hb-space-2);color:var(--hb-color-secondary-300)}
 
+/* ---------- Header (organism) ----------
+   The component defines the compact collapse but not the menu trigger's visibility or the
+   Logo swap; the page owns both. data-size and the Logo's data-type are set by the script
+   at the 744 breakpoint, so this is only the menu button's switch. (proposal) */
+.hb-header:not([data-size="compact"]) .proto-header-menu{display:none}
+.hb-header{position:sticky;top:calc(var(--proto-bar-h) + var(--proto-hairline));z-index:70}
+/* the compressed SearchField is 44 wide, so the bar must not stretch it */
+.hb-header__search:has(.hb-search[data-style="compressed"]){flex:0 0 auto}
+/* DS finding, not a fix to the library: the count Badge is on-primary over color/primary-light
+   (#188bdf) — 3.62:1 at 10 px, below AA. Held at color/primary here (5.30:1) so the screens
+   are legible, and recorded against the Badge atom. (proposal) */
+.hb-header .hb-badge[data-color="primary"]{--badge-bg:var(--hb-color-primary)}
+
+/* ---------- Page composition: Header — body — Footer ----------
+   The Footer organism is full-bleed dark; its regions, rule and copyright bar are
+   pulled in to the same 1320 measure as the body so the three bands line up.
+   That is a page-layout decision, so it lives here and not in the component. (proposal) */
+.hb-footer__regions,.hb-footer__rule,.hb-footer__bar{
+  width:100%;max-width:var(--proto-page-max);margin-inline:auto;
+}
+.proto-footer-logo{--logo-h:var(--proto-footer-logo)}
+/* the DS Footer ships "Leave us a message" as a span; the prototype makes it the link
+   the live storefront has, so the row needs the same reset the Quick Links get. (proposal) */
+a.hb-footer__row{color:inherit;text-decoration:none}
+a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
+.hb-footer .pin{box-shadow:0 0 0 var(--proto-hairline) var(--hb-color-surface-dark-container)}
+
+/* ---------- Scroll to top (organism) — page affordance, so the page owns the offset ---------- */
+.hb-scroll-top{
+  position:fixed;inset-inline-end:var(--hb-space-20);bottom:var(--hb-space-20);z-index:80;
+}
+
 /* ---------- Snackbar host ---------- */
 #toasts{
   position:fixed;inset-inline-start:var(--hb-space-20);bottom:var(--hb-space-20);z-index:90;
@@ -355,7 +398,9 @@ body.notes-on .pin{display:inline-block}
 
 /* ---------- Breakpoints: compact < 744, medium 744–1279, expanded ≥ 1280 ---------- */
 @media (max-width:1279px){
-  .cols{grid-template-columns:1fr}
+  /* minmax(0,1fr), not 1fr: an auto minimum lets the cart table's min-content blow the
+     track past the viewport and the whole page scrolls sideways on a phone. */
+  .cols{grid-template-columns:minmax(0,1fr)}
   .rail{position:static;order:2}
   .cols > :first-child{order:1}
   .commit-bar{
@@ -369,14 +414,29 @@ body.notes-on .pin{display:inline-block}
   .commit-bar .hb-btn{margin-inline-start:auto}
   .site{padding-bottom:var(--hb-space-104)}
   #toasts{bottom:var(--hb-space-80)}
+  .hb-scroll-top{bottom:var(--hb-space-80)}
 }
 .commit-bar{display:none}
 @media (max-width:743px){
   .site{padding-inline:var(--hb-space-12)}
-  .cart-table col.c-pack,.cart-table col.c-total{width:auto}
+  /* Below 744 the fixed columns collide rather than shrink gracefully, so the table keeps
+     the width it needs and .hb-table-scroll does the scrolling — the one element on the
+     page allowed to be wider than the viewport. */
+  .cart-table{min-width:var(--proto-cart-table-min)}
   .doc-page h2{margin-top:var(--hb-space-24)}
-  .hb-table-scroll{overflow-x:auto}
+  /* The supplier head is a wrapping flex row, but .supplier__id has flex-basis 0, so at
+     compact it shrinks to nothing and the supplier name wraps one word per line. Give the
+     trailing status chip its own line and the identity block keeps the width it needs. */
+  .supplier__head > .hb-status{flex:1 0 100%}
+  .supplier__head{align-items:flex-start}
+  /* DataTable finding: the scroller clips the table visually, but the table still widens
+     the viewport, so the whole page scrolls sideways behind it — reproduced in Chromium's
+     new headless as well as the shell, and cured only by giving the scroller its own paint
+     containment. Recorded against organisms/DataTable; applied here so a phone cannot
+     rubber-band the page. Cost: an annotation tooltip inside a cell is clipped at this
+     width (two of them on the cart). (proposal) */
+  .hb-table-scroll{overflow-x:auto;contain:paint}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}}
-@media print{.proto-bar,#toasts,.pin,.commit-bar{display:none !important}}
+@media print{.proto-bar,#toasts,.pin,.commit-bar,.hb-scroll-top{display:none !important}}
 </style>

@@ -10,6 +10,11 @@
     $$(".proto-nav .hb-btn").forEach(function (b) {
       b.setAttribute("aria-current", String(b.dataset.screen === name));
     });
+    // Checkout drops to the reduced Footer (data-view="dashboard" — the copyright bar
+    // alone). Fewer exits on the one screen where a buyer is committing; the full
+    // marketplace footer returns on cart, confirmation and the evaluation sheet.
+    var foot = $(".hb-footer");
+    if (foot) { foot.dataset.view = name === "checkout" ? "dashboard" : "marketplace"; }
     window.scrollTo(0, 0);
     if (location.hash.slice(1) !== name) {
       try { history.replaceState(null, "", "#" + name); } catch (err) { /* sandboxed frame */ }
@@ -20,6 +25,10 @@
   var LANG = null;
   function applyLang() {
     if (!LANG) { return; }
+    $$("[data-ar-ph]").forEach(function (el) {
+      if (!el.dataset.enPh) { el.dataset.enPh = el.placeholder; }
+      el.placeholder = LANG === "ar" ? el.dataset.arPh : el.dataset.enPh;
+    });
     $$("[data-ar]").forEach(function (el) {
       if (!el.dataset.en) { el.dataset.en = el.textContent; }
       el.textContent = LANG === "ar" ? el.dataset.ar : el.dataset.en;
@@ -300,6 +309,62 @@
 
   document.addEventListener("keydown", function (e) {
     if (e.key === "Enter" && e.target.id === "cpn") { e.preventDefault(); ACTS.coupon(); }
+  });
+
+  /* ---------- Header (organism) ----------
+     data-size is a component axis, so the page sets it at the design system's own
+     breakpoint: compact < 744. The Header README puts the wordmark on expanded and
+     the mark on compact, so the Logo atom's data-type follows. */
+  var hdr = $(".hb-header");
+  var hdrLogo = $("#h-logo .hb-logo");
+  var mqCompact = window.matchMedia("(max-width: 743px)");
+  function syncHeader(){
+    var compact = mqCompact.matches;
+    hdr.dataset.size = compact ? "compact" : "expanded";
+    hdrLogo.dataset.type = compact ? "mark" : "wordmark";
+    $("#h-avatar").dataset.size = compact ? "32" : "40";
+    // the SearchField has an icon-only variant for exactly this width — declare it
+    // rather than letting the full field get squeezed down to the same 44 by flex
+    $(".hb-header .hb-search").dataset.style = compact ? "compressed" : "default";
+  }
+  if (mqCompact.addEventListener) { mqCompact.addEventListener("change", syncHeader); }
+  else { mqCompact.addListener(syncHeader); }
+  syncHeader();
+
+  $(".hb-header .hb-search").addEventListener("click", function () {
+    if (hdr.dataset.size !== "compact") { return; }
+    toast("Search opens full width on compact.");
+  });
+  $("#h-menu").addEventListener("click", function () {
+    toast("Categories, Brands, offers and messages move into this menu on compact.");
+  });
+  $(".hb-header__account").addEventListener("click", function () {
+    toast("Account and branch switching sit outside the checkout flow this prototype covers.");
+  });
+  $$(".hb-header__nav .hb-header__pill").forEach(function (b) {
+    b.addEventListener("click", function () {
+      toast(b.textContent.trim() + " sits outside the checkout flow this prototype covers.");
+    });
+  });
+
+  /* ---------- Footer (organism) ---------- */
+  var toTop = $("#to-top");
+  function syncToTop(){ toTop.hidden = window.scrollY < 320; }
+  toTop.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+  window.addEventListener("scroll", syncToTop, { passive: true });
+  syncToTop();
+
+  $("#f-app").addEventListener("click", function () {
+    toast("The Highbase app is not part of this prototype.");
+  });
+  $(".hb-footer").addEventListener("click", function (e) {
+    var a = e.target.closest("a");
+    if (!a || a.getAttribute("href") !== "#") { return; }
+    e.preventDefault();
+    var label = a.getAttribute("aria-label") || a.textContent.trim();
+    toast(label + " sits outside the checkout flow this prototype covers.");
   });
 
   /* ---------- Prototype chrome ---------- */

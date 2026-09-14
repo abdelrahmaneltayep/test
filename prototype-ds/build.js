@@ -15,7 +15,9 @@ const PARTS = [
   'atoms/Chip/Chip.css',
   'atoms/Checkbox/Checkbox.css',
   'atoms/RadioButton/RadioButton.css',
+  'atoms/Avatar/Avatar.css',
   'atoms/Badge/Badge.css',
+  'atoms/Logo/Logo.css',
   'atoms/Divider/Divider.css',
   'molecules/_base/Field.css',
   'molecules/_base/Alert.css',
@@ -38,6 +40,7 @@ const PARTS = [
   'organisms/Drawer/Drawer.css',
   'organisms/ConfirmationDialog/ConfirmationDialog.css',
   'organisms/EmptyState/EmptyState.css',
+  'organisms/Footer/Footer.css',
   'organisms/ScrollToTop/ScrollToTop.css',
 ];
 
