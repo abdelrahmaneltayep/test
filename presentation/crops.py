@@ -3,7 +3,7 @@ import json, os, math
 
 D = "/tmp/claude-0/-home-user-test/d071304f-3298-5cba-8f5f-704a2bf6e28d/scratchpad"
 OUT = D + "/crops"; os.makedirs(OUT, exist_ok=True)
-ASPECT = 2.74          # matches the image slot: what is left after the text fits
+ASPECT = 2.11          # column width 526 over the height the text leaves free
 OUT_W  = 760
 
 def fit(img, box, aspect=ASPECT):
