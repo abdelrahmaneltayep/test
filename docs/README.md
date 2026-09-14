@@ -1,7 +1,7 @@
 # Documentation
 
 Reference material for work done on this account that does not live in this repository's source
-tree. Right now that is one thing: the Highbase Design System push into Figma.
+tree. Right now that is one thing: the Highbase Design System push into Figma, and the review fixes that followed it.
 
 ---
 
@@ -14,7 +14,8 @@ English and Arabic — was built into the Figma file **`DS`**
 | File | What it is |
 |---|---|
 | [`FIGMA_PUSH_REPORT.md`](FIGMA_PUSH_REPORT.md) | The audit. Read this before trusting the result. |
-| [`FIGMA_PUSH_STATE.md`](FIGMA_PUSH_STATE.md) | Append-only log, one entry per batch. 23 entries. |
+| [`FIGMA_FIXES_REPORT.md`](FIGMA_FIXES_REPORT.md) | The fourteen review fixes: what changed, what was measured, and the seven questions still open. |
+| [`FIGMA_PUSH_STATE.md`](FIGMA_PUSH_STATE.md) | Append-only log, one entry per batch. |
 
 ### Read the report first, and read it in this order
 
