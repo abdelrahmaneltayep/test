@@ -26,7 +26,7 @@ alias chain, not judged by eye.
 | F11 · Drawer replaces Dialog | **done** | **done** | old Dialog deleted after re-pointing its one instance |
 | F12 · Confirmation Dialog | **done** | **done** | new page, new component, full doc page |
 | F13 · Bottom Sheet button hierarchy | **done** | **done** | |
-| F14 · Footer rebuild | **done** | **done** | seven icon glyphs are missing from the library — flagged, not substituted |
+| F14 · Footer rebuild | **done** | **done** | rebuilt again 14 Sep against a live screenshot; seven icon glyphs missing from the library — flagged, not substituted |
 
 ---
 
@@ -168,8 +168,42 @@ the icon library, and **neither are mail and phone**:
 | `icon/phone` | contact · phone |
 
 Address uses `icon/location` and the message row uses `icon/message`; both exist. Every affected
-button and tile is **built, named for the glyph it needs, and left empty**, with a visible note in
-the component. No substitute has been drawn for any of the seven.
+button and tile is **built, named for the glyph it needs, and left empty**. No substitute has been
+drawn for any of the seven.
+
+The screenshot settles one thing: the live product renders all seven correctly, so this is a
+**library** gap, not a product gap — and because the shapes now carry the live treatment, they
+will look right the moment the glyphs land.
+
+### Rebuilt a second time, against a screenshot
+
+The first pass was built from the written brief alone and got several things wrong. A screenshot
+of the live footer corrected it:
+
+| First pass | The live footer |
+|---|---|
+| Outlined transparent social circles | **Filled white** circles, mark in navy |
+| Outlined transparent contact tiles | **Filled white** rounded squares, navy glyph |
+| A light-grey secondary Button for the download | A **lighter-navy pill**, full width of its column |
+| No dividers between regions | A **vertical rule** between each of the three |
+| Invented copy and contact details | The real blurb, `info@highbaseco.com`, `+973-13300833`, the Seef address |
+| `© 2026 Highbase. All rights reserved.` | `© 2026 HIGHBASE. All Rights Reserved` |
+| Scroll-to-top blue with a white chevron | **White circle, navy double chevron** |
+
+It is worth naming why: the brief described the footer accurately in words, and I built something
+that satisfied every sentence in it and still did not look like the product. Written specs fix
+structure; they do not fix treatment.
+
+### One new colour role
+
+The library had **no lighter-navy surface** — `surface-dark` is the ground itself and
+`primary-pressed` is a brighter blue. The Download pill, the two dividers and the bottom rule all
+need one, so `color/surface-dark-container` → `primary/900` (#103F6A) was added, with
+`color/on-surface-dark` → white alongside it.
+
+Tagged `(proposal)`. It is clearly lighter than the ground in the screenshot, which rules out
+`primary/950` (#0B2746, only ~9 per channel away); 900 versus a step between the two has not been
+measured. One look at the live CSS settles it.
 
 ### A rendering note worth recording
 
@@ -187,22 +221,26 @@ instance before believing the export.
 
 1. **The ribbon offset** (F7). The brief asked for this one to be put to a person. Built at half
    the ribbon's own height below the button's bottom border and tagged `(proposal)`.
-2. **Nine missing icons.** F14 needs the five brand marks plus **mail** and **phone** — add them,
-   or accept a documented gap. F8 additionally has no ribbon glyph for `Brands` and no hamburger
-   for compact; `icon/tag` and `icon/more` stand in, both flagged.
-3. **Noto Kufi Arabic is not installed.** The Arabic text style names it. The Header's `العربية`
+2. **Nine missing icons.** F14 needs the five brand marks plus **mail** and **phone** — the live
+   product has all seven, so the library is behind the product. F8 additionally has no ribbon
+   glyph for `Brands` and no hamburger for compact; `icon/tag` and `icon/more` stand in. A tenth
+   gap: **no double-chevron glyph**, now wanted in two places (the Product Card's more-coupons
+   link and the scroll-to-top button), both built as two chevrons on a negative gap.
+3. **`color/surface-dark-container` = `primary/900`** is a proposal taken by eye. Confirm the step
+   against the live CSS.
+4. **Noto Kufi Arabic is not installed.** The Arabic text style names it. The Header's `العربية`
    label renders through the platform fallback, not through the design system's style. Installed
    Arabic families that could replace it: Almarai, Cairo, Noto Sans Arabic, Reem Kufi, Tajawal.
    **No substitution has been made.**
-4. **The disabled filled button is not legible.** `color/on-primary` (white) on
+5. **The disabled filled button is not legible.** `color/on-primary` (white) on
    `color/surface-container-high` — that is the value F1's Option A preserved deliberately, and it
    affects every disabled filled button in the library, not just Add to Cart. Changing it is a
    visual change, which Option A forbade, so it is left alone and raised here.
-5. **`--hb-font-size-13`** in `Coupon.css` is still an undefined reference. Per the brief this is a
+6. **`--hb-font-size-13`** in `Coupon.css` is still an undefined reference. Per the brief this is a
    "stop and ask", not a rounding decision.
-6. **`Size=compact` on Product Card** was dropped. The five axes do not include size; restoring it
+7. **`Size=compact` on Product Card** was dropped. The five axes do not include size; restoring it
    doubles the set to 144 variants.
-7. **The `Price` molecule** is gone from Figma but `04_Components/molecules/Price` is still in the
+8. **The `Price` molecule** is gone from Figma but `04_Components/molecules/Price` is still in the
    repo and in the molecule index. Decide whether it goes or comes back.
 
 ---
@@ -213,5 +251,5 @@ instance before believing the export.
   deleted with the component it documented, and nothing replaced it. This is the one piece of the
   fourteen-fix scope that is genuinely unfinished.
 - **Footer compact** variant still carries its old three-stacked-columns layout; only the
-  expanded marketplace variant was rebuilt.
+  expanded marketplace variant was rebuilt against the screenshot.
 - The seven questions below.
