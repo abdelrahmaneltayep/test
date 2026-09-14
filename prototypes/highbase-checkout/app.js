@@ -36,7 +36,7 @@
       discounts: [{ code: 'ALMANAR2', label: 'Supplier coupon', amount: 2.0 }]
     },
     {
-      id: 'gulf', name: 'Gulf Fresh Trading', mov: 25.0, delivery: 5.0,
+      id: 'gulf', name: 'Gulf Fresh Trading', mov: 15.0, delivery: 5.0,
       items: [
         { id: 'b1', name: 'Almarai Fresh Laban 1L', pack: '1 Liter', pieces: 6, price: 3.25, qty: 4, stock: 18, sel: true, tone: '#d7ead7' },
         { id: 'b2', name: 'Al Ain Natural Water 500ml', pack: '500ML', pieces: 24, price: 2.4, qty: 2, stock: 90, sel: true, tone: '#cfe6f5' }

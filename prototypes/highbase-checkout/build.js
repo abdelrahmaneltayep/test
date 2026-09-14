@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const DS = process.argv[2] || process.env.HIGHBASE_DS ||
+// --artifact emits artifact.html: the same page with no <!doctype>/<html>/<head>/
+// <body>, because the Artifact host supplies that shell itself.
+const ARTIFACT = process.argv.includes('--artifact');
+const DS = process.argv.filter(a => a !== '--artifact')[2] || process.env.HIGHBASE_DS ||
   path.resolve(__dirname, '../../../highbase-ds');
 
 if (!fs.existsSync(path.join(DS, '03_Tokens/dist/tokens.css'))) {
@@ -62,31 +65,43 @@ if (missing.length) {
   process.exit(1);
 }
 
-const html = `<!doctype html>
-<html lang="en" dir="ltr">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Highbase — Checkout proposal</title>
+// This page mocks a live product, so it deliberately stays single-theme: flipping
+// it to dark would stop it representing the thing it argues about. It therefore
+// paints its own ground and pins color-scheme, so it holds on either host theme.
+const singleTheme = `:root{color-scheme:light}`;
+
+const head = `<title>Highbase Checkout</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap">
 <style>
+${singleTheme}
 ${tokens}
 ${dsCss}
 ${iconCss}
 ${protoCss}
-</style>
-</head>
-<body>
-${SPRITE}
+</style>`;
+
+const body = `${SPRITE}
 <script>
 ${appJs}
-<\/script>
+<\/script>`;
+
+const html = ARTIFACT
+  ? head + '\n' + body + '\n'
+  : `<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+${head}
+</head>
+<body>
+${body}
 </body>
 </html>`;
 
-const out = path.join(__dirname, 'index.html');
+const out = path.join(__dirname, ARTIFACT ? 'artifact.html' : 'index.html');
 fs.writeFileSync(out, html);
 console.log('Wrote ' + out + '  (' + (html.length / 1024).toFixed(0) + ' KB)');
 console.log('Icons used: ' + used.length + ' of ' + Object.keys(NAMES).length + ' — all resolved.');

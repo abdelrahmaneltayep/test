@@ -22,8 +22,10 @@ with sync_playwright() as p:
     # C5 — per piece
     ok("C5 per-piece price shown", pg.locator('.line__per').count() >= 10)
     # C6 — nothing ready yet, both suppliers held
-    ok("C6 checkout disabled while nothing ready", pg.locator('[data-act="todetails"]').is_disabled())
-    ok("C6 held suppliers named", "Staying in your cart" in pg.locator('.held').inner_text())
+    # at rest: Gulf is ready, Nadec is held by the filmed stock conflict
+    ok("C6 opens with one supplier ready", not pg.locator('[data-act="todetails"]').is_disabled())
+    ok("C6 held supplier named at rest", "Nadec" in pg.locator('.held').inner_text())
+    ok("C6 summary is non-zero at rest", "BHD 0.000" not in pg.locator('.rail__row[data-total="true"]').inner_text())
     # C7 — group readiness chips
     ok("C7 group states readiness", pg.locator('.supplier .pill').first.inner_text().strip() != "")
     pg.screenshot(path=OUT/"01-cart.png", full_page=True)
@@ -33,9 +35,8 @@ with sync_playwright() as p:
     q = pg.locator('input[data-act="qty"][data-sup="nadec"][data-item="a2"]')
     q.fill("12"); q.press("Enter"); pg.wait_for_timeout(350)
     btn = pg.locator('[data-act="todetails"]')
-    ok("C6 partial checkout enabled with 1 of 2 suppliers", not btn.is_disabled())
-    ok("C6 button names the supplier count", "1 supplier" in btn.inner_text())
-    ok("C6 Gulf still named as held", "Gulf Fresh" in pg.locator('.held').inner_text())
+    ok("C6 both suppliers ready after the fix", "2 suppliers" in btn.inner_text())
+    ok("C6 nothing held once both qualify", pg.locator('.held').count() == 0)
     pg.screenshot(path=OUT/"02-cart-partial.png", full_page=True)
 
     # R3/R2 coupon at top of summary
@@ -54,18 +55,21 @@ with sync_playwright() as p:
     ok("A4 three-step indicator", pg.locator('.stepper__item').count() == 3)
     ok("A2 verification shown as a value, no upload fields", pg.locator('.verif').count()==1 and pg.locator('.drop').count()==0)
     ok("A10 pin shows coordinates", "26.2" in pg.locator('.pin').inner_text())
-    ok("A7 one shipment block per ready supplier", pg.locator('.ship').count() == 1)
+    ok("A7 one shipment block per ready supplier", pg.locator('.ship').count() == 2)
     ok("A8 PO + cost centre + invoice email", pg.locator('#po').count()==1 and pg.locator('#cc').count()==1 and pg.locator('#ie').count()==1)
     ok("A6 button carries the amount", "BHD" in pg.locator('[data-act="place"]').inner_text())
     pg.screenshot(path=OUT/"03-details.png", full_page=True)
 
     # A7 — cannot place without a slot
     pg.locator('[data-act="place"]').click(); pg.wait_for_timeout(500)
-    ok("A7 place blocked without a delivery window", pg.locator('.ship[data-invalid="true"]').count() == 1)
+    ok("A7 place blocked without a delivery window", pg.locator('.ship[data-invalid="true"]').count() == 2)
     # bad email
     pg.locator('#ie').fill("not-an-email")
-    pg.locator('[data-act="slotday"]').first.click(); pg.wait_for_timeout(120)
-    pg.locator('[data-act="slottime"]').first.click(); pg.wait_for_timeout(120)
+    # fill a window for EVERY shipment — one per ready supplier
+    for ship in range(pg.locator('.ship').count()):
+        s = pg.locator('.ship').nth(ship)
+        s.locator('[data-act="slotday"]').first.click(); pg.wait_for_timeout(120)
+        s.locator('[data-act="slottime"]').first.click(); pg.wait_for_timeout(120)
     pg.locator('[data-act="place"]').click(); pg.wait_for_timeout(500)
     ok("A8 invoice email validated", pg.locator('[data-invalid="true"] #ie').count() == 1)
     pg.locator('#ie').fill("finance@buyer.com")
