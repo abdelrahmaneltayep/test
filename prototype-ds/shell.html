@@ -1,0 +1,70 @@
+<!-- Prototype chrome (proposal) — a review shell, not Highbase product UI -->
+<header class="proto-bar">
+  <div class="proto-bar__in">
+    <div class="proto-brand hb-title-sm">Highbase
+      <span class="hb-chip" data-style="neutral" data-size="sm">Proposal v2</span>
+    </div>
+    <nav class="proto-nav" aria-label="Prototype screens">
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="cart" aria-current="true"><span class="hb-btn__label">1 · Cart</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="checkout" aria-current="false"><span class="hb-btn__label">2 · Checkout</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="confirm" aria-current="false"><span class="hb-btn__label">3 · Confirmation</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="why" aria-current="false"><span class="hb-btn__label">Evaluation</span></button>
+    </nav>
+    <div class="spacer"></div>
+    <button type="button" class="hb-btn" data-intent="secondary" data-style="outlined" data-size="sm" id="t-notes" aria-pressed="true"><span class="hb-btn__label">Annotations</span></button>
+    <button type="button" class="hb-btn" data-intent="primary" data-style="outlined" data-size="sm" id="t-dir" aria-pressed="false"><span class="hb-btn__label">العربية / RTL</span></button>
+  </div>
+</header>
+
+<!-- Header (organism) -->
+<header class="hb-header" data-view="marketplace" data-size="expanded">
+  <a class="hb-header__pill hb-title-md" href="#" aria-label="Highbase home">HIGHBASE</a>
+  <nav class="hb-header__nav hb-label-lg" aria-label="Main">
+    <a href="#">Categories</a><a href="#">Brands</a><a href="#">Suppliers</a><a href="#">My lists</a>
+  </nav>
+  <div class="hb-header__search">
+    <div class="hb-field hb-search">
+      <label class="sr" for="hdr-q">Search</label>
+      <div class="hb-field__control">
+        <span class="hb-field__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-search"/></svg></span>
+        <input class="hb-field__input" id="hdr-q" type="search" placeholder="Search by name, category or brand">
+      </div>
+    </div>
+  </div>
+  <div class="hb-header__actions">
+    <span class="hb-badge-anchor">
+      <button type="button" class="hb-btn hb-icon-btn" data-intent="primary" data-style="ghost" data-size="md" aria-label="Offers">
+        <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-gift"/></svg></span>
+      </button>
+      <span class="hb-badge" data-variant="count" data-color="primary" id="hdr-offers">7</span>
+    </span>
+    <span class="hb-badge-anchor">
+      <button type="button" class="hb-btn hb-icon-btn" data-intent="primary" data-style="ghost" data-size="md" aria-label="Cart" data-goto="cart">
+        <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-cart"/></svg></span>
+      </button>
+      <span class="hb-badge" data-variant="count" data-color="primary" id="hdr-cart">5</span>
+    </span>
+    <button type="button" class="hb-btn hb-icon-btn" data-intent="primary" data-style="ghost" data-size="md" aria-label="Messages">
+      <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-message"/></svg></span>
+    </button>
+    <button type="button" class="hb-btn hb-icon-btn" data-intent="primary" data-style="ghost" data-size="md" aria-label="Notifications">
+      <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-notification"/></svg></span>
+    </button>
+    <button type="button" class="hb-header__language hb-label-md" id="t-dir-2">
+      <svg class="hb-i" aria-hidden="true"><use href="#hb-i-globe"/></svg> العربية
+    </button>
+    <span class="hb-header__account">
+      <span class="hb-header__account-lines">
+        <span class="hb-header__account-name hb-label-lg">Buyer Bahrain</span>
+        <span class="hb-header__account-branch hb-body-sm">Branch · Manama</span>
+      </span>
+    </span>
+  </div>
+</header>
+
+<div class="site">
+  <main id="screen-cart" class="screen"></main>
+  <main id="screen-checkout" class="screen" hidden></main>
+  <main id="screen-confirm" class="screen" hidden></main>
+  <main id="screen-why" class="screen doc-page" hidden></main>
+</div>
