@@ -1975,6 +1975,20 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .hb-list .hb-li[data-state="todo"] .hb-li__text,.hb-list .hb-li[data-state="todo"] .hb-li__time{color:var(--hb-color-on-warning-container)}
 .hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-warning-light);color:var(--hb-color-on-warning-container)}
 
+/* 13 · Activity — a replaced document shows the file it replaced beside the one on file */
+.ba{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;margin-top:var(--hb-space-12)}
+.ba__side{display:flex;flex-direction:column;gap:var(--hb-space-4);min-width:0;flex:1 1 220px}
+.ba__arrow{flex:0 0 auto;color:var(--hb-color-on-surface-variant);display:inline-flex;align-self:flex-end;
+  padding-bottom:var(--hb-space-12)}
+.ba__arrow .hb-i{font-size:var(--hb-space-20)}
+.bafile{display:flex;align-items:center;gap:var(--hb-space-12);min-width:0;padding:var(--hb-space-8) var(--hb-space-12);
+  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-surface)}
+.bafile[data-old]{background:var(--hb-color-surface-container-low);border-style:dashed}
+.bafile[data-old] .hb-label-md{text-decoration:line-through;color:var(--hb-color-on-surface-variant)}
+.bafile__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
+.bafile__lines span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 /* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
 .pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
 .pledger .hb-li__title{font-weight:var(--hb-font-weight-regular);color:var(--hb-color-on-surface-variant)}
@@ -2113,6 +2127,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .pcred__facts,.pstats{grid-template-columns:1fr}
   .pcred__pill{margin-inline-start:0}
   .prcp__row{flex-wrap:wrap}
+  .ba__arrow{align-self:center;padding-bottom:0;transform:rotate(90deg)}
   .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
   .prow dd{text-align:start}
   .prow__file{justify-content:flex-start}
@@ -2320,12 +2335,14 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     hasVat: false,
     taxNumber: "",
     docs: {
-      cr:  { label: "Commercial License (CR)", required: true,  file: { name: "CR-5056050560-1.pdf", size: "412 KB", isImage: false, at: "12 Jan 2026" } },
+      /* prev is the version this file replaced — what the Activity preview shows as "before" */
+      cr:  { label: "Commercial License (CR)", required: true,  file: { name: "CR-5056050560-1.pdf", size: "412 KB", isImage: false, at: "12 Jan 2026" },
+             prev: { name: "CR-5056050560-1-2024.pdf", size: "380 KB", isImage: false, at: "14 Feb 2024" } },
       vat: { label: "VAT Certificate",         required: false, file: null },
       id:  { label: "Personal ID Document",    required: true,  file: { name: "CPR-front.jpg", size: "1.2 MB", isImage: false, at: "12 Jan 2026" } }
     },
     editing: { branch: false, address: false },
-    previewStyle: "grid",     // version B: which of the five read-only previews is on screen
+    previewStyle: "activity", // version B: the chosen preview — the others stay switchable
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit
@@ -3135,6 +3152,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '<span class="hb-li__top"><span class="hb-li__title">' + o.title + '</span>' +
         (o.time ? '<span class="hb-li__time">' + o.time + '</span>' : '') + '</span>' +
         (o.text ? '<span class="hb-li__text">' + o.text + '</span>' : '') +
+        (o.extra ? o.extra : '') +
         (o.actions ? '<span class="hb-li__actions">' + o.actions + '</span>' : '') +
       '</span>' +
       (o.trail ? '<span class="hb-li__trail">' + o.trail + '</span>' : '') + '</div>';
@@ -3198,35 +3216,58 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     return list("pledger", rows);
   }
 
-  /* ---------- 13 · Activity — what was saved and when; only what needs the buyer is tinted ---------- */
+  /* ---------- 13 · Activity — what was saved and when. No status pills: the row says it ---------- */
+  /* The chosen preview for B. A pill would repeat what the line already states, so the row
+     carries the fact in words and the tint carries the exception. A document that replaced an
+     earlier version shows both files, the superseded one beside the current one. */
+  function fileChip(f, o){
+    o = o || {};
+    return '<span class="bafile"' + (o.old ? ' data-old' : '') + '>' +
+      '<span class="doc__prev" aria-hidden="true">' + (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) + '</span>' +
+      '<span class="bafile__lines"><span class="hb-label-md">' + esc(f.name) + '</span>' +
+      '<span class="hb-body-sm muted">' + esc(f.size) + (f.at ? ' · ' + esc(f.at) : '') + '</span></span></span>';
+  }
+  function beforeAfter(d){
+    return '<span class="ba">' +
+      '<span class="ba__side"><span class="hb-label-sm muted">Before</span>' + fileChip(d.prev, { old: true }) + '</span>' +
+      '<span class="ba__arrow" aria-hidden="true">' + I.chevronRight + '</span>' +
+      '<span class="ba__side"><span class="hb-label-sm muted">After</span>' + fileChip(d.file) + '</span></span>';
+  }
   function activityBranch(){
     var b = state.branchDetails;
     return list("pactivity", [
       li({ lead: I.building, title: "Branch details saved", time: "12 Jan 2026",
-        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email), trail: statusChip("completed", "No change") })
+        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email) })
     ]);
   }
   function activityAddress(){
     var a = state.address;
     return list("pactivity", [
       li({ lead: I.location, title: "Delivery address saved", time: "12 Jan 2026",
-        text: addressLines().join(' · '), trail: statusChip("completed", "No change") }),
-      li({ lead: I.location, unread: a.pinned, title: a.pinned ? "Map pin updated" : "Map pin never set",
-        time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()),
-        trail: a.pinned ? statusChip("approved", "Recent") : statusChip("pending", "Not set") })
+        text: addressLines().join(' · ') }),
+      li({ lead: I.location, state: a.pinned ? "" : "todo",
+        title: a.pinned ? "Map pin updated" : "Map pin has never been set",
+        time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()) })
     ]);
   }
   function activityDocs(){
     var rows = [];
     docIds().forEach(function (k) {
       var d = state.docs[k], f = d.file;
-      rows.push(li({ lead: f ? I.file : I.upload, state: f ? "" : "todo",
-        title: f ? esc(d.label) + ' uploaded' : esc(d.label) + ' is missing',
-        time: f ? esc(f.at || '') : '', text: docText(d), trail: docStatusChip(d) }));
+      if (f && d.prev) {
+        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', time: esc(f.at || 'just now'),
+          text: 'The earlier version stays on your account until this one is reviewed.',
+          extra: beforeAfter(d) }));
+      } else if (f) {
+        rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', time: esc(f.at || 'just now'),
+          text: esc(f.name) + ' · ' + esc(f.size) }));
+      } else {
+        rows.push(li({ lead: I.upload, state: "todo", title: esc(d.label) + ' is missing',
+          text: d.required ? 'Upload it before placing this order.' : 'Optional — add it whenever you like.' }));
+      }
     });
     rows.push(li({ lead: I.invoice, title: "Registration on file", time: "12 Jan 2026",
-      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue(),
-      trail: statusChip("completed", "No change") }));
+      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue() }));
     return list("pactivity", rows);
   }
 
@@ -3366,10 +3407,10 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       how: "The same component with the leading slot dropped and the value moved into the trailing slot: one line per value, values aligned down the end edge.",
       best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
       risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
-    { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs,
-      how: "The notification variant: what was saved and when, the date in the time slot, and the tint reserved for what changed recently or still needs the buyer.",
-      best: "Returning buyers asking the real question — has anything changed since my last order?",
-      risk: "It reports history, not the current record; a buyer looking for one value has to read a sentence to find it." },
+    { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs, noStatus: true,
+      how: "What was saved and when, the date in the time slot, and a replaced document showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words, and the tint carries the exception.",
+      best: "Returning buyers asking the real question — has anything changed since my last order? It is the chosen preview for B.",
+      risk: "It reports history, not the current record; a buyer looking for one particular value has to read a line to find it." },
     { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
       how: "Every row uses the component's actions slot: Copy on an identifier, Preview on a document, Upload or Change opening the Drawer at that section.",
       best: "Doing one small thing without opening anything — copying the CR number, replacing one expired licence.",
@@ -3444,7 +3485,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '<span class="card__icon">' + o.icon + '</span>' +
         '<div class="card__main"><span class="hb-title-sm">' + o.title + '</span>' +
           '<span class="card__line hb-body-sm">' + o.meta + '</span></div>' +
-        o.pill +
+        /* a preview that states its own state in words takes no pill — two of them would
+           say the same thing twice, and the readiness banner already answers "am I ready?" */
+        (previewStyle().noStatus ? '' : o.pill) +
         btn(o.action, { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="open-drawer" data-drawer="' + o.id + '"' }) +
       '</div>' +
       '<div class="card__prev">' + o.preview() + '</div>' +
@@ -3470,7 +3513,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
         '<div class="hb-body-sm muted">' + t.lines + ' lines from ' + esc(state.supplier.name) + ' · delivery ' + esc(state.slot.day) + ' · Highbase Payment</div>' +
         placeBtn({ label: "Place Order · " + bhd(t.total) }) +
-        '<details class="why"><summary class="hb-body-sm">' + I.chevronDown + 'See the breakdown</summary><div class="stack" style="margin-top:var(--hb-space-12)">' + railTotals() + '</div></details>' +
+        '<details class="why" open><summary class="hb-body-sm">' + I.chevronDown + 'See the breakdown</summary><div class="stack" style="margin-top:var(--hb-space-12)">' + railTotals() + '</div></details>' +
       '</div></div></aside></div>' +
       '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(t.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
   }
@@ -3644,7 +3687,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
             btn("See B in " + p.name, { style: "outlined", size: "sm", attrs: ' data-act="goto-style" data-preview="' + p.id + '"' }) +
           '</div></div>';
       }).join('') + '</div>' +
-      '<p class="hb-body-md"><b>The recommendation for B:</b> <b>Facts</b> on the storefront, because the labels make a wrong value visible without opening anything, with <b>Summary</b> as the compact-width treatment where the whole page should fit above the fold. <b>Tiles</b> is the strongest of the reference five and the best candidate for phones if the rows ever become tappable. <b>Receipt</b> is the one to try on this page specifically: it speaks with the same voice as the order summary beside it. <b>Credential</b> suits documents more than it suits a branch, <b>Options</b> earns its keep only once an account has a second address, and <b>Highlights</b> is the fastest read but decides for the buyer what matters. <b>As used</b> remains the one to test with buyers, and <b>Record</b> belongs in the dashboard. Of the five built on List Item, <b>List</b> is the one to ship if the answer has to be a component the system already owns, <b>Actions</b> is the most useful to a buyer who came to change one small thing, and <b>Grouped</b> is the only one that still reads well when a section grows past six values.</p>' +
+      '<p class="hb-body-md"><b>B ships with Activity.</b> It carries no status pills — the row says what happened in words, the readiness banner answers whether the order can go, and a pill would state either a second time. A replaced document shows both files, the version it replaced beside the one now on file. And the order breakdown in the rail is open rather than folded away.</p>' +
+      '<p class="hb-body-md"><b>What the others were for:</b> <b>Facts</b> on the storefront, because the labels make a wrong value visible without opening anything, with <b>Summary</b> as the compact-width treatment where the whole page should fit above the fold. <b>Tiles</b> is the strongest of the reference five and the best candidate for phones if the rows ever become tappable. <b>Receipt</b> is the one to try on this page specifically: it speaks with the same voice as the order summary beside it. <b>Credential</b> suits documents more than it suits a branch, <b>Options</b> earns its keep only once an account has a second address, and <b>Highlights</b> is the fastest read but decides for the buyer what matters. <b>As used</b> remains the one to test with buyers, and <b>Record</b> belongs in the dashboard. Of the five built on List Item, <b>List</b> is the one to ship if the answer has to be a component the system already owns, <b>Actions</b> is the most useful to a buyer who came to change one small thing, and <b>Grouped</b> is the only one that still reads well when a section grows past six values.</p>' +
       '<h2 class="hb-title-lg">Visual hierarchy, shared by all five</h2>' +
       '<p class="hb-body-md">One headline role per page (headline-md), one title role per section (title-md), labels in on-surface-variant and values in on-surface — colour is reserved for status pills and the single primary Button. Saved values are text, never orange. The only filled button on the screen is the one that moves the buyer forward; Cancel and Change are ghost or outlined. Detail lives one level down: behind a card, an accordion head, or a "Why do we ask for this?" disclosure.</p>' +
       '<h2 class="hb-title-lg">A recommendation</h2>' +
@@ -3712,8 +3756,10 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     state.uploading = id; state.uploadName = file.name;
     renderVerify();
     setTimeout(function () {
-      if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); }
-      d.file = describe(file); d.file.at = null;
+      /* a replacement keeps what it replaced: the Activity preview shows both files, and the
+         old object URL stays alive because its thumbnail is still on screen */
+      if (d.file) { d.prev = d.file; }
+      d.file = describe(file); d.file.at = "just now";
       state.uploading = null;
       renderVerify();
       toast(d.label + " saved to your account.", { kind: "ok" });
@@ -3877,7 +3923,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         body: d.required ? "It is required to place an order — you will need to upload it again." : "You can add it again at any time.",
         actions: btn("Keep it", { style: "ghost", size: "lg", attrs: ' data-act="close-confirm"' }) + btn("Remove", { intent: "danger", size: "lg", attrs: ' data-act="remove-doc-go" data-doc="' + id + '"' }) });
     },
-    "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); } d.file = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
+    "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); }
+      /* with the current file gone there is no "after" to compare a superseded copy against */
+      d.file = null; d.prev = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
     /* the Credential preview offers its identifier for copying; the clipboard is not
        available on every origin, so the failure is reported rather than claimed as a copy. */

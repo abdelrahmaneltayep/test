@@ -21,12 +21,14 @@
     hasVat: false,
     taxNumber: "",
     docs: {
-      cr:  { label: "Commercial License (CR)", required: true,  file: { name: "CR-5056050560-1.pdf", size: "412 KB", isImage: false, at: "12 Jan 2026" } },
+      /* prev is the version this file replaced — what the Activity preview shows as "before" */
+      cr:  { label: "Commercial License (CR)", required: true,  file: { name: "CR-5056050560-1.pdf", size: "412 KB", isImage: false, at: "12 Jan 2026" },
+             prev: { name: "CR-5056050560-1-2024.pdf", size: "380 KB", isImage: false, at: "14 Feb 2024" } },
       vat: { label: "VAT Certificate",         required: false, file: null },
       id:  { label: "Personal ID Document",    required: true,  file: { name: "CPR-front.jpg", size: "1.2 MB", isImage: false, at: "12 Jan 2026" } }
     },
     editing: { branch: false, address: false },
-    previewStyle: "grid",     // version B: which of the five read-only previews is on screen
+    previewStyle: "activity", // version B: the chosen preview — the others stay switchable
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit
