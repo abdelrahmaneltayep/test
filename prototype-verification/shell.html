@@ -1,0 +1,156 @@
+<!-- Prototype chrome (proposal) — a review shell, not Highbase product UI -->
+<header class="proto-bar">
+  <div class="proto-bar__in">
+    <div class="proto-brand hb-title-sm">Highbase
+      <span class="hb-chip" data-style="neutral" data-size="sm">Proposal v2 · Verification &amp; payment</span>
+    </div>
+    <nav class="proto-nav" aria-label="Prototype screens">
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="verify" aria-current="true"><span class="hb-btn__label">1 · Verification</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="paid" aria-current="false"><span class="hb-btn__label">2 · Order placed &amp; payment</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="why" aria-current="false"><span class="hb-btn__label">Evaluation</span></button>
+    </nav>
+    <div class="spacer"></div>
+    <button type="button" class="hb-btn" data-intent="secondary" data-style="outlined" data-size="sm" id="t-scenario" aria-pressed="false" title="Simulate a stock change between checkout and placing the order"><span class="hb-btn__label">Scenario: stock changes</span></button>
+    <button type="button" class="hb-btn" data-intent="secondary" data-style="outlined" data-size="sm" id="t-notes" aria-pressed="true"><span class="hb-btn__label">Annotations</span></button>
+    <button type="button" class="hb-btn" data-intent="primary" data-style="outlined" data-size="sm" id="t-dir" aria-pressed="false"><span class="hb-btn__label">العربية / RTL</span></button>
+  </div>
+</header>
+
+<!-- Header (organism) — composed exactly as organisms/Header/build-demo.js does:
+     menu (compact) · Logo atom · nav pills · SearchField · action cluster · language · account chip.
+     data-size is switched at the 744 breakpoint by the prototype script. -->
+<header class="hb-header" data-view="marketplace" data-size="expanded">
+  <button type="button" class="hb-btn hb-icon-btn proto-header-menu" data-intent="secondary" data-style="ghost" data-size="md" aria-label="Menu" id="h-menu">
+    <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-more"/></svg></span>
+  </button>
+  <a class="hb-header__pill" href="#" aria-label="Highbase home" id="h-logo"><span class="hb-logo" data-type="wordmark" data-color="blue" aria-hidden="true"></span></a>
+  <span class="hb-header__nav">
+    <button type="button" class="hb-header__pill"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-dashboard"/></svg><span data-ar="التصنيفات">Categories</span><span data-mirror><svg class="hb-i" aria-hidden="true"><use href="#hb-i-chevronDown"/></svg></span></button>
+    <button type="button" class="hb-header__pill"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-tag"/></svg><span data-ar="العلامات التجارية">Brands</span></button>
+  </span>
+  <span class="hb-header__search">
+    <span class="hb-search">
+      <span class="hb-search__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-search"/></svg></span>
+      <label class="sr" for="hdr-q">Search</label>
+      <input class="hb-search__input" id="hdr-q" type="search" placeholder="Search products, sellers or SKUs" data-ar-ph="ابحث عن منتجات أو موردين أو أرقام أصناف">
+    </span>
+  </span>
+  <span class="hb-header__actions">
+    <span class="hb-header__action" data-collapse>
+      <button type="button" class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="md" aria-label="Offers">
+        <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-gift"/></svg></span>
+      </button>
+      <span class="hb-badge" data-variant="count" data-color="primary" id="hdr-offers">7</span>
+    </span>
+    <span class="hb-header__action">
+      <button type="button" class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="md" aria-label="Cart" data-goto="cart">
+        <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-cart"/></svg></span>
+      </button>
+      <span class="hb-badge" data-variant="count" data-color="primary" id="hdr-cart">5</span>
+    </span>
+    <span class="hb-header__action" data-collapse>
+      <button type="button" class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="md" aria-label="Messages">
+        <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-message"/></svg></span>
+      </button>
+      <span class="hb-badge" data-variant="count" data-color="primary">1</span>
+    </span>
+    <span class="hb-header__action">
+      <button type="button" class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="md" aria-label="Notifications">
+        <span class="hb-btn__icon"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-notification"/></svg></span>
+      </button>
+      <span class="hb-badge" data-variant="count" data-color="primary">9</span>
+    </span>
+  </span>
+  <span class="hb-header__language">
+    <button type="button" class="hb-header__pill" id="t-dir-2"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-globe"/></svg><span>العربية</span></button>
+  </span>
+  <button type="button" class="hb-header__account">
+    <span class="hb-avatar" data-shape="square" data-size="40" id="h-avatar">BB</span>
+    <span class="hb-header__account-lines">
+      <span class="hb-header__account-name" data-ar="مشتري البحرين">Buyer Bahrain</span>
+      <span class="hb-header__account-branch" data-ar="الفرع: مستودع المنامة المركزي">Branch: Manama_Central_Warehouse</span>
+    </span>
+    <span data-mirror><svg class="hb-i" aria-hidden="true"><use href="#hb-i-chevronDown"/></svg></span>
+  </button>
+</header>
+
+<div class="site">
+  <main id="screen-verify" class="screen"></main>
+  <main id="screen-paid" class="screen" hidden></main>
+  <main id="screen-why" class="screen doc-page" hidden></main>
+</div>
+
+<!-- Footer (organism) — data-view is switched per screen by the prototype script -->
+<footer class="hb-footer" data-view="marketplace" data-size="expanded">
+  <div class="hb-footer__regions">
+
+    <div class="hb-footer__region">
+      <span class="hb-logo proto-footer-logo" data-type="lockup" data-color="white" role="img" aria-label="Highbase — where you grow"></span>
+      <span class="hb-footer__blurb" data-ar="هايبيس للتجارة ذ.م.م — نربط الشركات عبر سوقنا المبتكر بين الشركات، ونتيح الوصول إلى منتجات موثوقة وشركاء معتمدين. نمكّن الشركات من النمو والازدهار في أسواق متغيرة عبر رفع الكفاءة وتوسيع الوصول.">HIGHBASE TRADING W.L.L, we connect businesses through our innovative B2B marketplace, providing access to quality products and trusted partners. We empower companies to grow and thrive in dynamic markets by enhancing efficiency and reach.</span>
+      <span class="hb-footer__social">
+        <a href="#" aria-label="LinkedIn" data-needs="icon/linkedin"></a>
+        <a href="#" aria-label="YouTube" data-needs="icon/youtube"></a>
+        <a href="#" aria-label="WhatsApp" data-needs="icon/whatsapp"></a>
+        <a href="#" aria-label="Instagram" data-needs="icon/instagram"></a>
+        <a href="#" aria-label="Facebook" data-needs="icon/facebook"></a>
+        <button type="button" class="pin" aria-label="Design note 7">7<span class="pin__tip"><b>Five brand marks are missing from the icon library</b>LinkedIn, YouTube, WhatsApp, Instagram and Facebook have no <code>icon/*</code> component. The live storefront renders all five, so this is a library gap, not a product gap. The buttons are built with the live treatment — a filled white circle with a navy mark — and named for the glyph each needs. Nothing has been substituted.</span></button>
+      </span>
+    </div>
+
+    <span class="hb-footer__divider"></span>
+
+    <div class="hb-footer__region">
+      <span class="hb-footer__heading" data-ar="روابط سريعة">Quick Links</span>
+      <span class="hb-footer__link-columns">
+        <span class="hb-footer__links">
+          <a href="#" data-ar="الرئيسية">Home</a>
+          <a href="#" data-ar="العلامات التجارية">Brands</a>
+          <a href="#" data-ar="الشروط والأحكام">Terms &amp; Conditions</a>
+        </span>
+        <span class="hb-footer__links">
+          <a href="#" data-ar="من نحن">About Us</a>
+          <a href="#" data-ar="دليل المستخدم">User Guide</a>
+          <a href="#" data-ar="سياسة الخصوصية">Privacy Policy</a>
+        </span>
+      </span>
+      <button type="button" class="hb-footer__download" id="f-app">
+        <svg class="hb-i" aria-hidden="true"><use href="#hb-i-download"/></svg>
+        <span data-ar="حمّل تطبيقنا الآن">Download Our App Now</span>
+      </button>
+    </div>
+
+    <span class="hb-footer__divider"></span>
+
+    <div class="hb-footer__region">
+      <span class="hb-footer__heading"><span data-ar="تواصل معنا">Contact Us</span><button type="button" class="pin" aria-label="Design note 8">8<span class="pin__tip"><b>mail and phone are missing too</b>Neither <code>icon/mail</code> nor <code>icon/phone</code> exists in the 66-key icon library, so those two tiles are built, named and left empty. The address row uses <code>icon/location</code> and the message row <code>icon/message</code>; both exist. Seven glyphs in total are outstanding on this footer.</span></button></span>
+      <span class="hb-footer__row">
+        <span class="hb-footer__tile" data-needs="icon/mail"></span>
+        <span class="hb-footer__value">info@highbaseco.com</span>
+      </span>
+      <span class="hb-footer__row">
+        <span class="hb-footer__tile" data-needs="icon/phone"></span>
+        <span class="hb-footer__value"><bdi dir="ltr">+973-13300833</bdi></span>
+      </span>
+      <span class="hb-footer__row">
+        <span class="hb-footer__tile"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-location"/></svg></span>
+        <span class="hb-footer__value" data-ar="هايبيس للتجارة ذ.م.م، طريق ٢٨٤٥ السيف، مملكة البحرين">HIGHBASE TRADING W.L.L Road 2845 Seef, Kingdom of Bahrain</span>
+      </span>
+      <a class="hb-footer__row" href="#">
+        <span class="hb-footer__tile"><svg class="hb-i" aria-hidden="true"><use href="#hb-i-message"/></svg></span>
+        <span class="hb-footer__value" data-ar="اترك لنا رسالة">Leave us a message</span>
+        <span data-mirror><svg class="hb-i" aria-hidden="true"><use href="#hb-i-chevronRight"/></svg></span>
+      </a>
+    </div>
+
+  </div>
+  <span class="hb-footer__rule"></span>
+  <div class="hb-footer__bar">
+    <span class="hb-footer__copyright" data-ar="© ٢٠٢٦ هايبيس. جميع الحقوق محفوظة">&copy; 2026 HIGHBASE. All Rights Reserved</span>
+  </div>
+</footer>
+
+<!-- Scroll to top (organism) — a page affordance, deliberately not part of the Footer -->
+<button type="button" class="hb-scroll-top" id="to-top" aria-label="Back to top" hidden>
+  <svg class="hb-i" aria-hidden="true"><use href="#hb-i-chevronUp"/></svg>
+  <svg class="hb-i" aria-hidden="true"><use href="#hb-i-chevronUp"/></svg>
+</button>

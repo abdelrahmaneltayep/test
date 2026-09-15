@@ -1,0 +1,13 @@
+require('./wrap.js');const {chromium}=require('playwright');
+const EXE='/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell';
+(async()=>{const b=await chromium.launch({executablePath:EXE});
+ const p=await b.newPage({viewport:{width:1440,height:1100}});
+ const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+ await p.goto('file://'+__dirname+'/sweep.html');await p.waitForTimeout(800);
+ await p.screenshot({path:'v-verify.png',fullPage:true});
+ await p.click('[data-act="place-order"]');await p.waitForTimeout(1500);
+ await p.screenshot({path:'v-paid.png',fullPage:true});
+ await p.evaluate(()=>location.hash='why');await p.waitForTimeout(400);
+ await p.screenshot({path:'v-why.png',fullPage:true});
+ console.log('errors:',errs.length?errs:'none');
+ await b.close()})();
