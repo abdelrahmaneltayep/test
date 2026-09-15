@@ -368,6 +368,202 @@
         '<span class="hb-headline-sm">' + (missing ? missing + ' of ' + docsNeeded() : docsOnFile() + ' of ' + docsNeeded()) + '</span></div></div>';
   }
 
+  /* ============================================================
+     11-15 · the List Item molecule, five ways. Every row below is the component's
+     own markup — lead / body (top · title · time · text · actions) / trail — wrapped
+     in .hb-list. What changes is which slot carries the value, and what a row offers.
+     One prototype-layer override applies to all five: the component paints its text
+     slot in on-surface-variant, and a value the buyer is checking should be on-surface,
+     so the label takes the title slot and the value takes the text slot in full colour.
+     ============================================================ */
+  function li(o){
+    return '<div class="hb-li"' + (o.unread ? ' data-unread' : '') + (o.state ? ' data-state="' + o.state + '"' : '') + '>' +
+      (o.lead === false ? '' : '<span class="hb-li__lead">' + (o.lead || I.file) + '</span>') +
+      '<span class="hb-li__body">' +
+        '<span class="hb-li__top"><span class="hb-li__title">' + o.title + '</span>' +
+        (o.time ? '<span class="hb-li__time">' + o.time + '</span>' : '') + '</span>' +
+        (o.text ? '<span class="hb-li__text">' + o.text + '</span>' : '') +
+        (o.actions ? '<span class="hb-li__actions">' + o.actions + '</span>' : '') +
+      '</span>' +
+      (o.trail ? '<span class="hb-li__trail">' + o.trail + '</span>' : '') + '</div>';
+  }
+  function list(cls, rows){ return '<div class="hb-list ' + cls + '">' + rows.join('') + '</div>'; }
+  function docText(d){
+    var f = d.file;
+    return f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional');
+  }
+
+  /* ---------- 11 · List — the component as built: label, value, status ---------- */
+  function listBranch(){
+    var b = state.branchDetails;
+    return list("plist", [
+      li({ lead: I.building, title: "Branch Name", text: esc(b.name) }),
+      li({ lead: I.building, title: "Branch Phone", text: phoneText() }),
+      li({ lead: I.message,  title: "Branch Email", text: esc(b.email) })
+    ]);
+  }
+  function listAddress(){
+    var a = state.address;
+    return list("plist", [
+      li({ lead: I.location, title: "City", text: esc(a.city) + ', ' + esc(a.state) + ' · ' + esc(a.country) }),
+      li({ lead: I.location, title: "Street and building", text: 'Street ' + esc(a.street) + ' · Building ' + esc(a.building) }),
+      li({ lead: I.location, title: "ZIP / Postal Code", text: '<span class="num">' + esc(a.zip) + '</span>' }),
+      li({ lead: I.location, title: "Map pin", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("active", "Saved") : statusChip("pending", "Not set") })
+    ]);
+  }
+  function listDocs(){
+    var rows = [li({ lead: I.invoice, title: "CR Number", text: '<span class="num">' + esc(state.crNumber) + '</span>' }),
+      li({ lead: I.invoice, title: vatLabel(), text: vatValue() })];
+    docIds().forEach(function (k) {
+      var d = state.docs[k];
+      rows.push(li({ lead: d.file ? I.file : I.upload, state: d.file ? "" : "todo",
+        title: esc(d.label), text: docText(d), trail: docStatusChip(d) }));
+    });
+    return list("plist", rows);
+  }
+
+  /* ---------- 12 · Ledger — one line per value, the value in the trailing slot ---------- */
+  function ledgerRow(label, value){ return li({ lead: false, title: label, trail: '<span class="hb-body-md">' + value + '</span>' }); }
+  function ledgerBranch(){
+    var b = state.branchDetails;
+    return list("pledger", [ledgerRow("Branch Name", esc(b.name)), ledgerRow("Branch Phone", phoneText()), ledgerRow("Branch Email", esc(b.email))]);
+  }
+  function ledgerAddress(){
+    var a = state.address;
+    return list("pledger", [ledgerRow("Country", esc(a.country)), ledgerRow("State / Province", esc(a.state)),
+      ledgerRow("City", esc(a.city)), ledgerRow("Street Address", esc(a.street)),
+      ledgerRow("Building", esc(a.building)), ledgerRow("ZIP / Postal Code", '<span class="num">' + esc(a.zip) + '</span>'),
+      ledgerRow("Map pin", esc(pinLabel()))]);
+  }
+  function ledgerDocs(){
+    var rows = [ledgerRow("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>'), ledgerRow(vatLabel(), vatValue())];
+    docIds().forEach(function (k) {
+      var d = state.docs[k];
+      rows.push(li({ lead: false, state: d.file ? "" : "todo", title: esc(d.label),
+        trail: '<span class="hb-body-sm muted">' + (d.file ? esc(d.file.name) : '') + '</span>' + docStatusChip(d) }));
+    });
+    return list("pledger", rows);
+  }
+
+  /* ---------- 13 · Activity — what was saved and when; only what needs the buyer is tinted ---------- */
+  function activityBranch(){
+    var b = state.branchDetails;
+    return list("pactivity", [
+      li({ lead: I.building, title: "Branch details saved", time: "12 Jan 2026",
+        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email), trail: statusChip("completed", "No change") })
+    ]);
+  }
+  function activityAddress(){
+    var a = state.address;
+    return list("pactivity", [
+      li({ lead: I.location, title: "Delivery address saved", time: "12 Jan 2026",
+        text: addressLines().join(' · '), trail: statusChip("completed", "No change") }),
+      li({ lead: I.location, unread: a.pinned, title: a.pinned ? "Map pin updated" : "Map pin never set",
+        time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("approved", "Recent") : statusChip("pending", "Not set") })
+    ]);
+  }
+  function activityDocs(){
+    var rows = [];
+    docIds().forEach(function (k) {
+      var d = state.docs[k], f = d.file;
+      rows.push(li({ lead: f ? I.file : I.upload, state: f ? "" : "todo",
+        title: f ? esc(d.label) + ' uploaded' : esc(d.label) + ' is missing',
+        time: f ? esc(f.at || '') : '', text: docText(d), trail: docStatusChip(d) }));
+    });
+    rows.push(li({ lead: I.invoice, title: "Registration on file", time: "12 Jan 2026",
+      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue(),
+      trail: statusChip("completed", "No change") }));
+    return list("pactivity", rows);
+  }
+
+  /* ---------- 14 · Actions — every row carries what can be done to it ---------- */
+  function rowAct(label, act, attrs){
+    return '<button type="button" class="linkbtn hb-label-md" data-act="' + act + '"' + (attrs || '') + '>' + label + '</button>';
+  }
+  function copyAct(value, label){
+    return rowAct("Copy", "copy-value", ' data-value="' + esc(value) + '" data-label="' + esc(label) + '"');
+  }
+  function changeAct(section, label){
+    return rowAct(label || "Change", "open-drawer", ' data-drawer="' + section + '"');
+  }
+  function actionsBranch(){
+    var b = state.branchDetails;
+    return list("pactions", [
+      li({ lead: I.building, title: "Branch Name", text: esc(b.name), actions: changeAct("branch") }),
+      li({ lead: I.building, title: "Branch Phone", text: phoneText(),
+        actions: copyAct('+973 ' + b.phone, "branch phone") + changeAct("branch") }),
+      li({ lead: I.message, title: "Branch Email", text: esc(b.email),
+        actions: copyAct(b.email, "branch email") + changeAct("branch") })
+    ]);
+  }
+  function actionsAddress(){
+    var a = state.address;
+    return list("pactions", [
+      li({ lead: I.location, title: "Delivery Address", text: addressLines().join(', '),
+        actions: copyAct(addressLines().join(', '), "delivery address") + changeAct("address") }),
+      li({ lead: I.location, title: "Map pin", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("active", "Saved") : statusChip("pending", "Not set"),
+        actions: changeAct("address", a.pinned ? "Move pin" : "Set pin") })
+    ]);
+  }
+  function actionsDocs(){
+    var rows = [li({ lead: I.invoice, title: "CR Number", text: '<span class="num">' + esc(state.crNumber) + '</span>',
+      actions: copyAct(state.crNumber, "CR number") + changeAct("docs", "Edit") })];
+    docIds().forEach(function (k) {
+      var d = state.docs[k], f = d.file;
+      rows.push(li({ lead: f ? I.file : I.upload, state: f ? "" : "todo", title: esc(d.label), text: docText(d),
+        trail: docStatusChip(d),
+        actions: (f ? rowAct("Preview", "view-doc", ' data-doc="' + k + '"') + changeAct("docs", "Replace")
+                    : changeAct("docs", "Upload")) }));
+    });
+    return list("pactions", rows);
+  }
+
+  /* ---------- 15 · Grouped — subheaders inside the list, a count per group ---------- */
+  function group(title, count, rows){
+    return '<div class="pgroup__head"><span class="hb-label-lg">' + title + '</span>' +
+      '<span class="hb-label-md muted">' + count + '</span></div>' + rows.join('');
+  }
+  function groupedBranch(){
+    var b = state.branchDetails;
+    return list("pgrouped", [
+      group("Who receives it", "1 value", [li({ lead: I.building, title: "Branch Name", text: esc(b.name) })]),
+      group("How the driver reaches them", "2 values", [
+        li({ lead: I.building, title: "Branch Phone", text: phoneText() }),
+        li({ lead: I.message, title: "Branch Email", text: esc(b.email) })])
+    ]);
+  }
+  function groupedAddress(){
+    var a = state.address;
+    return list("pgrouped", [
+      group("Where", "3 values", [
+        li({ lead: I.location, title: "Country", text: esc(a.country) }),
+        li({ lead: I.location, title: "State / Province", text: esc(a.state) }),
+        li({ lead: I.location, title: "City", text: esc(a.city) })]),
+      group("Exactly where", "4 values", [
+        li({ lead: I.location, title: "Street Address", text: esc(a.street) }),
+        li({ lead: I.location, title: "Building", text: esc(a.building) }),
+        li({ lead: I.location, title: "ZIP / Postal Code", text: '<span class="num">' + esc(a.zip) + '</span>' }),
+        li({ lead: I.location, title: "Map pin", text: esc(pinLabel()),
+          trail: a.pinned ? statusChip("active", "Saved") : statusChip("pending", "Not set") })])
+    ]);
+  }
+  function groupedDocs(){
+    var files = docIds().map(function (k) {
+      var d = state.docs[k];
+      return li({ lead: d.file ? I.file : I.upload, state: d.file ? "" : "todo",
+        title: esc(d.label), text: docText(d), trail: docStatusChip(d) });
+    });
+    return list("pgrouped", [
+      group("Registration", "2 values", [
+        li({ lead: I.invoice, title: "CR Number", text: '<span class="num">' + esc(state.crNumber) + '</span>' }),
+        li({ lead: I.invoice, title: vatLabel(), text: vatValue() })]),
+      group("Files", docsOnFile() + ' of ' + docsNeeded() + ' on file', files)
+    ]);
+  }
+
   /* The five, with what each one is for — the Compare screen reads the same list. */
   var PREVIEWS = [
     { id: "grid",  name: "Facts",   branch: gridBranch,  address: gridAddress,  docs: gridDocs,
@@ -409,7 +605,27 @@
     { id: "receipt", name: "Receipt",  branch: rcpBranch, address: rcpAddress, docs: rcpDocs,
       how: "A summary sheet: thumbnail rows with the value at the end, a rule, then the line that matters set large, the way a total is.",
       best: "The last screen before paying — it reads like the order summary next to it, so the page holds one voice.",
-      risk: "Emphasis by size means one line wins; if the buyer needs a different value, it is the smallest thing on the card." }
+      risk: "Emphasis by size means one line wins; if the buyer needs a different value, it is the smallest thing on the card." },
+    { id: "list",     name: "List",     branch: listBranch,     address: listAddress,     docs: listDocs,
+      how: "The List Item molecule as built — a leading icon, the label, the value beneath it, a status pill in the trailing slot, one divider per row.",
+      best: "The safest of the fifteen: a component the buyer already meets in notifications and menus, carrying nothing it was not built to carry.",
+      risk: "Every row looks equally important, so a section with seven values reads as seven equal things." },
+    { id: "ledger",   name: "Ledger",   branch: ledgerBranch,   address: ledgerAddress,   docs: ledgerDocs,
+      how: "The same component with the leading slot dropped and the value moved into the trailing slot: one line per value, values aligned down the end edge.",
+      best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
+      risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
+    { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs,
+      how: "The notification variant: what was saved and when, the date in the time slot, and the tint reserved for what changed recently or still needs the buyer.",
+      best: "Returning buyers asking the real question — has anything changed since my last order?",
+      risk: "It reports history, not the current record; a buyer looking for one value has to read a sentence to find it." },
+    { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
+      how: "Every row uses the component's actions slot: Copy on an identifier, Preview on a document, Upload or Change opening the Drawer at that section.",
+      best: "Doing one small thing without opening anything — copying the CR number, replacing one expired licence.",
+      risk: "Three actions a row is a lot of blue; it is the busiest of the fifteen and the least restful to read." },
+    { id: "grouped",  name: "Grouped",  branch: groupedBranch,  address: groupedAddress,  docs: groupedDocs,
+      how: "One list per section, split by subheaders with a count — Where and Exactly where, Registration and Files.",
+      best: "Sections that keep growing: the grouping survives a fourth document or a second contact where a flat list stops being readable.",
+      risk: "Two subheaders over seven values is more structure than the data needs today." }
   ];
   function previewStyle(){
     for (var i = 0; i < PREVIEWS.length; i++) { if (PREVIEWS[i].id === state.previewStyle) { return PREVIEWS[i]; } }

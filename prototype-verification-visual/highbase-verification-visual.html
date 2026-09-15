@@ -1964,6 +1964,36 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .stylebar__lines{flex:0 0 auto}
 .stylebar .hb-segmented{width:100%;overflow-x:auto}
 
+/* ---------- Version B · preview styles 11-15, all on the List Item molecule ---------- */
+/* The component paints its text slot in on-surface-variant, which is right for a
+   notification's supporting line and wrong for a value the buyer is checking. In these
+   five the label takes the title slot and the value takes the text slot, so the value is
+   restored to on-surface. That is the only override; every other rule below is layout. */
+.plist .hb-li__text,.pactivity .hb-li__text,.pactions .hb-li__text,.pgrouped .hb-li__text{color:var(--hb-color-on-surface)}
+.hb-list .hb-li__text{overflow-wrap:anywhere}
+.hb-list .hb-li[data-state="todo"]{background:var(--hb-color-warning-container)}
+.hb-list .hb-li[data-state="todo"] .hb-li__text,.hb-list .hb-li[data-state="todo"] .hb-li__time{color:var(--hb-color-on-warning-container)}
+.hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-warning-light);color:var(--hb-color-on-warning-container)}
+
+/* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
+.pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
+.pledger .hb-li__title{font-weight:var(--hb-font-weight-regular);color:var(--hb-color-on-surface-variant)}
+.pledger .hb-li__trail{max-width:60%;justify-content:flex-end;text-align:end;flex-wrap:wrap}
+.pledger .hb-li__trail .hb-body-md{overflow-wrap:anywhere}
+
+/* 14 · Actions — the component's actions slot, text buttons only */
+.pactions .hb-li__actions{flex-wrap:wrap}
+
+/* 15 · Grouped — subheaders inside the list */
+.pgroup__head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--hb-space-12);
+  padding:var(--hb-space-12) var(--hb-component-list-item-padding-x);
+  background:var(--hb-color-surface-container-low);
+  border-bottom:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.pgroup__head .hb-label-lg{color:var(--hb-color-on-surface-heading)}
+
+/* fifteen segments no longer fit one track: the review switcher wraps (proposal) */
+.stylebar .hb-segmented{flex-wrap:wrap;overflow-x:visible;row-gap:var(--hb-space-4)}
+
 /* The Drawer carries a section's edit form; its panel is narrower than the page, so the
    two-column grids inside it stack and the inline edit chrome is dropped. */
 .drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
@@ -2089,7 +2119,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .pused{flex-direction:column}
   .pused__map{width:100%;height:var(--hb-space-72);flex:0 0 auto}
   .docsheet{flex:1 1 100%}
-  .stylebar .hb-segmented{width:100%;overflow-x:auto}
+  /* the switcher wraps rather than scrolling, so no segment is ever half-visible */
+  .stylebar .hb-segmented{width:100%;overflow-x:visible;flex-wrap:wrap}
   .site{padding-inline:var(--hb-space-12)}
   .grid2,.addr,.kv{grid-template-columns:1fr}
   .progress{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -3089,6 +3120,202 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '<span class="hb-headline-sm">' + (missing ? missing + ' of ' + docsNeeded() : docsOnFile() + ' of ' + docsNeeded()) + '</span></div></div>';
   }
 
+  /* ============================================================
+     11-15 · the List Item molecule, five ways. Every row below is the component's
+     own markup — lead / body (top · title · time · text · actions) / trail — wrapped
+     in .hb-list. What changes is which slot carries the value, and what a row offers.
+     One prototype-layer override applies to all five: the component paints its text
+     slot in on-surface-variant, and a value the buyer is checking should be on-surface,
+     so the label takes the title slot and the value takes the text slot in full colour.
+     ============================================================ */
+  function li(o){
+    return '<div class="hb-li"' + (o.unread ? ' data-unread' : '') + (o.state ? ' data-state="' + o.state + '"' : '') + '>' +
+      (o.lead === false ? '' : '<span class="hb-li__lead">' + (o.lead || I.file) + '</span>') +
+      '<span class="hb-li__body">' +
+        '<span class="hb-li__top"><span class="hb-li__title">' + o.title + '</span>' +
+        (o.time ? '<span class="hb-li__time">' + o.time + '</span>' : '') + '</span>' +
+        (o.text ? '<span class="hb-li__text">' + o.text + '</span>' : '') +
+        (o.actions ? '<span class="hb-li__actions">' + o.actions + '</span>' : '') +
+      '</span>' +
+      (o.trail ? '<span class="hb-li__trail">' + o.trail + '</span>' : '') + '</div>';
+  }
+  function list(cls, rows){ return '<div class="hb-list ' + cls + '">' + rows.join('') + '</div>'; }
+  function docText(d){
+    var f = d.file;
+    return f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional');
+  }
+
+  /* ---------- 11 · List — the component as built: label, value, status ---------- */
+  function listBranch(){
+    var b = state.branchDetails;
+    return list("plist", [
+      li({ lead: I.building, title: "Branch Name", text: esc(b.name) }),
+      li({ lead: I.building, title: "Branch Phone", text: phoneText() }),
+      li({ lead: I.message,  title: "Branch Email", text: esc(b.email) })
+    ]);
+  }
+  function listAddress(){
+    var a = state.address;
+    return list("plist", [
+      li({ lead: I.location, title: "City", text: esc(a.city) + ', ' + esc(a.state) + ' · ' + esc(a.country) }),
+      li({ lead: I.location, title: "Street and building", text: 'Street ' + esc(a.street) + ' · Building ' + esc(a.building) }),
+      li({ lead: I.location, title: "ZIP / Postal Code", text: '<span class="num">' + esc(a.zip) + '</span>' }),
+      li({ lead: I.location, title: "Map pin", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("active", "Saved") : statusChip("pending", "Not set") })
+    ]);
+  }
+  function listDocs(){
+    var rows = [li({ lead: I.invoice, title: "CR Number", text: '<span class="num">' + esc(state.crNumber) + '</span>' }),
+      li({ lead: I.invoice, title: vatLabel(), text: vatValue() })];
+    docIds().forEach(function (k) {
+      var d = state.docs[k];
+      rows.push(li({ lead: d.file ? I.file : I.upload, state: d.file ? "" : "todo",
+        title: esc(d.label), text: docText(d), trail: docStatusChip(d) }));
+    });
+    return list("plist", rows);
+  }
+
+  /* ---------- 12 · Ledger — one line per value, the value in the trailing slot ---------- */
+  function ledgerRow(label, value){ return li({ lead: false, title: label, trail: '<span class="hb-body-md">' + value + '</span>' }); }
+  function ledgerBranch(){
+    var b = state.branchDetails;
+    return list("pledger", [ledgerRow("Branch Name", esc(b.name)), ledgerRow("Branch Phone", phoneText()), ledgerRow("Branch Email", esc(b.email))]);
+  }
+  function ledgerAddress(){
+    var a = state.address;
+    return list("pledger", [ledgerRow("Country", esc(a.country)), ledgerRow("State / Province", esc(a.state)),
+      ledgerRow("City", esc(a.city)), ledgerRow("Street Address", esc(a.street)),
+      ledgerRow("Building", esc(a.building)), ledgerRow("ZIP / Postal Code", '<span class="num">' + esc(a.zip) + '</span>'),
+      ledgerRow("Map pin", esc(pinLabel()))]);
+  }
+  function ledgerDocs(){
+    var rows = [ledgerRow("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>'), ledgerRow(vatLabel(), vatValue())];
+    docIds().forEach(function (k) {
+      var d = state.docs[k];
+      rows.push(li({ lead: false, state: d.file ? "" : "todo", title: esc(d.label),
+        trail: '<span class="hb-body-sm muted">' + (d.file ? esc(d.file.name) : '') + '</span>' + docStatusChip(d) }));
+    });
+    return list("pledger", rows);
+  }
+
+  /* ---------- 13 · Activity — what was saved and when; only what needs the buyer is tinted ---------- */
+  function activityBranch(){
+    var b = state.branchDetails;
+    return list("pactivity", [
+      li({ lead: I.building, title: "Branch details saved", time: "12 Jan 2026",
+        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email), trail: statusChip("completed", "No change") })
+    ]);
+  }
+  function activityAddress(){
+    var a = state.address;
+    return list("pactivity", [
+      li({ lead: I.location, title: "Delivery address saved", time: "12 Jan 2026",
+        text: addressLines().join(' · '), trail: statusChip("completed", "No change") }),
+      li({ lead: I.location, unread: a.pinned, title: a.pinned ? "Map pin updated" : "Map pin never set",
+        time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("approved", "Recent") : statusChip("pending", "Not set") })
+    ]);
+  }
+  function activityDocs(){
+    var rows = [];
+    docIds().forEach(function (k) {
+      var d = state.docs[k], f = d.file;
+      rows.push(li({ lead: f ? I.file : I.upload, state: f ? "" : "todo",
+        title: f ? esc(d.label) + ' uploaded' : esc(d.label) + ' is missing',
+        time: f ? esc(f.at || '') : '', text: docText(d), trail: docStatusChip(d) }));
+    });
+    rows.push(li({ lead: I.invoice, title: "Registration on file", time: "12 Jan 2026",
+      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue(),
+      trail: statusChip("completed", "No change") }));
+    return list("pactivity", rows);
+  }
+
+  /* ---------- 14 · Actions — every row carries what can be done to it ---------- */
+  function rowAct(label, act, attrs){
+    return '<button type="button" class="linkbtn hb-label-md" data-act="' + act + '"' + (attrs || '') + '>' + label + '</button>';
+  }
+  function copyAct(value, label){
+    return rowAct("Copy", "copy-value", ' data-value="' + esc(value) + '" data-label="' + esc(label) + '"');
+  }
+  function changeAct(section, label){
+    return rowAct(label || "Change", "open-drawer", ' data-drawer="' + section + '"');
+  }
+  function actionsBranch(){
+    var b = state.branchDetails;
+    return list("pactions", [
+      li({ lead: I.building, title: "Branch Name", text: esc(b.name), actions: changeAct("branch") }),
+      li({ lead: I.building, title: "Branch Phone", text: phoneText(),
+        actions: copyAct('+973 ' + b.phone, "branch phone") + changeAct("branch") }),
+      li({ lead: I.message, title: "Branch Email", text: esc(b.email),
+        actions: copyAct(b.email, "branch email") + changeAct("branch") })
+    ]);
+  }
+  function actionsAddress(){
+    var a = state.address;
+    return list("pactions", [
+      li({ lead: I.location, title: "Delivery Address", text: addressLines().join(', '),
+        actions: copyAct(addressLines().join(', '), "delivery address") + changeAct("address") }),
+      li({ lead: I.location, title: "Map pin", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("active", "Saved") : statusChip("pending", "Not set"),
+        actions: changeAct("address", a.pinned ? "Move pin" : "Set pin") })
+    ]);
+  }
+  function actionsDocs(){
+    var rows = [li({ lead: I.invoice, title: "CR Number", text: '<span class="num">' + esc(state.crNumber) + '</span>',
+      actions: copyAct(state.crNumber, "CR number") + changeAct("docs", "Edit") })];
+    docIds().forEach(function (k) {
+      var d = state.docs[k], f = d.file;
+      rows.push(li({ lead: f ? I.file : I.upload, state: f ? "" : "todo", title: esc(d.label), text: docText(d),
+        trail: docStatusChip(d),
+        actions: (f ? rowAct("Preview", "view-doc", ' data-doc="' + k + '"') + changeAct("docs", "Replace")
+                    : changeAct("docs", "Upload")) }));
+    });
+    return list("pactions", rows);
+  }
+
+  /* ---------- 15 · Grouped — subheaders inside the list, a count per group ---------- */
+  function group(title, count, rows){
+    return '<div class="pgroup__head"><span class="hb-label-lg">' + title + '</span>' +
+      '<span class="hb-label-md muted">' + count + '</span></div>' + rows.join('');
+  }
+  function groupedBranch(){
+    var b = state.branchDetails;
+    return list("pgrouped", [
+      group("Who receives it", "1 value", [li({ lead: I.building, title: "Branch Name", text: esc(b.name) })]),
+      group("How the driver reaches them", "2 values", [
+        li({ lead: I.building, title: "Branch Phone", text: phoneText() }),
+        li({ lead: I.message, title: "Branch Email", text: esc(b.email) })])
+    ]);
+  }
+  function groupedAddress(){
+    var a = state.address;
+    return list("pgrouped", [
+      group("Where", "3 values", [
+        li({ lead: I.location, title: "Country", text: esc(a.country) }),
+        li({ lead: I.location, title: "State / Province", text: esc(a.state) }),
+        li({ lead: I.location, title: "City", text: esc(a.city) })]),
+      group("Exactly where", "4 values", [
+        li({ lead: I.location, title: "Street Address", text: esc(a.street) }),
+        li({ lead: I.location, title: "Building", text: esc(a.building) }),
+        li({ lead: I.location, title: "ZIP / Postal Code", text: '<span class="num">' + esc(a.zip) + '</span>' }),
+        li({ lead: I.location, title: "Map pin", text: esc(pinLabel()),
+          trail: a.pinned ? statusChip("active", "Saved") : statusChip("pending", "Not set") })])
+    ]);
+  }
+  function groupedDocs(){
+    var files = docIds().map(function (k) {
+      var d = state.docs[k];
+      return li({ lead: d.file ? I.file : I.upload, state: d.file ? "" : "todo",
+        title: esc(d.label), text: docText(d), trail: docStatusChip(d) });
+    });
+    return list("pgrouped", [
+      group("Registration", "2 values", [
+        li({ lead: I.invoice, title: "CR Number", text: '<span class="num">' + esc(state.crNumber) + '</span>' }),
+        li({ lead: I.invoice, title: vatLabel(), text: vatValue() })]),
+      group("Files", docsOnFile() + ' of ' + docsNeeded() + ' on file', files)
+    ]);
+  }
+
   /* The five, with what each one is for — the Compare screen reads the same list. */
   var PREVIEWS = [
     { id: "grid",  name: "Facts",   branch: gridBranch,  address: gridAddress,  docs: gridDocs,
@@ -3130,7 +3357,27 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     { id: "receipt", name: "Receipt",  branch: rcpBranch, address: rcpAddress, docs: rcpDocs,
       how: "A summary sheet: thumbnail rows with the value at the end, a rule, then the line that matters set large, the way a total is.",
       best: "The last screen before paying — it reads like the order summary next to it, so the page holds one voice.",
-      risk: "Emphasis by size means one line wins; if the buyer needs a different value, it is the smallest thing on the card." }
+      risk: "Emphasis by size means one line wins; if the buyer needs a different value, it is the smallest thing on the card." },
+    { id: "list",     name: "List",     branch: listBranch,     address: listAddress,     docs: listDocs,
+      how: "The List Item molecule as built — a leading icon, the label, the value beneath it, a status pill in the trailing slot, one divider per row.",
+      best: "The safest of the fifteen: a component the buyer already meets in notifications and menus, carrying nothing it was not built to carry.",
+      risk: "Every row looks equally important, so a section with seven values reads as seven equal things." },
+    { id: "ledger",   name: "Ledger",   branch: ledgerBranch,   address: ledgerAddress,   docs: ledgerDocs,
+      how: "The same component with the leading slot dropped and the value moved into the trailing slot: one line per value, values aligned down the end edge.",
+      best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
+      risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
+    { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs,
+      how: "The notification variant: what was saved and when, the date in the time slot, and the tint reserved for what changed recently or still needs the buyer.",
+      best: "Returning buyers asking the real question — has anything changed since my last order?",
+      risk: "It reports history, not the current record; a buyer looking for one value has to read a sentence to find it." },
+    { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
+      how: "Every row uses the component's actions slot: Copy on an identifier, Preview on a document, Upload or Change opening the Drawer at that section.",
+      best: "Doing one small thing without opening anything — copying the CR number, replacing one expired licence.",
+      risk: "Three actions a row is a lot of blue; it is the busiest of the fifteen and the least restful to read." },
+    { id: "grouped",  name: "Grouped",  branch: groupedBranch,  address: groupedAddress,  docs: groupedDocs,
+      how: "One list per section, split by subheaders with a count — Where and Exactly where, Registration and Files.",
+      best: "Sections that keep growing: the grouping survives a fourth document or a second contact where a flat list stops being readable.",
+      risk: "Two subheaders over seven values is more structure than the data needs today." }
   ];
   function previewStyle(){
     for (var i = 0; i < PREVIEWS.length; i++) { if (PREVIEWS[i].id === state.previewStyle) { return PREVIEWS[i]; } }
@@ -3386,8 +3633,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
             btn("Open version " + v.k, { style: "outlined", size: "sm", attrs: ' data-act="goto" data-screen="' + v.k.toLowerCase() + '"' }) +
           '</div></div>';
       }).join('') + '</div>' +
-      '<h2 class="hb-title-lg">Ten ways for B to preview a section\'s data</h2>' +
-      '<p class="hb-body-md">All ten are read only and all ten hand editing to the same Drawer — what differs is how much of the data is on the page, and how much work it is to read. The first five were drawn from the page itself; the last five follow the reference layouts: an insurance card, a smart-home list, dashboard metrics, a payment sheet and a cart summary. Version B carries a switcher so the same order can be seen in each.</p>' +
+      '<h2 class="hb-title-lg">Fifteen ways for B to preview a section\'s data</h2>' +
+      '<p class="hb-body-md">All fifteen are read only and all fifteen hand editing to the same Drawer — what differs is how much of the data is on the page, and how much work it is to read. Five were drawn from the page itself; five follow the reference layouts (an insurance card, a smart-home list, dashboard metrics, a payment sheet, a cart summary); and five are the List Item molecule used five ways, since that component already carries a leading slot, a title, a supporting line, an actions row and a trailing slot. Version B carries a switcher so the same order can be seen in each.</p>' +
       '<div class="vs">' + PREVIEWS.map(function (p, i) {
         return '<div class="panel"><div class="panel__head"><span class="acc__no hb-label-lg">' + (i + 1) + '</span><h3 class="hb-title-md">' + p.name + '</h3></div>' +
           '<div class="panel__body">' +
@@ -3397,7 +3644,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
             btn("See B in " + p.name, { style: "outlined", size: "sm", attrs: ' data-act="goto-style" data-preview="' + p.id + '"' }) +
           '</div></div>';
       }).join('') + '</div>' +
-      '<p class="hb-body-md"><b>The recommendation for B:</b> <b>Facts</b> on the storefront, because the labels make a wrong value visible without opening anything, with <b>Summary</b> as the compact-width treatment where the whole page should fit above the fold. <b>Tiles</b> is the strongest of the reference five and the best candidate for phones if the rows ever become tappable. <b>Receipt</b> is the one to try on this page specifically: it speaks with the same voice as the order summary beside it. <b>Credential</b> suits documents more than it suits a branch, <b>Options</b> earns its keep only once an account has a second address, and <b>Highlights</b> is the fastest read but decides for the buyer what matters. <b>As used</b> remains the one to test with buyers, and <b>Record</b> belongs in the dashboard.</p>' +
+      '<p class="hb-body-md"><b>The recommendation for B:</b> <b>Facts</b> on the storefront, because the labels make a wrong value visible without opening anything, with <b>Summary</b> as the compact-width treatment where the whole page should fit above the fold. <b>Tiles</b> is the strongest of the reference five and the best candidate for phones if the rows ever become tappable. <b>Receipt</b> is the one to try on this page specifically: it speaks with the same voice as the order summary beside it. <b>Credential</b> suits documents more than it suits a branch, <b>Options</b> earns its keep only once an account has a second address, and <b>Highlights</b> is the fastest read but decides for the buyer what matters. <b>As used</b> remains the one to test with buyers, and <b>Record</b> belongs in the dashboard. Of the five built on List Item, <b>List</b> is the one to ship if the answer has to be a component the system already owns, <b>Actions</b> is the most useful to a buyer who came to change one small thing, and <b>Grouped</b> is the only one that still reads well when a section grows past six values.</p>' +
       '<h2 class="hb-title-lg">Visual hierarchy, shared by all five</h2>' +
       '<p class="hb-body-md">One headline role per page (headline-md), one title role per section (title-md), labels in on-surface-variant and values in on-surface — colour is reserved for status pills and the single primary Button. Saved values are text, never orange. The only filled button on the screen is the one that moves the buyer forward; Cancel and Change are ghost or outlined. Detail lives one level down: behind a card, an accordion head, or a "Why do we ask for this?" disclosure.</p>' +
       '<h2 class="hb-title-lg">A recommendation</h2>' +

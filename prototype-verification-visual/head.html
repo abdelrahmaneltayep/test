@@ -519,6 +519,36 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .stylebar__lines{flex:0 0 auto}
 .stylebar .hb-segmented{width:100%;overflow-x:auto}
 
+/* ---------- Version B · preview styles 11-15, all on the List Item molecule ---------- */
+/* The component paints its text slot in on-surface-variant, which is right for a
+   notification's supporting line and wrong for a value the buyer is checking. In these
+   five the label takes the title slot and the value takes the text slot, so the value is
+   restored to on-surface. That is the only override; every other rule below is layout. */
+.plist .hb-li__text,.pactivity .hb-li__text,.pactions .hb-li__text,.pgrouped .hb-li__text{color:var(--hb-color-on-surface)}
+.hb-list .hb-li__text{overflow-wrap:anywhere}
+.hb-list .hb-li[data-state="todo"]{background:var(--hb-color-warning-container)}
+.hb-list .hb-li[data-state="todo"] .hb-li__text,.hb-list .hb-li[data-state="todo"] .hb-li__time{color:var(--hb-color-on-warning-container)}
+.hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-warning-light);color:var(--hb-color-on-warning-container)}
+
+/* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
+.pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
+.pledger .hb-li__title{font-weight:var(--hb-font-weight-regular);color:var(--hb-color-on-surface-variant)}
+.pledger .hb-li__trail{max-width:60%;justify-content:flex-end;text-align:end;flex-wrap:wrap}
+.pledger .hb-li__trail .hb-body-md{overflow-wrap:anywhere}
+
+/* 14 · Actions — the component's actions slot, text buttons only */
+.pactions .hb-li__actions{flex-wrap:wrap}
+
+/* 15 · Grouped — subheaders inside the list */
+.pgroup__head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--hb-space-12);
+  padding:var(--hb-space-12) var(--hb-component-list-item-padding-x);
+  background:var(--hb-color-surface-container-low);
+  border-bottom:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.pgroup__head .hb-label-lg{color:var(--hb-color-on-surface-heading)}
+
+/* fifteen segments no longer fit one track: the review switcher wraps (proposal) */
+.stylebar .hb-segmented{flex-wrap:wrap;overflow-x:visible;row-gap:var(--hb-space-4)}
+
 /* The Drawer carries a section's edit form; its panel is narrower than the page, so the
    two-column grids inside it stack and the inline edit chrome is dropped. */
 .drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
@@ -644,7 +674,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .pused{flex-direction:column}
   .pused__map{width:100%;height:var(--hb-space-72);flex:0 0 auto}
   .docsheet{flex:1 1 100%}
-  .stylebar .hb-segmented{width:100%;overflow-x:auto}
+  /* the switcher wraps rather than scrolling, so no segment is ever half-visible */
+  .stylebar .hb-segmented{width:100%;overflow-x:visible;flex-wrap:wrap}
   .site{padding-inline:var(--hb-space-12)}
   .grid2,.addr,.kv{grid-template-columns:1fr}
   .progress{grid-template-columns:repeat(2,minmax(0,1fr))}

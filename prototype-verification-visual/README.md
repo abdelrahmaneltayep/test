@@ -13,18 +13,18 @@ ID Document). Same edit and upload behaviour everywhere, from the previous propo
 | | How it discloses | Buyer sees first | Best for | Trade-off |
 |---|---|---|---|---|
 | **A · Steps** | Accordion — one section open, the rest collapse to one line and a status pill. *Confirm & continue* walks down. | The whole task's shape, one section's detail. | Buyers who want the order of things; closest to today's page. | Three clicks even when nothing needs changing. |
-| **B · Confirm** | Each card's body is the data itself, read only, in one of ten preview styles (below). *Change* / *Manage* open the **Drawer** with only that section's fields; the page holds no form. | The actual values beside their status, and one button. | Returning buyers with everything on file — most orders. | Editing happens in a panel over the page, so several changes mean several openings. |
+| **B · Confirm** | Each card's body is the data itself, read only, in one of fifteen preview styles (below). *Change* / *Manage* open the **Drawer** with only that section's fields; the page holds no form. | The actual values beside their status, and one button. | Returning buyers with everything on file — most orders. | Editing happens in a panel over the page, so several changes mean several openings. |
 | **C · Guided** | One question per screen, a step map beside it, one *Continue*; a review step before Place Order; *Why do we ask for this?* behind a disclosure. | One decision, nothing else. | Senior or infrequent buyers, and phones. | The longest path. |
 | **D · Tabs** | The three sections are tabs over one pane — one pane at a time, all three visible and reachable in any order, each with its own status pill. | All three sections and their states, one section's detail. | Buyers arriving to change one specific thing, without walking a sequence. | Tabs read as parallel; a buyer may place the order without opening the one that needed attention. |
 | **E · Checklist** | The page is a list of what is already done, ticked, value on each row. Nothing is a form until a row is expanded; a progress bar states how much is settled, and only what is outstanding is styled as work. | How ready the order is, and the one thing that is not. | Mixed accounts, and anyone who wants reassurance before committing. | Four rows of green can read as busy when nothing needs doing. |
 
-## B · ten ways to preview the section data
+## B · fifteen ways to preview the section data
 
 Every card in B shows the section's own data, read only, and every one of them hands editing
 to the same Drawer. The switcher above the cards (review chrome, `(proposal)`) swaps between
-ten treatments of that data. The first five come from the page itself; the last five follow
-reference layouts supplied for the purpose — an insurance card, a smart-home list, dashboard
-metrics, a payment sheet and a cart summary:
+fifteen treatments of that data. Five come from the page itself; five follow reference layouts
+supplied for the purpose (an insurance card, a smart-home list, dashboard metrics, a payment
+sheet, a cart summary); and five are the **List Item** molecule used five ways:
 
 | | How it previews | Best for | Trade-off |
 |---|---|---|---|
@@ -38,10 +38,23 @@ metrics, a payment sheet and a cart summary:
 | **8 Highlights** | The two values that decide the order as Stat Cards, everything else on one line beneath. | The quickest read of the ten. | It chooses for the buyer; the rest is invisible until the Drawer opens. |
 | **9 Options** | A bordered card per record, the one in use outlined and pilled, documents carrying Preview. | Accounts with more than one of something — a second address, a renewed licence. | Looks like a chooser and is not one; one record makes a lonely card. |
 | **10 Receipt** | A summary sheet: thumbnail rows, value at the end, a rule, then the line that matters set large. | The last screen before paying — same voice as the order summary beside it. | Emphasis by size means one line wins; another value is then the smallest thing on the card. |
+| **11 List** | The List Item molecule as built: leading icon, label, value beneath, status pill in the trailing slot. | The safest of the fifteen — a component buyers already meet in notifications and menus. | Every row looks equally important. |
+| **12 Ledger** | The same component with no leading slot and the value in the trailing slot: one line per value, values aligned down the end edge. | Checking many values quickly; the alignment exposes an odd one. | The densest, and the least scannable on a phone. |
+| **13 Activity** | The notification variant: what was saved and when, the date in the time slot, the tint reserved for what changed or still needs the buyer. | Returning buyers asking whether anything changed since the last order. | Reports history, not the record; finding one value means reading a sentence. |
+| **14 Actions** | Every row uses the actions slot: Copy an identifier, Preview a document, Upload or Change opening the Drawer at that section. | Doing one small thing without opening anything. | The busiest of the fifteen; three actions a row is a lot of blue. |
+| **15 Grouped** | One list per section split by subheaders with a count — Where and Exactly where, Registration and Files. | Sections that keep growing: a fourth document, a second contact. | More structure than today's data needs. |
+
+The List Item five carry one prototype-layer override, noted in `head.html`: the component paints
+its text slot in `on-surface-variant`, which is right for a notification's supporting line and
+wrong for a value being checked, so the label takes the title slot and the value is restored to
+`on-surface`. Everything else is the component's own markup — lead, body, top, title, time, text,
+actions, trail — inside `.hb-list`.
 
 Recommendation: **Facts** on the storefront, **Summary** at compact width, **Tiles** for phones,
 **Receipt** on this page specifically because it matches the order summary next to it, **As used**
-as the one to put in front of buyers, **Record** in the dashboard. Status in every style is the system's
+as the one to put in front of buyers, **Record** in the dashboard. Among the List Item five,
+**List** ships safest, **Actions** helps the buyer who came to change one thing, and **Grouped**
+is the only one that survives a section growing past six values. Status in every style is the system's
 status pill with its fixed vocabulary — the Chip atom has no success or warning style and none
 was invented.
 
@@ -55,7 +68,7 @@ Button; Cancel / Change are ghost or outlined.
 ./assemble.sh                             # slices → body.html → build.js → the artifact
 node audit.js                             # static checks, DS stylesheets verbatim
 NODE_PATH=../node_modules node sweep.js   # contrast in both directions on all six screens
-                                          # (each of B's ten preview styles and its three
+                                          # (each of B's fifteen preview styles and its three
                                           # Drawers), overflow at 1440 and 390,
                                           # and the A / B / C / D / E interaction paths
 ```
