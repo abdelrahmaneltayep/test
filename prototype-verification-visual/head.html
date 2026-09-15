@@ -362,6 +362,41 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 @media (max-width:1279px){.guide{grid-template-columns:1fr}.guide__nav{position:static;flex-direction:row;flex-wrap:wrap}}
 @media (max-width:743px){.vs{grid-template-columns:1fr}.review__row{flex-wrap:wrap}.review__row dt{flex-basis:100%}.guide__main{padding:var(--hb-space-20)}}
 
+
+/* ---------- Version D · Tabs (one pane at a time, order kept in view) ---------- */
+.tabbar{display:flex;flex-direction:column;gap:var(--hb-space-8);padding:var(--hb-space-12) var(--hb-space-20);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12) var(--hb-radius-12) 0 0;
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);border-bottom:0}
+.tabbar .hb-tabs{width:100%}
+.tabbar .hb-tab{flex:0 0 auto}
+.tab__badge{margin-inline-start:var(--hb-space-6)}
+.tabpane{background:var(--hb-color-surface);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  border-radius:0 0 var(--hb-radius-12) var(--hb-radius-12);padding:var(--hb-space-24)}
+.tabpane__head{display:flex;align-items:baseline;gap:var(--hb-space-12);flex-wrap:wrap;margin-bottom:var(--hb-space-16)}
+.tabpane__head p{color:var(--hb-color-on-surface-variant);flex:1 1 320px;min-width:0}
+.tabfoot{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;margin-top:var(--hb-space-24);
+  padding-top:var(--hb-space-16);border-top:var(--proto-hairline) solid var(--hb-color-surface-dim)}
+.tabfoot .spacer{flex:1}
+
+/* ---------- Version E · Checklist (everything on one page, ticked off) ---------- */
+.list{display:flex;flex-direction:column;gap:var(--hb-space-8)}
+.list__item{display:flex;align-items:flex-start;gap:var(--hb-space-16);padding:var(--hb-space-16) var(--hb-space-20);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.list__item[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.list__tick{width:var(--hb-space-28);height:var(--hb-space-28);flex:0 0 var(--hb-space-28);border-radius:var(--hb-radius-full);
+  display:grid;place-items:center;background:var(--hb-color-success);color:var(--hb-color-on-success);margin-top:var(--hb-space-2)}
+.list__item[data-state="todo"] .list__tick{background:var(--hb-color-warning);color:var(--hb-color-on-warning)}
+.list__tick .hb-i{font-size:var(--hb-space-16)}
+.list__main{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--hb-space-2)}
+.list__val{color:var(--hb-color-on-surface-variant)}
+.list__item[data-state="todo"] .list__val{color:var(--hb-color-on-warning-container)}
+.list__edit{margin-top:var(--hb-space-16);padding-top:var(--hb-space-16);border-top:var(--proto-hairline) solid var(--hb-color-surface-dim)}
+.progressbar{display:flex;align-items:center;gap:var(--hb-space-12);padding:var(--hb-space-16) var(--hb-space-20);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.progressbar__track{flex:1;height:var(--hb-space-8);border-radius:var(--hb-radius-full);background:var(--hb-color-surface-container);overflow:hidden}
+.progressbar__fill{height:100%;border-radius:inherit;background:var(--hb-color-success);transition:width 200ms ease} /* (proposal) motion placeholder */
+
 /* ---------- Annotation pins (proposal) — review commentary, not product UI ---------- */
 .pin{
   display:none;position:relative;width:var(--hb-space-20);height:var(--hb-space-20);

@@ -2,7 +2,7 @@
   /* ============================================================
      Screens, language, files, and one delegated listener
      ============================================================ */
-  var screens = ["a", "b", "c", "why"];
+  var screens = ["a", "b", "c", "d", "e", "why"];
   function show(name){
     if (screens.indexOf(name) === -1) { name = "a"; }
     state.version = name;
@@ -118,8 +118,11 @@
     if (missing.length || state.errors["tax-no"]) {
       state.errors.docs = missing.length ? "Still needed before you can place the order: " + missing.join(", ") : "Enter the tax number";
       missing.forEach(function (l) { var k = Object.keys(state.docs).filter(function (x) { return state.docs[x].label === l; })[0]; state.errors["doc-" + k] = "This document is required"; });
-      if (state.version === "a") { state.step.a = 2; } if (state.version === "c") { state.step.c = 2; } if (state.version === "b") { state.open.docs = true; }
-      renderVerify(); scrollTo(state.version === "a" ? "acc-docs" : "card-docs"); return;
+      var v = state.version;
+      if (v === "a") { state.step.a = 2; } else if (v === "c") { state.step.c = 2; }
+      else if (v === "d") { state.step.d = 2; } else if (v === "b") { state.open.docs = true; }
+      else if (v === "e") { state.expand.docs = true; }
+      renderVerify(); scrollTo({ a: "acc-docs", b: "card-docs", e: "row-docs" }[state.version] || ""); return;
     }
     state.placing = true; renderVerify();
     setTimeout(function () {
@@ -136,10 +139,16 @@
     "reset": function () { location.reload(); },
     "goto": function (el) { show(el.dataset.screen); },
     "open-step": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step[state.version] = +el.dataset.step; renderVerify(); },
+    "go-tab": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step.d = +el.dataset.step; renderVerify(); },
+    "expand-row": function (el) {
+      var id = el.dataset.row;
+      if (state.expand[id] && (state.editing.branch || state.editing.address)) { toast("Save or cancel your edit first.", { kind: "bad" }); return; }
+      state.expand[id] = !state.expand[id]; renderVerify();
+    },
     "go-step": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step.c = +el.dataset.step; renderVerify(); window.scrollTo(0, 0); },
     "next-step": function () {
       if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; }
-      var k = state.version; state.step[k] = Math.min(state.step[k] + 1, (k === "c" ? GUIDE : SECTIONS).length - 1); renderVerify();
+      var k = state.version; state.step[k] = Math.min(state.step[k] + 1, (k === "c" ? GUIDE : k === "d" ? TABS : SECTIONS).length - 1); renderVerify();
       if (k === "c") { window.scrollTo(0, 0); }
     },
     "toggle-card": function (el) {
@@ -148,10 +157,10 @@
       state.open[id] = !state.open[id]; renderVerify();
     },
     "show-vat": function () { state.hasVat = true; renderVerify(); var el = $("#screen-" + state.version + " #tax-no"); if (el) { el.focus(); } },
-    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "b") { state.open.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
+    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "b") { state.open.branch = true; } if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
     "cancel-branch": function () { state.errors = {}; state.editing.branch = false; renderVerify(); },
     "save-branch": saveBranch,
-    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "b") { state.open.address = true; } renderVerify(); },
+    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "b") { state.open.address = true; } if (state.version === "e") { state.expand.address = true; } renderVerify(); },
     "cancel-address": function () { state.errors = {}; state.editing.address = false; renderVerify(); },
     "save-address": saveAddress,
     "move-pin": function () { toast("The map would let you drag the pin here; the fields fill from it."); },

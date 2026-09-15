@@ -6,7 +6,8 @@
   var COUNTRIES = ["Bahrain", "Saudi Arabia", "Kuwait", "Qatar", "United Arab Emirates", "Oman"];
   var STATES = ["Capital", "Muharraq", "Northern", "Southern"];
   state.version = "a";
-  state.step = { a: 0, c: 0 };       // the open step in A and C
+  state.step = { a: 0, c: 0, d: 0 };  // the open step in A, C and the tab in D
+  state.expand = {};                  // the open editor in E
   state.open = {};                    // opened cards in B
   state.editing = { branch: false, address: false };
 

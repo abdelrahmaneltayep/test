@@ -33,6 +33,7 @@ const PARTS = [
   'molecules/FileUpload/FileUpload.css',
   'molecules/ListItem/ListItem.css',
   'molecules/StatCard/StatCard.css',
+  'molecules/Tabs/Tabs.css',
   'molecules/PageHeader/PageHeader.css',
   'molecules/Tooltip/Tooltip.css',
   'molecules/DialogHeader/DialogHeader.css',

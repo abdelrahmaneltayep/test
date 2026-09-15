@@ -118,4 +118,90 @@
         '</section></div>';
   }
 
-  function renderVerify(){ renderA(); renderB(); renderC(); applyLang(); wireDocDrops(); }
+
+
+  /* ============================================================
+     Version D · Tabs — the three sections are tabs over one pane. Only one
+     pane exists at a time, but all three stay visible and reachable in any
+     order, each carrying its own status. Disclosure by selection.
+     ============================================================ */
+  var TABS = [
+    { id: "branch",  label: "Branch Details",     lead: "Who the driver calls when the order arrives.", body: branchBlock },
+    { id: "address", label: "Delivery Address",   lead: "Where the order goes, and the pin the driver navigates to.", body: addressBlock },
+    { id: "docs",    label: "Business Documents", lead: "Kept on your account — act only if something is missing.", body: function () { return docsBlock({ vatAsLink: true }); } }
+  ];
+  function tabPill(i){
+    var t = TABS[i];
+    if (t.id !== "docs") { return '<span class="tab__badge">' + statusChip("active", "Saved") + '</span>'; }
+    return '<span class="tab__badge">' + (docsOk() ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded())) + '</span>';
+  }
+  function renderD(){
+    var now = state.step.d, t = TABS[now], tot = totals();
+    var bar = '<div class="tabbar"><div class="hb-tabs" role="tablist" aria-label="Verification sections">' +
+      TABS.map(function (x, i) {
+        return '<button type="button" class="hb-tab" role="tab" aria-selected="' + (i === now) + '" data-act="go-tab" data-step="' + i + '">' +
+          '<span class="hb-tab__icon">' + (i === now ? I.chevronRight : (x.id === "docs" && !docsOk() ? I.warning : I.check)) + '</span>' +
+          x.label + tabPill(i) + '</button>';
+      }).join('') + '</div>' +
+      '<span class="hb-body-sm muted">All three are already saved — open any one to change it</span></div>';
+    var pane = '<section class="tabpane" role="tabpanel" aria-label="' + t.label + '">' +
+      '<div class="tabpane__head"><h2 class="hb-title-lg">' + t.label + '</h2><p class="hb-body-md">' + t.lead + '</p></div>' +
+      t.body() +
+      '<div class="tabfoot">' +
+        (now > 0 ? btn("Previous", { style: "ghost", attrs: ' data-act="go-tab" data-step="' + (now - 1) + '"' }) : '') +
+        '<span class="spacer"></span>' +
+        (now < TABS.length - 1 ? btn("Next: " + TABS[now + 1].label, { style: "outlined", icon: I.chevronRight, attrs: ' data-act="go-tab" data-step="' + (now + 1) + '"' }) : '') +
+        btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) +
+      '</div></section>';
+    $("#screen-d").innerHTML = pageHead() +
+      '<div class="cols"><div class="stack">' + bar + pane + '</div>' +
+      rail('<ul class="checks hb-body-sm"><li>' + I.success + '<span>Address confirmed</span></li><li' + (docsOk() ? '' : ' data-state="warn"') + '>' + (docsOk() ? I.success : I.warning) + '<span>Required documents on file</span></li></ul>') + '</div>' +
+      '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(tot.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
+  }
+
+  /* ============================================================
+     Version E · Checklist — the whole page is a list of what is already done,
+     ticked. Nothing is a form until the buyer expands one row. A progress bar
+     states how much is settled. Disclosure by exception: only what is NOT
+     done looks like work.
+     ============================================================ */
+  var CHECKS = [
+    { id: "branch",  label: "Branch details",     val: branchLine,  done: function () { return true; },  editor: function () { return state.editing.branch ? branchForm() : branchView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Details", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-branch"' }) + '</div>'; } },
+    { id: "address", label: "Delivery address",   val: addressLine, done: function () { return true; },  editor: function () { return state.editing.address ? addressForm() : addressView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Address", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-address"' }) + '</div>'; } },
+    { id: "docs",    label: "Business documents", val: docsLine,    done: docsOk,                        editor: function () { return docsBlock({ vatAsLink: true }); } },
+    { id: "payment", label: "Payment method",     val: function () { return 'Highbase Payment · bank transfer of <b class="num">' + bhd(totals().total) + '</b> within 48 hours'; }, done: function () { return true; }, editor: null }
+  ];
+  function renderE(){
+    var done = CHECKS.filter(function (c) { return c.done(); }).length, all = CHECKS.length;
+    var pct = Math.round(done / all * 100);
+    var rows = CHECKS.map(function (c) {
+      var ok = c.done(), open = !!state.expand[c.id];
+      return '<div class="list__item" data-state="' + (ok ? "done" : "todo") + '" id="row-' + c.id + '">' +
+        '<span class="list__tick">' + (ok ? I.check : I.warning) + '</span>' +
+        '<div class="list__main">' +
+          '<span class="hb-title-sm">' + c.label + '</span>' +
+          '<span class="list__val hb-body-md">' + c.val() + '</span>' +
+          (open && c.editor ? '<div class="list__edit">' + c.editor() + '</div>' : '') +
+        '</div>' +
+        (c.editor ? btn(open ? "Close" : (ok ? "Change" : "Add"), { style: open ? "tonal" : (ok ? "ghost" : "filled"), size: "sm", icon: open ? I.close : I.edit, attrs: ' data-act="expand-row" data-row="' + c.id + '"' }) : '') +
+      '</div>';
+    }).join('');
+    var t = totals();
+    $("#screen-e").innerHTML = pageHead() +
+      '<div class="cols"><div class="stack">' +
+        '<div class="progressbar"><span class="hb-title-sm">' + done + ' of ' + all + ' ready</span>' +
+          '<span class="progressbar__track"><span class="progressbar__fill" style="width:' + pct + '%"></span></span>' +
+          (done === all ? statusChip("active", "Ready to place") : statusChip("pending", "1 thing left")) + '</div>' +
+        '<div class="list">' + rows + '</div>' +
+        '<p class="hb-body-sm muted">Anything ticked is already on your account — change it only if it is wrong for this order.</p>' +
+      '</div>' +
+      '<aside class="rail"><div class="panel"><div class="panel__body stack">' +
+        '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
+        '<div class="hb-body-sm muted">' + t.lines + ' lines from ' + esc(state.supplier.name) + ' · delivery ' + esc(state.slot.day) + '</div>' +
+        placeBtn({ label: done === all ? "Place Order · " + bhd(t.total) : "Place Order" }) +
+        '<details class="why"><summary class="hb-body-sm">' + I.chevronDown + 'See the breakdown</summary><div class="stack" style="margin-top:var(--hb-space-12)">' + railTotals() + '</div></details>' +
+      '</div></div></aside></div>' +
+      '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(t.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
+  }
+
+  function renderVerify(){ renderA(); renderB(); renderC(); renderD(); renderE(); applyLang(); wireDocDrops(); }

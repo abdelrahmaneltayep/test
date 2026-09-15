@@ -945,6 +945,25 @@ a.hb-stat:hover, button.hb-stat:hover { border-color: var(--hb-color-primary-300
 [dir="rtl"] .hb-stat__trail[data-mirror] svg { transform: scaleX(-1); }
 
 
+/* ===== molecules/Tabs/Tabs.css (verbatim, highbase-ds) ===== */
+/* Highbase · Tabs (molecule) — Structure type 1. (file) Secondary tab 276×40 pill r-full gap 8; the active tab grows to 48 with a filled background.
+   data-style = pill (file) | underline (proposal). Item: .hb-tab with aria-selected. */
+.hb-tabs { display: flex; align-items: center; gap: var(--hb-component-tab-gap); font-family: var(--hb-font-family-latin); overflow-x: auto; scrollbar-width: none; }
+.hb-tabs::-webkit-scrollbar { display: none; }
+[lang="ar"] .hb-tabs, [dir="rtl"] .hb-tabs { font-family: var(--hb-font-family-arabic); }
+.hb-tab { display: inline-flex; align-items: center; gap: var(--hb-space-8); box-sizing: border-box; height: var(--hb-component-tab-height); padding-inline: var(--hb-space-16); border: 0; background: none; border-radius: var(--hb-component-tab-radius); color: var(--hb-color-on-surface-variant); font: inherit; font-size: var(--hb-font-size-14); font-weight: var(--hb-font-weight-medium); white-space: nowrap; cursor: pointer; transition: background-color 120ms, color 120ms; }
+.hb-tab__icon { width: 20px; height: 20px; flex: 0 0 auto; display: inline-flex; }
+.hb-tab__icon svg { width: 100%; height: 100%; }
+.hb-tab:hover { background: var(--hb-color-surface-container-low); }
+.hb-tab[aria-selected="true"] { background: var(--hb-color-primary-container-low); color: var(--hb-color-primary-hover); font-weight: var(--hb-font-weight-semibold); }
+.hb-tab:focus-visible { outline: 2px solid var(--hb-color-inverse-primary); outline-offset: 2px; }
+.hb-tab:disabled { color: var(--hb-color-on-surface-disabled); cursor: not-allowed; background: none; }
+/* underline style (proposal) */
+.hb-tabs[data-style="underline"] { gap: 0; border-bottom: 1px solid var(--hb-color-outline-variant); }
+.hb-tabs[data-style="underline"] .hb-tab { border-radius: 0; box-shadow: inset 0 -2px 0 0 transparent; }
+.hb-tabs[data-style="underline"] .hb-tab[aria-selected="true"] { background: none; box-shadow: inset 0 -2px 0 0 var(--hb-color-primary-hover); }
+
+
 /* ===== molecules/PageHeader/PageHeader.css (verbatim, highbase-ds) ===== */
 /* Highbase · Page Header (molecule) — Structure type 4 (slots: title / description / breadcrumb / actions).
    (live) Every dashboard page opens with a 24 Bold title, an amber one-line description and a dot-separated breadcrumb.
@@ -1773,6 +1792,41 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 @media (max-width:1279px){.guide{grid-template-columns:1fr}.guide__nav{position:static;flex-direction:row;flex-wrap:wrap}}
 @media (max-width:743px){.vs{grid-template-columns:1fr}.review__row{flex-wrap:wrap}.review__row dt{flex-basis:100%}.guide__main{padding:var(--hb-space-20)}}
 
+
+/* ---------- Version D · Tabs (one pane at a time, order kept in view) ---------- */
+.tabbar{display:flex;flex-direction:column;gap:var(--hb-space-8);padding:var(--hb-space-12) var(--hb-space-20);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12) var(--hb-radius-12) 0 0;
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);border-bottom:0}
+.tabbar .hb-tabs{width:100%}
+.tabbar .hb-tab{flex:0 0 auto}
+.tab__badge{margin-inline-start:var(--hb-space-6)}
+.tabpane{background:var(--hb-color-surface);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  border-radius:0 0 var(--hb-radius-12) var(--hb-radius-12);padding:var(--hb-space-24)}
+.tabpane__head{display:flex;align-items:baseline;gap:var(--hb-space-12);flex-wrap:wrap;margin-bottom:var(--hb-space-16)}
+.tabpane__head p{color:var(--hb-color-on-surface-variant);flex:1 1 320px;min-width:0}
+.tabfoot{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;margin-top:var(--hb-space-24);
+  padding-top:var(--hb-space-16);border-top:var(--proto-hairline) solid var(--hb-color-surface-dim)}
+.tabfoot .spacer{flex:1}
+
+/* ---------- Version E · Checklist (everything on one page, ticked off) ---------- */
+.list{display:flex;flex-direction:column;gap:var(--hb-space-8)}
+.list__item{display:flex;align-items:flex-start;gap:var(--hb-space-16);padding:var(--hb-space-16) var(--hb-space-20);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.list__item[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.list__tick{width:var(--hb-space-28);height:var(--hb-space-28);flex:0 0 var(--hb-space-28);border-radius:var(--hb-radius-full);
+  display:grid;place-items:center;background:var(--hb-color-success);color:var(--hb-color-on-success);margin-top:var(--hb-space-2)}
+.list__item[data-state="todo"] .list__tick{background:var(--hb-color-warning);color:var(--hb-color-on-warning)}
+.list__tick .hb-i{font-size:var(--hb-space-16)}
+.list__main{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--hb-space-2)}
+.list__val{color:var(--hb-color-on-surface-variant)}
+.list__item[data-state="todo"] .list__val{color:var(--hb-color-on-warning-container)}
+.list__edit{margin-top:var(--hb-space-16);padding-top:var(--hb-space-16);border-top:var(--proto-hairline) solid var(--hb-color-surface-dim)}
+.progressbar{display:flex;align-items:center;gap:var(--hb-space-12);padding:var(--hb-space-16) var(--hb-space-20);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.progressbar__track{flex:1;height:var(--hb-space-8);border-radius:var(--hb-radius-full);background:var(--hb-color-surface-container);overflow:hidden}
+.progressbar__fill{height:100%;border-radius:inherit;background:var(--hb-color-success);transition:width 200ms ease} /* (proposal) motion placeholder */
+
 /* ---------- Annotation pins (proposal) — review commentary, not product UI ---------- */
 .pin{
   display:none;position:relative;width:var(--hb-space-20);height:var(--hb-space-20);
@@ -1857,6 +1911,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="a" aria-current="true"><span class="hb-btn__label">A · Steps</span></button>
       <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="b" aria-current="false"><span class="hb-btn__label">B · Confirm</span></button>
       <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="c" aria-current="false"><span class="hb-btn__label">C · Guided</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="d" aria-current="false"><span class="hb-btn__label">D · Tabs</span></button>
+      <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="e" aria-current="false"><span class="hb-btn__label">E · Checklist</span></button>
       <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="why" aria-current="false"><span class="hb-btn__label">Compare</span></button>
     </nav>
     <div class="spacer"></div>
@@ -1927,6 +1983,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   <main id="screen-a" class="screen"></main>
   <main id="screen-b" class="screen" hidden></main>
   <main id="screen-c" class="screen" hidden></main>
+  <main id="screen-d" class="screen" hidden></main>
+  <main id="screen-e" class="screen" hidden></main>
   <main id="screen-why" class="screen doc-page" hidden></main>
 </div>
 
@@ -2294,7 +2352,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   var COUNTRIES = ["Bahrain", "Saudi Arabia", "Kuwait", "Qatar", "United Arab Emirates", "Oman"];
   var STATES = ["Capital", "Muharraq", "Northern", "Southern"];
   state.version = "a";
-  state.step = { a: 0, c: 0 };       // the open step in A and C
+  state.step = { a: 0, c: 0, d: 0 };  // the open step in A, C and the tab in D
+  state.expand = {};                  // the open editor in E
   state.open = {};                    // opened cards in B
   state.editing = { branch: false, address: false };
 
@@ -2568,19 +2627,107 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '</section></div>';
   }
 
-  function renderVerify(){ renderA(); renderB(); renderC(); applyLang(); wireDocDrops(); }
+
+
+  /* ============================================================
+     Version D · Tabs — the three sections are tabs over one pane. Only one
+     pane exists at a time, but all three stay visible and reachable in any
+     order, each carrying its own status. Disclosure by selection.
+     ============================================================ */
+  var TABS = [
+    { id: "branch",  label: "Branch Details",     lead: "Who the driver calls when the order arrives.", body: branchBlock },
+    { id: "address", label: "Delivery Address",   lead: "Where the order goes, and the pin the driver navigates to.", body: addressBlock },
+    { id: "docs",    label: "Business Documents", lead: "Kept on your account — act only if something is missing.", body: function () { return docsBlock({ vatAsLink: true }); } }
+  ];
+  function tabPill(i){
+    var t = TABS[i];
+    if (t.id !== "docs") { return '<span class="tab__badge">' + statusChip("active", "Saved") + '</span>'; }
+    return '<span class="tab__badge">' + (docsOk() ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded())) + '</span>';
+  }
+  function renderD(){
+    var now = state.step.d, t = TABS[now], tot = totals();
+    var bar = '<div class="tabbar"><div class="hb-tabs" role="tablist" aria-label="Verification sections">' +
+      TABS.map(function (x, i) {
+        return '<button type="button" class="hb-tab" role="tab" aria-selected="' + (i === now) + '" data-act="go-tab" data-step="' + i + '">' +
+          '<span class="hb-tab__icon">' + (i === now ? I.chevronRight : (x.id === "docs" && !docsOk() ? I.warning : I.check)) + '</span>' +
+          x.label + tabPill(i) + '</button>';
+      }).join('') + '</div>' +
+      '<span class="hb-body-sm muted">All three are already saved — open any one to change it</span></div>';
+    var pane = '<section class="tabpane" role="tabpanel" aria-label="' + t.label + '">' +
+      '<div class="tabpane__head"><h2 class="hb-title-lg">' + t.label + '</h2><p class="hb-body-md">' + t.lead + '</p></div>' +
+      t.body() +
+      '<div class="tabfoot">' +
+        (now > 0 ? btn("Previous", { style: "ghost", attrs: ' data-act="go-tab" data-step="' + (now - 1) + '"' }) : '') +
+        '<span class="spacer"></span>' +
+        (now < TABS.length - 1 ? btn("Next: " + TABS[now + 1].label, { style: "outlined", icon: I.chevronRight, attrs: ' data-act="go-tab" data-step="' + (now + 1) + '"' }) : '') +
+        btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) +
+      '</div></section>';
+    $("#screen-d").innerHTML = pageHead() +
+      '<div class="cols"><div class="stack">' + bar + pane + '</div>' +
+      rail('<ul class="checks hb-body-sm"><li>' + I.success + '<span>Address confirmed</span></li><li' + (docsOk() ? '' : ' data-state="warn"') + '>' + (docsOk() ? I.success : I.warning) + '<span>Required documents on file</span></li></ul>') + '</div>' +
+      '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(tot.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
+  }
+
+  /* ============================================================
+     Version E · Checklist — the whole page is a list of what is already done,
+     ticked. Nothing is a form until the buyer expands one row. A progress bar
+     states how much is settled. Disclosure by exception: only what is NOT
+     done looks like work.
+     ============================================================ */
+  var CHECKS = [
+    { id: "branch",  label: "Branch details",     val: branchLine,  done: function () { return true; },  editor: function () { return state.editing.branch ? branchForm() : branchView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Details", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-branch"' }) + '</div>'; } },
+    { id: "address", label: "Delivery address",   val: addressLine, done: function () { return true; },  editor: function () { return state.editing.address ? addressForm() : addressView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Address", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-address"' }) + '</div>'; } },
+    { id: "docs",    label: "Business documents", val: docsLine,    done: docsOk,                        editor: function () { return docsBlock({ vatAsLink: true }); } },
+    { id: "payment", label: "Payment method",     val: function () { return 'Highbase Payment · bank transfer of <b class="num">' + bhd(totals().total) + '</b> within 48 hours'; }, done: function () { return true; }, editor: null }
+  ];
+  function renderE(){
+    var done = CHECKS.filter(function (c) { return c.done(); }).length, all = CHECKS.length;
+    var pct = Math.round(done / all * 100);
+    var rows = CHECKS.map(function (c) {
+      var ok = c.done(), open = !!state.expand[c.id];
+      return '<div class="list__item" data-state="' + (ok ? "done" : "todo") + '" id="row-' + c.id + '">' +
+        '<span class="list__tick">' + (ok ? I.check : I.warning) + '</span>' +
+        '<div class="list__main">' +
+          '<span class="hb-title-sm">' + c.label + '</span>' +
+          '<span class="list__val hb-body-md">' + c.val() + '</span>' +
+          (open && c.editor ? '<div class="list__edit">' + c.editor() + '</div>' : '') +
+        '</div>' +
+        (c.editor ? btn(open ? "Close" : (ok ? "Change" : "Add"), { style: open ? "tonal" : (ok ? "ghost" : "filled"), size: "sm", icon: open ? I.close : I.edit, attrs: ' data-act="expand-row" data-row="' + c.id + '"' }) : '') +
+      '</div>';
+    }).join('');
+    var t = totals();
+    $("#screen-e").innerHTML = pageHead() +
+      '<div class="cols"><div class="stack">' +
+        '<div class="progressbar"><span class="hb-title-sm">' + done + ' of ' + all + ' ready</span>' +
+          '<span class="progressbar__track"><span class="progressbar__fill" style="width:' + pct + '%"></span></span>' +
+          (done === all ? statusChip("active", "Ready to place") : statusChip("pending", "1 thing left")) + '</div>' +
+        '<div class="list">' + rows + '</div>' +
+        '<p class="hb-body-sm muted">Anything ticked is already on your account — change it only if it is wrong for this order.</p>' +
+      '</div>' +
+      '<aside class="rail"><div class="panel"><div class="panel__body stack">' +
+        '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
+        '<div class="hb-body-sm muted">' + t.lines + ' lines from ' + esc(state.supplier.name) + ' · delivery ' + esc(state.slot.day) + '</div>' +
+        placeBtn({ label: done === all ? "Place Order · " + bhd(t.total) : "Place Order" }) +
+        '<details class="why"><summary class="hb-body-sm">' + I.chevronDown + 'See the breakdown</summary><div class="stack" style="margin-top:var(--hb-space-12)">' + railTotals() + '</div></details>' +
+      '</div></div></aside></div>' +
+      '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(t.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
+  }
+
+  function renderVerify(){ renderA(); renderB(); renderC(); renderD(); renderE(); applyLang(); wireDocDrops(); }
 
   /* ============================================================
      Compare — what each version discloses, when, and who it suits.
      ============================================================ */
   function renderWhy(){
     var V = [
-      { k: "A", name: "Steps", how: "An accordion. One section open at a time; the others collapse to a single line with a status pill. Confirm & continue moves the focus down the page.", shows: "The whole page's shape at a glance, but only one section's detail.", best: "Buyers who want to see the whole task and work through it in order — the closest to the live page's structure.", risk: "Three clicks before Place Order even when nothing needs changing." },
-      { k: "B", name: "Confirm", how: "Everything already on file is a compact card with one line and a Change / Manage button. Forms and upload zones exist only behind that button. The page opens on a readiness banner and one primary action.", shows: "Only what the buyer needs to decide — is this right? — with detail on demand.", best: "Returning buyers with a saved branch, address and documents: the common case becomes one look and one button.", risk: "A first-time buyer with nothing on file has to open every card; the banner tells them which." },
-      { k: "C", name: "Guided", how: "One question per screen, in plain words, with a map of the steps beside it and a single Continue. A final step reviews everything before Place Order. \"Why do we ask for this?\" sits behind a disclosure.", shows: "One decision at a time, nothing else on screen.", best: "Senior or infrequent buyers, and anyone on a phone — the note said these users run businesses and are often senior.", risk: "The longest path; experienced buyers will feel walked through something they know." }
+      { k: "A", name: "Steps", how: "An accordion. One section open at a time; the rest collapse to a line and a status pill. <b>Confirm &amp; continue</b> walks down the page.", shows: "The whole task's shape, one section's detail.", best: "Buyers who want the order of things — closest to the live page's structure.", risk: "Three clicks before Place Order even when nothing needs changing." },
+      { k: "B", name: "Confirm", how: "Everything on file is a compact card with one line and <b>Change</b> / <b>Manage</b>. Forms and upload zones exist only behind that button; the page opens on a readiness banner and one primary.", shows: "Is this right? — and one button.", best: "Returning buyers with everything saved: the common case is one look and one click.", risk: "A first-time buyer must open every card; the banner says which." },
+      { k: "C", name: "Guided", how: "One question per screen in plain words, a step map beside it, one <b>Continue</b>. A review step precedes Place Order; <b>Why do we ask for this?</b> sits behind a disclosure.", shows: "One decision, nothing else.", best: "Senior or infrequent buyers, and phones — the note said these users run businesses and are often senior.", risk: "The longest path; experienced buyers feel walked through." },
+      { k: "D", name: "Tabs", how: "The three sections are tabs over a single pane. One pane exists at a time, but all three stay visible, reachable in any order, each carrying its own status pill.", shows: "All three sections and their states, one section's detail.", best: "Buyers who come to change one specific thing — a different delivery address, a renewed licence — without walking a sequence.", risk: "Tabs imply the content is parallel; a buyer may place the order without opening the tab that needed attention." },
+      { k: "E", name: "Checklist", how: "The page is a list of what is already done, ticked, with the value on each row. Nothing is a form until a row is expanded. A progress bar states how much is settled, and anything outstanding is the only row styled as work.", shows: "How ready the order is, and the one thing that is not.", best: "Mixed accounts — some documents on file, some not — and anyone who wants reassurance before committing.", risk: "Four rows of green can read as busy when nothing needs doing; B is quieter for that case." }
     ];
     $("#screen-why").innerHTML =
-      '<h1 class="hb-headline-md">Three ways to disclose the same page</h1>' +
+      '<h1 class="hb-headline-md">Five ways to disclose the same page</h1>' +
       '<p class="hb-body-md">Same sections, same values, same edit and upload behaviour. What differs is what the buyer sees first, and what has to be asked for. Progressive disclosure: show the decision, hold back the detail until it is needed, and never make the detail hard to reach.</p>' +
       '<div class="vs">' + V.map(function (v) {
         return '<div class="panel"><div class="panel__head"><span class="acc__no hb-label-lg" style="background:var(--hb-color-primary-700);color:var(--hb-color-on-primary)">' + v.k + '</span><h2 class="hb-title-md">' + v.name + '</h2></div>' +
@@ -2592,16 +2739,16 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
             btn("Open version " + v.k, { style: "outlined", size: "sm", attrs: ' data-act="goto" data-screen="' + v.k.toLowerCase() + '"' }) +
           '</div></div>';
       }).join('') + '</div>' +
-      '<h2 class="hb-title-lg">Visual hierarchy, shared by all three</h2>' +
+      '<h2 class="hb-title-lg">Visual hierarchy, shared by all five</h2>' +
       '<p class="hb-body-md">One headline role per page (headline-md), one title role per section (title-md), labels in on-surface-variant and values in on-surface — colour is reserved for status pills and the single primary Button. Saved values are text, never orange. The only filled button on the screen is the one that moves the buyer forward; Cancel and Change are ghost or outlined. Detail lives one level down: behind a card, an accordion head, or a "Why do we ask for this?" disclosure.</p>' +
       '<h2 class="hb-title-lg">A recommendation</h2>' +
-      '<p class="hb-body-md">B for the storefront default — it rewards the returning buyer, who is most orders — with C offered on compact widths and to accounts placing their first order. A is the safe fallback if the team wants the page to keep looking like today\'s.</p>';
+      '<p class="hb-body-md"><b>B</b> for the storefront default — it rewards the returning buyer, who is most orders — with <b>C</b> on compact widths and for an account\'s first order. <b>E</b> is the strongest alternative to B: it answers "am I ready?" without a click, and degrades gracefully when something is missing. <b>D</b> suits a buyer arriving to change one thing, and would pair well as the behaviour behind B\'s <b>Manage</b>. <b>A</b> is the safe fallback if the page must keep looking like today\'s.</p>';
   }
 
   /* ============================================================
      Screens, language, files, and one delegated listener
      ============================================================ */
-  var screens = ["a", "b", "c", "why"];
+  var screens = ["a", "b", "c", "d", "e", "why"];
   function show(name){
     if (screens.indexOf(name) === -1) { name = "a"; }
     state.version = name;
@@ -2717,8 +2864,11 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     if (missing.length || state.errors["tax-no"]) {
       state.errors.docs = missing.length ? "Still needed before you can place the order: " + missing.join(", ") : "Enter the tax number";
       missing.forEach(function (l) { var k = Object.keys(state.docs).filter(function (x) { return state.docs[x].label === l; })[0]; state.errors["doc-" + k] = "This document is required"; });
-      if (state.version === "a") { state.step.a = 2; } if (state.version === "c") { state.step.c = 2; } if (state.version === "b") { state.open.docs = true; }
-      renderVerify(); scrollTo(state.version === "a" ? "acc-docs" : "card-docs"); return;
+      var v = state.version;
+      if (v === "a") { state.step.a = 2; } else if (v === "c") { state.step.c = 2; }
+      else if (v === "d") { state.step.d = 2; } else if (v === "b") { state.open.docs = true; }
+      else if (v === "e") { state.expand.docs = true; }
+      renderVerify(); scrollTo({ a: "acc-docs", b: "card-docs", e: "row-docs" }[state.version] || ""); return;
     }
     state.placing = true; renderVerify();
     setTimeout(function () {
@@ -2735,10 +2885,16 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     "reset": function () { location.reload(); },
     "goto": function (el) { show(el.dataset.screen); },
     "open-step": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step[state.version] = +el.dataset.step; renderVerify(); },
+    "go-tab": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step.d = +el.dataset.step; renderVerify(); },
+    "expand-row": function (el) {
+      var id = el.dataset.row;
+      if (state.expand[id] && (state.editing.branch || state.editing.address)) { toast("Save or cancel your edit first.", { kind: "bad" }); return; }
+      state.expand[id] = !state.expand[id]; renderVerify();
+    },
     "go-step": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step.c = +el.dataset.step; renderVerify(); window.scrollTo(0, 0); },
     "next-step": function () {
       if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; }
-      var k = state.version; state.step[k] = Math.min(state.step[k] + 1, (k === "c" ? GUIDE : SECTIONS).length - 1); renderVerify();
+      var k = state.version; state.step[k] = Math.min(state.step[k] + 1, (k === "c" ? GUIDE : k === "d" ? TABS : SECTIONS).length - 1); renderVerify();
       if (k === "c") { window.scrollTo(0, 0); }
     },
     "toggle-card": function (el) {
@@ -2747,10 +2903,10 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       state.open[id] = !state.open[id]; renderVerify();
     },
     "show-vat": function () { state.hasVat = true; renderVerify(); var el = $("#screen-" + state.version + " #tax-no"); if (el) { el.focus(); } },
-    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "b") { state.open.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
+    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "b") { state.open.branch = true; } if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
     "cancel-branch": function () { state.errors = {}; state.editing.branch = false; renderVerify(); },
     "save-branch": saveBranch,
-    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "b") { state.open.address = true; } renderVerify(); },
+    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "b") { state.open.address = true; } if (state.version === "e") { state.expand.address = true; } renderVerify(); },
     "cancel-address": function () { state.errors = {}; state.editing.address = false; renderVerify(); },
     "save-address": saveAddress,
     "move-pin": function () { toast("The map would let you drag the pin here; the fields fill from it."); },
