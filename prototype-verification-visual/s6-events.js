@@ -60,9 +60,8 @@
     state.uploading = id; state.uploadName = file.name;
     renderVerify();
     setTimeout(function () {
-      /* a replacement keeps what it replaced: the Activity preview shows both files, and the
-         old object URL stays alive because its thumbnail is still on screen */
-      if (d.file) { d.prev = d.file; state.lastReplaced = id; }
+      /* a replacement is remembered so the row reads "replaced" rather than "uploaded" */
+      if (d.file) { if (d.file.url) { URL.revokeObjectURL(d.file.url); } d.prev = { name: d.file.name, size: d.file.size, at: d.file.at }; }
       d.file = describe(file); d.file.at = "just now";
       state.uploading = null;
       renderVerify();
@@ -229,7 +228,7 @@
     },
     "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); }
       /* with the current file gone there is no "after" to compare a superseded copy against */
-      d.file = null; d.prev = null; if (state.lastReplaced === el.dataset.doc) { state.lastReplaced = null; } closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
+      d.file = null; d.prev = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
     /* the Credential preview offers its identifier for copying; the clipboard is not
        available on every origin, so the failure is reported rather than claimed as a copy. */

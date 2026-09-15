@@ -52,12 +52,13 @@ B opens on **Activity**. Three things follow from choosing it:
   (*saved*, *replaced*, *is missing*), the readiness banner answers whether the order can go, and
   a pill beside either would state it a second time. The exception still shows: an outstanding
   row is tinted and says what to do.
-- **A replaced file shows before and after — on one row.** `docs.cr` is seeded with the version it
-  replaced, and any upload over an existing file in the prototype moves that file to `prev` and
-  becomes `state.lastReplaced`. Only that newest replacement opens out into a *Before* and *After*
-  pair with both thumbnails, sizes and dates; an older one keeps the fact in its line and reads
-  like every other row, so the card carries one case rather than a column of file pairs. Removing
-  a document clears both.
+- **A replaced file reads as replaced.** `docs.cr` is seeded with the version it replaced and any
+  upload over an existing file records one, so the row says *replaced* rather than *uploaded*. The
+  side-by-side Before and After pair was removed after review: one line per document, like every
+  other row.
+- **A document still to come is not filled in.** The row keeps the page's own surface; the
+  exception is carried by the leading icon's amber outline, the Required tag and the row's own
+  words. Nothing on the card is a filled state.
 - **Every document carries a Required or Optional tag** beside its name, in the component's top row.
   It is a neutral Chip, never a status pill: required-ness is what the document is, not how it is
   doing, so it does not reintroduce the state this preview drops.

@@ -449,22 +449,9 @@
   }
 
   /* ---------- 13 · Activity — what was saved and when. No status pills: the row says it ---------- */
-  /* The chosen preview for B. A pill would repeat what the line already states, so the row
-     carries the fact in words and the tint carries the exception. A document that replaced an
-     earlier version shows both files, the superseded one beside the current one. */
-  function fileChip(f, o){
-    o = o || {};
-    return '<span class="bafile"' + (o.old ? ' data-old' : '') + '>' +
-      '<span class="doc__prev" aria-hidden="true">' + (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) + '</span>' +
-      '<span class="bafile__lines"><span class="hb-label-md">' + esc(f.name) + '</span>' +
-      '<span class="hb-body-sm muted">' + esc(f.size) + (f.at ? ' · ' + esc(f.at) : '') + '</span></span></span>';
-  }
-  function beforeAfter(d){
-    return '<span class="ba">' +
-      '<span class="ba__side"><span class="hb-label-sm muted">Before</span>' + fileChip(d.prev, { old: true }) + '</span>' +
-      '<span class="ba__arrow" aria-hidden="true">' + I.chevronRight + '</span>' +
-      '<span class="ba__side"><span class="hb-label-sm muted">After</span>' + fileChip(d.file) + '</span></span>';
-  }
+  /* The chosen preview for B. A pill would repeat what the line already states, so every row
+     carries the fact in words. A document still to come is not filled in: the row keeps the
+     page's own surface and is marked by its outlined icon and its Required tag. */
   function activityBranch(){
     var b = state.branchDetails;
     return list("pactivity", [
@@ -489,19 +476,11 @@
   }
   function activityDocs(){
     var rows = [];
-    /* Only the latest replacement opens out into before and after. An older one keeps the
-       fact in its line and reads like every other row — one case on the card, not a column
-       of file pairs. */
-    var featured = state.lastReplaced;
     docIds().forEach(function (k) {
       var d = state.docs[k], f = d.file;
-      if (f && d.prev && k === featured) {
+      if (f && d.prev) {
         rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
-          text: 'The earlier version stays on your account until this one is reviewed.',
-          extra: beforeAfter(d) }));
-      } else if (f && d.prev) {
-        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
-          text: esc(f.name) + ' · ' + esc(f.size) + ' · replaced ' + esc(d.prev.name) }));
+          text: esc(f.name) + ' · ' + esc(f.size) }));
       } else if (f) {
         rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', tag: reqTag(d), time: esc(f.at || 'just now'),
           text: esc(f.name) + ' · ' + esc(f.size) }));
@@ -652,7 +631,7 @@
       best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
       risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
     { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs, noStatus: true,
-      how: "What was saved and when, the date in the time slot, a Required or Optional tag beside each document, and the newest replacement showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words, and the tint carries the exception.",
+      how: "What was saved and when, the date in the time slot, and a Required or Optional tag beside each document. No status pills, and nothing filled in: a document still to come keeps the page's own surface and is marked by its outlined icon.",
       best: "Returning buyers asking the real question — has anything changed since my last order? It is the chosen preview for B.",
       risk: "It reports history, not the current record; a buyer looking for one particular value has to read a line to find it." },
     { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,

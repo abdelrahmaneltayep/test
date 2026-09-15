@@ -21,7 +21,7 @@
     hasVat: false,
     taxNumber: "",
     docs: {
-      /* prev is the version this file replaced — what the Activity preview shows as "before" */
+      /* prev is the version this file replaced — it makes the row read "replaced", not "uploaded" */
       cr:  { label: "Commercial License (CR)", required: true,  file: { name: "CR-5056050560-1.pdf", size: "412 KB", isImage: false, at: "12 Jan 2026" },
              prev: { name: "CR-5056050560-1-2024.pdf", size: "380 KB", isImage: false, at: "14 Feb 2024" } },
       vat: { label: "VAT Certificate",         required: false, file: null },
@@ -29,7 +29,6 @@
     },
     editing: { branch: false, address: false },
     previewStyle: "activity", // version B: the chosen preview — the others stay switchable
-    lastReplaced: "cr",       // the one document whose row opens out into before and after
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit

@@ -84,24 +84,30 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const pills=(await p.$$('#screen-b .hb-status')).length;
      const t=await txt('#screen-b');
      return pressed.join()==='activity'&&pills===0&&t.includes('Branch details saved')&&t.includes('Map pin updated')}],
-  ['B: a replaced document shows the file it replaced beside the new one',async()=>{
-     const before=await p.$$('#screen-b #card-docs .bafile[data-old]');
-     const both=await p.$$('#screen-b #card-docs .bafile');
-     const t=await txt('#screen-b #card-docs');
-     return before.length===1&&both.length===2&&t.includes('Commercial License (CR) replaced')&&t.includes('CR-5056050560-1-2024.pdf')&&t.includes('Before')&&t.includes('After')}],
-  ['B: replacing a file adds its own before and after',async()=>{
-     fs.writeFileSync(__dirname+'/tmp-id.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
-     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(350);
-     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('dialog.hb-drawer-layer [data-act="pick-doc"][data-doc="id"]')]);
-     await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(1400);
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(400);
-     const t=await txt('#screen-b #card-docs');
-     /* only the newest replacement opens out; the older one falls back to a single line */
-     return (await p.$$('#screen-b #card-docs .bafile[data-old]')).length===1&&t.includes('Personal ID Document replaced')&&t.includes('CPR-front.jpg')&&t.includes('tmp-id.png')&&t.includes('replaced CR-5056050560-1-2024.pdf')}],
   ['B: every document is tagged Required or Optional, and the tag is not a status pill',async()=>{
      const tags=await p.$$eval('#screen-b #card-docs .hb-chip',e=>e.map(x=>x.textContent.trim()));
      const pills=(await p.$$('#screen-b #card-docs .hb-status')).length;
      return tags.length===2&&tags.every(t=>t==='Required')&&pills===0}],
+  ['B: a document still to come is not filled in',async()=>{
+     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(350);
+     await p.click('dialog.hb-drawer-layer [data-act="remove-doc"][data-doc="id"]');await p.waitForTimeout(250);
+     await p.click('[data-act="remove-doc-go"]');await p.waitForTimeout(350);
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(400);
+     const row=await p.$('#screen-b #card-docs .hb-li[data-state="todo"]');
+     const bg=await p.evaluate(el=>getComputedStyle(el).backgroundColor,row);
+     const plain=await p.evaluate(()=>getComputedStyle(document.querySelector('#screen-b #card-docs .hb-li:not([data-state])')).backgroundColor);
+     const pairs=(await p.$$('#screen-b .bafile')).length;
+     const t=await txt('#screen-b #card-docs');
+     /* put it back so the tests after this start from a complete account */
+     fs.writeFileSync(__dirname+'/tmp-id.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
+     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(350);
+     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('dialog.hb-drawer-layer [data-drop="id"]')]);
+     await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(1400);
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(350);
+     return !!row&&bg===plain&&pairs===0&&t.includes('Personal ID Document is missing')&&t.includes('Upload it before placing this order')}],
+  ['B: nothing shows a before and after pair any more',async()=>{
+     const t=await txt('#screen-b #card-docs');
+     return (await p.$$('#screen-b .bafile, #screen-b .ba')).length===0&&t.includes('Commercial License (CR) replaced')&&!t.includes('Before')}],
   ['B: the order breakdown is open, not folded away',async()=>{
      const open=await p.evaluate(()=>document.querySelector('#screen-b .rail details.why').open);
      const t=await txt('#screen-b .rail');

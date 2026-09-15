@@ -1971,29 +1971,17 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
    restored to on-surface. That is the only override; every other rule below is layout. */
 .plist .hb-li__text,.pactivity .hb-li__text,.pactions .hb-li__text,.pgrouped .hb-li__text{color:var(--hb-color-on-surface)}
 .hb-list .hb-li__text{overflow-wrap:anywhere}
-.hb-list .hb-li[data-state="todo"]{background:var(--hb-color-warning-container)}
-.hb-list .hb-li[data-state="todo"] .hb-li__text,.hb-list .hb-li[data-state="todo"] .hb-li__time{color:var(--hb-color-on-warning-container)}
-.hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-warning-light);color:var(--hb-color-on-warning-container)}
+/* A document still to come is NOT filled in: the row keeps the page's surface, and the
+   exception is carried by the leading icon's outline and by the row's own words. */
+.hb-list .hb-li[data-state="todo"]{background:var(--hb-color-surface)}
+.hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-surface);
+  border:var(--proto-hairline) solid var(--hb-color-warning-outline);color:var(--hb-color-warning-dark)}
 
 /* the Required / Optional tag beside a document's name, inside the component's top row */
 .pactivity .hb-li__top .hb-chip{flex:0 0 auto}
 .pactivity .hb-li__top{flex-wrap:wrap;row-gap:var(--hb-space-4)}
 .pactivity .hb-li__title{flex:0 1 auto}
 .pactivity .hb-li__time{margin-inline-start:auto}
-
-/* 13 · Activity — a replaced document shows the file it replaced beside the one on file */
-.ba{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;margin-top:var(--hb-space-12)}
-.ba__side{display:flex;flex-direction:column;gap:var(--hb-space-4);min-width:0;flex:1 1 220px}
-.ba__arrow{flex:0 0 auto;color:var(--hb-color-on-surface-variant);display:inline-flex;align-self:flex-end;
-  padding-bottom:var(--hb-space-12)}
-.ba__arrow .hb-i{font-size:var(--hb-space-20)}
-.bafile{display:flex;align-items:center;gap:var(--hb-space-12);min-width:0;padding:var(--hb-space-8) var(--hb-space-12);
-  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
-  background:var(--hb-color-surface)}
-.bafile[data-old]{background:var(--hb-color-surface-container-low);border-style:dashed}
-.bafile[data-old] .hb-label-md{text-decoration:line-through;color:var(--hb-color-on-surface-variant)}
-.bafile__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
-.bafile__lines span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
 .pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
@@ -2133,7 +2121,6 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .pcred__facts,.pstats{grid-template-columns:1fr}
   .pcred__pill{margin-inline-start:0}
   .prcp__row{flex-wrap:wrap}
-  .ba__arrow{align-self:center;padding-bottom:0;transform:rotate(90deg)}
   .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
   .prow dd{text-align:start}
   .prow__file{justify-content:flex-start}
@@ -2341,7 +2328,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     hasVat: false,
     taxNumber: "",
     docs: {
-      /* prev is the version this file replaced — what the Activity preview shows as "before" */
+      /* prev is the version this file replaced — it makes the row read "replaced", not "uploaded" */
       cr:  { label: "Commercial License (CR)", required: true,  file: { name: "CR-5056050560-1.pdf", size: "412 KB", isImage: false, at: "12 Jan 2026" },
              prev: { name: "CR-5056050560-1-2024.pdf", size: "380 KB", isImage: false, at: "14 Feb 2024" } },
       vat: { label: "VAT Certificate",         required: false, file: null },
@@ -2349,7 +2336,6 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     },
     editing: { branch: false, address: false },
     previewStyle: "activity", // version B: the chosen preview — the others stay switchable
-    lastReplaced: "cr",       // the one document whose row opens out into before and after
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit
@@ -3225,22 +3211,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   }
 
   /* ---------- 13 · Activity — what was saved and when. No status pills: the row says it ---------- */
-  /* The chosen preview for B. A pill would repeat what the line already states, so the row
-     carries the fact in words and the tint carries the exception. A document that replaced an
-     earlier version shows both files, the superseded one beside the current one. */
-  function fileChip(f, o){
-    o = o || {};
-    return '<span class="bafile"' + (o.old ? ' data-old' : '') + '>' +
-      '<span class="doc__prev" aria-hidden="true">' + (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) + '</span>' +
-      '<span class="bafile__lines"><span class="hb-label-md">' + esc(f.name) + '</span>' +
-      '<span class="hb-body-sm muted">' + esc(f.size) + (f.at ? ' · ' + esc(f.at) : '') + '</span></span></span>';
-  }
-  function beforeAfter(d){
-    return '<span class="ba">' +
-      '<span class="ba__side"><span class="hb-label-sm muted">Before</span>' + fileChip(d.prev, { old: true }) + '</span>' +
-      '<span class="ba__arrow" aria-hidden="true">' + I.chevronRight + '</span>' +
-      '<span class="ba__side"><span class="hb-label-sm muted">After</span>' + fileChip(d.file) + '</span></span>';
-  }
+  /* The chosen preview for B. A pill would repeat what the line already states, so every row
+     carries the fact in words. A document still to come is not filled in: the row keeps the
+     page's own surface and is marked by its outlined icon and its Required tag. */
   function activityBranch(){
     var b = state.branchDetails;
     return list("pactivity", [
@@ -3265,19 +3238,11 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   }
   function activityDocs(){
     var rows = [];
-    /* Only the latest replacement opens out into before and after. An older one keeps the
-       fact in its line and reads like every other row — one case on the card, not a column
-       of file pairs. */
-    var featured = state.lastReplaced;
     docIds().forEach(function (k) {
       var d = state.docs[k], f = d.file;
-      if (f && d.prev && k === featured) {
+      if (f && d.prev) {
         rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
-          text: 'The earlier version stays on your account until this one is reviewed.',
-          extra: beforeAfter(d) }));
-      } else if (f && d.prev) {
-        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
-          text: esc(f.name) + ' · ' + esc(f.size) + ' · replaced ' + esc(d.prev.name) }));
+          text: esc(f.name) + ' · ' + esc(f.size) }));
       } else if (f) {
         rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', tag: reqTag(d), time: esc(f.at || 'just now'),
           text: esc(f.name) + ' · ' + esc(f.size) }));
@@ -3428,7 +3393,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
       risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
     { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs, noStatus: true,
-      how: "What was saved and when, the date in the time slot, a Required or Optional tag beside each document, and the newest replacement showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words, and the tint carries the exception.",
+      how: "What was saved and when, the date in the time slot, and a Required or Optional tag beside each document. No status pills, and nothing filled in: a document still to come keeps the page's own surface and is marked by its outlined icon.",
       best: "Returning buyers asking the real question — has anything changed since my last order? It is the chosen preview for B.",
       risk: "It reports history, not the current record; a buyer looking for one particular value has to read a line to find it." },
     { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
@@ -3776,9 +3741,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     state.uploading = id; state.uploadName = file.name;
     renderVerify();
     setTimeout(function () {
-      /* a replacement keeps what it replaced: the Activity preview shows both files, and the
-         old object URL stays alive because its thumbnail is still on screen */
-      if (d.file) { d.prev = d.file; state.lastReplaced = id; }
+      /* a replacement is remembered so the row reads "replaced" rather than "uploaded" */
+      if (d.file) { if (d.file.url) { URL.revokeObjectURL(d.file.url); } d.prev = { name: d.file.name, size: d.file.size, at: d.file.at }; }
       d.file = describe(file); d.file.at = "just now";
       state.uploading = null;
       renderVerify();
@@ -3945,7 +3909,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     },
     "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); }
       /* with the current file gone there is no "after" to compare a superseded copy against */
-      d.file = null; d.prev = null; if (state.lastReplaced === el.dataset.doc) { state.lastReplaced = null; } closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
+      d.file = null; d.prev = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
     /* the Credential preview offers its identifier for copying; the clipboard is not
        available on every origin, so the failure is reported rather than claimed as a copy. */

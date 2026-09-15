@@ -526,29 +526,17 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
    restored to on-surface. That is the only override; every other rule below is layout. */
 .plist .hb-li__text,.pactivity .hb-li__text,.pactions .hb-li__text,.pgrouped .hb-li__text{color:var(--hb-color-on-surface)}
 .hb-list .hb-li__text{overflow-wrap:anywhere}
-.hb-list .hb-li[data-state="todo"]{background:var(--hb-color-warning-container)}
-.hb-list .hb-li[data-state="todo"] .hb-li__text,.hb-list .hb-li[data-state="todo"] .hb-li__time{color:var(--hb-color-on-warning-container)}
-.hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-warning-light);color:var(--hb-color-on-warning-container)}
+/* A document still to come is NOT filled in: the row keeps the page's surface, and the
+   exception is carried by the leading icon's outline and by the row's own words. */
+.hb-list .hb-li[data-state="todo"]{background:var(--hb-color-surface)}
+.hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-surface);
+  border:var(--proto-hairline) solid var(--hb-color-warning-outline);color:var(--hb-color-warning-dark)}
 
 /* the Required / Optional tag beside a document's name, inside the component's top row */
 .pactivity .hb-li__top .hb-chip{flex:0 0 auto}
 .pactivity .hb-li__top{flex-wrap:wrap;row-gap:var(--hb-space-4)}
 .pactivity .hb-li__title{flex:0 1 auto}
 .pactivity .hb-li__time{margin-inline-start:auto}
-
-/* 13 · Activity — a replaced document shows the file it replaced beside the one on file */
-.ba{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;margin-top:var(--hb-space-12)}
-.ba__side{display:flex;flex-direction:column;gap:var(--hb-space-4);min-width:0;flex:1 1 220px}
-.ba__arrow{flex:0 0 auto;color:var(--hb-color-on-surface-variant);display:inline-flex;align-self:flex-end;
-  padding-bottom:var(--hb-space-12)}
-.ba__arrow .hb-i{font-size:var(--hb-space-20)}
-.bafile{display:flex;align-items:center;gap:var(--hb-space-12);min-width:0;padding:var(--hb-space-8) var(--hb-space-12);
-  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
-  background:var(--hb-color-surface)}
-.bafile[data-old]{background:var(--hb-color-surface-container-low);border-style:dashed}
-.bafile[data-old] .hb-label-md{text-decoration:line-through;color:var(--hb-color-on-surface-variant)}
-.bafile__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
-.bafile__lines span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
 .pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
@@ -688,7 +676,6 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .pcred__facts,.pstats{grid-template-columns:1fr}
   .pcred__pill{margin-inline-start:0}
   .prcp__row{flex-wrap:wrap}
-  .ba__arrow{align-self:center;padding-bottom:0;transform:rotate(90deg)}
   .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
   .prow dd{text-align:start}
   .prow__file{justify-content:flex-start}
