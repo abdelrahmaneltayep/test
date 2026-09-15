@@ -102,13 +102,13 @@
   function phoneField(o){
     /* The Phone Field molecule: country selector inside the control. icon/phone is absent
        from the icon library, so the country flag stands in for it — nothing substituted. */
-    return '<div class="hb-field hb-textfield hb-phonefield">' +
+    return '<div class="hb-field hb-textfield hb-phonefield"' + (o.error ? ' data-state="error"' : '') + '>' +
       '<label class="hb-field__label" for="' + o.id + '">' + o.label + ' <span class="hb-field__req">*</span></label>' +
       '<div class="hb-field__control">' +
         '<button type="button" class="hb-phone__country" aria-label="Country code"><span class="hb-phone__flag" aria-hidden="true"></span><span class="hb-phone__key">+973</span></button>' +
         '<span class="hb-phone__sep"></span>' +
-        '<input class="hb-field__input num" id="' + o.id + '" type="tel" value="' + esc(o.value) + '" inputmode="tel">' +
-      '</div></div>';
+        '<input class="hb-field__input num" id="' + o.id + '" type="tel" value="' + esc(o.value) + '" inputmode="tel" autocomplete="tel-national">' +
+      '</div>' + (o.error ? '<div class="hb-field__msg">' + I.error + '<span>' + esc(o.error) + '</span></div>' : '') + '</div>';
   }
   function pin(n){
     if (!PIN[n]) { return ''; }
@@ -117,12 +117,12 @@
   }
   var PIN = {
     1:'<b>Validate before, not after</b>On the live site the stock and minimum checks run when "Place order" is pressed — after the buyer has edited an address and uploaded documents — and fail with a toast that sends them back to the cart. Here the checks run on entry and again on submit, and a change is resolved in place.',
-    2:'<b>One "deliver to", not three sections</b>Branch details, delivery address and the "pin location is saved" banner are one fact: where this order goes. It is shown as one card with the map, and edited in a Drawer, not inline.',
+    2:'<b>Edit in place, safely</b>Same section, same fields. Edit Address swaps the saved values for Select, Text Field and Phone Field molecules with required marks and inline errors; Cancel restores, Update Address validates. The map pin is visible in the saved state too — the banner finally points at something.',
     3:'<b>Values are text, not orange</b>The live page renders every saved value in secondary/600 — decoration that reads as links and measures 2.25:1 on white. Values here are on-surface, labels on-surface-variant.',
-    4:'<b>Verification belongs to the account</b>A CR, a VAT certificate and a signatory ID describe the business, not the basket. Verify once, show status at checkout, and ask for a document only when it is missing or expiring. No buyer should upload the same CR on every order.',
-    5:'<b>A preview is a thumbnail</b>The live "Personal ID document" renders whatever was chosen at full width — including a personal photo. A 64 px thumbnail, the file name and size, and View / Replace. Accepted types and the size limit are stated before the click.',
+    4:'<b>Same three documents, with memory</b>A document already on file shows as a card — name, size, date, Preview / Replace / Remove — instead of an empty box. Empty zones say Required or Optional and what they accept. Ticking "Have VAT certificate" reveals the tax number and its zone, as on the live page.',
+    5:'<b>A preview is a thumbnail</b>The live Personal ID document renders whatever was chosen at full width — including a personal photo. Here it is a 64 px thumbnail with the file name and size; Preview opens it in a Drawer. A wrong type or a file over 10 MB is refused in the zone itself, not by a toast.',
     6:'<b>The chosen payment method is visible</b>The buyer picked Highbase Payment on the review page and the verification page never mentions it. The choice is shown here, with what it means — transfer within 48 h, receipt upload — so nothing is a surprise on the next screen.',
-    7:'<b>Commit with the summary in view</b>The live "Place Order" is a small button under a full-width image, with no total, no address and no supplier next to it. The summary rail is sticky and the primary action lives in it.',
+    7:'<b>Commit with the summary in view</b>The live Place Order is a small button under a full-width image, with no total next to it. The summary rail is sticky, carries the three readiness checks, and Place Order refuses while an edit is still open or a required document is missing.',
     8:'<b>A purchase order number is a B2B field</b>The person who orders is rarely the person who pays. A PO number and an invoice recipient give finance what they need to reconcile the transfer.',
     9:'<b>One status, stated plainly</b>"Thank you, your order has been placed successfully" next to "Complete your payment" says two things. The order is received and awaiting a transfer; the timeline shows exactly where it stands and what unblocks the next step.',
     10:'<b>A payment reference</b>The live page gives an IBAN and an amount but never says what to write on the transfer. The order number is the reference — without it, finance reconciles by amount and date.',

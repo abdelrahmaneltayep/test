@@ -29,7 +29,7 @@
       [r && r.submitted ? "Receipt received" : "Awaiting your transfer", r && r.submitted ? "Under review · usually within 2 working hours" : "Reserved until " + fmtDate(o.deadline), r && r.submitted ? "done" : "now"],
       ["Payment confirmed", r && r.submitted ? "Next" : "After the receipt is checked", r && r.submitted ? "now" : ""],
       ["Dispatched", "Al Manar Trading · " + state.slot.day, ""],
-      ["Delivered", branch().name, ""]
+      ["Delivered", state.address.city + " · " + state.branchDetails.name, ""]
     ];
     return '<ol class="progress" aria-label="Order progress">' + steps.map(function (s) {
       return '<li' + (s[2] ? ' data-state="' + s[2] + '"' : '') + '><span class="progress__bar" aria-hidden="true"></span><h4 class="hb-label-lg">' + s[0] + '</h4><p class="hb-body-sm">' + esc(s[1]) + '</p></li>';
@@ -105,7 +105,7 @@
         btn("Print", { style: "ghost", size: "sm", icon: I.print, attrs: ' data-act="print"' }) + '</div>' +
       '<div class="panel__body grid2">' +
         '<div class="stack">' +
-          '<div><div class="hb-label-md muted">Deliver to</div><div class="hb-body-md">' + esc(b.name) + '<br>' + b.lines.map(esc).join('<br>') + '</div></div>' +
+          '<div><div class="hb-label-md muted">Deliver to</div><div class="hb-body-md">' + esc(b.name) + ' · <bdi dir="ltr" class="num">+973 ' + esc(state.branchDetails.phone) + '</bdi><br>' + b.lines.map(esc).join('<br>') + '</div></div>' +
           '<div><div class="hb-label-md muted">Delivery</div><div class="hb-body-md">' + esc(state.slot.day) + ', ' + esc(state.slot.window) + ' · Al Manar Trading</div></div>' +
           (state.po ? '<div><div class="hb-label-md muted">Purchase order</div><div class="hb-body-md num">' + esc(state.po) + '</div></div>' : '') +
         '</div>' +

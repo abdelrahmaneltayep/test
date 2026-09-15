@@ -18,13 +18,23 @@ a personal photo at full width; the receipt upload lives two screens away behind
 
 ## Screens
 
-1. **Verify & place order** — stepper · pre-flight checks banner · one "Deliver to" card
-   (map pin, contact, hours, delivery slot; edited in a Drawer with the saved branches as a
-   radio list) · **Business verification as account status** (Verified / Expiring / Missing,
-   List Item rows with a thumbnail, View / Replace, upload in a Drawer with the File Upload
-   molecule) · payment method with what it implies · PO number and invoice recipient · sticky
-   summary rail with the primary action. The **"Scenario: stock changes"** toggle in the review
-   bar makes one line change on submit, resolved in a Confirmation Dialog instead of a bounce.
+1. **Checkout Verification** — the live page's own sections and values, kept as they are:
+   *Branch Details* (Branch Name · Branch Phone · Branch Email), *Delivery Address* (Country ·
+   State / Province · City · Street Address · Building · ZIP / Postal Code, with the map pin) and
+   *Business Documents* (CR Number · Commercial License (CR) · Have VAT certificate → Tax Number
+   + VAT Certificate · Personal ID Document), then Place Order. What changed is how they are
+   edited and how files upload:
+   - **Edit Details / Edit Address** swap the saved values for the Text Field, Phone Field and
+     Select molecules in place — required marks, inline errors on Save, Cancel restores, and
+     Place Order refuses while an edit is open. The map pin is visible in the saved state too.
+   - **Upload zones** are the File Upload molecule in its own states: a document already on file
+     is a card (name, size, date, Preview / Replace / Remove); an empty zone says Required or
+     Optional and the accepted types; a wrong type or a file over 10 MB is refused in the zone;
+     a good file shows progress then the card. Ticking *Have VAT certificate* reveals the tax
+     number and its zone, as on the live page. Place Order refuses while a required document is
+     missing, and says which.
+   - The **"Scenario: stock changes"** toggle in the review bar makes one line change on submit,
+     resolved in a Confirmation Dialog instead of a bounce to the cart.
 2. **Order received — awaiting your transfer** — one status, a five-step progress that moves
    when the receipt is submitted · Stat Card facts: amount, **payment reference**, transfer-by
    deadline · bank details with copy, Copy all, PDF, Send to finance · Benefit Pay / Fawri+ QR ·
@@ -55,7 +65,7 @@ Actions · Logo · Avatar · Button · Icon Button · Chip · Checkbox · Radio 
 - the review shell — top bar, screen switcher, scenario toggle, annotation pins
 - `--proto-*` geometry: page max, rail width, hairline, document thumbnail (64), QR size (148)
 - the stepper and the five-step order progress — the system has no stepper
-- the pre-flight checklist and the "Deliver to" map tile
+- the readiness checklist in the summary rail, and the map tile
 - `.hb-btn.proto-block` — the Button has no full-width variant
 - the placeholder QR — the real code is the bank's
 
