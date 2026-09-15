@@ -13,7 +13,7 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
  for(const dir of ['ltr','rtl']){const p=await b.newPage({viewport:{width:1440,height:1000}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto('file://'+__dirname+'/sweep.html');await p.waitForTimeout(500);if(dir==='rtl'){await p.click('#t-dir');await p.waitForTimeout(300)}
   for(const sc of ['a','b','c','d','e','why']){await p.evaluate(s=>location.hash=s,sc);await p.waitForTimeout(300);
-   if(sc==='b'){for(const st of ['grid','rows','used','chips','table']){await p.click('[data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(250);
+   if(sc==='b'){for(const st of ['grid','rows','used','chips','table','cred','tiles','stats','options','receipt']){await p.click('[data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(250);
      const badp=await p.evaluate(CONTRAST);if(badp.length){bad(`contrast ${dir}/preview:${st}`);badp.slice(0,4).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))}else ok(`contrast ${dir}/preview:${st}`);
      const ovp=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);ovp>1?bad(`overflow ${dir}/preview:${st} ${ovp}px`):ok(`no overflow ${dir}/preview:${st}`)}
     await p.click('[data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(200);
@@ -33,31 +33,31 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const facts=await p.$$('#screen-b .fact');const tiles=await p.$$('#screen-b .doctile');const forms=await p.$$('#screen-b input:not([type=checkbox])');
      const t=await txt('#screen-b');
      return facts.length===12&&tiles.length===2&&forms.length===0&&t.includes('Branch Phone')&&t.includes('ZIP / Postal Code')&&t.includes('CR Number')}],
-  ['B: five preview styles, same data, none of them a form',async()=>{
+  ['B: ten preview styles, same data, none of them a form',async()=>{
      const seen={};
-     for(const st of ['grid','rows','used','chips','table']){
+     for(const st of ['grid','rows','used','chips','table','cred','tiles','stats','options','receipt']){
        await p.click('#screen-b [data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(250);
        const pressed=await p.$$eval('#screen-b [data-act="preview-style"]',e=>e.filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.dataset.preview));
        const t=await txt('#screen-b');
        const forms=await p.$$('#screen-b input:not([type=checkbox]), #screen-b select, #screen-b textarea');
        seen[st]=pressed.join()===st&&forms.length===0&&t.includes('Manama')&&t.includes('908070605')&&t.includes('5056050560-1');
      }
-     const marks={rows:'.prows',used:'.pused',chips:'.pchips',table:'.prev__table',grid:'.prev__facts'};
+     const marks={grid:'.prev__facts',rows:'.prows',used:'.pused',chips:'.pchips',table:'.prev__table',cred:'.pcred',tiles:'.ptiles',stats:'.pstats',options:'.popts',receipt:'.prcp'};
      let shapes=true;
-     for(const st of ['grid','rows','used','chips','table']){
+     for(const st of ['grid','rows','used','chips','table','cred','tiles','stats','options','receipt']){
        await p.click('#screen-b [data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(200);
        if(!(await p.$('#screen-b '+marks[st]))) shapes=false;
        for(const other of Object.keys(marks)) if(other!==st&&marks[other]!==marks[st]&&await p.$('#screen-b '+marks[other])) shapes=false;
      }
      await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(200);
      return shapes&&Object.keys(seen).every(k=>seen[k])}],
-  ['B: a missing document shows in every style',async()=>{
+  ['B: a missing document shows in every one of the ten styles',async()=>{
      await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(300);
      await p.click('dialog.hb-drawer-layer [data-act="remove-doc"][data-doc="id"]');await p.waitForTimeout(200);
      await p.click('[data-act="remove-doc-go"]');await p.waitForTimeout(300);
      await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(300);
      let flagged=true;
-     for(const st of ['grid','rows','used','chips','table']){
+     for(const st of ['grid','rows','used','chips','table','cred','tiles','stats','options','receipt']){
        await p.click('#screen-b [data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(220);
        const t=await txt('#screen-b #card-docs');
        if(!/Required|needed|Not uploaded/.test(t)) flagged=false;
@@ -69,13 +69,13 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(1300);
      await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(300);
      return flagged&&(await p.$$('#screen-b .doctile[data-state="todo"]')).length===0}],
-  ['Compare: the five previews are listed and open B in that style',async()=>{
+  ['Compare: the ten previews are listed and open B in that style',async()=>{
      await p.evaluate(()=>location.hash='why');await p.waitForTimeout(300);
      const n=(await p.$$('#screen-why [data-act="goto-style"]')).length;
      await p.click('#screen-why [data-act="goto-style"][data-preview="table"]');await p.waitForTimeout(300);
      const onB=!!(await p.$('#screen-b .prev__table'));
      await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(200);
-     return n===5&&onB}],
+     return n===10&&onB}],
   ['B: no drawer until Change is pressed',async()=>!(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open))],
   ['B: Change opens the Drawer with that section only',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="branch"]');await p.waitForTimeout(300);
      const open=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
@@ -144,9 +144,9 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
   ['E: re-uploading it ticks the row again',async()=>{fs.writeFileSync(__dirname+'/tmp-cr.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
      const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('#screen-e [data-drop="cr"]')]);await fc.setFiles(__dirname+'/tmp-cr.png');await p.waitForTimeout(1200);
      return (await p.$$('#screen-e .list__item[data-state="todo"]')).length===0&&(await txt('#screen-e .progressbar')).includes('4 of 4 ready')}],
-  ['compact 390: no overflow in any of B\'s five preview styles',async()=>{await p.setViewportSize({width:390,height:844});
+  ['compact 390: no overflow in any of B\'s ten preview styles',async()=>{await p.setViewportSize({width:390,height:844});
      await p.evaluate(()=>location.hash='b');await p.waitForTimeout(300);let okk=true;
-     for(const st of ['grid','rows','used','chips','table']){await p.click('#screen-b [data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(250);
+     for(const st of ['grid','rows','used','chips','table','cred','tiles','stats','options','receipt']){await p.click('#screen-b [data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(250);
        const r=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);if(r>1){okk=false;console.log('       overflow',st,r)}}
      await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(200);
      await p.setViewportSize({width:1440,height:1000});await p.waitForTimeout(200);return okk}],

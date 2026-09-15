@@ -178,6 +178,196 @@
     return tableOf(rows);
   }
 
+  /* ---------- 6 · Credential — the section drawn as the document it stands for ---------- */
+  /* After the insurance-card layout: a portrait, a dated badge, an identifier that can be
+     copied, then the rest as two columns of labelled values. The card has no QR code — the
+     icon library has no QR glyph, and nothing is substituted for one. */
+  function credHead(art, badgeIcon, badgeLabel, badgeValue, pill){
+    return '<div class="pcred__head">' + art +
+      '<div class="pcred__badge"><span class="pcred__badge-ico">' + badgeIcon + '</span>' +
+        '<span class="pcred__badge-lines"><span class="hb-label-md">' + badgeLabel + '</span>' +
+        '<span class="hb-title-sm">' + badgeValue + '</span></span></div>' +
+      '<span class="pcred__pill">' + pill + '</span></div>';
+  }
+  function copyable(value, label){
+    return '<span class="pcopy"><span class="num">' + value + '</span>' +
+      iconBtn(I.copy, "Copy " + label, { style: "ghost", size: "sm", attrs: ' data-act="copy-value" data-value="' + esc(value) + '" data-label="' + esc(label) + '"' }) + '</span>';
+  }
+  function credBranch(){
+    var b = state.branchDetails;
+    return '<div class="pcred">' +
+      credHead('<span class="hb-avatar" data-shape="square" data-size="56">' + esc(initialsOf(b.name)) + '</span>',
+        I.clock, "Branch on file since", "12 Jan 2026", statusChip("active", "Saved")) +
+      '<dl class="pcred__facts">' + fact("Branch Name", esc(b.name)) +
+        fact("Branch Phone", copyable('+973 ' + esc(b.phone), "branch phone")) +
+        fact("Branch Email", esc(b.email)) + '</dl></div>';
+  }
+  function credAddress(){
+    var a = state.address;
+    return '<div class="pcred">' +
+      credHead('<span class="pcred__map" aria-hidden="true">' + I.location + '</span>',
+        I.clock, "Delivers to", esc(a.city) + ', ' + esc(a.state),
+        a.pinned ? statusChip("active", "Pin saved") : statusChip("pending", "No pin")) +
+      '<dl class="pcred__facts">' + fact("Street Address", esc(a.street)) + fact("Building", esc(a.building)) +
+        fact("ZIP / Postal Code", copyable(esc(a.zip), "postal code")) + fact("Country", esc(a.country)) + '</dl></div>';
+  }
+  function credDocs(){
+    var missing = docsNeeded() - docsOnFile();
+    return '<div class="pcred">' +
+      credHead('<span class="pcred__map" aria-hidden="true">' + I.file + '</span>',
+        I.clock, "Kept on your account", docsOnFile() + ' of ' + docsNeeded() + ' documents',
+        missing ? statusChip("pending", missing + " needed") : statusChip("active", "Complete")) +
+      '<dl class="pcred__facts">' + fact("CR Number", copyable(esc(state.crNumber), "CR number")) +
+        fact(vatLabel(), vatValue()) + '</dl>' +
+      '<div class="doctiles">' + docIds().map(function (k) {
+        var d = state.docs[k], f = d.file;
+        return '<div class="doctile" data-state="' + (f ? "done" : "todo") + '">' + docThumb(d) +
+          '<div class="doctile__main"><span class="hb-label-lg">' + esc(d.label) + '</span>' +
+          '<span class="hb-body-sm muted">' + (f ? esc(f.name) : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span></div>' +
+          docStatusChip(d) + '</div>';
+      }).join('') + '</div></div>';
+  }
+
+  /* ---------- 7 · Tiles — one soft row per value, leading icon, label over value ---------- */
+  /* After the smart-home analytics list: rounded rows, a tinted icon tile, the label small
+     above and the value below. The tile carries the section's icon — the library has no
+     phone or mail glyph, and none is substituted. */
+  function tile(icon, label, value){
+    return '<div class="ptile"><span class="ptile__ico">' + icon + '</span>' +
+      '<span class="ptile__lines"><span class="hb-label-sm">' + label + '</span>' +
+      '<span class="hb-title-sm">' + value + '</span></span></div>';
+  }
+  function tilesBranch(){
+    var b = state.branchDetails;
+    return '<div class="ptiles">' + tile(I.building, "Branch Name", esc(b.name)) +
+      tile(I.building, "Branch Phone", phoneText()) + tile(I.message, "Branch Email", esc(b.email)) + '</div>';
+  }
+  function tilesAddress(){
+    var a = state.address;
+    return '<div class="ptiles">' +
+      tile(I.location, "City", esc(a.city) + ', ' + esc(a.state)) +
+      tile(I.location, "Street and building", 'Street ' + esc(a.street) + ' · Building ' + esc(a.building)) +
+      tile(I.location, "ZIP / Postal Code", esc(a.zip) + ' · ' + esc(a.country)) +
+      tile(I.location, "Map pin", esc(pinLabel())) + '</div>';
+  }
+  function tilesDocs(){
+    return '<div class="ptiles">' + tile(I.invoice, "CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
+      docIds().map(function (k) {
+        var d = state.docs[k], f = d.file;
+        return '<div class="ptile" data-state="' + (f ? "done" : "todo") + '">' +
+          '<span class="ptile__ico">' + (f ? I.file : I.upload) + '</span>' +
+          '<span class="ptile__lines"><span class="hb-label-sm">' + esc(d.label) + '</span>' +
+          '<span class="hb-title-sm">' + (f ? esc(f.name) + ' <span class="hb-body-sm muted">' + esc(f.size) + '</span>' : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span></span>' +
+          docStatusChip(d) + '</div>';
+      }).join('') + '</div>';
+  }
+
+  /* ---------- 8 · Highlights — the two values that decide the order, as Stat Cards ---------- */
+  /* After the dashboard metric tiles: what the buyer would check at a glance is large, the
+     rest is one line underneath and the whole detail is one Change away. */
+  function metric(label, value, icon){
+    return '<div class="hb-stat"><span class="hb-stat__body"><span class="hb-stat__label">' + label + '</span>' +
+      '<span class="hb-stat__value">' + value + '</span></span><span class="hb-stat__trail">' + icon + '</span></div>';
+  }
+  function statsBranch(){
+    var b = state.branchDetails;
+    return '<div class="pstats">' + metric("Branch", esc(b.name), I.building) +
+      metric("Phone the driver calls", phoneText(), "") + '</div>' +
+      '<p class="pstats__rest hb-body-sm">Also on file: ' + esc(b.email) + '</p>';
+  }
+  function statsAddress(){
+    var a = state.address;
+    return '<div class="pstats">' + metric("Delivers to", esc(a.city) + ', ' + esc(a.state), I.location) +
+      metric("Map pin", a.pinned ? "Block 460" : "Not set", I.location) + '</div>' +
+      '<p class="pstats__rest hb-body-sm">Also on file: Street ' + esc(a.street) + ', Building ' + esc(a.building) + ', ' + esc(a.zip) + ', ' + esc(a.country) + '</p>';
+  }
+  function statsDocs(){
+    var missing = docsMissing();
+    return '<div class="pstats">' + metric("Documents on file", docsOnFile() + ' of ' + docsNeeded(), I.file) +
+      metric("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>', I.invoice) + '</div>' +
+      '<p class="pstats__rest hb-body-sm">' + (missing.length ? 'Still needed: ' + missing.join(', ') + '.' : 'Nothing outstanding. ' + vatLabel() + ': ') + (missing.length ? '' : vatValue()) + '</p>';
+  }
+
+  /* ---------- 9 · Options — each record as a bordered card, the one in use marked ---------- */
+  /* After the payment-method sheet: the same card per record, the active one outlined and
+     pilled "In use". Read only — a switch would imply the choice can be made here, and the
+     choosing happens in the Drawer. */
+  function option(o){
+    return '<div class="popt"' + (o.active ? ' data-active' : '') + (o.state ? ' data-state="' + o.state + '"' : '') + '>' +
+      '<span class="popt__art" aria-hidden="true">' + o.art + '</span>' +
+      '<span class="popt__lines"><span class="hb-title-sm">' + o.title + '</span>' +
+        '<span class="hb-body-sm muted">' + o.text + '</span>' +
+        (o.actions ? '<span class="popt__actions">' + o.actions + '</span>' : '') + '</span>' +
+      '<span class="popt__trail">' + o.trail + '</span></div>';
+  }
+  function optionsBranch(){
+    var b = state.branchDetails;
+    return '<div class="popts">' + option({ active: true,
+      art: '<span class="hb-avatar" data-shape="square" data-size="40">' + esc(initialsOf(b.name)) + '</span>',
+      title: esc(b.name), text: '+973 ' + esc(b.phone) + ' · ' + esc(b.email),
+      trail: statusChip("active", "In use") }) + '</div>';
+  }
+  function optionsAddress(){
+    var a = state.address;
+    return '<div class="popts">' + option({ active: true, art: I.location,
+      title: 'Building ' + esc(a.building) + ', Street ' + esc(a.street),
+      text: esc(a.city) + ', ' + esc(a.state) + ' ' + esc(a.zip) + ' · ' + esc(a.country),
+      trail: statusChip("active", "In use") }) +
+      option({ art: I.location, title: esc(pinLabel()), text: 'What the driver navigates to',
+        trail: a.pinned ? statusChip("approved", "Saved") : statusChip("pending", "Not set") }) + '</div>';
+  }
+  function optionsDocs(){
+    return '<div class="popts">' + docIds().map(function (k) {
+      var d = state.docs[k], f = d.file;
+      return option({ active: !!f, state: f ? "" : "todo", art: f ? I.file : I.upload,
+        title: esc(d.label),
+        text: f ? esc(f.name) + ' · ' + esc(f.size) + ' · added ' + esc(f.at || '—') : (d.required ? 'Not uploaded yet' : 'Optional'),
+        actions: f ? '<button type="button" class="linkbtn hb-label-md" data-act="view-doc" data-doc="' + k + '">Preview</button>' : '',
+        trail: docStatusChip(d) });
+    }).join('') + '</div>';
+  }
+
+  /* ---------- 10 · Receipt — a summary sheet, values at the end, one emphasised line ---------- */
+  /* After the cart summary: thumbnail rows with the value at the end, a rule, then the line
+     that decides the delivery set in the largest type, the way a total is. */
+  function rline(art, title, text, value){
+    return '<div class="prcp__row">' + (art ? '<span class="prcp__art" aria-hidden="true">' + art + '</span>' : '') +
+      '<span class="prcp__lines"><span class="hb-title-sm">' + title + '</span>' +
+      (text ? '<span class="hb-body-sm muted">' + text + '</span>' : '') + '</span>' +
+      '<span class="prcp__val hb-body-md">' + value + '</span></div>';
+  }
+  function rcpBranch(){
+    var b = state.branchDetails;
+    return '<div class="prcp">' +
+      rline('<span class="hb-avatar" data-shape="square" data-size="40">' + esc(initialsOf(b.name)) + '</span>',
+        esc(b.name), "Branch on the order", statusChip("active", "Saved")) +
+      '<hr class="hb-divider" data-orientation="horizontal">' +
+      rline('', "Branch Email", "", esc(b.email)) +
+      '<div class="prcp__total"><span class="hb-body-md">The driver calls</span>' +
+        '<span class="hb-headline-sm num">+973 ' + esc(b.phone) + '</span></div></div>';
+  }
+  function rcpAddress(){
+    var a = state.address;
+    return '<div class="prcp">' +
+      rline('<span class="prcp__map">' + I.location + '</span>', addressLines()[0], addressLines()[1] + ' · ' + esc(a.country),
+        a.pinned ? statusChip("active", "Pin saved") : statusChip("pending", "No pin")) +
+      '<hr class="hb-divider" data-orientation="horizontal">' +
+      rline('', "ZIP / Postal Code", "", '<span class="num">' + esc(a.zip) + '</span>') +
+      '<div class="prcp__total"><span class="hb-body-md">Delivers to</span>' +
+        '<span class="hb-headline-sm">' + esc(a.city) + ', ' + esc(a.state) + '</span></div></div>';
+  }
+  function rcpDocs(){
+    var missing = docsNeeded() - docsOnFile();
+    return '<div class="prcp">' + docIds().map(function (k) {
+      var d = state.docs[k], f = d.file;
+      return rline(docThumb(d), esc(d.label), f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional'), docStatusChip(d));
+    }).join('') +
+      '<hr class="hb-divider" data-orientation="horizontal">' +
+      rline('', "CR Number", vatLabel() + ': ' + vatValue(), '<span class="num">' + esc(state.crNumber) + '</span>') +
+      '<div class="prcp__total"><span class="hb-body-md">' + (missing ? 'Still needed' : 'On your account') + '</span>' +
+        '<span class="hb-headline-sm">' + (missing ? missing + ' of ' + docsNeeded() : docsOnFile() + ' of ' + docsNeeded()) + '</span></div></div>';
+  }
+
   /* The five, with what each one is for — the Compare screen reads the same list. */
   var PREVIEWS = [
     { id: "grid",  name: "Facts",   branch: gridBranch,  address: gridAddress,  docs: gridDocs,
@@ -199,7 +389,27 @@
     { id: "table", name: "Record",  branch: tableBranch, address: tableAddress, docs: tableDocs,
       how: "The Data Table organism, two columns — Field and what is on your account.",
       best: "Buyers who already read this data as a record in the dashboard; the same table, the same dashed rules.",
-      risk: "A table for three values looks heavier than it is, and it is the least mobile-friendly of the five." }
+      risk: "A table for three values looks heavier than it is, and it is the least mobile-friendly of the ten." },
+    { id: "cred",  name: "Credential", branch: credBranch, address: credAddress, docs: credDocs,
+      how: "The section drawn as the document it stands for: a portrait or thumbnail, a dated badge, an identifier that copies, then the rest in two columns.",
+      best: "The sections that are records — an account's branch, its licence — where the buyer is checking an identity, not a form.",
+      risk: "It borrows the authority of a real card; the page has no QR code because the icon library has none, so it stops short of the reference." },
+    { id: "tiles", name: "Tiles",      branch: tilesBranch, address: tilesAddress, docs: tilesDocs,
+      how: "One soft, rounded row per value, a tinted icon tile at the start, the label small above the value.",
+      best: "Touch, and any width: the rows stack without reflowing and stay comfortably tappable if they ever become editable.",
+      risk: "The library has no phone or mail glyph, so the tiles repeat the section's own icon; a per-field icon set would have to be drawn." },
+    { id: "stats", name: "Highlights", branch: statsBranch, address: statsAddress, docs: statsDocs,
+      how: "The two values that actually decide the order as Stat Cards, everything else on one line beneath them.",
+      best: "The quickest read of the ten — the buyer checks the two things that change an order and moves on.",
+      risk: "It chooses for the buyer. Anything not chosen is invisible until the Drawer opens." },
+    { id: "options", name: "Options",  branch: optionsBranch, address: optionsAddress, docs: optionsDocs,
+      how: "Each record as a bordered card — the one in use outlined and pilled, documents carrying a Preview action.",
+      best: "Accounts with more than one of something: a second address, a renewed licence beside the expired one.",
+      risk: "It looks like a chooser and is not one; the choosing happens in the Drawer, and a single record makes a lonely card." },
+    { id: "receipt", name: "Receipt",  branch: rcpBranch, address: rcpAddress, docs: rcpDocs,
+      how: "A summary sheet: thumbnail rows with the value at the end, a rule, then the line that matters set large, the way a total is.",
+      best: "The last screen before paying — it reads like the order summary next to it, so the page holds one voice.",
+      risk: "Emphasis by size means one line wins; if the buyer needs a different value, it is the smallest thing on the card." }
   ];
   function previewStyle(){
     for (var i = 0; i < PREVIEWS.length; i++) { if (PREVIEWS[i].id === state.previewStyle) { return PREVIEWS[i]; } }

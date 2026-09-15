@@ -13,16 +13,18 @@ ID Document). Same edit and upload behaviour everywhere, from the previous propo
 | | How it discloses | Buyer sees first | Best for | Trade-off |
 |---|---|---|---|---|
 | **A · Steps** | Accordion — one section open, the rest collapse to one line and a status pill. *Confirm & continue* walks down. | The whole task's shape, one section's detail. | Buyers who want the order of things; closest to today's page. | Three clicks even when nothing needs changing. |
-| **B · Confirm** | Each card's body is the data itself, read only, in one of five preview styles (below). *Change* / *Manage* open the **Drawer** with only that section's fields; the page holds no form. | The actual values beside their status, and one button. | Returning buyers with everything on file — most orders. | Editing happens in a panel over the page, so several changes mean several openings. |
+| **B · Confirm** | Each card's body is the data itself, read only, in one of ten preview styles (below). *Change* / *Manage* open the **Drawer** with only that section's fields; the page holds no form. | The actual values beside their status, and one button. | Returning buyers with everything on file — most orders. | Editing happens in a panel over the page, so several changes mean several openings. |
 | **C · Guided** | One question per screen, a step map beside it, one *Continue*; a review step before Place Order; *Why do we ask for this?* behind a disclosure. | One decision, nothing else. | Senior or infrequent buyers, and phones. | The longest path. |
 | **D · Tabs** | The three sections are tabs over one pane — one pane at a time, all three visible and reachable in any order, each with its own status pill. | All three sections and their states, one section's detail. | Buyers arriving to change one specific thing, without walking a sequence. | Tabs read as parallel; a buyer may place the order without opening the one that needed attention. |
 | **E · Checklist** | The page is a list of what is already done, ticked, value on each row. Nothing is a form until a row is expanded; a progress bar states how much is settled, and only what is outstanding is styled as work. | How ready the order is, and the one thing that is not. | Mixed accounts, and anyone who wants reassurance before committing. | Four rows of green can read as busy when nothing needs doing. |
 
-## B · five ways to preview the section data
+## B · ten ways to preview the section data
 
 Every card in B shows the section's own data, read only, and every one of them hands editing
 to the same Drawer. The switcher above the cards (review chrome, `(proposal)`) swaps between
-five treatments of that data:
+ten treatments of that data. The first five come from the page itself; the last five follow
+reference layouts supplied for the purpose — an insurance card, a smart-home list, dashboard
+metrics, a payment sheet and a cart summary:
 
 | | How it previews | Best for | Trade-off |
 |---|---|---|---|
@@ -31,9 +33,15 @@ five treatments of that data:
 | **3 As used** | The data in the shape it is used in: a contact block, a postal address as the driver reads it, documents as sheets. | Recognition rather than reading. | Without labels, a value in the wrong field is harder to spot. |
 | **4 Summary** | Values as Chips on one or two lines, every section the same short height. | The returning buyer with nothing to change — the page fits above the fold. | Chips carry values without labels; detail needs the Drawer. |
 | **5 Record** | The Data Table organism, two columns: Field and what is on your account. | Buyers who already read this data as a table in the dashboard. | Heavier than the data warrants, and the least mobile-friendly. |
+| **6 Credential** | The section drawn as the document it stands for: portrait or thumbnail, a dated badge, an identifier that copies, then two columns of values. | Sections that are records — the branch on the account, the licence. | Borrows the authority of a real card; there is no QR code, because the icon library has none. |
+| **7 Tiles** | One soft rounded row per value, a tinted icon tile at the start, label small above the value. | Touch and any width — rows stack without reflowing. | No phone or mail glyph exists, so tiles repeat the section's own icon. |
+| **8 Highlights** | The two values that decide the order as Stat Cards, everything else on one line beneath. | The quickest read of the ten. | It chooses for the buyer; the rest is invisible until the Drawer opens. |
+| **9 Options** | A bordered card per record, the one in use outlined and pilled, documents carrying Preview. | Accounts with more than one of something — a second address, a renewed licence. | Looks like a chooser and is not one; one record makes a lonely card. |
+| **10 Receipt** | A summary sheet: thumbnail rows, value at the end, a rule, then the line that matters set large. | The last screen before paying — same voice as the order summary beside it. | Emphasis by size means one line wins; another value is then the smallest thing on the card. |
 
-Recommendation: **Facts** on the storefront, **Summary** at compact width, **As used** as the one
-to put in front of buyers, **Record** in the dashboard. Status in every style is the system's
+Recommendation: **Facts** on the storefront, **Summary** at compact width, **Tiles** for phones,
+**Receipt** on this page specifically because it matches the order summary next to it, **As used**
+as the one to put in front of buyers, **Record** in the dashboard. Status in every style is the system's
 status pill with its fixed vocabulary — the Chip atom has no success or warning style and none
 was invented.
 
@@ -47,7 +55,7 @@ Button; Cancel / Change are ghost or outlined.
 ./assemble.sh                             # slices → body.html → build.js → the artifact
 node audit.js                             # static checks, DS stylesheets verbatim
 NODE_PATH=../node_modules node sweep.js   # contrast in both directions on all six screens
-                                          # (each of B's five preview styles and its three
+                                          # (each of B's ten preview styles and its three
                                           # Drawers), overflow at 1440 and 390,
                                           # and the A / B / C / D / E interaction paths
 ```

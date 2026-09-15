@@ -227,6 +227,15 @@
     },
     "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); } d.file = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
+    /* the Credential preview offers its identifier for copying; the clipboard is not
+       available on every origin, so the failure is reported rather than claimed as a copy. */
+    "copy-value": function (el) {
+      var v = el.dataset.value, label = el.dataset.label || "value";
+      var done = function () { toast("Copied the " + label + "."); };
+      var failed = function () { toast("Could not copy — select the " + label + " instead.", { kind: "bad" }); };
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(v).then(done, failed); }
+      else { failed(); }
+    },
     /* version B only: swap how the sections preview their data. Review chrome (proposal). */
     "preview-style": function (el) { state.previewStyle = el.dataset.preview; renderB(); applyLang(); },
     "close-drawer": closeDrawer

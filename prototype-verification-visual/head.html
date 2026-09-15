@@ -439,6 +439,86 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .prev__table .hb-table td{overflow-wrap:anywhere}
 .tcell{display:inline-flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap}
 
+/* ---------- Version B · preview styles 6-10, after the reference layouts ---------- */
+/* 6 · Credential — the insurance-card layout: portrait, dated badge, copyable identifier */
+.pcred{display:flex;flex-direction:column;gap:var(--hb-space-16);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-surface)}
+.pcred__head{display:flex;align-items:center;gap:var(--hb-space-16);flex-wrap:wrap}
+.pcred__map{width:var(--hb-space-56);height:var(--hb-space-56);flex:0 0 var(--hb-space-56);border-radius:var(--hb-radius-8);
+  background:var(--hb-color-primary-50);display:grid;place-items:center}
+.pcred__map .hb-i{font-size:var(--hb-space-24);color:var(--hb-color-primary-700)}
+.pcred__badge{display:flex;align-items:center;gap:var(--hb-space-12);flex:1 1 200px;min-width:0}
+.pcred__badge-ico{width:var(--hb-space-36);height:var(--hb-space-36);flex:0 0 var(--hb-space-36);border-radius:var(--hb-radius-8);
+  background:var(--hb-color-primary-container);color:var(--hb-color-on-primary-container);display:grid;place-items:center}
+.pcred__badge-ico .hb-i{font-size:var(--hb-space-20)}
+.pcred__badge-lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
+.pcred__badge-lines .hb-label-md{color:var(--hb-color-on-surface-variant)}
+.pcred__pill{margin-inline-start:auto}
+.pcred__facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-12) var(--hb-space-20);margin:0;
+  padding-top:var(--hb-space-16);border-top:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.pcopy{display:inline-flex;align-items:center;gap:var(--hb-space-4)}
+
+/* 7 · Tiles — the analytics-list layout: rounded rows, tinted icon tile, label over value */
+.ptiles{display:flex;flex-direction:column;gap:var(--hb-space-8)}
+.ptile{display:flex;align-items:center;gap:var(--hb-space-12);padding:var(--hb-space-12) var(--hb-space-16);
+  border-radius:var(--hb-radius-16);background:var(--hb-color-surface-container-low)}
+.ptile__ico{width:var(--hb-space-40);height:var(--hb-space-40);flex:0 0 var(--hb-space-40);border-radius:var(--hb-radius-12);
+  background:var(--hb-color-surface);display:grid;place-items:center;color:var(--hb-color-on-surface-variant);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.ptile__ico .hb-i{font-size:var(--hb-space-20)}
+.ptile__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0;flex:1}
+.ptile__lines .hb-label-sm{color:var(--hb-color-on-surface-variant)}
+.ptile__lines .hb-title-sm{overflow-wrap:anywhere}
+.ptile[data-state="todo"]{background:var(--hb-color-warning-container)}
+.ptile[data-state="todo"] .hb-label-sm,.ptile[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
+
+/* 8 · Highlights — the two deciding values as Stat Cards, the rest on one line */
+.pstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-12)}
+.pstats__rest{margin-top:var(--hb-space-12);color:var(--hb-color-on-surface-variant);overflow-wrap:anywhere}
+
+/* 9 · Options — the payment-sheet layout: a card per record, the one in use outlined */
+.popts{display:flex;flex-direction:column;gap:var(--hb-space-12)}
+.popt{display:flex;align-items:flex-start;gap:var(--hb-space-12);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-surface)}
+.popt[data-active]{border-color:var(--hb-color-primary);border-width:2px}
+.popt[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.popt[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
+.popt__art{width:var(--hb-space-40);height:var(--hb-space-40);flex:0 0 var(--hb-space-40);border-radius:var(--hb-radius-8);
+  display:grid;place-items:center;background:var(--hb-color-surface-container-low);color:var(--hb-color-on-surface-variant)}
+.popt__art .hb-avatar{width:100%;height:100%}
+.popt__art .hb-i{font-size:var(--hb-space-20)}
+.popt__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0;flex:1}
+.popt__lines .hb-body-sm{overflow-wrap:anywhere}
+.popt__actions{margin-top:var(--hb-space-8)}
+.popt__trail{flex:0 0 auto}
+.linkbtn{border:0;background:none;padding:0;cursor:pointer;color:var(--hb-color-primary-700);
+  font:inherit;font-weight:var(--hb-font-weight-medium);text-decoration:underline}
+
+/* 10 · Receipt — the cart-summary layout: rows, a rule, one line set large */
+.prcp{display:flex;flex-direction:column;gap:var(--hb-space-12);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-surface)}
+.prcp__row{display:flex;align-items:center;gap:var(--hb-space-12)}
+.prcp__art{width:var(--hb-space-40);height:var(--hb-space-40);flex:0 0 var(--hb-space-40);border-radius:var(--hb-radius-8);
+  display:grid;place-items:center;overflow:hidden;background:var(--hb-color-surface-container-low);color:var(--hb-color-on-surface-variant)}
+.prcp__art img{width:100%;height:100%;object-fit:cover}
+.prcp__art .hb-i{font-size:var(--hb-space-20)}
+.prcp__map{width:var(--hb-space-40);height:var(--hb-space-40);flex:0 0 var(--hb-space-40);border-radius:var(--hb-radius-8);
+  background:var(--hb-color-primary-50);color:var(--hb-color-primary-700);display:grid;place-items:center}
+.prcp__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0;flex:1}
+.prcp__lines .hb-body-sm{overflow-wrap:anywhere}
+.prcp__val{flex:0 0 auto;text-align:end;overflow-wrap:anywhere}
+.prcp__total{display:flex;align-items:baseline;justify-content:space-between;gap:var(--hb-space-16);
+  padding-top:var(--hb-space-12);border-top:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.prcp__total .hb-body-md{color:var(--hb-color-on-surface-variant)}
+
+/* ten segments need the row to themselves; in a column the lines must not take a basis */
+.stylebar{flex-direction:column;align-items:stretch;gap:var(--hb-space-12)}
+.stylebar__lines{flex:0 0 auto}
+.stylebar .hb-segmented{width:100%;overflow-x:auto}
+
 /* The Drawer carries a section's edit form; its panel is narrower than the page, so the
    two-column grids inside it stack and the inline edit chrome is dropped. */
 .drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
@@ -555,6 +635,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .prev__facts{grid-template-columns:1fr 1fr}
   .prev__map{width:100%;flex:0 0 auto}
   .doctile{flex:1 1 100%}
+  .pcred__facts,.pstats{grid-template-columns:1fr}
+  .pcred__pill{margin-inline-start:0}
+  .prcp__row{flex-wrap:wrap}
   .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
   .prow dd{text-align:start}
   .prow__file{justify-content:flex-start}
