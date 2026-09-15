@@ -52,9 +52,15 @@ B opens on **Activity**. Three things follow from choosing it:
   (*saved*, *replaced*, *is missing*), the readiness banner answers whether the order can go, and
   a pill beside either would state it a second time. The exception still shows: an outstanding
   row is tinted and says what to do.
-- **A replaced file shows before and after.** `docs.cr` is seeded with the version it replaced, and
-  any upload over an existing file in the prototype moves that file to `prev`, so the row grows a
-  *Before* and *After* pair with both thumbnails, sizes and dates. Removing a document clears both.
+- **A replaced file shows before and after — on one row.** `docs.cr` is seeded with the version it
+  replaced, and any upload over an existing file in the prototype moves that file to `prev` and
+  becomes `state.lastReplaced`. Only that newest replacement opens out into a *Before* and *After*
+  pair with both thumbnails, sizes and dates; an older one keeps the fact in its line and reads
+  like every other row, so the card carries one case rather than a column of file pairs. Removing
+  a document clears both.
+- **Every document carries a Required or Optional tag** beside its name, in the component's top row.
+  It is a neutral Chip, never a status pill: required-ness is what the document is, not how it is
+  doing, so it does not reintroduce the state this preview drops.
 - **The order breakdown is open.** The rail's *See the breakdown* details element carries `open` in
   B, so items, delivery, the coupon and VAT are on screen before the buyer commits, not one click
   behind a summary.

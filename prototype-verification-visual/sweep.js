@@ -96,7 +96,12 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(1400);
      await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(400);
      const t=await txt('#screen-b #card-docs');
-     return (await p.$$('#screen-b #card-docs .bafile[data-old]')).length===2&&t.includes('Personal ID Document replaced')&&t.includes('CPR-front.jpg')&&t.includes('tmp-id.png')}],
+     /* only the newest replacement opens out; the older one falls back to a single line */
+     return (await p.$$('#screen-b #card-docs .bafile[data-old]')).length===1&&t.includes('Personal ID Document replaced')&&t.includes('CPR-front.jpg')&&t.includes('tmp-id.png')&&t.includes('replaced CR-5056050560-1-2024.pdf')}],
+  ['B: every document is tagged Required or Optional, and the tag is not a status pill',async()=>{
+     const tags=await p.$$eval('#screen-b #card-docs .hb-chip',e=>e.map(x=>x.textContent.trim()));
+     const pills=(await p.$$('#screen-b #card-docs .hb-status')).length;
+     return tags.length===2&&tags.every(t=>t==='Required')&&pills===0}],
   ['B: the order breakdown is open, not folded away',async()=>{
      const open=await p.evaluate(()=>document.querySelector('#screen-b .rail details.why').open);
      const t=await txt('#screen-b .rail');

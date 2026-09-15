@@ -530,6 +530,12 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .hb-list .hb-li[data-state="todo"] .hb-li__text,.hb-list .hb-li[data-state="todo"] .hb-li__time{color:var(--hb-color-on-warning-container)}
 .hb-list .hb-li[data-state="todo"] .hb-li__lead{background:var(--hb-color-warning-light);color:var(--hb-color-on-warning-container)}
 
+/* the Required / Optional tag beside a document's name, inside the component's top row */
+.pactivity .hb-li__top .hb-chip{flex:0 0 auto}
+.pactivity .hb-li__top{flex-wrap:wrap;row-gap:var(--hb-space-4)}
+.pactivity .hb-li__title{flex:0 1 auto}
+.pactivity .hb-li__time{margin-inline-start:auto}
+
 /* 13 · Activity — a replaced document shows the file it replaced beside the one on file */
 .ba{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;margin-top:var(--hb-space-12)}
 .ba__side{display:flex;flex-direction:column;gap:var(--hb-space-4);min-width:0;flex:1 1 220px}

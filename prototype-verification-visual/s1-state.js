@@ -29,6 +29,7 @@
     },
     editing: { branch: false, address: false },
     previewStyle: "activity", // version B: the chosen preview — the others stay switchable
+    lastReplaced: "cr",       // the one document whose row opens out into before and after
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit

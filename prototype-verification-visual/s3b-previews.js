@@ -381,6 +381,7 @@
       (o.lead === false ? '' : '<span class="hb-li__lead">' + (o.lead || I.file) + '</span>') +
       '<span class="hb-li__body">' +
         '<span class="hb-li__top"><span class="hb-li__title">' + o.title + '</span>' +
+        (o.tag ? o.tag : '') +
         (o.time ? '<span class="hb-li__time">' + o.time + '</span>' : '') + '</span>' +
         (o.text ? '<span class="hb-li__text">' + o.text + '</span>' : '') +
         (o.extra ? o.extra : '') +
@@ -481,20 +482,32 @@
         time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()) })
     ]);
   }
+  function reqTag(d){
+    /* Required / Optional is what the document IS, not how it is doing — a neutral Chip,
+       never a status pill, so it does not reintroduce the state this preview drops. */
+    return chip(d.required ? "Required" : "Optional", { style: "neutral", size: "sm" });
+  }
   function activityDocs(){
     var rows = [];
+    /* Only the latest replacement opens out into before and after. An older one keeps the
+       fact in its line and reads like every other row — one case on the card, not a column
+       of file pairs. */
+    var featured = state.lastReplaced;
     docIds().forEach(function (k) {
       var d = state.docs[k], f = d.file;
-      if (f && d.prev) {
-        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', time: esc(f.at || 'just now'),
+      if (f && d.prev && k === featured) {
+        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
           text: 'The earlier version stays on your account until this one is reviewed.',
           extra: beforeAfter(d) }));
+      } else if (f && d.prev) {
+        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
+          text: esc(f.name) + ' · ' + esc(f.size) + ' · replaced ' + esc(d.prev.name) }));
       } else if (f) {
-        rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', time: esc(f.at || 'just now'),
+        rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', tag: reqTag(d), time: esc(f.at || 'just now'),
           text: esc(f.name) + ' · ' + esc(f.size) }));
       } else {
-        rows.push(li({ lead: I.upload, state: "todo", title: esc(d.label) + ' is missing',
-          text: d.required ? 'Upload it before placing this order.' : 'Optional — add it whenever you like.' }));
+        rows.push(li({ lead: I.upload, state: "todo", title: esc(d.label) + ' is missing', tag: reqTag(d),
+          text: d.required ? 'Upload it before placing this order.' : 'Add it whenever you like.' }));
       }
     });
     rows.push(li({ lead: I.invoice, title: "Registration on file", time: "12 Jan 2026",
@@ -639,7 +652,7 @@
       best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
       risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
     { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs, noStatus: true,
-      how: "What was saved and when, the date in the time slot, and a replaced document showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words, and the tint carries the exception.",
+      how: "What was saved and when, the date in the time slot, a Required or Optional tag beside each document, and the newest replacement showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words, and the tint carries the exception.",
       best: "Returning buyers asking the real question — has anything changed since my last order? It is the chosen preview for B.",
       risk: "It reports history, not the current record; a buyer looking for one particular value has to read a line to find it." },
     { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
