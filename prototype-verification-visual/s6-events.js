@@ -60,10 +60,8 @@
     state.uploading = id; state.uploadName = file.name;
     renderVerify();
     setTimeout(function () {
-      /* a replacement keeps what it replaced: the Activity preview shows both files, and the
-         old object URL stays alive because its thumbnail is still on screen */
-      if (d.file) { d.prev = d.file; }
-      d.file = describe(file); d.file.at = "just now";
+      if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); }
+      d.file = describe(file); d.file.at = null;
       state.uploading = null;
       renderVerify();
       toast(d.label + " saved to your account.", { kind: "ok" });
@@ -227,9 +225,7 @@
         body: d.required ? "It is required to place an order — you will need to upload it again." : "You can add it again at any time.",
         actions: btn("Keep it", { style: "ghost", size: "lg", attrs: ' data-act="close-confirm"' }) + btn("Remove", { intent: "danger", size: "lg", attrs: ' data-act="remove-doc-go" data-doc="' + id + '"' }) });
     },
-    "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); }
-      /* with the current file gone there is no "after" to compare a superseded copy against */
-      d.file = null; d.prev = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
+    "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); } d.file = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
     /* the Credential preview offers its identifier for copying; the clipboard is not
        available on every origin, so the failure is reported rather than claimed as a copy. */

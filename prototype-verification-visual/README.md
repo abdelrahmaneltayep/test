@@ -40,24 +40,9 @@ sheet, a cart summary); and five are the **List Item** molecule used five ways:
 | **10 Receipt** | A summary sheet: thumbnail rows, value at the end, a rule, then the line that matters set large. | The last screen before paying — same voice as the order summary beside it. | Emphasis by size means one line wins; another value is then the smallest thing on the card. |
 | **11 List** | The List Item molecule as built: leading icon, label, value beneath, status pill in the trailing slot. | The safest of the fifteen — a component buyers already meet in notifications and menus. | Every row looks equally important. |
 | **12 Ledger** | The same component with no leading slot and the value in the trailing slot: one line per value, values aligned down the end edge. | Checking many values quickly; the alignment exposes an odd one. | The densest, and the least scannable on a phone. |
-| **13 Activity · chosen** | What was saved and when, the date in the time slot, and a replaced document showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words and the tint carries the exception. | Returning buyers asking whether anything changed since the last order. | Reports history, not the record; finding one value means reading a line. |
+| **13 Activity** | The notification variant: what was saved and when, the date in the time slot, the tint reserved for what changed or still needs the buyer. | Returning buyers asking whether anything changed since the last order. | Reports history, not the record; finding one value means reading a sentence. |
 | **14 Actions** | Every row uses the actions slot: Copy an identifier, Preview a document, Upload or Change opening the Drawer at that section. | Doing one small thing without opening anything. | The busiest of the fifteen; three actions a row is a lot of blue. |
 | **15 Grouped** | One list per section split by subheaders with a count — Where and Exactly where, Registration and Files. | Sections that keep growing: a fourth document, a second contact. | More structure than today's data needs. |
-
-### What B ships with
-
-B opens on **Activity**. Three things follow from choosing it:
-
-- **No status pills**, on the rows or on the card headers. The line already says what happened
-  (*saved*, *replaced*, *is missing*), the readiness banner answers whether the order can go, and
-  a pill beside either would state it a second time. The exception still shows: an outstanding
-  row is tinted and says what to do.
-- **A replaced file shows before and after.** `docs.cr` is seeded with the version it replaced, and
-  any upload over an existing file in the prototype moves that file to `prev`, so the row grows a
-  *Before* and *After* pair with both thumbnails, sizes and dates. Removing a document clears both.
-- **The order breakdown is open.** The rail's *See the breakdown* details element carries `open` in
-  B, so items, delivery, the coupon and VAT are on screen before the buyer commits, not one click
-  behind a summary.
 
 The List Item five carry one prototype-layer override, noted in `head.html`: the component paints
 its text slot in `on-surface-variant`, which is right for a notification's supporting line and
@@ -65,8 +50,7 @@ wrong for a value being checked, so the label takes the title slot and the value
 `on-surface`. Everything else is the component's own markup — lead, body, top, title, time, text,
 actions, trail — inside `.hb-list`.
 
-Chosen for B: **Activity**. The rest stay switchable in the prototype for comparison.
-Earlier recommendation, kept for the record: **Facts** on the storefront, **Summary** at compact width, **Tiles** for phones,
+Recommendation: **Facts** on the storefront, **Summary** at compact width, **Tiles** for phones,
 **Receipt** on this page specifically because it matches the order summary next to it, **As used**
 as the one to put in front of buyers, **Record** in the dashboard. Among the List Item five,
 **List** ships safest, **Actions** helps the buyer who came to change one thing, and **Grouped**

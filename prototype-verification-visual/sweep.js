@@ -30,7 +30,6 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
   ['A: confirm & continue walks the accordion',async()=>{await p.click('#screen-a [data-act="next-step"]');await p.waitForTimeout(200);return !!(await p.$('#screen-a #acc-address[data-state="now"]'))&&!!(await p.$('#screen-a #acc-branch[data-state="done"]'))}],
   ['A: edit inside a step validates',async()=>{await p.click('#screen-a [data-act="edit-address"]');await p.fill('#screen-a #a-city','');await p.click('#screen-a [data-act="save-address"]');await p.waitForTimeout(150);const e=!!(await p.$('#screen-a .hb-field[data-state="error"]'));await p.fill('#screen-a #a-city','Manama');await p.click('#screen-a [data-act="save-address"]');await p.waitForTimeout(150);return e&&!(await p.$('#screen-a #a-city'))}],
   ['B: previews are structured data, not a sentence',async()=>{await p.evaluate(()=>location.hash='b');await p.waitForTimeout(300);
-     await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(250);
      const facts=await p.$$('#screen-b .fact');const tiles=await p.$$('#screen-b .doctile');const forms=await p.$$('#screen-b input:not([type=checkbox])');
      const t=await txt('#screen-b');
      return facts.length===12&&tiles.length===2&&forms.length===0&&t.includes('Branch Phone')&&t.includes('ZIP / Postal Code')&&t.includes('CR Number')}],
@@ -61,7 +60,7 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      for(const st of ['grid','rows','used','chips','table','cred','tiles','stats','options','receipt','list','ledger','activity','actions','grouped']){
        await p.click('#screen-b [data-act="preview-style"][data-preview="'+st+'"]');await p.waitForTimeout(220);
        const t=await txt('#screen-b #card-docs');
-       if(!/Required|needed|Not uploaded|missing/.test(t)) flagged=false;
+       if(!/Required|needed|Not uploaded/.test(t)) flagged=false;
      }
      /* put it back so the tests that follow start from a complete account */
      await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(200);
@@ -77,33 +76,7 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const onB=!!(await p.$('#screen-b .prev__table'));
      await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(200);
      return n===15&&onB}],
-  ['B opens on Activity, with no status pill anywhere on the page',async()=>{
-     await p.evaluate(()=>location.hash='b');await p.waitForTimeout(300);
-     await p.reload();await p.waitForTimeout(600);await p.evaluate(()=>location.hash='b');await p.waitForTimeout(400);
-     const pressed=await p.$$eval('#screen-b [data-act="preview-style"]',e=>e.filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.dataset.preview));
-     const pills=(await p.$$('#screen-b .hb-status')).length;
-     const t=await txt('#screen-b');
-     return pressed.join()==='activity'&&pills===0&&t.includes('Branch details saved')&&t.includes('Map pin updated')}],
-  ['B: a replaced document shows the file it replaced beside the new one',async()=>{
-     const before=await p.$$('#screen-b #card-docs .bafile[data-old]');
-     const both=await p.$$('#screen-b #card-docs .bafile');
-     const t=await txt('#screen-b #card-docs');
-     return before.length===1&&both.length===2&&t.includes('Commercial License (CR) replaced')&&t.includes('CR-5056050560-1-2024.pdf')&&t.includes('Before')&&t.includes('After')}],
-  ['B: replacing a file adds its own before and after',async()=>{
-     fs.writeFileSync(__dirname+'/tmp-id.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
-     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(350);
-     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('dialog.hb-drawer-layer [data-act="pick-doc"][data-doc="id"]')]);
-     await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(1400);
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(400);
-     const t=await txt('#screen-b #card-docs');
-     return (await p.$$('#screen-b #card-docs .bafile[data-old]')).length===2&&t.includes('Personal ID Document replaced')&&t.includes('CPR-front.jpg')&&t.includes('tmp-id.png')}],
-  ['B: the order breakdown is open, not folded away',async()=>{
-     const open=await p.evaluate(()=>document.querySelector('#screen-b .rail details.why').open);
-     const t=await txt('#screen-b .rail');
-     return open&&t.includes('VAT 10%')&&t.includes('ALMANAR2')}],
-  ['B: no drawer until Change is pressed',async()=>{
-     await p.click('#screen-b [data-act="preview-style"][data-preview="grid"]');await p.waitForTimeout(250);
-     return !(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open))}],
+  ['B: no drawer until Change is pressed',async()=>!(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open))],
   ['B: Change opens the Drawer with that section only',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="branch"]');await p.waitForTimeout(300);
      const open=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
      const t=await txt('dialog.hb-drawer-layer');

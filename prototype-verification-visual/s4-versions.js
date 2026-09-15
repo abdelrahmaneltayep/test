@@ -45,9 +45,7 @@
         '<span class="card__icon">' + o.icon + '</span>' +
         '<div class="card__main"><span class="hb-title-sm">' + o.title + '</span>' +
           '<span class="card__line hb-body-sm">' + o.meta + '</span></div>' +
-        /* a preview that states its own state in words takes no pill — two of them would
-           say the same thing twice, and the readiness banner already answers "am I ready?" */
-        (previewStyle().noStatus ? '' : o.pill) +
+        o.pill +
         btn(o.action, { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="open-drawer" data-drawer="' + o.id + '"' }) +
       '</div>' +
       '<div class="card__prev">' + o.preview() + '</div>' +
@@ -73,7 +71,7 @@
         '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
         '<div class="hb-body-sm muted">' + t.lines + ' lines from ' + esc(state.supplier.name) + ' · delivery ' + esc(state.slot.day) + ' · Highbase Payment</div>' +
         placeBtn({ label: "Place Order · " + bhd(t.total) }) +
-        '<details class="why" open><summary class="hb-body-sm">' + I.chevronDown + 'See the breakdown</summary><div class="stack" style="margin-top:var(--hb-space-12)">' + railTotals() + '</div></details>' +
+        '<details class="why"><summary class="hb-body-sm">' + I.chevronDown + 'See the breakdown</summary><div class="stack" style="margin-top:var(--hb-space-12)">' + railTotals() + '</div></details>' +
       '</div></div></aside></div>' +
       '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(t.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
   }

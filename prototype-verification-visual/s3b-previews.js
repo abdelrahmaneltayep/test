@@ -383,7 +383,6 @@
         '<span class="hb-li__top"><span class="hb-li__title">' + o.title + '</span>' +
         (o.time ? '<span class="hb-li__time">' + o.time + '</span>' : '') + '</span>' +
         (o.text ? '<span class="hb-li__text">' + o.text + '</span>' : '') +
-        (o.extra ? o.extra : '') +
         (o.actions ? '<span class="hb-li__actions">' + o.actions + '</span>' : '') +
       '</span>' +
       (o.trail ? '<span class="hb-li__trail">' + o.trail + '</span>' : '') + '</div>';
@@ -447,58 +446,35 @@
     return list("pledger", rows);
   }
 
-  /* ---------- 13 · Activity — what was saved and when. No status pills: the row says it ---------- */
-  /* The chosen preview for B. A pill would repeat what the line already states, so the row
-     carries the fact in words and the tint carries the exception. A document that replaced an
-     earlier version shows both files, the superseded one beside the current one. */
-  function fileChip(f, o){
-    o = o || {};
-    return '<span class="bafile"' + (o.old ? ' data-old' : '') + '>' +
-      '<span class="doc__prev" aria-hidden="true">' + (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) + '</span>' +
-      '<span class="bafile__lines"><span class="hb-label-md">' + esc(f.name) + '</span>' +
-      '<span class="hb-body-sm muted">' + esc(f.size) + (f.at ? ' · ' + esc(f.at) : '') + '</span></span></span>';
-  }
-  function beforeAfter(d){
-    return '<span class="ba">' +
-      '<span class="ba__side"><span class="hb-label-sm muted">Before</span>' + fileChip(d.prev, { old: true }) + '</span>' +
-      '<span class="ba__arrow" aria-hidden="true">' + I.chevronRight + '</span>' +
-      '<span class="ba__side"><span class="hb-label-sm muted">After</span>' + fileChip(d.file) + '</span></span>';
-  }
+  /* ---------- 13 · Activity — what was saved and when; only what needs the buyer is tinted ---------- */
   function activityBranch(){
     var b = state.branchDetails;
     return list("pactivity", [
       li({ lead: I.building, title: "Branch details saved", time: "12 Jan 2026",
-        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email) })
+        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email), trail: statusChip("completed", "No change") })
     ]);
   }
   function activityAddress(){
     var a = state.address;
     return list("pactivity", [
       li({ lead: I.location, title: "Delivery address saved", time: "12 Jan 2026",
-        text: addressLines().join(' · ') }),
-      li({ lead: I.location, state: a.pinned ? "" : "todo",
-        title: a.pinned ? "Map pin updated" : "Map pin has never been set",
-        time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()) })
+        text: addressLines().join(' · '), trail: statusChip("completed", "No change") }),
+      li({ lead: I.location, unread: a.pinned, title: a.pinned ? "Map pin updated" : "Map pin never set",
+        time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()),
+        trail: a.pinned ? statusChip("approved", "Recent") : statusChip("pending", "Not set") })
     ]);
   }
   function activityDocs(){
     var rows = [];
     docIds().forEach(function (k) {
       var d = state.docs[k], f = d.file;
-      if (f && d.prev) {
-        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', time: esc(f.at || 'just now'),
-          text: 'The earlier version stays on your account until this one is reviewed.',
-          extra: beforeAfter(d) }));
-      } else if (f) {
-        rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', time: esc(f.at || 'just now'),
-          text: esc(f.name) + ' · ' + esc(f.size) }));
-      } else {
-        rows.push(li({ lead: I.upload, state: "todo", title: esc(d.label) + ' is missing',
-          text: d.required ? 'Upload it before placing this order.' : 'Optional — add it whenever you like.' }));
-      }
+      rows.push(li({ lead: f ? I.file : I.upload, state: f ? "" : "todo",
+        title: f ? esc(d.label) + ' uploaded' : esc(d.label) + ' is missing',
+        time: f ? esc(f.at || '') : '', text: docText(d), trail: docStatusChip(d) }));
     });
     rows.push(li({ lead: I.invoice, title: "Registration on file", time: "12 Jan 2026",
-      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue() }));
+      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue(),
+      trail: statusChip("completed", "No change") }));
     return list("pactivity", rows);
   }
 
@@ -638,10 +614,10 @@
       how: "The same component with the leading slot dropped and the value moved into the trailing slot: one line per value, values aligned down the end edge.",
       best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
       risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
-    { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs, noStatus: true,
-      how: "What was saved and when, the date in the time slot, and a replaced document showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words, and the tint carries the exception.",
-      best: "Returning buyers asking the real question — has anything changed since my last order? It is the chosen preview for B.",
-      risk: "It reports history, not the current record; a buyer looking for one particular value has to read a line to find it." },
+    { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs,
+      how: "The notification variant: what was saved and when, the date in the time slot, and the tint reserved for what changed recently or still needs the buyer.",
+      best: "Returning buyers asking the real question — has anything changed since my last order?",
+      risk: "It reports history, not the current record; a buyer looking for one value has to read a sentence to find it." },
     { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
       how: "Every row uses the component's actions slot: Copy on an identifier, Preview on a document, Upload or Change opening the Drawer at that section.",
       best: "Doing one small thing without opening anything — copying the CR number, replacing one expired licence.",
