@@ -55,16 +55,17 @@
     var ok = docsOk(), t = totals();
     $("#screen-b").innerHTML = pageHead() +
       '<div class="cols"><div class="stack">' +
+        previewSwitch() +
         '<div class="ready"' + (ok ? '' : ' data-state="warn"') + '><span class="ready__mark">' + (ok ? I.check : I.warning) + '</span>' +
           '<div><div class="hb-title-lg">' + (ok ? 'Everything is in place' : 'One thing still needed') + '</div>' +
           '<div class="hb-body-md">' + (ok ? 'Your branch, delivery address and documents are on file. Check them below, or place the order.' : 'Still needed: ' + docsMissing().join(', ') + '. Open Business Documents to add it.') + '</div></div></div>' +
         cardB({ id: "branch", icon: I.building, title: "Branch Details", meta: "Who the driver calls on arrival",
-          pill: statusChip("active", "Saved"), action: "Change", preview: prevBranch }) +
+          pill: statusChip("active", "Saved"), action: "Change", preview: previewOf("branch") }) +
         cardB({ id: "address", icon: I.location, title: "Delivery Address", meta: "Where the order goes",
-          pill: statusChip("active", "Pin saved"), action: "Change", preview: prevAddress }) +
+          pill: statusChip("active", "Pin saved"), action: "Change", preview: previewOf("address") }) +
         cardB({ id: "docs", icon: I.file, title: "Business Documents", meta: "Kept on your account",
           pill: ok ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded()),
-          action: "Manage", preview: prevDocs }) +
+          action: "Manage", preview: previewOf("docs") }) +
       '</div>' +
       '<aside class="rail"><div class="panel"><div class="panel__body stack">' +
         '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +

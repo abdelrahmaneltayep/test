@@ -34,6 +34,7 @@ const PARTS = [
   'molecules/ListItem/ListItem.css',
   'molecules/StatCard/StatCard.css',
   'molecules/Tabs/Tabs.css',
+  'molecules/SegmentedControl/SegmentedControl.css',
   'molecules/PageHeader/PageHeader.css',
   'molecules/Tooltip/Tooltip.css',
   'molecules/DialogHeader/DialogHeader.css',

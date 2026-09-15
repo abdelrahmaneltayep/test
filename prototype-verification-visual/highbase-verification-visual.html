@@ -964,6 +964,21 @@ a.hb-stat:hover, button.hb-stat:hover { border-color: var(--hb-color-primary-300
 .hb-tabs[data-style="underline"] .hb-tab[aria-selected="true"] { background: none; box-shadow: inset 0 -2px 0 0 var(--hb-color-primary-hover); }
 
 
+/* ===== molecules/SegmentedControl/SegmentedControl.css (verbatim, highbase-ds) ===== */
+/* Highbase · Segmented Control (molecule) — Structure type 1. (file) Account status (Local / Global): track Neutrals/50 r-full p4,
+   the selected segment filled Primary/700 r-full with white 14 Medium, unselected neutral/600; optional 20 px leading icon per segment. */
+.hb-segmented { display: inline-flex; align-items: center; gap: var(--hb-component-segmented-segment-gap); box-sizing: border-box; padding: var(--hb-component-segmented-track-padding); background: var(--hb-color-surface-container-low); border-radius: var(--hb-component-segmented-radius); font-family: var(--hb-font-family-latin); }
+[lang="ar"] .hb-segmented, [dir="rtl"] .hb-segmented { font-family: var(--hb-font-family-arabic); }
+.hb-segment { display: inline-flex; align-items: center; justify-content: center; gap: var(--hb-space-4); height: var(--hb-component-segmented-segment-height); padding-inline: var(--hb-component-segmented-segment-padding-x); border: 0; background: none; border-radius: var(--hb-radius-full); color: var(--hb-color-on-surface-variant); font: inherit; font-size: var(--hb-font-size-14); font-weight: var(--hb-font-weight-medium); white-space: nowrap; cursor: pointer; transition: background-color 120ms, color 120ms; }
+.hb-segment__icon { width: 20px; height: 20px; flex: 0 0 auto; display: inline-flex; }
+.hb-segment__icon svg { width: 100%; height: 100%; }
+.hb-segment[aria-pressed="true"] { background: var(--hb-color-primary-hover); color: var(--hb-color-on-primary); }
+.hb-segment:focus-visible { outline: 2px solid var(--hb-color-inverse-primary); outline-offset: 2px; }
+.hb-segment:disabled { color: var(--hb-color-on-surface-disabled); cursor: not-allowed; }
+.hb-segmented[data-width="fill"] { display: flex; width: 100%; }
+.hb-segmented[data-width="fill"] .hb-segment { flex: 1 1 0; }
+
+
 /* ===== molecules/PageHeader/PageHeader.css (verbatim, highbase-ds) ===== */
 /* Highbase · Page Header (molecule) — Structure type 4 (slots: title / description / breadcrumb / actions).
    (live) Every dashboard page opens with a 24 Bold title, an amber one-line description and a dot-separated breadcrumb.
@@ -1817,6 +1832,58 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .doctile__main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .doctile[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
 
+/* ---------- Version B · the other four preview styles, same data, read only ---------- */
+/* The switcher itself is review chrome (proposal) — it would not ship on the page. */
+.stylebar{display:flex;align-items:center;gap:var(--hb-space-16);flex-wrap:wrap;
+  padding:var(--hb-space-12) var(--hb-space-16);border-radius:var(--hb-radius-12);
+  border:var(--proto-hairline) dashed var(--hb-color-outline);background:var(--hb-color-surface-container-low)}
+.stylebar__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);flex:1 1 320px;min-width:0}
+
+/* 2 · Rows — one value per line, hairline between, nothing editable */
+.prows{margin:0;border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);overflow:hidden}
+.prow{display:flex;align-items:center;gap:var(--hb-space-16);justify-content:space-between;
+  padding:var(--hb-space-12) var(--hb-space-16);border-block-end:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.prows .prow:last-child{border-block-end:0}
+.prow:nth-child(odd){background:var(--hb-color-surface-container-low)}
+.prow dt{margin:0;color:var(--hb-color-on-surface-variant)}
+.prow dd{margin:0;text-align:end;color:var(--hb-color-on-surface);overflow-wrap:anywhere}
+.prow[data-state="todo"]{background:var(--hb-color-warning-container)}
+.prow[data-state="todo"] dt,.prow[data-state="todo"] dd{color:var(--hb-color-on-warning-container)}
+.prow__file{display:inline-flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;justify-content:flex-end}
+
+/* 3 · As used — the data in the shape it is used in */
+.pused{display:flex;align-items:flex-start;gap:var(--hb-space-16);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-8);background:var(--hb-color-surface-container-low)}
+.pused__lines{display:flex;flex-direction:column;gap:var(--hb-space-4);min-width:0}
+.pused__lines span{overflow-wrap:anywhere}
+.pused__map{width:var(--hb-space-104);height:var(--hb-space-104);flex:0 0 var(--hb-space-104);
+  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-primary-50);display:grid;place-items:center}
+.pused__map .hb-i{font-size:var(--hb-space-32);color:var(--hb-color-primary-700)}
+.pused__meta{color:var(--hb-color-on-surface-variant)}
+.docrow{display:flex;gap:var(--hb-space-12);flex-wrap:wrap}
+.docsheet{display:flex;align-items:center;gap:var(--hb-space-12);
+  flex:1 1 260px;min-width:0;padding:var(--hb-space-12);border-radius:var(--hb-radius-8);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);background:var(--hb-color-surface-container-low)}
+.docsheet__lines{display:flex;flex-direction:column;align-items:flex-start;gap:var(--hb-space-4);min-width:0}
+.docsheet[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.docsheet[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
+.docsheet span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.docsheet__art{width:var(--hb-space-52);height:var(--hb-space-72);flex:0 0 var(--hb-space-52);border-radius:var(--hb-radius-6);
+  background:var(--hb-color-surface);display:grid;place-items:center;overflow:hidden;
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.docsheet__art img{width:100%;height:100%;object-fit:cover}
+.docsheet__art .hb-i{font-size:var(--hb-space-28);color:var(--hb-color-on-surface-variant)}
+
+/* 4 · Summary — every section the same short height, values as Chips */
+.pchips{display:flex;gap:var(--hb-space-8);flex-wrap:wrap;align-items:center}
+
+/* 5 · Record — the Data Table organism, two columns */
+.prev__table .hb-table{table-layout:fixed}
+.prev__table .hb-table th:first-child,.prev__table .hb-table td:first-child{width:38%}
+.prev__table .hb-table td{overflow-wrap:anywhere}
+.tcell{display:inline-flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap}
+
 /* The Drawer carries a section's edit form; its panel is narrower than the page, so the
    two-column grids inside it stack and the inline edit chrome is dropped. */
 .drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
@@ -1933,6 +2000,13 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .prev__facts{grid-template-columns:1fr 1fr}
   .prev__map{width:100%;flex:0 0 auto}
   .doctile{flex:1 1 100%}
+  .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
+  .prow dd{text-align:start}
+  .prow__file{justify-content:flex-start}
+  .pused{flex-direction:column}
+  .pused__map{width:100%;height:var(--hb-space-72);flex:0 0 auto}
+  .docsheet{flex:1 1 100%}
+  .stylebar .hb-segmented{width:100%;overflow-x:auto}
   .site{padding-inline:var(--hb-space-12)}
   .grid2,.addr,.kv{grid-template-columns:1fr}
   .progress{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -2137,6 +2211,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       id:  { label: "Personal ID Document",    required: true,  file: { name: "CPR-front.jpg", size: "1.2 MB", isImage: false, at: "12 Jan 2026" } }
     },
     editing: { branch: false, address: false },
+    previewStyle: "grid",     // version B: which of the five read-only previews is on screen
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit
@@ -2561,17 +2636,43 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     var w = String(name).trim().split(/\s+/);
     return ((w[0] || "").charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : "")).toUpperCase() || "B";
   }
-  function prevBranch(){
+
+  /* ============================================================
+     Version B · five ways to preview a section's data, read only.
+     Each style renders the same three sections from the same state; none of
+     them is editable, and every one of them hands editing to the Drawer.
+     The switcher that chooses between them is review chrome (proposal).
+     ============================================================ */
+
+  function docStatusChip(d){
+    return d.file ? statusChip("active", "On file")
+      : d.required ? statusChip("pending", "Required") : statusChip("approved", "Optional");
+  }
+  function docIds(){ return ["cr", "id"].concat(state.hasVat ? ["vat"] : []); }
+  function docThumb(d){
+    var f = d.file;
+    return '<span class="doc__prev" aria-hidden="true">' +
+      (f ? (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) : I.upload) + '</span>';
+  }
+  function phoneText(){ return '<bdi dir="ltr" class="num">+973 ' + esc(state.branchDetails.phone) + '</bdi>'; }
+  function vatValue(){
+    return state.hasVat
+      ? (state.taxNumber ? '<span class="num">' + esc(state.taxNumber) + '</span>' : '<span class="muted">Not entered</span>')
+      : '<span class="muted">Not registered</span>';
+  }
+  function vatLabel(){ return state.hasVat ? "Tax Number" : "VAT registration"; }
+  function pinLabel(){ return state.address.pinned ? "Pin saved · Block 460" : "No pin saved"; }
+
+  /* ---------- 1 · Facts — labelled values in a grid, the thumbnail beside them ---------- */
+  function gridBranch(){
     var b = state.branchDetails;
     return '<div class="prev">' +
       '<span class="hb-avatar" data-shape="square" data-size="40">' + esc(initialsOf(b.name)) + '</span>' +
       '<dl class="prev__facts">' +
-        fact("Branch Name", esc(b.name)) +
-        fact("Branch Phone", '<bdi dir="ltr" class="num">+973 ' + esc(b.phone) + '</bdi>') +
-        fact("Branch Email", esc(b.email)) +
+        fact("Branch Name", esc(b.name)) + fact("Branch Phone", phoneText()) + fact("Branch Email", esc(b.email)) +
       '</dl></div>';
   }
-  function prevAddress(){
+  function gridAddress(){
     var a = state.address;
     return '<div class="prev">' +
       '<span class="prev__map" aria-label="Delivery pin, Block 460">' + I.location + '<span class="hb-label-sm">' + (a.pinned ? 'Pin saved' : 'No pin') + '</span></span>' +
@@ -2580,21 +2681,181 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         fact("Street Address", esc(a.street)) + fact("Building", esc(a.building)) + fact("ZIP / Postal Code", esc(a.zip)) +
       '</dl></div>';
   }
-  function prevDocs(){
-    var ids = ["cr", "id"].concat(state.hasVat ? ["vat"] : []);
-    var facts = '<div class="prev"><dl class="prev__facts">' + fact("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
-      (state.hasVat ? fact("Tax Number", state.taxNumber ? '<span class="num">' + esc(state.taxNumber) + '</span>' : '<span class="muted">Not entered</span>') : fact("VAT registration", '<span class="muted">Not registered</span>')) +
+  function gridDocs(){
+    var facts = '<div class="prev"><dl class="prev__facts">' +
+      fact("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
+      fact(vatLabel(), vatValue()) +
       fact("On file", docsOnFile() + ' of ' + docsNeeded() + ' documents') + '</dl></div>';
-    var tiles = '<div class="doctiles" style="margin-top:var(--hb-space-12)">' + ids.map(function (k) {
+    var tiles = '<div class="doctiles" style="margin-top:var(--hb-space-12)">' + docIds().map(function (k) {
       var d = state.docs[k], f = d.file;
-      return '<div class="doctile" data-state="' + (f ? "done" : "todo") + '">' +
-        '<span class="doc__prev" aria-hidden="true">' + (f ? (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) : I.upload) + '</span>' +
+      return '<div class="doctile" data-state="' + (f ? "done" : "todo") + '">' + docThumb(d) +
         '<div class="doctile__main"><span class="hb-label-lg">' + esc(d.label) + '</span>' +
           '<span class="hb-body-sm muted">' + (f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span></div>' +
-        (f ? statusChip("active", "On file") : d.required ? statusChip("pending", "Required") : statusChip("approved", "Optional")) +
-      '</div>';
+        docStatusChip(d) + '</div>';
     }).join('') + '</div>';
     return facts + tiles;
+  }
+
+  /* ---------- 2 · Rows — one value per line, label start, value end ---------- */
+  function row(label, value, o){
+    o = o || {};
+    return '<div class="prow"' + (o.state ? ' data-state="' + o.state + '"' : '') + '>' +
+      '<dt class="hb-body-md">' + label + '</dt><dd class="hb-body-md">' + value + '</dd></div>';
+  }
+  function rowsBranch(){
+    var b = state.branchDetails;
+    return '<dl class="prows">' + row("Branch Name", esc(b.name)) + row("Branch Phone", phoneText()) +
+      row("Branch Email", esc(b.email)) + '</dl>';
+  }
+  function rowsAddress(){
+    var a = state.address;
+    return '<dl class="prows">' + row("Country", esc(a.country)) + row("State / Province", esc(a.state)) +
+      row("City", esc(a.city)) + row("Street Address", esc(a.street)) + row("Building", esc(a.building)) +
+      row("ZIP / Postal Code", esc(a.zip)) + row("Map pin", esc(pinLabel())) + '</dl>';
+  }
+  function rowsDocs(){
+    return '<dl class="prows">' + row("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
+      row(vatLabel(), vatValue()) +
+      docIds().map(function (k) {
+        var d = state.docs[k], f = d.file;
+        return row(esc(d.label), '<span class="prow__file">' +
+          (f ? '<span class="hb-body-md">' + esc(f.name) + '</span><span class="hb-body-sm muted">' + esc(f.size) + '</span>' : '<span class="hb-body-sm muted">' + (d.required ? 'Not uploaded yet' : 'Optional') + '</span>') +
+          docStatusChip(d) + '</span>', { state: f ? "" : "todo" });
+      }).join('') + '</dl>';
+  }
+
+  /* ---------- 3 · As used — the data in the shape it is used in, not as fields ---------- */
+  function usedBranch(){
+    var b = state.branchDetails;
+    return '<div class="pused">' +
+      '<span class="hb-avatar" data-shape="square" data-size="56">' + esc(initialsOf(b.name)) + '</span>' +
+      '<div class="pused__lines">' +
+        '<span class="hb-title-sm">' + esc(b.name) + '</span>' +
+        '<span class="hb-body-md">' + phoneText() + '</span>' +
+        '<span class="hb-body-md">' + esc(b.email) + '</span>' +
+        '<span class="hb-body-sm muted">The driver calls this number on arrival.</span>' +
+      '</div></div>';
+  }
+  function usedAddress(){
+    return '<div class="pused">' +
+      '<span class="pused__map" aria-label="Delivery pin, Block 460">' + I.location + '</span>' +
+      '<div class="pused__lines">' +
+        addressLines().map(function (l) { return '<span class="hb-body-lg">' + esc(l) + '</span>'; }).join('') +
+        '<span class="hb-body-sm muted">' + esc(pinLabel()) + '</span>' +
+      '</div></div>';
+  }
+  function usedDocs(){
+    /* the document is drawn as the sheet it is — a page, with what is written on it beside it */
+    var vat = state.hasVat ? (state.taxNumber ? 'Tax ' + esc(state.taxNumber) : 'Tax number not entered') : 'No VAT registration';
+    return '<div class="stack" style="gap:var(--hb-space-12)">' +
+      '<div class="pused__meta hb-body-md">CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vat + '</div>' +
+      '<div class="docrow">' + docIds().map(function (k) {
+        var d = state.docs[k], f = d.file;
+        return '<div class="docsheet" data-state="' + (f ? "done" : "todo") + '">' +
+          '<span class="docsheet__art" aria-hidden="true">' + (f && f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : (f ? I.file : I.upload)) + '</span>' +
+          '<span class="docsheet__lines">' +
+            '<span class="hb-label-lg">' + esc(d.label) + '</span>' +
+            '<span class="hb-body-sm muted">' + (f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span>' +
+            docStatusChip(d) +
+          '</span></div>';
+      }).join('') + '</div></div>';
+  }
+
+  /* ---------- 4 · Summary — the card stays short; values as Chips ---------- */
+  /* A value is a neutral Chip; a state is the status pill with the system's fixed
+     vocabulary (active · approved · pending · cancelled · completed) — the Chip atom
+     carries no success or warning style, and none is invented here. */
+  function chipsOf(items){ return '<div class="pchips">' + items.join('') + '</div>'; }
+  function valChip(label){ return chip(esc(label), { style: "neutral", size: "md" }); }
+  function chipsBranch(){
+    var b = state.branchDetails;
+    return chipsOf([valChip(b.name), valChip('+973 ' + b.phone), valChip(b.email)]);
+  }
+  function chipsAddress(){
+    var a = state.address;
+    return chipsOf([valChip(a.city + ', ' + a.state), valChip('Building ' + a.building + ', Street ' + a.street),
+      valChip(a.zip), valChip(a.country),
+      a.pinned ? statusChip("active", "Pin saved") : statusChip("pending", "No pin")]);
+  }
+  function chipsDocs(){
+    var items = [valChip('CR ' + state.crNumber)];
+    if (state.hasVat) { items.push(valChip('Tax ' + (state.taxNumber || 'not entered'))); }
+    docIds().forEach(function (k) {
+      var d = state.docs[k];
+      items.push(d.file ? statusChip("active", esc(d.label))
+        : d.required ? statusChip("pending", esc(d.label) + " needed") : statusChip("approved", esc(d.label) + " optional"));
+    });
+    return chipsOf(items);
+  }
+
+  /* ---------- 5 · Record — the Data Table organism, two columns ---------- */
+  function tableOf(rows){
+    return '<div class="hb-table-wrap prev__table"><div class="hb-table-scroll"><table class="hb-table">' +
+      '<thead><tr><th scope="col">Field</th><th scope="col">On your account</th></tr></thead><tbody>' +
+      rows.map(function (r) { return '<tr><td>' + r[0] + '</td><td>' + r[1] + '</td></tr>'; }).join('') +
+      '</tbody></table></div></div>';
+  }
+  function tableBranch(){
+    var b = state.branchDetails;
+    return tableOf([["Branch Name", esc(b.name)], ["Branch Phone", phoneText()], ["Branch Email", esc(b.email)]]);
+  }
+  function tableAddress(){
+    var a = state.address;
+    return tableOf([["Country", esc(a.country)], ["State / Province", esc(a.state)], ["City", esc(a.city)],
+      ["Street Address", esc(a.street)], ["Building", esc(a.building)], ["ZIP / Postal Code", esc(a.zip)],
+      ["Map pin", esc(pinLabel())]]);
+  }
+  function tableDocs(){
+    var rows = [["CR Number", '<span class="num">' + esc(state.crNumber) + '</span>'], [vatLabel(), vatValue()]];
+    docIds().forEach(function (k) {
+      var d = state.docs[k], f = d.file;
+      rows.push([esc(d.label), '<span class="tcell">' +
+        (f ? '<span>' + esc(f.name) + ' · ' + esc(f.size) + '</span>' : '<span class="muted">' + (d.required ? 'Not uploaded yet' : 'Optional') + '</span>') +
+        docStatusChip(d) + '</span>']);
+    });
+    return tableOf(rows);
+  }
+
+  /* The five, with what each one is for — the Compare screen reads the same list. */
+  var PREVIEWS = [
+    { id: "grid",  name: "Facts",   branch: gridBranch,  address: gridAddress,  docs: gridDocs,
+      how: "Labelled values in a grid, the avatar, map pin or document thumbnail beside them.",
+      best: "A buyer checking one particular value — every label is visible, so nothing has to be inferred.",
+      risk: "Three columns of label-plus-value is the most ink of the five, and the card grows with the section." },
+    { id: "rows",  name: "Rows",    branch: rowsBranch,  address: rowsAddress,  docs: rowsDocs,
+      how: "One value per line, label at the start, value at the end, hairline between rows — an account summary.",
+      best: "Reading top to bottom and comparing against a document on the desk; the tallest card but the easiest scan.",
+      risk: "A long list of rows reads as a form even though nothing here is editable." },
+    { id: "used",  name: "As used", branch: usedBranch,  address: usedAddress,  docs: usedDocs,
+      how: "The data in the shape it is used in: a contact block, a postal address as the driver will read it, documents as sheets.",
+      best: "Recognition rather than reading — the buyer sees what the driver will see.",
+      risk: "Without labels, an unusual value (a ZIP in the wrong field) is harder to spot." },
+    { id: "chips", name: "Summary", branch: chipsBranch, address: chipsAddress, docs: chipsDocs,
+      how: "Values as Chips on one or two lines, so every section stays the same short height.",
+      best: "The returning buyer with nothing to change: the whole page fits above the fold.",
+      risk: "Chips carry values without labels, and a long email or street fills the row; detail needs the Drawer." },
+    { id: "table", name: "Record",  branch: tableBranch, address: tableAddress, docs: tableDocs,
+      how: "The Data Table organism, two columns — Field and what is on your account.",
+      best: "Buyers who already read this data as a record in the dashboard; the same table, the same dashed rules.",
+      risk: "A table for three values looks heavier than it is, and it is the least mobile-friendly of the five." }
+  ];
+  function previewStyle(){
+    for (var i = 0; i < PREVIEWS.length; i++) { if (PREVIEWS[i].id === state.previewStyle) { return PREVIEWS[i]; } }
+    return PREVIEWS[0];
+  }
+  function previewOf(section){ return function () { return previewStyle()[section](); }; }
+
+  /* The switcher is review chrome (proposal): a Segmented Control over the same page. */
+  function previewSwitch(){
+    return '<div class="stylebar">' +
+      '<div class="stylebar__lines"><span class="hb-label-lg">Preview style</span>' +
+        '<span class="hb-body-sm muted">' + previewStyle().how + '</span></div>' +
+      '<span class="hb-segmented" role="group" aria-label="How the section data is previewed">' +
+        PREVIEWS.map(function (p) {
+          return '<button type="button" class="hb-segment" aria-pressed="' + (p.id === state.previewStyle) + '"' +
+            ' data-act="preview-style" data-preview="' + p.id + '">' + p.name + '</button>';
+        }).join('') +
+      '</span></div>';
   }
 
   /* ============================================================
@@ -2653,16 +2914,17 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     var ok = docsOk(), t = totals();
     $("#screen-b").innerHTML = pageHead() +
       '<div class="cols"><div class="stack">' +
+        previewSwitch() +
         '<div class="ready"' + (ok ? '' : ' data-state="warn"') + '><span class="ready__mark">' + (ok ? I.check : I.warning) + '</span>' +
           '<div><div class="hb-title-lg">' + (ok ? 'Everything is in place' : 'One thing still needed') + '</div>' +
           '<div class="hb-body-md">' + (ok ? 'Your branch, delivery address and documents are on file. Check them below, or place the order.' : 'Still needed: ' + docsMissing().join(', ') + '. Open Business Documents to add it.') + '</div></div></div>' +
         cardB({ id: "branch", icon: I.building, title: "Branch Details", meta: "Who the driver calls on arrival",
-          pill: statusChip("active", "Saved"), action: "Change", preview: prevBranch }) +
+          pill: statusChip("active", "Saved"), action: "Change", preview: previewOf("branch") }) +
         cardB({ id: "address", icon: I.location, title: "Delivery Address", meta: "Where the order goes",
-          pill: statusChip("active", "Pin saved"), action: "Change", preview: prevAddress }) +
+          pill: statusChip("active", "Pin saved"), action: "Change", preview: previewOf("address") }) +
         cardB({ id: "docs", icon: I.file, title: "Business Documents", meta: "Kept on your account",
           pill: ok ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded()),
-          action: "Manage", preview: prevDocs }) +
+          action: "Manage", preview: previewOf("docs") }) +
       '</div>' +
       '<aside class="rail"><div class="panel"><div class="panel__body stack">' +
         '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
@@ -2831,6 +3093,18 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
             btn("Open version " + v.k, { style: "outlined", size: "sm", attrs: ' data-act="goto" data-screen="' + v.k.toLowerCase() + '"' }) +
           '</div></div>';
       }).join('') + '</div>' +
+      '<h2 class="hb-title-lg">Five ways for B to preview a section\'s data</h2>' +
+      '<p class="hb-body-md">All five are read only and all five hand editing to the same Drawer — what differs is how much of the data is on the page, and how much work it is to read. Version B carries a switcher so the same order can be seen in each.</p>' +
+      '<div class="vs">' + PREVIEWS.map(function (p, i) {
+        return '<div class="panel"><div class="panel__head"><span class="acc__no hb-label-lg">' + (i + 1) + '</span><h3 class="hb-title-md">' + p.name + '</h3></div>' +
+          '<div class="panel__body">' +
+            '<div class="hb-label-md muted">How it previews</div><p class="hb-body-md">' + p.how + '</p>' +
+            '<div class="hb-label-md muted">Best for</div><p class="hb-body-md">' + p.best + '</p>' +
+            '<div class="hb-label-md muted">Trade-off</div><p class="hb-body-md">' + p.risk + '</p>' +
+            btn("See B in " + p.name, { style: "outlined", size: "sm", attrs: ' data-act="goto-style" data-preview="' + p.id + '"' }) +
+          '</div></div>';
+      }).join('') + '</div>' +
+      '<p class="hb-body-md"><b>The recommendation for B:</b> <b>Facts</b> on the storefront, because the labels make a wrong value visible without opening anything, with <b>Summary</b> as the compact-width treatment where the whole page should fit above the fold. <b>As used</b> is the one to test with buyers: it is the most human, and the least forgiving of a value in the wrong field. <b>Record</b> belongs in the dashboard, where the buyer already reads this data as a table.</p>' +
       '<h2 class="hb-title-lg">Visual hierarchy, shared by all five</h2>' +
       '<p class="hb-body-md">One headline role per page (headline-md), one title role per section (title-md), labels in on-surface-variant and values in on-surface — colour is reserved for status pills and the single primary Button. Saved values are text, never orange. The only filled button on the screen is the one that moves the buyer forward; Cancel and Change are ghost or outlined. Detail lives one level down: behind a card, an accordion head, or a "Why do we ask for this?" disclosure.</p>' +
       '<h2 class="hb-title-lg">A recommendation</h2>' +
@@ -3019,6 +3293,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     "place-order": placeOrder,
     "reset": function () { location.reload(); },
     "goto": function (el) { show(el.dataset.screen); },
+    /* the Compare screen opens B already set to the style being described */
+    "goto-style": function (el) { state.previewStyle = el.dataset.preview; renderB(); show("b"); },
     "open-step": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step[state.version] = +el.dataset.step; renderVerify(); },
     "go-tab": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step.d = +el.dataset.step; renderVerify(); },
     "expand-row": function (el) {
@@ -3063,6 +3339,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     },
     "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); } d.file = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
+    /* version B only: swap how the sections preview their data. Review chrome (proposal). */
+    "preview-style": function (el) { state.previewStyle = el.dataset.preview; renderB(); applyLang(); },
     "close-drawer": closeDrawer
   };
 

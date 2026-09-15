@@ -181,6 +181,8 @@
     "place-order": placeOrder,
     "reset": function () { location.reload(); },
     "goto": function (el) { show(el.dataset.screen); },
+    /* the Compare screen opens B already set to the style being described */
+    "goto-style": function (el) { state.previewStyle = el.dataset.preview; renderB(); show("b"); },
     "open-step": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step[state.version] = +el.dataset.step; renderVerify(); },
     "go-tab": function (el) { if (state.editing.branch || state.editing.address) { toast("Save or cancel your edit first.", { kind: "bad" }); return; } state.step.d = +el.dataset.step; renderVerify(); },
     "expand-row": function (el) {
@@ -225,6 +227,8 @@
     },
     "remove-doc-go": function (el) { var d = doc(el.dataset.doc); if (d.file && d.file.url) { URL.revokeObjectURL(d.file.url); } d.file = null; closeConfirm(); renderVerify(); toast(d.label + " removed.", { kind: "ok" }); },
     "close-confirm": closeConfirm,
+    /* version B only: swap how the sections preview their data. Review chrome (proposal). */
+    "preview-style": function (el) { state.previewStyle = el.dataset.preview; renderB(); applyLang(); },
     "close-drawer": closeDrawer
   };
 

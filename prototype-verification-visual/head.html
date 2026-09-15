@@ -387,6 +387,58 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .doctile__main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .doctile[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
 
+/* ---------- Version B · the other four preview styles, same data, read only ---------- */
+/* The switcher itself is review chrome (proposal) — it would not ship on the page. */
+.stylebar{display:flex;align-items:center;gap:var(--hb-space-16);flex-wrap:wrap;
+  padding:var(--hb-space-12) var(--hb-space-16);border-radius:var(--hb-radius-12);
+  border:var(--proto-hairline) dashed var(--hb-color-outline);background:var(--hb-color-surface-container-low)}
+.stylebar__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);flex:1 1 320px;min-width:0}
+
+/* 2 · Rows — one value per line, hairline between, nothing editable */
+.prows{margin:0;border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);overflow:hidden}
+.prow{display:flex;align-items:center;gap:var(--hb-space-16);justify-content:space-between;
+  padding:var(--hb-space-12) var(--hb-space-16);border-block-end:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.prows .prow:last-child{border-block-end:0}
+.prow:nth-child(odd){background:var(--hb-color-surface-container-low)}
+.prow dt{margin:0;color:var(--hb-color-on-surface-variant)}
+.prow dd{margin:0;text-align:end;color:var(--hb-color-on-surface);overflow-wrap:anywhere}
+.prow[data-state="todo"]{background:var(--hb-color-warning-container)}
+.prow[data-state="todo"] dt,.prow[data-state="todo"] dd{color:var(--hb-color-on-warning-container)}
+.prow__file{display:inline-flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;justify-content:flex-end}
+
+/* 3 · As used — the data in the shape it is used in */
+.pused{display:flex;align-items:flex-start;gap:var(--hb-space-16);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-8);background:var(--hb-color-surface-container-low)}
+.pused__lines{display:flex;flex-direction:column;gap:var(--hb-space-4);min-width:0}
+.pused__lines span{overflow-wrap:anywhere}
+.pused__map{width:var(--hb-space-104);height:var(--hb-space-104);flex:0 0 var(--hb-space-104);
+  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-primary-50);display:grid;place-items:center}
+.pused__map .hb-i{font-size:var(--hb-space-32);color:var(--hb-color-primary-700)}
+.pused__meta{color:var(--hb-color-on-surface-variant)}
+.docrow{display:flex;gap:var(--hb-space-12);flex-wrap:wrap}
+.docsheet{display:flex;align-items:center;gap:var(--hb-space-12);
+  flex:1 1 260px;min-width:0;padding:var(--hb-space-12);border-radius:var(--hb-radius-8);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);background:var(--hb-color-surface-container-low)}
+.docsheet__lines{display:flex;flex-direction:column;align-items:flex-start;gap:var(--hb-space-4);min-width:0}
+.docsheet[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.docsheet[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
+.docsheet span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.docsheet__art{width:var(--hb-space-52);height:var(--hb-space-72);flex:0 0 var(--hb-space-52);border-radius:var(--hb-radius-6);
+  background:var(--hb-color-surface);display:grid;place-items:center;overflow:hidden;
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant)}
+.docsheet__art img{width:100%;height:100%;object-fit:cover}
+.docsheet__art .hb-i{font-size:var(--hb-space-28);color:var(--hb-color-on-surface-variant)}
+
+/* 4 · Summary — every section the same short height, values as Chips */
+.pchips{display:flex;gap:var(--hb-space-8);flex-wrap:wrap;align-items:center}
+
+/* 5 · Record — the Data Table organism, two columns */
+.prev__table .hb-table{table-layout:fixed}
+.prev__table .hb-table th:first-child,.prev__table .hb-table td:first-child{width:38%}
+.prev__table .hb-table td{overflow-wrap:anywhere}
+.tcell{display:inline-flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap}
+
 /* The Drawer carries a section's edit form; its panel is narrower than the page, so the
    two-column grids inside it stack and the inline edit chrome is dropped. */
 .drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
@@ -503,6 +555,13 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   .prev__facts{grid-template-columns:1fr 1fr}
   .prev__map{width:100%;flex:0 0 auto}
   .doctile{flex:1 1 100%}
+  .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
+  .prow dd{text-align:start}
+  .prow__file{justify-content:flex-start}
+  .pused{flex-direction:column}
+  .pused__map{width:100%;height:var(--hb-space-72);flex:0 0 auto}
+  .docsheet{flex:1 1 100%}
+  .stylebar .hb-segmented{width:100%;overflow-x:auto}
   .site{padding-inline:var(--hb-space-12)}
   .grid2,.addr,.kv{grid-template-columns:1fr}
   .progress{grid-template-columns:repeat(2,minmax(0,1fr))}

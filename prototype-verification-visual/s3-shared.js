@@ -172,38 +172,3 @@
     var w = String(name).trim().split(/\s+/);
     return ((w[0] || "").charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : "")).toUpperCase() || "B";
   }
-  function prevBranch(){
-    var b = state.branchDetails;
-    return '<div class="prev">' +
-      '<span class="hb-avatar" data-shape="square" data-size="40">' + esc(initialsOf(b.name)) + '</span>' +
-      '<dl class="prev__facts">' +
-        fact("Branch Name", esc(b.name)) +
-        fact("Branch Phone", '<bdi dir="ltr" class="num">+973 ' + esc(b.phone) + '</bdi>') +
-        fact("Branch Email", esc(b.email)) +
-      '</dl></div>';
-  }
-  function prevAddress(){
-    var a = state.address;
-    return '<div class="prev">' +
-      '<span class="prev__map" aria-label="Delivery pin, Block 460">' + I.location + '<span class="hb-label-sm">' + (a.pinned ? 'Pin saved' : 'No pin') + '</span></span>' +
-      '<dl class="prev__facts">' +
-        fact("Country", esc(a.country)) + fact("State / Province", esc(a.state)) + fact("City", esc(a.city)) +
-        fact("Street Address", esc(a.street)) + fact("Building", esc(a.building)) + fact("ZIP / Postal Code", esc(a.zip)) +
-      '</dl></div>';
-  }
-  function prevDocs(){
-    var ids = ["cr", "id"].concat(state.hasVat ? ["vat"] : []);
-    var facts = '<div class="prev"><dl class="prev__facts">' + fact("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
-      (state.hasVat ? fact("Tax Number", state.taxNumber ? '<span class="num">' + esc(state.taxNumber) + '</span>' : '<span class="muted">Not entered</span>') : fact("VAT registration", '<span class="muted">Not registered</span>')) +
-      fact("On file", docsOnFile() + ' of ' + docsNeeded() + ' documents') + '</dl></div>';
-    var tiles = '<div class="doctiles" style="margin-top:var(--hb-space-12)">' + ids.map(function (k) {
-      var d = state.docs[k], f = d.file;
-      return '<div class="doctile" data-state="' + (f ? "done" : "todo") + '">' +
-        '<span class="doc__prev" aria-hidden="true">' + (f ? (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) : I.upload) + '</span>' +
-        '<div class="doctile__main"><span class="hb-label-lg">' + esc(d.label) + '</span>' +
-          '<span class="hb-body-sm muted">' + (f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span></div>' +
-        (f ? statusChip("active", "On file") : d.required ? statusChip("pending", "Required") : statusChip("approved", "Optional")) +
-      '</div>';
-    }).join('') + '</div>';
-    return facts + tiles;
-  }

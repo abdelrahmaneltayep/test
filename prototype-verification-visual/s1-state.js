@@ -26,6 +26,7 @@
       id:  { label: "Personal ID Document",    required: true,  file: { name: "CPR-front.jpg", size: "1.2 MB", isImage: false, at: "12 Jan 2026" } }
     },
     editing: { branch: false, address: false },
+    previewStyle: "grid",     // version B: which of the five read-only previews is on screen
     errors: {},
     uploading: null,          // doc id while the progress bar runs
     payment: "hb",          // hb | cod | credit

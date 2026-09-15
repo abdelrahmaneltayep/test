@@ -23,6 +23,18 @@
             btn("Open version " + v.k, { style: "outlined", size: "sm", attrs: ' data-act="goto" data-screen="' + v.k.toLowerCase() + '"' }) +
           '</div></div>';
       }).join('') + '</div>' +
+      '<h2 class="hb-title-lg">Five ways for B to preview a section\'s data</h2>' +
+      '<p class="hb-body-md">All five are read only and all five hand editing to the same Drawer — what differs is how much of the data is on the page, and how much work it is to read. Version B carries a switcher so the same order can be seen in each.</p>' +
+      '<div class="vs">' + PREVIEWS.map(function (p, i) {
+        return '<div class="panel"><div class="panel__head"><span class="acc__no hb-label-lg">' + (i + 1) + '</span><h3 class="hb-title-md">' + p.name + '</h3></div>' +
+          '<div class="panel__body">' +
+            '<div class="hb-label-md muted">How it previews</div><p class="hb-body-md">' + p.how + '</p>' +
+            '<div class="hb-label-md muted">Best for</div><p class="hb-body-md">' + p.best + '</p>' +
+            '<div class="hb-label-md muted">Trade-off</div><p class="hb-body-md">' + p.risk + '</p>' +
+            btn("See B in " + p.name, { style: "outlined", size: "sm", attrs: ' data-act="goto-style" data-preview="' + p.id + '"' }) +
+          '</div></div>';
+      }).join('') + '</div>' +
+      '<p class="hb-body-md"><b>The recommendation for B:</b> <b>Facts</b> on the storefront, because the labels make a wrong value visible without opening anything, with <b>Summary</b> as the compact-width treatment where the whole page should fit above the fold. <b>As used</b> is the one to test with buyers: it is the most human, and the least forgiving of a value in the wrong field. <b>Record</b> belongs in the dashboard, where the buyer already reads this data as a table.</p>' +
       '<h2 class="hb-title-lg">Visual hierarchy, shared by all five</h2>' +
       '<p class="hb-body-md">One headline role per page (headline-md), one title role per section (title-md), labels in on-surface-variant and values in on-surface — colour is reserved for status pills and the single primary Button. Saved values are text, never orange. The only filled button on the screen is the one that moves the buyer forward; Cancel and Change are ghost or outlined. Detail lives one level down: behind a card, an accordion head, or a "Why do we ask for this?" disclosure.</p>' +
       '<h2 class="hb-title-lg">A recommendation</h2>' +
