@@ -8,7 +8,8 @@
   state.version = "a";
   state.step = { a: 0, c: 0, d: 0 };  // the open step in A, C and the tab in D
   state.expand = {};                  // the open editor in E
-  state.open = {};                    // opened cards in B
+  state.drawer = null;                // the section Drawer open in B
+  state.returnTo = null;              // the Drawer to restore after a file preview
   state.editing = { branch: false, address: false };
 
   function err(id){ return state.errors[id] ? { state: "error", msg: I.error + '<span>' + esc(state.errors[id]) + '</span>' } : {}; }
@@ -41,16 +42,17 @@
     var b = state.branchDetails;
     return kv([["Branch Name", esc(b.name)], ["Branch Phone", '<bdi dir="ltr" class="num">+973 ' + esc(b.phone) + '</bdi>'], ["Branch Email", esc(b.email)]]);
   }
-  function branchForm(){
+  function branchFields(){
     var b = state.branchDetails;
-    return '<div class="editform">' +
-      '<div class="grid2">' +
+    return '<div class="grid2">' +
         field(withErr({ id: "b-name", label: "Branch Name", value: b.name, req: true, attrs: ' autocomplete="organization"' })) +
         phoneField({ id: "b-phone", label: "Branch Phone", value: b.phone, error: state.errors["b-phone"] }) +
         field(withErr({ id: "b-email", label: "Branch Email", value: b.email, type: "email" })) +
-      '</div>' +
-      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-branch"' }) + btn("Save Details", { icon: I.save, attrs: ' data-act="save-branch"' }) + '</div>' +
-    '</div>';
+      '</div>';
+  }
+  function branchForm(){
+    return '<div class="editform">' + branchFields() +
+      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-branch"' }) + btn("Save Details", { icon: I.save, attrs: ' data-act="save-branch"' }) + '</div></div>';
   }
   function branchBlock(){
     return state.editing.branch ? branchForm() :
@@ -68,10 +70,9 @@
     var a = state.address;
     return '<div class="addr">' + kv([["Country", esc(a.country)], ["State / Province", esc(a.state)], ["City", esc(a.city)], ["Street Address", esc(a.street)], ["Building", esc(a.building)], ["ZIP / Postal Code", esc(a.zip)]]) + mapTile(false) + '</div>';
   }
-  function addressForm(){
+  function addressFields(){
     var a = state.address;
-    return '<div class="editform">' +
-      '<div class="hb-field"><span class="hb-field__label">Select Address Location <span class="hb-field__req">*</span></span>' + mapTile(true) +
+    return '<div class="hb-field"><span class="hb-field__label">Select Address Location <span class="hb-field__req">*</span></span>' + mapTile(true) +
         '<div class="hb-field__msg">Drag the pin or search — the fields below fill from it</div></div>' +
       '<div class="grid2">' +
         field(withErr({ id: "a-country", label: "Country", value: a.country, options: COUNTRIES, req: true })) +
@@ -80,9 +81,11 @@
         field(withErr({ id: "a-street", label: "Street Address", value: a.street, req: true })) +
         field(withErr({ id: "a-building", label: "Building Name / Number", value: a.building, req: true })) +
         field(withErr({ id: "a-zip", label: "Postal Code", value: a.zip, attrs: ' inputmode="numeric"' })) +
-      '</div>' +
-      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-address"' }) + btn("Update Address", { icon: I.save, attrs: ' data-act="save-address"' }) + '</div>' +
-    '</div>';
+      '</div>';
+  }
+  function addressForm(){
+    return '<div class="editform">' + addressFields() +
+      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-address"' }) + btn("Update Address", { icon: I.save, attrs: ' data-act="save-address"' }) + '</div></div>';
   }
   function addressBlock(){
     return state.editing.address ? addressForm() :
@@ -160,4 +163,47 @@
     return '<div class="hb-pagehead" style="margin:var(--hb-space-16) 0"><div class="hb-pagehead__row">' +
       '<h1 class="hb-pagehead__title hb-headline-md" data-ar="التحقق قبل الطلب">Checkout Verification</h1></div>' +
       '<p class="hb-pagehead__desc hb-body-md">Confirm your shipping address, then review business documents before placing your order.</p></div>';
+  }
+
+  /* ---------- Structured previews (version B): the section's own data, laid out
+     as labelled facts and document tiles rather than a sentence. Read-only. ---------- */
+  function fact(label, value){ return '<div class="fact"><dt class="hb-label-sm">' + label + '</dt><dd class="hb-body-md">' + value + '</dd></div>'; }
+  function initialsOf(name){
+    var w = String(name).trim().split(/\s+/);
+    return ((w[0] || "").charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : "")).toUpperCase() || "B";
+  }
+  function prevBranch(){
+    var b = state.branchDetails;
+    return '<div class="prev">' +
+      '<span class="hb-avatar" data-shape="square" data-size="40">' + esc(initialsOf(b.name)) + '</span>' +
+      '<dl class="prev__facts">' +
+        fact("Branch Name", esc(b.name)) +
+        fact("Branch Phone", '<bdi dir="ltr" class="num">+973 ' + esc(b.phone) + '</bdi>') +
+        fact("Branch Email", esc(b.email)) +
+      '</dl></div>';
+  }
+  function prevAddress(){
+    var a = state.address;
+    return '<div class="prev">' +
+      '<span class="prev__map" aria-label="Delivery pin, Block 460">' + I.location + '<span class="hb-label-sm">' + (a.pinned ? 'Pin saved' : 'No pin') + '</span></span>' +
+      '<dl class="prev__facts">' +
+        fact("Country", esc(a.country)) + fact("State / Province", esc(a.state)) + fact("City", esc(a.city)) +
+        fact("Street Address", esc(a.street)) + fact("Building", esc(a.building)) + fact("ZIP / Postal Code", esc(a.zip)) +
+      '</dl></div>';
+  }
+  function prevDocs(){
+    var ids = ["cr", "id"].concat(state.hasVat ? ["vat"] : []);
+    var facts = '<div class="prev"><dl class="prev__facts">' + fact("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
+      (state.hasVat ? fact("Tax Number", state.taxNumber ? '<span class="num">' + esc(state.taxNumber) + '</span>' : '<span class="muted">Not entered</span>') : fact("VAT registration", '<span class="muted">Not registered</span>')) +
+      fact("On file", docsOnFile() + ' of ' + docsNeeded() + ' documents') + '</dl></div>';
+    var tiles = '<div class="doctiles" style="margin-top:var(--hb-space-12)">' + ids.map(function (k) {
+      var d = state.docs[k], f = d.file;
+      return '<div class="doctile" data-state="' + (f ? "done" : "todo") + '">' +
+        '<span class="doc__prev" aria-hidden="true">' + (f ? (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) : I.upload) + '</span>' +
+        '<div class="doctile__main"><span class="hb-label-lg">' + esc(d.label) + '</span>' +
+          '<span class="hb-body-sm muted">' + (f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span></div>' +
+        (f ? statusChip("active", "On file") : d.required ? statusChip("pending", "Required") : statusChip("approved", "Optional")) +
+      '</div>';
+    }).join('') + '</div>';
+    return facts + tiles;
   }

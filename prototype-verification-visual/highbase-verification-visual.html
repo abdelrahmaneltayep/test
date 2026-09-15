@@ -1793,6 +1793,37 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 @media (max-width:743px){.vs{grid-template-columns:1fr}.review__row{flex-wrap:wrap}.review__row dt{flex-basis:100%}.guide__main{padding:var(--hb-space-20)}}
 
 
+/* ---------- Version B · structured previews (read-only data, not a sentence) ---------- */
+.card__prev{padding:0 var(--hb-space-20) var(--hb-space-20)}
+.prev{display:flex;align-items:flex-start;gap:var(--hb-space-16);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-8);background:var(--hb-color-surface-container-low)}
+.prev__facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--hb-space-12) var(--hb-space-20);flex:1;min-width:0;margin:0}
+.fact{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
+.fact dt{margin:0;color:var(--hb-color-on-surface-variant)}
+.fact dd{margin:0;color:var(--hb-color-on-surface);overflow-wrap:anywhere}
+.prev__map{width:var(--hb-space-104);height:var(--hb-space-72);flex:0 0 var(--hb-space-104);
+  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-primary-50);display:grid;place-items:center;position:relative;overflow:hidden}
+.prev__map .hb-i{font-size:var(--hb-space-24);color:var(--hb-color-primary-700)}
+.prev__map span{position:absolute;inset-inline-start:var(--hb-space-4);bottom:var(--hb-space-4);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-full);padding:0 var(--hb-space-6);
+  color:var(--hb-color-on-surface-variant)}
+.doctiles{display:flex;gap:var(--hb-space-12);flex-wrap:wrap}
+.doctile{display:flex;align-items:center;gap:var(--hb-space-12);flex:1 1 240px;min-width:0;
+  padding:var(--hb-space-12);border-radius:var(--hb-radius-8);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);background:var(--hb-color-surface-container-low)}
+.doctile[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.doctile__main{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--hb-space-2)}
+.doctile__main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doctile[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
+
+/* The Drawer carries a section's edit form; its panel is narrower than the page, so the
+   two-column grids inside it stack and the inline edit chrome is dropped. */
+.drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
+.drawerform .editform{padding:0;background:none;border:0;gap:var(--hb-space-16)}
+.drawerform .editform .row-end{display:none}
+.drawerform .upzone .hb-upload[data-state="ready"]{padding-block:var(--hb-space-20)}
+
 /* ---------- Version D · Tabs (one pane at a time, order kept in view) ---------- */
 .tabbar{display:flex;flex-direction:column;gap:var(--hb-space-8);padding:var(--hb-space-12) var(--hb-space-20);
   background:var(--hb-color-surface);border-radius:var(--hb-radius-12) var(--hb-radius-12) 0 0;
@@ -1872,6 +1903,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
 
 /* ---------- Breakpoints: compact < 744, medium 744–1279, expanded ≥ 1280 ---------- */
 @media (max-width:1279px){
+  /* Version B: three fact columns only survive the expanded width; below it the values
+     start breaking mid-word, so the grid drops to two and the map tile goes full width. */
+  .prev__facts{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cols{grid-template-columns:minmax(0,1fr)}
   .rail{position:static}
   .commit-bar{
@@ -1890,6 +1924,15 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
 }
 .commit-bar{display:none}
 @media (max-width:743px){
+  /* the card head stops competing for one row: title and meta keep the row with the icon,
+     the status pill and Change wrap under them, both still full-size touch targets */
+  .card__row{flex-wrap:wrap}
+  .card__main{flex:1 1 60%}
+  .card__prev{padding-inline:var(--hb-space-12)}
+  .prev{flex-direction:column;padding:var(--hb-space-12)}
+  .prev__facts{grid-template-columns:1fr 1fr}
+  .prev__map{width:100%;flex:0 0 auto}
+  .doctile{flex:1 1 100%}
   .site{padding-inline:var(--hb-space-12)}
   .grid2,.addr,.kv{grid-template-columns:1fr}
   .progress{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1905,7 +1948,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
 <header class="proto-bar">
   <div class="proto-bar__in">
     <div class="proto-brand hb-title-sm">Highbase
-      <span class="hb-chip" data-style="neutral" data-size="sm">Verification · 3 visual versions</span>
+      <span class="hb-chip" data-style="neutral" data-size="sm">Verification · 5 visual versions</span>
     </div>
     <nav class="proto-nav" aria-label="Prototype versions">
       <button type="button" class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-screen="a" aria-current="true"><span class="hb-btn__label">A · Steps</span></button>
@@ -2184,7 +2227,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   }
   function iconBtn(icon, label, o){
     o = o || {};
-    return '<button type="button" class="hb-btn hb-icon-btn" data-intent="' + (o.intent || 'primary') +
+    return '<button type="' + (o.type || 'button') + '" class="hb-btn hb-icon-btn" data-intent="' + (o.intent || 'primary') +
       '" data-style="' + (o.style || 'ghost') + '" data-size="' + (o.size || 'sm') + '"' +
       ' aria-label="' + esc(label) + '" title="' + esc(label) + '"' + (o.attrs || '') + '>' +
       '<span class="hb-btn__icon">' + icon + '</span></button>';
@@ -2305,7 +2348,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     dlg.innerHTML =
       '<div class="hb-drawer" data-side="end" data-size="' + (size || "md") + '">' +
         '<form method="dialog" class="hb-drawer__close">' +
-          iconBtn(I.close, "Close", { style:"filled", size:"md", attrs:' value="close"' }) +
+          iconBtn(I.close, "Close", { style:"filled", size:"md", type:"submit", attrs:' value="close"' }) +
         '</form>' +
         '<div class="hb-drawer__panel">' +
           '<div class="hb-dlg-header"><h2 class="hb-dlg-header__title hb-title-lg">' + esc(title) + '</h2></div>' +
@@ -2354,7 +2397,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   state.version = "a";
   state.step = { a: 0, c: 0, d: 0 };  // the open step in A, C and the tab in D
   state.expand = {};                  // the open editor in E
-  state.open = {};                    // opened cards in B
+  state.drawer = null;                // the section Drawer open in B
+  state.returnTo = null;              // the Drawer to restore after a file preview
   state.editing = { branch: false, address: false };
 
   function err(id){ return state.errors[id] ? { state: "error", msg: I.error + '<span>' + esc(state.errors[id]) + '</span>' } : {}; }
@@ -2387,16 +2431,17 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     var b = state.branchDetails;
     return kv([["Branch Name", esc(b.name)], ["Branch Phone", '<bdi dir="ltr" class="num">+973 ' + esc(b.phone) + '</bdi>'], ["Branch Email", esc(b.email)]]);
   }
-  function branchForm(){
+  function branchFields(){
     var b = state.branchDetails;
-    return '<div class="editform">' +
-      '<div class="grid2">' +
+    return '<div class="grid2">' +
         field(withErr({ id: "b-name", label: "Branch Name", value: b.name, req: true, attrs: ' autocomplete="organization"' })) +
         phoneField({ id: "b-phone", label: "Branch Phone", value: b.phone, error: state.errors["b-phone"] }) +
         field(withErr({ id: "b-email", label: "Branch Email", value: b.email, type: "email" })) +
-      '</div>' +
-      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-branch"' }) + btn("Save Details", { icon: I.save, attrs: ' data-act="save-branch"' }) + '</div>' +
-    '</div>';
+      '</div>';
+  }
+  function branchForm(){
+    return '<div class="editform">' + branchFields() +
+      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-branch"' }) + btn("Save Details", { icon: I.save, attrs: ' data-act="save-branch"' }) + '</div></div>';
   }
   function branchBlock(){
     return state.editing.branch ? branchForm() :
@@ -2414,10 +2459,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     var a = state.address;
     return '<div class="addr">' + kv([["Country", esc(a.country)], ["State / Province", esc(a.state)], ["City", esc(a.city)], ["Street Address", esc(a.street)], ["Building", esc(a.building)], ["ZIP / Postal Code", esc(a.zip)]]) + mapTile(false) + '</div>';
   }
-  function addressForm(){
+  function addressFields(){
     var a = state.address;
-    return '<div class="editform">' +
-      '<div class="hb-field"><span class="hb-field__label">Select Address Location <span class="hb-field__req">*</span></span>' + mapTile(true) +
+    return '<div class="hb-field"><span class="hb-field__label">Select Address Location <span class="hb-field__req">*</span></span>' + mapTile(true) +
         '<div class="hb-field__msg">Drag the pin or search — the fields below fill from it</div></div>' +
       '<div class="grid2">' +
         field(withErr({ id: "a-country", label: "Country", value: a.country, options: COUNTRIES, req: true })) +
@@ -2426,9 +2470,11 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         field(withErr({ id: "a-street", label: "Street Address", value: a.street, req: true })) +
         field(withErr({ id: "a-building", label: "Building Name / Number", value: a.building, req: true })) +
         field(withErr({ id: "a-zip", label: "Postal Code", value: a.zip, attrs: ' inputmode="numeric"' })) +
-      '</div>' +
-      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-address"' }) + btn("Update Address", { icon: I.save, attrs: ' data-act="save-address"' }) + '</div>' +
-    '</div>';
+      '</div>';
+  }
+  function addressForm(){
+    return '<div class="editform">' + addressFields() +
+      '<div class="row-end">' + btn("Cancel", { style: "ghost", attrs: ' data-act="cancel-address"' }) + btn("Update Address", { icon: I.save, attrs: ' data-act="save-address"' }) + '</div></div>';
   }
   function addressBlock(){
     return state.editing.address ? addressForm() :
@@ -2508,6 +2554,49 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       '<p class="hb-pagehead__desc hb-body-md">Confirm your shipping address, then review business documents before placing your order.</p></div>';
   }
 
+  /* ---------- Structured previews (version B): the section's own data, laid out
+     as labelled facts and document tiles rather than a sentence. Read-only. ---------- */
+  function fact(label, value){ return '<div class="fact"><dt class="hb-label-sm">' + label + '</dt><dd class="hb-body-md">' + value + '</dd></div>'; }
+  function initialsOf(name){
+    var w = String(name).trim().split(/\s+/);
+    return ((w[0] || "").charAt(0) + (w.length > 1 ? w[w.length - 1].charAt(0) : "")).toUpperCase() || "B";
+  }
+  function prevBranch(){
+    var b = state.branchDetails;
+    return '<div class="prev">' +
+      '<span class="hb-avatar" data-shape="square" data-size="40">' + esc(initialsOf(b.name)) + '</span>' +
+      '<dl class="prev__facts">' +
+        fact("Branch Name", esc(b.name)) +
+        fact("Branch Phone", '<bdi dir="ltr" class="num">+973 ' + esc(b.phone) + '</bdi>') +
+        fact("Branch Email", esc(b.email)) +
+      '</dl></div>';
+  }
+  function prevAddress(){
+    var a = state.address;
+    return '<div class="prev">' +
+      '<span class="prev__map" aria-label="Delivery pin, Block 460">' + I.location + '<span class="hb-label-sm">' + (a.pinned ? 'Pin saved' : 'No pin') + '</span></span>' +
+      '<dl class="prev__facts">' +
+        fact("Country", esc(a.country)) + fact("State / Province", esc(a.state)) + fact("City", esc(a.city)) +
+        fact("Street Address", esc(a.street)) + fact("Building", esc(a.building)) + fact("ZIP / Postal Code", esc(a.zip)) +
+      '</dl></div>';
+  }
+  function prevDocs(){
+    var ids = ["cr", "id"].concat(state.hasVat ? ["vat"] : []);
+    var facts = '<div class="prev"><dl class="prev__facts">' + fact("CR Number", '<span class="num">' + esc(state.crNumber) + '</span>') +
+      (state.hasVat ? fact("Tax Number", state.taxNumber ? '<span class="num">' + esc(state.taxNumber) + '</span>' : '<span class="muted">Not entered</span>') : fact("VAT registration", '<span class="muted">Not registered</span>')) +
+      fact("On file", docsOnFile() + ' of ' + docsNeeded() + ' documents') + '</dl></div>';
+    var tiles = '<div class="doctiles" style="margin-top:var(--hb-space-12)">' + ids.map(function (k) {
+      var d = state.docs[k], f = d.file;
+      return '<div class="doctile" data-state="' + (f ? "done" : "todo") + '">' +
+        '<span class="doc__prev" aria-hidden="true">' + (f ? (f.url && f.isImage ? '<img src="' + f.url + '" alt="">' : I.file) : I.upload) + '</span>' +
+        '<div class="doctile__main"><span class="hb-label-lg">' + esc(d.label) + '</span>' +
+          '<span class="hb-body-sm muted">' + (f ? esc(f.name) + ' · ' + esc(f.size) : (d.required ? 'Not uploaded yet' : 'Optional')) + '</span></div>' +
+        (f ? statusChip("active", "On file") : d.required ? statusChip("pending", "Required") : statusChip("approved", "Optional")) +
+      '</div>';
+    }).join('') + '</div>';
+    return facts + tiles;
+  }
+
   /* ============================================================
      Version A · Steps — an accordion. One section open at a time; the others
      collapse to a one-line summary. Disclosure by sequence.
@@ -2549,28 +2638,31 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
      The common case (nothing to change) is one look and one button.
      ============================================================ */
   function cardB(o){
-    var open = !!state.open[o.id];
-    return '<section class="card"' + (open ? ' data-open' : '') + ' id="card-' + o.id + '">' +
+    return '<section class="card" id="card-' + o.id + '">' +
       '<div class="card__row">' +
         '<span class="card__icon">' + o.icon + '</span>' +
-        '<div class="card__main"><span class="hb-title-sm">' + o.title + '</span><span class="card__line hb-body-md">' + o.line + '</span></div>' +
+        '<div class="card__main"><span class="hb-title-sm">' + o.title + '</span>' +
+          '<span class="card__line hb-body-sm">' + o.meta + '</span></div>' +
         o.pill +
-        btn(open ? "Done" : o.action, { style: open ? "tonal" : "outlined", size: "sm", icon: open ? I.check : I.edit, attrs: ' data-act="toggle-card" data-card="' + o.id + '"' }) +
+        btn(o.action, { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="open-drawer" data-drawer="' + o.id + '"' }) +
       '</div>' +
-      (open ? '<div class="card__open">' + o.body() + '</div>' : '') +
+      '<div class="card__prev">' + o.preview() + '</div>' +
     '</section>';
   }
   function renderB(){
-    var ok = docsOk();
-    var t = totals();
+    var ok = docsOk(), t = totals();
     $("#screen-b").innerHTML = pageHead() +
       '<div class="cols"><div class="stack">' +
         '<div class="ready"' + (ok ? '' : ' data-state="warn"') + '><span class="ready__mark">' + (ok ? I.check : I.warning) + '</span>' +
           '<div><div class="hb-title-lg">' + (ok ? 'Everything is in place' : 'One thing still needed') + '</div>' +
-          '<div class="hb-body-md">' + (ok ? 'Your branch, delivery address and documents are on file. Check them below, or place the order.' : 'Still needed: ' + docsMissing().join(', ') + '. Open Business documents to add it.') + '</div></div></div>' +
-        cardB({ id: "branch", icon: I.building, title: "Branch Details", line: branchLine(), pill: statusChip("active", "Saved"), action: "Change", body: function () { return state.editing.branch ? branchForm() : branchView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Details", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-branch"' }) + '</div>'; } }) +
-        cardB({ id: "address", icon: I.location, title: "Delivery Address", line: addressLine(), pill: statusChip("active", "Pin saved"), action: "Change", body: function () { return state.editing.address ? addressForm() : addressView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Address", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-address"' }) + '</div>'; } }) +
-        cardB({ id: "docs", icon: I.file, title: "Business Documents", line: docsLine(), pill: ok ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded()), action: "Manage", body: function () { return docsBlock({ vatAsLink: true }); } }) +
+          '<div class="hb-body-md">' + (ok ? 'Your branch, delivery address and documents are on file. Check them below, or place the order.' : 'Still needed: ' + docsMissing().join(', ') + '. Open Business Documents to add it.') + '</div></div></div>' +
+        cardB({ id: "branch", icon: I.building, title: "Branch Details", meta: "Who the driver calls on arrival",
+          pill: statusChip("active", "Saved"), action: "Change", preview: prevBranch }) +
+        cardB({ id: "address", icon: I.location, title: "Delivery Address", meta: "Where the order goes",
+          pill: statusChip("active", "Pin saved"), action: "Change", preview: prevAddress }) +
+        cardB({ id: "docs", icon: I.file, title: "Business Documents", meta: "Kept on your account",
+          pill: ok ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded()),
+          action: "Manage", preview: prevDocs }) +
       '</div>' +
       '<aside class="rail"><div class="panel"><div class="panel__body stack">' +
         '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
@@ -2713,7 +2805,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(t.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
   }
 
-  function renderVerify(){ renderA(); renderB(); renderC(); renderD(); renderE(); applyLang(); wireDocDrops(); }
+  function renderVerify(){ renderA(); renderB(); renderC(); renderD(); renderE(); applyLang(); if (state.drawer && dlg.open) { paintDrawer(); } wireDocDrops(); }
 
   /* ============================================================
      Compare — what each version discloses, when, and who it suits.
@@ -2721,7 +2813,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   function renderWhy(){
     var V = [
       { k: "A", name: "Steps", how: "An accordion. One section open at a time; the rest collapse to a line and a status pill. <b>Confirm &amp; continue</b> walks down the page.", shows: "The whole task's shape, one section's detail.", best: "Buyers who want the order of things — closest to the live page's structure.", risk: "Three clicks before Place Order even when nothing needs changing." },
-      { k: "B", name: "Confirm", how: "Everything on file is a compact card with one line and <b>Change</b> / <b>Manage</b>. Forms and upload zones exist only behind that button; the page opens on a readiness banner and one primary.", shows: "Is this right? — and one button.", best: "Returning buyers with everything saved: the common case is one look and one click.", risk: "A first-time buyer must open every card; the banner says which." },
+      { k: "B", name: "Confirm", how: "Every section is a card whose body is the data itself, read only — labelled facts, a map tile, a thumbnail per document — never a sentence describing it. <b>Change</b> and <b>Manage</b> open the <b>Drawer</b> carrying only that section's fields, with Cancel and Save in its footer. The page itself holds no form at all.", shows: "The actual values, side by side with their status, and one button.", best: "Returning buyers with everything saved: the common case is one read and one click.", risk: "Editing happens in a panel over the page, so a buyer changing several things opens the Drawer several times." },
       { k: "C", name: "Guided", how: "One question per screen in plain words, a step map beside it, one <b>Continue</b>. A review step precedes Place Order; <b>Why do we ask for this?</b> sits behind a disclosure.", shows: "One decision, nothing else.", best: "Senior or infrequent buyers, and phones — the note said these users run businesses and are often senior.", risk: "The longest path; experienced buyers feel walked through." },
       { k: "D", name: "Tabs", how: "The three sections are tabs over a single pane. One pane exists at a time, but all three stay visible, reachable in any order, each carrying its own status pill.", shows: "All three sections and their states, one section's detail.", best: "Buyers who come to change one specific thing — a different delivery address, a renewed licence — without walking a sequence.", risk: "Tabs imply the content is parallel; a buyer may place the order without opening the tab that needed attention." },
       { k: "E", name: "Checklist", how: "The page is a list of what is already done, ticked, with the value on each row. Nothing is a form until a row is expanded. A progress bar states how much is settled, and anything outstanding is the only row styled as work.", shows: "How ready the order is, and the one thing that is not.", best: "Mixed accounts — some documents on file, some not — and anyone who wants reassurance before committing.", risk: "Four rows of green can read as busy when nothing needs doing; B is quieter for that case." }
@@ -2742,7 +2834,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       '<h2 class="hb-title-lg">Visual hierarchy, shared by all five</h2>' +
       '<p class="hb-body-md">One headline role per page (headline-md), one title role per section (title-md), labels in on-surface-variant and values in on-surface — colour is reserved for status pills and the single primary Button. Saved values are text, never orange. The only filled button on the screen is the one that moves the buyer forward; Cancel and Change are ghost or outlined. Detail lives one level down: behind a card, an accordion head, or a "Why do we ask for this?" disclosure.</p>' +
       '<h2 class="hb-title-lg">A recommendation</h2>' +
-      '<p class="hb-body-md"><b>B</b> for the storefront default — it rewards the returning buyer, who is most orders — with <b>C</b> on compact widths and for an account\'s first order. <b>E</b> is the strongest alternative to B: it answers "am I ready?" without a click, and degrades gracefully when something is missing. <b>D</b> suits a buyer arriving to change one thing, and would pair well as the behaviour behind B\'s <b>Manage</b>. <b>A</b> is the safe fallback if the page must keep looking like today\'s.</p>';
+      '<p class="hb-body-md"><b>B</b> for the storefront default — it rewards the returning buyer, who is most orders — with <b>C</b> on compact widths and for an account\'s first order. <b>E</b> is the strongest alternative to B: it answers "am I ready?" without a click, and degrades gracefully when something is missing. <b>D</b> suits a buyer arriving to change one thing, and would pair well inside B\'s <b>Manage</b> Drawer. <b>A</b> is the safe fallback if the page must keep looking like today\'s.</p>';
   }
 
   /* ============================================================
@@ -2822,15 +2914,54 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     });
   }
   function previewFile(f, title){
-    if (!f.url) { f = { name: f.name, size: f.size, isImage: false }; }
-    drawer(title, f.isImage
-      ? '<img src="' + f.url + '" alt="' + esc(f.name) + '" style="max-height:60vh;margin:0 auto;border-radius:var(--hb-radius-8)">'
-      : '<div class="hb-empty"><span class="hb-empty__art">' + I.file + '</span><div class="hb-empty__title hb-title-md">' + esc(f.name) + '</div><div class="hb-empty__text hb-body-sm">' + esc(f.size) + ' · PDF. PDFs open in your own reader; the prototype shows the file card.</div></div>',
+    /* A document already on the account has no local blob to draw, whatever its type — the
+       prototype names it and says where it opens rather than claiming a format it cannot read. */
+    var stored = !f.url;
+    var body = (!stored && f.isImage)
+      ? '<img src="' + f.url + '" alt="' + esc(f.name) + '" style="max-height:52vh;margin:0 auto;border-radius:var(--hb-radius-8)">'
+      : '<div class="hb-empty"><span class="hb-empty__art">' + I.file + '</span>' +
+        '<div class="hb-empty__title hb-title-md">' + esc(f.name) + '</div>' +
+        '<div class="hb-empty__text hb-body-sm">' + esc(f.size) + ' · ' +
+        (stored ? 'kept on your account — it opens in your own reader.' : 'this file type opens in your own reader.') +
+        '</div></div>';
+    drawer(title, '<div class="stack">' + body +
+      '<p class="hb-body-sm muted" style="text-align:center">' + esc(f.name) + ' · ' + esc(f.size) + '</p></div>',
       btn("Close", { style: "ghost", attrs: ' data-act="close-drawer"' }));
   }
 
+  /* ---------- Section Drawers (version B): the form lives in the Drawer organism ---------- */
+  var DRAWERS = {
+    branch:  { title: "Branch Details", size: "md",
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Who the driver calls when the order arrives. Saved to your account.</p>' + branchFields() + '</div>'; },
+      foot: function () { return btn("Cancel", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }) + btn("Save Details", { size: "lg", icon: I.save, attrs: ' data-act="save-branch"' }); } },
+    address: { title: "Delivery Address", size: "md",
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Where the order goes. The pin is what the driver navigates to.</p>' + addressFields() + '</div>'; },
+      foot: function () { return btn("Cancel", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }) + btn("Update Address", { size: "lg", icon: I.save, attrs: ' data-act="save-address"' }); } },
+    docs:    { title: "Business Documents", size: "lg",
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Kept on your account and reviewed within one working day — you will not be asked again on the next order.</p>' + docsBlock({ vatAsLink: true }) + '</div>'; },
+      foot: function () { return btn("Done", { size: "lg", icon: I.check, attrs: ' data-act="close-drawer"' }); } }
+  };
+  function paintDrawer(reopen){
+    var spec = DRAWERS[state.drawer];
+    if (!spec) { return; }
+    if (reopen || !dlg.open) { drawer(spec.title, spec.body(), spec.foot(), spec.size); }
+    else {
+      var body = $(".hb-drawer__body", dlg), acts = $(".hb-dlg-actions", dlg);
+      if (body) { body.innerHTML = spec.body(); }
+      if (acts) { acts.innerHTML = spec.foot(); }
+    }
+  }
+  /* A Drawer can close natively (its close button is a form method="dialog"), so the state
+     it was editing is reset here rather than in the action that opened it. */
+  dlg.addEventListener("close", function () {
+    if (state.returnTo) { state.drawer = state.returnTo; state.returnTo = null; paintDrawer(true); return; }
+    if (!state.drawer) { return; }
+    state.drawer = null; state.editing.branch = false; state.editing.address = false; state.errors = {};
+    renderVerify();
+  });
+
   /* ---------- Inline editing: validate, then save; Cancel restores ---------- */
-  function val(id){ var el = $("#screen-" + state.version + " #" + id); return el ? el.value.trim() : ""; }
+  function val(id){ var el = (dlg.open ? $("#" + id, dlg) : null) || $("#screen-" + state.version + " #" + id); return el ? el.value.trim() : ""; }
   function saveBranch(){
     var e = {};
     if (!val("b-name")) { e["b-name"] = "Branch name is required"; }
@@ -2839,7 +2970,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     state.errors = e;
     if (Object.keys(e).length) { renderVerify(); toast("Check the highlighted fields.", { kind: "bad" }); return; }
     state.branchDetails = { name: val("b-name"), phone: val("b-phone").replace(/\s/g, ""), email: val("b-email") };
-    state.editing.branch = false; renderVerify();
+    state.editing.branch = false;
+    if (state.drawer) { closeDrawer(); } else { renderVerify(); }
     toast("Branch details saved.", { kind: "ok" });
   }
   function saveAddress(){
@@ -2849,7 +2981,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     state.errors = e;
     if (Object.keys(e).length) { renderVerify(); toast("Check the highlighted fields.", { kind: "bad" }); return; }
     state.address = { country: val("a-country"), state: val("a-state"), city: val("a-city"), street: val("a-street"), building: val("a-building"), zip: val("a-zip"), pinned: true };
-    state.editing.address = false; renderVerify();
+    state.editing.address = false;
+    if (state.drawer) { closeDrawer(); } else { renderVerify(); }
     toast("Delivery address updated.", { kind: "ok" });
   }
   function scrollTo(id){ var el = $("#screen-" + state.version + " #" + id) || $("#" + id); if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); } }
@@ -2866,9 +2999,11 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       missing.forEach(function (l) { var k = Object.keys(state.docs).filter(function (x) { return state.docs[x].label === l; })[0]; state.errors["doc-" + k] = "This document is required"; });
       var v = state.version;
       if (v === "a") { state.step.a = 2; } else if (v === "c") { state.step.c = 2; }
-      else if (v === "d") { state.step.d = 2; } else if (v === "b") { state.open.docs = true; }
+      else if (v === "d") { state.step.d = 2; }
       else if (v === "e") { state.expand.docs = true; }
-      renderVerify(); scrollTo({ a: "acc-docs", b: "card-docs", e: "row-docs" }[state.version] || ""); return;
+      renderVerify(); scrollTo({ a: "acc-docs", b: "card-docs", e: "row-docs" }[state.version] || "");
+      if (state.version === "b") { state.drawer = "docs"; paintDrawer(true); }
+      return;
     }
     state.placing = true; renderVerify();
     setTimeout(function () {
@@ -2897,21 +3032,29 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       var k = state.version; state.step[k] = Math.min(state.step[k] + 1, (k === "c" ? GUIDE : k === "d" ? TABS : SECTIONS).length - 1); renderVerify();
       if (k === "c") { window.scrollTo(0, 0); }
     },
-    "toggle-card": function (el) {
-      var id = el.dataset.card;
-      if (state.open[id] && (state.editing.branch || state.editing.address)) { toast("Save or cancel your edit first.", { kind: "bad" }); return; }
-      state.open[id] = !state.open[id]; renderVerify();
+    "open-drawer": function (el) {
+      var id = el.dataset.drawer;
+      state.drawer = id; state.errors = {};
+      if (id === "branch") { state.editing.branch = true; }
+      if (id === "address") { state.editing.address = true; }
+      paintDrawer(true);
+      var first = $(".hb-drawer__body input", dlg); if (first) { first.focus(); }
     },
     "show-vat": function () { state.hasVat = true; renderVerify(); var el = $("#screen-" + state.version + " #tax-no"); if (el) { el.focus(); } },
-    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "b") { state.open.branch = true; } if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
+    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
     "cancel-branch": function () { state.errors = {}; state.editing.branch = false; renderVerify(); },
     "save-branch": saveBranch,
-    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "b") { state.open.address = true; } if (state.version === "e") { state.expand.address = true; } renderVerify(); },
+    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "e") { state.expand.address = true; } renderVerify(); },
     "cancel-address": function () { state.errors = {}; state.editing.address = false; renderVerify(); },
     "save-address": saveAddress,
     "move-pin": function () { toast("The map would let you drag the pin here; the fields fill from it."); },
     "pick-doc": function (el) { pickFile(el.dataset.doc); },
-    "view-doc": function (el) { var d = doc(el.dataset.doc); previewFile(d.file, d.label); },
+    "view-doc": function (el) {
+      var d = doc(el.dataset.doc);
+      /* previewing replaces the Drawer's contents, so remember which section to come back to */
+      if (state.drawer) { state.returnTo = state.drawer; state.drawer = null; }
+      previewFile(d.file, d.label);
+    },
     "remove-doc": function (el) {
       var d = doc(el.dataset.doc), id = el.dataset.doc;
       confirmDialog({ intent: "danger", icon: I.warning, title: "Remove " + d.label + "?",

@@ -48,7 +48,7 @@
   }
   function iconBtn(icon, label, o){
     o = o || {};
-    return '<button type="button" class="hb-btn hb-icon-btn" data-intent="' + (o.intent || 'primary') +
+    return '<button type="' + (o.type || 'button') + '" class="hb-btn hb-icon-btn" data-intent="' + (o.intent || 'primary') +
       '" data-style="' + (o.style || 'ghost') + '" data-size="' + (o.size || 'sm') + '"' +
       ' aria-label="' + esc(label) + '"' + (o.attrs || '') + (o.disabled ? ' disabled' : '') + '>' +
       '<span class="hb-btn__icon">' + icon + '</span></button>';

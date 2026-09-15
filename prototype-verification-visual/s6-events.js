@@ -76,15 +76,54 @@
     });
   }
   function previewFile(f, title){
-    if (!f.url) { f = { name: f.name, size: f.size, isImage: false }; }
-    drawer(title, f.isImage
-      ? '<img src="' + f.url + '" alt="' + esc(f.name) + '" style="max-height:60vh;margin:0 auto;border-radius:var(--hb-radius-8)">'
-      : '<div class="hb-empty"><span class="hb-empty__art">' + I.file + '</span><div class="hb-empty__title hb-title-md">' + esc(f.name) + '</div><div class="hb-empty__text hb-body-sm">' + esc(f.size) + ' · PDF. PDFs open in your own reader; the prototype shows the file card.</div></div>',
+    /* A document already on the account has no local blob to draw, whatever its type — the
+       prototype names it and says where it opens rather than claiming a format it cannot read. */
+    var stored = !f.url;
+    var body = (!stored && f.isImage)
+      ? '<img src="' + f.url + '" alt="' + esc(f.name) + '" style="max-height:52vh;margin:0 auto;border-radius:var(--hb-radius-8)">'
+      : '<div class="hb-empty"><span class="hb-empty__art">' + I.file + '</span>' +
+        '<div class="hb-empty__title hb-title-md">' + esc(f.name) + '</div>' +
+        '<div class="hb-empty__text hb-body-sm">' + esc(f.size) + ' · ' +
+        (stored ? 'kept on your account — it opens in your own reader.' : 'this file type opens in your own reader.') +
+        '</div></div>';
+    drawer(title, '<div class="stack">' + body +
+      '<p class="hb-body-sm muted" style="text-align:center">' + esc(f.name) + ' · ' + esc(f.size) + '</p></div>',
       btn("Close", { style: "ghost", attrs: ' data-act="close-drawer"' }));
   }
 
+  /* ---------- Section Drawers (version B): the form lives in the Drawer organism ---------- */
+  var DRAWERS = {
+    branch:  { title: "Branch Details", size: "md",
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Who the driver calls when the order arrives. Saved to your account.</p>' + branchFields() + '</div>'; },
+      foot: function () { return btn("Cancel", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }) + btn("Save Details", { size: "lg", icon: I.save, attrs: ' data-act="save-branch"' }); } },
+    address: { title: "Delivery Address", size: "md",
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Where the order goes. The pin is what the driver navigates to.</p>' + addressFields() + '</div>'; },
+      foot: function () { return btn("Cancel", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }) + btn("Update Address", { size: "lg", icon: I.save, attrs: ' data-act="save-address"' }); } },
+    docs:    { title: "Business Documents", size: "lg",
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Kept on your account and reviewed within one working day — you will not be asked again on the next order.</p>' + docsBlock({ vatAsLink: true }) + '</div>'; },
+      foot: function () { return btn("Done", { size: "lg", icon: I.check, attrs: ' data-act="close-drawer"' }); } }
+  };
+  function paintDrawer(reopen){
+    var spec = DRAWERS[state.drawer];
+    if (!spec) { return; }
+    if (reopen || !dlg.open) { drawer(spec.title, spec.body(), spec.foot(), spec.size); }
+    else {
+      var body = $(".hb-drawer__body", dlg), acts = $(".hb-dlg-actions", dlg);
+      if (body) { body.innerHTML = spec.body(); }
+      if (acts) { acts.innerHTML = spec.foot(); }
+    }
+  }
+  /* A Drawer can close natively (its close button is a form method="dialog"), so the state
+     it was editing is reset here rather than in the action that opened it. */
+  dlg.addEventListener("close", function () {
+    if (state.returnTo) { state.drawer = state.returnTo; state.returnTo = null; paintDrawer(true); return; }
+    if (!state.drawer) { return; }
+    state.drawer = null; state.editing.branch = false; state.editing.address = false; state.errors = {};
+    renderVerify();
+  });
+
   /* ---------- Inline editing: validate, then save; Cancel restores ---------- */
-  function val(id){ var el = $("#screen-" + state.version + " #" + id); return el ? el.value.trim() : ""; }
+  function val(id){ var el = (dlg.open ? $("#" + id, dlg) : null) || $("#screen-" + state.version + " #" + id); return el ? el.value.trim() : ""; }
   function saveBranch(){
     var e = {};
     if (!val("b-name")) { e["b-name"] = "Branch name is required"; }
@@ -93,7 +132,8 @@
     state.errors = e;
     if (Object.keys(e).length) { renderVerify(); toast("Check the highlighted fields.", { kind: "bad" }); return; }
     state.branchDetails = { name: val("b-name"), phone: val("b-phone").replace(/\s/g, ""), email: val("b-email") };
-    state.editing.branch = false; renderVerify();
+    state.editing.branch = false;
+    if (state.drawer) { closeDrawer(); } else { renderVerify(); }
     toast("Branch details saved.", { kind: "ok" });
   }
   function saveAddress(){
@@ -103,7 +143,8 @@
     state.errors = e;
     if (Object.keys(e).length) { renderVerify(); toast("Check the highlighted fields.", { kind: "bad" }); return; }
     state.address = { country: val("a-country"), state: val("a-state"), city: val("a-city"), street: val("a-street"), building: val("a-building"), zip: val("a-zip"), pinned: true };
-    state.editing.address = false; renderVerify();
+    state.editing.address = false;
+    if (state.drawer) { closeDrawer(); } else { renderVerify(); }
     toast("Delivery address updated.", { kind: "ok" });
   }
   function scrollTo(id){ var el = $("#screen-" + state.version + " #" + id) || $("#" + id); if (el) { el.scrollIntoView({ behavior: "smooth", block: "start" }); } }
@@ -120,9 +161,11 @@
       missing.forEach(function (l) { var k = Object.keys(state.docs).filter(function (x) { return state.docs[x].label === l; })[0]; state.errors["doc-" + k] = "This document is required"; });
       var v = state.version;
       if (v === "a") { state.step.a = 2; } else if (v === "c") { state.step.c = 2; }
-      else if (v === "d") { state.step.d = 2; } else if (v === "b") { state.open.docs = true; }
+      else if (v === "d") { state.step.d = 2; }
       else if (v === "e") { state.expand.docs = true; }
-      renderVerify(); scrollTo({ a: "acc-docs", b: "card-docs", e: "row-docs" }[state.version] || ""); return;
+      renderVerify(); scrollTo({ a: "acc-docs", b: "card-docs", e: "row-docs" }[state.version] || "");
+      if (state.version === "b") { state.drawer = "docs"; paintDrawer(true); }
+      return;
     }
     state.placing = true; renderVerify();
     setTimeout(function () {
@@ -151,21 +194,29 @@
       var k = state.version; state.step[k] = Math.min(state.step[k] + 1, (k === "c" ? GUIDE : k === "d" ? TABS : SECTIONS).length - 1); renderVerify();
       if (k === "c") { window.scrollTo(0, 0); }
     },
-    "toggle-card": function (el) {
-      var id = el.dataset.card;
-      if (state.open[id] && (state.editing.branch || state.editing.address)) { toast("Save or cancel your edit first.", { kind: "bad" }); return; }
-      state.open[id] = !state.open[id]; renderVerify();
+    "open-drawer": function (el) {
+      var id = el.dataset.drawer;
+      state.drawer = id; state.errors = {};
+      if (id === "branch") { state.editing.branch = true; }
+      if (id === "address") { state.editing.address = true; }
+      paintDrawer(true);
+      var first = $(".hb-drawer__body input", dlg); if (first) { first.focus(); }
     },
     "show-vat": function () { state.hasVat = true; renderVerify(); var el = $("#screen-" + state.version + " #tax-no"); if (el) { el.focus(); } },
-    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "b") { state.open.branch = true; } if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
+    "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
     "cancel-branch": function () { state.errors = {}; state.editing.branch = false; renderVerify(); },
     "save-branch": saveBranch,
-    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "b") { state.open.address = true; } if (state.version === "e") { state.expand.address = true; } renderVerify(); },
+    "edit-address": function () { state.errors = {}; state.editing.address = true; if (state.version === "e") { state.expand.address = true; } renderVerify(); },
     "cancel-address": function () { state.errors = {}; state.editing.address = false; renderVerify(); },
     "save-address": saveAddress,
     "move-pin": function () { toast("The map would let you drag the pin here; the fields fill from it."); },
     "pick-doc": function (el) { pickFile(el.dataset.doc); },
-    "view-doc": function (el) { var d = doc(el.dataset.doc); previewFile(d.file, d.label); },
+    "view-doc": function (el) {
+      var d = doc(el.dataset.doc);
+      /* previewing replaces the Drawer's contents, so remember which section to come back to */
+      if (state.drawer) { state.returnTo = state.drawer; state.drawer = null; }
+      previewFile(d.file, d.label);
+    },
     "remove-doc": function (el) {
       var d = doc(el.dataset.doc), id = el.dataset.doc;
       confirmDialog({ intent: "danger", icon: I.warning, title: "Remove " + d.label + "?",

@@ -38,7 +38,7 @@
     dlg.innerHTML =
       '<div class="hb-drawer" data-side="end" data-size="' + (size || "md") + '">' +
         '<form method="dialog" class="hb-drawer__close">' +
-          iconBtn(I.close, "Close", { style:"filled", size:"md", attrs:' value="close"' }) +
+          iconBtn(I.close, "Close", { style:"filled", size:"md", type:"submit", attrs:' value="close"' }) +
         '</form>' +
         '<div class="hb-drawer__panel">' +
           '<div class="hb-dlg-header"><h2 class="hb-dlg-header__title hb-title-lg">' + esc(title) + '</h2></div>' +

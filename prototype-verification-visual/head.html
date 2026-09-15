@@ -363,6 +363,37 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 @media (max-width:743px){.vs{grid-template-columns:1fr}.review__row{flex-wrap:wrap}.review__row dt{flex-basis:100%}.guide__main{padding:var(--hb-space-20)}}
 
 
+/* ---------- Version B · structured previews (read-only data, not a sentence) ---------- */
+.card__prev{padding:0 var(--hb-space-20) var(--hb-space-20)}
+.prev{display:flex;align-items:flex-start;gap:var(--hb-space-16);padding:var(--hb-space-16);
+  border-radius:var(--hb-radius-8);background:var(--hb-color-surface-container-low)}
+.prev__facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--hb-space-12) var(--hb-space-20);flex:1;min-width:0;margin:0}
+.fact{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
+.fact dt{margin:0;color:var(--hb-color-on-surface-variant)}
+.fact dd{margin:0;color:var(--hb-color-on-surface);overflow-wrap:anywhere}
+.prev__map{width:var(--hb-space-104);height:var(--hb-space-72);flex:0 0 var(--hb-space-104);
+  border-radius:var(--hb-radius-8);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-primary-50);display:grid;place-items:center;position:relative;overflow:hidden}
+.prev__map .hb-i{font-size:var(--hb-space-24);color:var(--hb-color-primary-700)}
+.prev__map span{position:absolute;inset-inline-start:var(--hb-space-4);bottom:var(--hb-space-4);
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-full);padding:0 var(--hb-space-6);
+  color:var(--hb-color-on-surface-variant)}
+.doctiles{display:flex;gap:var(--hb-space-12);flex-wrap:wrap}
+.doctile{display:flex;align-items:center;gap:var(--hb-space-12);flex:1 1 240px;min-width:0;
+  padding:var(--hb-space-12);border-radius:var(--hb-radius-8);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);background:var(--hb-color-surface-container-low)}
+.doctile[data-state="todo"]{border-color:var(--hb-color-warning-outline);background:var(--hb-color-warning-container)}
+.doctile__main{flex:1;min-width:0;display:flex;flex-direction:column;gap:var(--hb-space-2)}
+.doctile__main span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doctile[data-state="todo"] .muted{color:var(--hb-color-on-warning-container)}
+
+/* The Drawer carries a section's edit form; its panel is narrower than the page, so the
+   two-column grids inside it stack and the inline edit chrome is dropped. */
+.drawerform .grid2,.drawerform .addr,.drawerform .kv{grid-template-columns:1fr;display:grid}
+.drawerform .editform{padding:0;background:none;border:0;gap:var(--hb-space-16)}
+.drawerform .editform .row-end{display:none}
+.drawerform .upzone .hb-upload[data-state="ready"]{padding-block:var(--hb-space-20)}
+
 /* ---------- Version D · Tabs (one pane at a time, order kept in view) ---------- */
 .tabbar{display:flex;flex-direction:column;gap:var(--hb-space-8);padding:var(--hb-space-12) var(--hb-space-20);
   background:var(--hb-color-surface);border-radius:var(--hb-radius-12) var(--hb-radius-12) 0 0;
@@ -442,6 +473,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
 
 /* ---------- Breakpoints: compact < 744, medium 744–1279, expanded ≥ 1280 ---------- */
 @media (max-width:1279px){
+  /* Version B: three fact columns only survive the expanded width; below it the values
+     start breaking mid-word, so the grid drops to two and the map tile goes full width. */
+  .prev__facts{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cols{grid-template-columns:minmax(0,1fr)}
   .rail{position:static}
   .commit-bar{
@@ -460,6 +494,15 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
 }
 .commit-bar{display:none}
 @media (max-width:743px){
+  /* the card head stops competing for one row: title and meta keep the row with the icon,
+     the status pill and Change wrap under them, both still full-size touch targets */
+  .card__row{flex-wrap:wrap}
+  .card__main{flex:1 1 60%}
+  .card__prev{padding-inline:var(--hb-space-12)}
+  .prev{flex-direction:column;padding:var(--hb-space-12)}
+  .prev__facts{grid-template-columns:1fr 1fr}
+  .prev__map{width:100%;flex:0 0 auto}
+  .doctile{flex:1 1 100%}
   .site{padding-inline:var(--hb-space-12)}
   .grid2,.addr,.kv{grid-template-columns:1fr}
   .progress{grid-template-columns:repeat(2,minmax(0,1fr))}

@@ -3,3 +3,10 @@ dist/
 .env
 .env.local
 .env.*.local
+
+# prototype build byproducts (assembled or captured, never hand-edited)
+prototype-*/body.html
+prototype-*/sweep.html
+prototype-*/tmp-*.png
+prototype-*/v-*.png
+prototype-*/tmp-bad.txt

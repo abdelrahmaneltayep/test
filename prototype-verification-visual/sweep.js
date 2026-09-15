@@ -13,7 +13,9 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
  for(const dir of ['ltr','rtl']){const p=await b.newPage({viewport:{width:1440,height:1000}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto('file://'+__dirname+'/sweep.html');await p.waitForTimeout(500);if(dir==='rtl'){await p.click('#t-dir');await p.waitForTimeout(300)}
   for(const sc of ['a','b','c','d','e','why']){await p.evaluate(s=>location.hash=s,sc);await p.waitForTimeout(300);
-   if(sc==='b'){for(const c of ['branch','address','docs'])await p.click('[data-act="toggle-card"][data-card="'+c+'"]');await p.waitForTimeout(200)}
+   if(sc==='b'){for(const c of ['branch','address','docs']){await p.click('[data-act="open-drawer"][data-drawer="'+c+'"]');await p.waitForTimeout(250);
+     const bad2=await p.evaluate(CONTRAST);if(bad2.length){bad(`contrast ${dir}/drawer:${c}`);bad2.slice(0,4).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))}else ok(`contrast ${dir}/drawer:${c}`);
+     await p.click('.hb-drawer__close button');await p.waitForTimeout(200)}}
    const badc=await p.evaluate(CONTRAST);badc.length?(bad(`contrast ${dir}/${sc}`),badc.slice(0,6).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))):ok(`contrast ${dir}/${sc}`);
    const ov=await p.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);ov>1?bad(`overflow ${dir}/${sc} ${ov}px`):ok(`no overflow ${dir}/${sc}`)}
   errs.length?bad('page errors '+dir+': '+errs.join('; ')):ok('no page errors '+dir);await p.close()}
@@ -23,16 +25,50 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
   ['A: one section open, summaries on the rest',async()=>{const n=await p.$$('#screen-a .acc__item[data-state="now"]');const s=await p.$$('#screen-a .acc__summary');return n.length===1&&s.length===2}],
   ['A: confirm & continue walks the accordion',async()=>{await p.click('#screen-a [data-act="next-step"]');await p.waitForTimeout(200);return !!(await p.$('#screen-a #acc-address[data-state="now"]'))&&!!(await p.$('#screen-a #acc-branch[data-state="done"]'))}],
   ['A: edit inside a step validates',async()=>{await p.click('#screen-a [data-act="edit-address"]');await p.fill('#screen-a #a-city','');await p.click('#screen-a [data-act="save-address"]');await p.waitForTimeout(150);const e=!!(await p.$('#screen-a .hb-field[data-state="error"]'));await p.fill('#screen-a #a-city','Manama');await p.click('#screen-a [data-act="save-address"]');await p.waitForTimeout(150);return e&&!(await p.$('#screen-a #a-city'))}],
-  ['B: cards closed by default, banner says ready',async()=>{await p.evaluate(()=>location.hash='b');await p.waitForTimeout(300);return (await p.$$('#screen-b .card[data-open]')).length===0&&(await txt('#screen-b .ready')).includes('Everything is in place')}],
-  ['B: Change opens the card; Done closes it',async()=>{await p.click('#screen-b [data-act="toggle-card"][data-card="branch"]');await p.waitForTimeout(150);const o=!!(await p.$('#screen-b #card-branch[data-open]'));await p.click('#screen-b [data-act="toggle-card"][data-card="branch"]');await p.waitForTimeout(150);return o&&!(await p.$('#screen-b #card-branch[data-open]'))}],
-  ['B: VAT is a link until asked for',async()=>{await p.click('#screen-b [data-act="toggle-card"][data-card="docs"]');await p.waitForTimeout(150);const link=!!(await p.$('#screen-b [data-act="show-vat"]'));await p.click('#screen-b [data-act="show-vat"]');await p.waitForTimeout(150);const shown=!!(await p.$('#screen-b #tax-no'));await p.click('#screen-b #has-vat');await p.waitForTimeout(150);return link&&shown}],
-  ['B: removing a required doc flips the banner',async()=>{await p.click('#screen-b [data-act="remove-doc"][data-doc="id"]');await p.waitForTimeout(150);await p.click('[data-act="remove-doc-go"]');await p.waitForTimeout(200);return !!(await p.$('#screen-b .ready[data-state="warn"]'))}],
-  ['B: place order refuses and opens documents',async()=>{await p.click('#screen-b .rail [data-act="place-order"]');await p.waitForTimeout(300);return (await txt('#screen-b #card-docs')).includes('Still needed')}],
-  ['upload in B shows progress then card',async()=>{fs.writeFileSync(__dirname+'/tmp-id.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
-     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('#screen-b [data-drop="id"]')]);await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(200);const prog=!!(await p.$('#screen-b .hb-upload[data-state="uploading"]'));await p.waitForTimeout(1100);return prog&&!!(await p.$('#screen-b .doc__prev img'))}],
-  ['C: one step on screen, map beside it',async()=>{await p.evaluate(()=>location.hash='c');await p.waitForTimeout(300);return (await p.$$('#screen-c .guide__main')).length===1&&(await p.$$('#screen-c .guide__step')).length===4&&(await txt('#screen-c')).includes('Step 1 of 4')}],
-  ['C: continue reaches the review with all lines',async()=>{for(let i=0;i<3;i++){await p.click('#screen-c [data-act="next-step"]');await p.waitForTimeout(150)}const t=await txt('#screen-c');return t.includes('Step 4 of 4')&&t.includes('Buyer')&&t.includes('Manama')&&t.includes('tmp-id.png')}],
-  ['C: place order from review succeeds',async()=>{await p.click('#screen-c [data-act="place-order"]');await p.waitForTimeout(1400);return await p.evaluate(()=>document.querySelector('dialog.proto-confirm').open)&&(await txt('dialog.proto-confirm')).includes('Order placed')}],
+  ['B: previews are structured data, not a sentence',async()=>{await p.evaluate(()=>location.hash='b');await p.waitForTimeout(300);
+     const facts=await p.$$('#screen-b .fact');const tiles=await p.$$('#screen-b .doctile');const forms=await p.$$('#screen-b input:not([type=checkbox])');
+     const t=await txt('#screen-b');
+     return facts.length===12&&tiles.length===2&&forms.length===0&&t.includes('Branch Phone')&&t.includes('ZIP / Postal Code')&&t.includes('CR Number')}],
+  ['B: no drawer until Change is pressed',async()=>!(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open))],
+  ['B: Change opens the Drawer with that section only',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="branch"]');await p.waitForTimeout(300);
+     const open=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
+     const t=await txt('dialog.hb-drawer-layer');
+     return open&&t.includes('Branch Details')&&t.includes('Branch Email')&&!t.includes('Postal Code')&&!!(await p.$('dialog.hb-drawer-layer #b-name'))}],
+  ['B: the Drawer validates before saving',async()=>{await p.fill('dialog.hb-drawer-layer #b-phone','12');await p.click('dialog.hb-drawer-layer [data-act="save-branch"]');await p.waitForTimeout(250);
+     const stillOpen=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
+     return stillOpen&&!!(await p.$('dialog.hb-drawer-layer .hb-phonefield[data-state="error"]'))}],
+  ['B: saving closes the Drawer and updates the preview',async()=>{await p.fill('dialog.hb-drawer-layer #b-phone','39080705');await p.fill('dialog.hb-drawer-layer #b-name','Buyer Bahrain');
+     await p.click('dialog.hb-drawer-layer [data-act="save-branch"]');await p.waitForTimeout(350);
+     const closed=!(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open));
+     const t=await txt('#screen-b #card-branch');return closed&&t.includes('Buyer Bahrain')&&t.includes('39080705')}],
+  ['B: Cancel discards and leaves the preview alone',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="address"]');await p.waitForTimeout(300);
+     await p.fill('dialog.hb-drawer-layer #a-city','Riffa');await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(300);
+     const t=await txt('#screen-b #card-address');return t.includes('Manama')&&!t.includes('Riffa')}],
+  ['B: document tiles show state; Manage opens the docs Drawer',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(300);
+     const t=await txt('dialog.hb-drawer-layer');const cards=await p.$$eval('dialog.hb-drawer-layer .hb-upload',e=>e.map(x=>x.dataset.state));
+     const tiles=await p.$$eval('#screen-b .doctile',e=>e.map(x=>x.dataset.state));
+     return t.includes('Commercial License (CR)')&&t.includes('Personal ID Document')&&cards.join()==='uploaded,uploaded'&&tiles.join()==='done,done'}],
+  ['B: removing a required doc turns its tile amber',async()=>{await p.click('dialog.hb-drawer-layer [data-act="remove-doc"][data-doc="id"]');await p.waitForTimeout(200);
+     await p.click('[data-act="remove-doc-go"]');await p.waitForTimeout(350);
+     const stillOpen=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
+     return stillOpen&&(await p.$$('#screen-b .doctile[data-state="todo"]')).length===1&&!!(await p.$('#screen-b .ready[data-state="warn"]'))}],
+  ['B: uploading inside the Drawer refreshes it and the tile',async()=>{fs.writeFileSync(__dirname+'/tmp-id.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
+     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('dialog.hb-drawer-layer [data-drop="id"]')]);await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(200);
+     const prog=!!(await p.$('dialog.hb-drawer-layer .hb-upload[data-state="uploading"]'));await p.waitForTimeout(1100);
+     const drawerCard=!!(await p.$('dialog.hb-drawer-layer .hb-upload[data-state="uploaded"]'));
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);
+     return prog&&drawerCard&&(await p.$$('#screen-b .doctile[data-state="todo"]')).length===0&&!!(await p.$('#screen-b .doctile img'))}],
+  ['B: previewing a file returns to the docs Drawer',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(300);
+     await p.click('dialog.hb-drawer-layer [data-act="view-doc"][data-doc="id"]');await p.waitForTimeout(300);
+     const preview=(await txt('dialog.hb-drawer-layer')).includes('tmp-id.png')&&!!(await p.$('dialog.hb-drawer-layer img[alt="tmp-id.png"]'));
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(350);
+     const back=(await txt('dialog.hb-drawer-layer')).includes('Commercial License (CR)');
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);
+     return preview&&back}],
+  ['B: VAT is a link until asked for',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(300);
+     const link=!!(await p.$('dialog.hb-drawer-layer [data-act="show-vat"]'));await p.click('dialog.hb-drawer-layer [data-act="show-vat"]');await p.waitForTimeout(250);
+     const shown=!!(await p.$('dialog.hb-drawer-layer #tax-no'));await p.click('dialog.hb-drawer-layer #has-vat');await p.waitForTimeout(250);
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);return link&&shown}],
   ['D: tabs, one pane, each with its own status',async()=>{
      // C's test leaves the Confirmation Dialog open, and a modal <dialog> swallows every click
      await p.evaluate(()=>{const d=document.querySelector('dialog.proto-confirm');if(d&&d.open)d.close()});

@@ -40,28 +40,31 @@
      The common case (nothing to change) is one look and one button.
      ============================================================ */
   function cardB(o){
-    var open = !!state.open[o.id];
-    return '<section class="card"' + (open ? ' data-open' : '') + ' id="card-' + o.id + '">' +
+    return '<section class="card" id="card-' + o.id + '">' +
       '<div class="card__row">' +
         '<span class="card__icon">' + o.icon + '</span>' +
-        '<div class="card__main"><span class="hb-title-sm">' + o.title + '</span><span class="card__line hb-body-md">' + o.line + '</span></div>' +
+        '<div class="card__main"><span class="hb-title-sm">' + o.title + '</span>' +
+          '<span class="card__line hb-body-sm">' + o.meta + '</span></div>' +
         o.pill +
-        btn(open ? "Done" : o.action, { style: open ? "tonal" : "outlined", size: "sm", icon: open ? I.check : I.edit, attrs: ' data-act="toggle-card" data-card="' + o.id + '"' }) +
+        btn(o.action, { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="open-drawer" data-drawer="' + o.id + '"' }) +
       '</div>' +
-      (open ? '<div class="card__open">' + o.body() + '</div>' : '') +
+      '<div class="card__prev">' + o.preview() + '</div>' +
     '</section>';
   }
   function renderB(){
-    var ok = docsOk();
-    var t = totals();
+    var ok = docsOk(), t = totals();
     $("#screen-b").innerHTML = pageHead() +
       '<div class="cols"><div class="stack">' +
         '<div class="ready"' + (ok ? '' : ' data-state="warn"') + '><span class="ready__mark">' + (ok ? I.check : I.warning) + '</span>' +
           '<div><div class="hb-title-lg">' + (ok ? 'Everything is in place' : 'One thing still needed') + '</div>' +
-          '<div class="hb-body-md">' + (ok ? 'Your branch, delivery address and documents are on file. Check them below, or place the order.' : 'Still needed: ' + docsMissing().join(', ') + '. Open Business documents to add it.') + '</div></div></div>' +
-        cardB({ id: "branch", icon: I.building, title: "Branch Details", line: branchLine(), pill: statusChip("active", "Saved"), action: "Change", body: function () { return state.editing.branch ? branchForm() : branchView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Details", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-branch"' }) + '</div>'; } }) +
-        cardB({ id: "address", icon: I.location, title: "Delivery Address", line: addressLine(), pill: statusChip("active", "Pin saved"), action: "Change", body: function () { return state.editing.address ? addressForm() : addressView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Address", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-address"' }) + '</div>'; } }) +
-        cardB({ id: "docs", icon: I.file, title: "Business Documents", line: docsLine(), pill: ok ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded()), action: "Manage", body: function () { return docsBlock({ vatAsLink: true }); } }) +
+          '<div class="hb-body-md">' + (ok ? 'Your branch, delivery address and documents are on file. Check them below, or place the order.' : 'Still needed: ' + docsMissing().join(', ') + '. Open Business Documents to add it.') + '</div></div></div>' +
+        cardB({ id: "branch", icon: I.building, title: "Branch Details", meta: "Who the driver calls on arrival",
+          pill: statusChip("active", "Saved"), action: "Change", preview: prevBranch }) +
+        cardB({ id: "address", icon: I.location, title: "Delivery Address", meta: "Where the order goes",
+          pill: statusChip("active", "Pin saved"), action: "Change", preview: prevAddress }) +
+        cardB({ id: "docs", icon: I.file, title: "Business Documents", meta: "Kept on your account",
+          pill: ok ? statusChip("active", docsOnFile() + " of " + docsNeeded()) : statusChip("pending", docsOnFile() + " of " + docsNeeded()),
+          action: "Manage", preview: prevDocs }) +
       '</div>' +
       '<aside class="rail"><div class="panel"><div class="panel__body stack">' +
         '<div class="hb-title-md">Total <span class="hb-headline-sm num" style="float:inline-end">' + bhd(t.total) + '</span></div>' +
@@ -204,4 +207,4 @@
       '<div class="commit-bar"><span class="hb-title-sm num">' + bhd(t.total) + '</span>' + btn("Place Order", { size: "lg", icon: I.chevronRight, attrs: ' data-act="place-order"' }) + '</div>';
   }
 
-  function renderVerify(){ renderA(); renderB(); renderC(); renderD(); renderE(); applyLang(); wireDocDrops(); }
+  function renderVerify(){ renderA(); renderB(); renderC(); renderD(); renderE(); applyLang(); if (state.drawer && dlg.open) { paintDrawer(); } wireDocDrops(); }
