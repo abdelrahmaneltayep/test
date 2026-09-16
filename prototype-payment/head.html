@@ -1,0 +1,359 @@
+<title>HIGHBASE Verification — 3 Visual Versions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/*__DS_CSS__*/
+
+/* ===========================================================================
+   Prototype layer — page composition only.
+   Every component above comes from the Highbase repo verbatim. Nothing here
+   redefines a component; it places them. No raw hex, no physical left/right —
+   logical properties throughout. Page geometry the system has no token for is
+   named --proto-* and tagged (proposal).
+   =========================================================================== */
+:root{
+  color-scheme:light;
+  /* (proposal) page geometry — not part of the Highbase system */
+  --proto-page-max:1320px;
+  --proto-rail-w:344px;
+  --proto-hairline:1px;
+  --proto-bar-h:48px;        /* (proposal) the review bar's own height, so the Header can stick beneath it */
+  --proto-footer-logo:43px;   /* (proposal) Logo README: "footer: lockup 43 (proposal — confirm)" */
+  --proto-doc-thumb:64px;     /* (proposal) a document preview is a thumbnail, never a full-width image */
+  --proto-qr:148px;           /* (proposal) the smallest size a phone camera reads reliably at arm's length */
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0;background:var(--hb-color-surface-container-low);
+  color:var(--hb-color-on-surface);font-family:var(--hb-font-family-latin);
+  -webkit-font-smoothing:antialiased;
+}
+[dir="rtl"] body,[lang="ar"] body{font-family:var(--hb-font-family-arabic)}
+img{max-width:100%;display:block}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:where(a,button,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--hb-color-primary);outline-offset:2px;border-radius:var(--hb-radius-4);
+}
+hr.hb-divider{margin:0}
+h1,h2,h3,h4,p{margin:0}
+
+/* The Drawer layer is a full-viewport flex container. Hosting it in a <dialog>
+   for the top layer and focus trap means neutralising the dialog's own box so
+   the component's own sizing governs. */
+dialog.hb-drawer-layer{
+  max-width:none;max-height:none;width:100%;height:100%;
+  margin:0;padding:0;border:0;background:var(--hb-color-scrim);
+}
+dialog.hb-drawer-layer::backdrop{background:transparent}
+/* .hb-drawer-layer sets display:flex, which beats the UA rule that hides a
+   closed <dialog> — without this the scrim covers the page permanently. */
+dialog.hb-drawer-layer:not([open]){display:none}
+/* The Confirmation Dialog is one question, two answers: it sits centred over the scrim. */
+dialog.proto-confirm{margin:auto;padding:0;border:0;background:transparent;max-width:100%}
+dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
+/* A native <select> draws its own arrow; the Field already supplies one. */
+.hb-field__input:is(select){appearance:none;-webkit-appearance:none;background:none;border:0;
+  flex:1 1 auto;min-width:0;font:inherit;color:inherit;outline:none}
+
+/* ---------- Prototype chrome (proposal) — a review shell, not product UI ---------- */
+.proto-bar{
+  position:sticky;top:0;z-index:80;background:var(--hb-color-surface-dark);
+  color:var(--hb-color-on-surface-dark);
+  border-bottom:var(--proto-hairline) solid var(--hb-color-surface-dark-container);
+}
+.proto-bar__in{
+  max-width:var(--proto-page-max);margin:0 auto;
+  padding:var(--hb-space-8) var(--hb-space-20);
+  display:flex;align-items:center;gap:var(--hb-space-16);flex-wrap:wrap;
+}
+.proto-brand{display:flex;align-items:center;gap:var(--hb-space-8)}
+.proto-nav{display:flex;gap:var(--hb-space-4);flex-wrap:wrap}
+.proto-bar .spacer{flex:1}
+/* On the dark review bar the Button atom's own intent colours land at 2.27:1, so the
+   chrome re-colours its own buttons against surface-dark. Prototype chrome only. (proposal) */
+.proto-bar .hb-btn{background:transparent;color:var(--hb-color-on-surface-dark);border-color:var(--hb-color-on-surface-dark)}
+.proto-bar .hb-btn:hover{background:var(--hb-color-surface-dark-container)}
+.proto-nav .hb-btn[aria-current="true"]{background:var(--hb-color-on-surface-dark);color:var(--hb-color-surface-dark)}
+.proto-bar .hb-btn[aria-pressed="true"]{background:var(--hb-color-on-surface-dark);color:var(--hb-color-surface-dark)}
+
+/* ---------- Page shell ---------- */
+.site{max-width:var(--proto-page-max);margin:0 auto;padding:0 var(--hb-space-20) var(--hb-space-72)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) var(--proto-rail-w);gap:var(--hb-space-24);align-items:start}
+.stack{display:flex;flex-direction:column;gap:var(--hb-space-16)}
+.panel{
+  background:var(--hb-color-surface);border-radius:var(--hb-radius-12);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+}
+.panel__head{
+  display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;
+  padding:var(--hb-space-16) var(--hb-space-20);
+  border-bottom:var(--proto-hairline) solid var(--hb-color-surface-dim);
+}
+.panel__head h2{flex:1;min-width:0}
+.panel__body{padding:var(--hb-space-20)}
+.panel__foot{
+  display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;
+  padding:var(--hb-space-12) var(--hb-space-20);
+  border-top:var(--proto-hairline) solid var(--hb-color-surface-dim);
+  background:var(--hb-color-surface-container-low);
+  border-radius:0 0 var(--hb-radius-12) var(--hb-radius-12);
+}
+.row{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap}
+.row-end{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;justify-content:flex-end}
+.muted{color:var(--hb-color-on-surface-variant)}
+.strong{color:var(--hb-color-on-surface)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-16)}
+.rail{position:sticky;top:calc(var(--proto-bar-h) + var(--hb-space-104));display:flex;flex-direction:column;gap:var(--hb-space-16)}
+.hb-btn.proto-block{width:100%;justify-content:center} /* (proposal) the Button has no full-width variant */
+
+/* ---------- Order placed ---------- */
+.hero-ok{text-align:center;padding:var(--hb-space-28) var(--hb-space-20) var(--hb-space-8)}
+.hero-ok__mark{
+  width:var(--hb-space-56);height:var(--hb-space-56);border-radius:var(--hb-radius-full);
+  margin:0 auto var(--hb-space-12);background:var(--hb-color-success);
+  color:var(--hb-color-on-success);display:grid;place-items:center;
+}
+.hero-ok__mark .hb-i{font-size:var(--hb-space-28)}
+.order-ref{
+  display:inline-flex;align-items:center;gap:var(--hb-space-8);margin-top:var(--hb-space-12);flex-wrap:wrap;justify-content:center;
+  padding:var(--hb-space-8) var(--hb-space-12);border-radius:var(--hb-radius-full);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);background:var(--hb-color-surface);
+}
+.progress{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--hb-space-8);padding:var(--hb-space-16) var(--hb-space-20)}
+.progress li{list-style:none;display:flex;flex-direction:column;gap:var(--hb-space-8);min-width:0}
+.progress__bar{height:var(--hb-space-6);border-radius:var(--hb-radius-full);background:var(--hb-color-surface-container)}
+.progress li[data-state="done"] .progress__bar{background:var(--hb-color-success)}
+.progress li[data-state="now"] .progress__bar{background:var(--hb-color-warning)}
+.progress h4{color:var(--hb-color-on-surface-variant)}
+.progress li[data-state] h4{color:var(--hb-color-on-surface)}
+.progress p{color:var(--hb-color-on-surface-variant)}
+.pay-head{
+  display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;
+  padding:var(--hb-space-16) var(--hb-space-20);
+  background:var(--hb-color-warning-container);
+  border-bottom:var(--proto-hairline) solid var(--hb-color-warning-outline);
+  border-radius:var(--hb-radius-12) var(--hb-radius-12) 0 0;
+  color:var(--hb-color-on-warning-container);
+}
+.pay-head .hb-i{font-size:var(--hb-space-24);color:var(--hb-color-warning-dark)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--hb-space-12)}
+.facts .hb-stat__value{white-space:nowrap}
+.copyrow{
+  display:flex;align-items:center;gap:var(--hb-space-12);
+  padding:var(--hb-space-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  border-radius:var(--hb-radius-8);background:var(--hb-color-surface);
+}
+.copyrow dt{margin:0;flex:0 0 112px;color:var(--hb-color-on-surface-variant)}
+.copyrow dd{margin:0;flex:1;min-width:0;word-break:break-all;font-weight:var(--hb-font-weight-semibold)}
+.copyrows{display:flex;flex-direction:column;gap:var(--hb-space-8);margin:0}
+.qr{
+  border:var(--proto-hairline) dashed var(--hb-color-outline);
+  border-radius:var(--hb-radius-12);padding:var(--hb-space-16);
+  display:grid;place-items:center;gap:var(--hb-space-8);background:var(--hb-color-surface);text-align:center;
+}
+.qr__code{width:var(--proto-qr);height:var(--proto-qr);color:var(--hb-color-on-surface)}
+.receipt-prev{
+  width:var(--proto-doc-thumb);height:var(--proto-doc-thumb);flex:0 0 var(--proto-doc-thumb);border-radius:var(--hb-radius-8);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);overflow:hidden;
+  display:grid;place-items:center;background:var(--hb-color-surface-container-low);color:var(--hb-color-on-surface-variant);
+}
+.receipt-prev img{width:100%;height:100%;object-fit:cover}
+.hb-upload.is-over{background:var(--hb-color-primary-container-low);border-color:var(--hb-color-primary)}
+.hb-upload__icon .hb-i{font-size:var(--hb-space-40)}
+.share{display:flex;gap:var(--hb-space-8);flex-wrap:wrap}
+
+/* ---------- The payment page: one column, wide when both halves are shown ---------- */
+.pay{display:flex;flex-direction:column;gap:var(--hb-space-20);max-width:var(--hb-space-104);width:100%;
+  margin-inline:auto;padding-block:var(--hb-space-24)}
+.pay{max-width:720px}
+.pay--wide{max-width:var(--proto-page-max)}
+.panel--lead{box-shadow:var(--hb-elevation-level-2)}
+.row--end{justify-content:flex-end}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-20);align-items:start}
+
+/* the order confirmation, demoted to a line once it has been read */
+.orderline{display:flex;align-items:center;gap:var(--hb-space-12);flex-wrap:wrap;
+  padding:var(--hb-space-12) var(--hb-space-16);border-radius:var(--hb-radius-12);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);background:var(--hb-color-surface)}
+.orderline__mark{width:var(--hb-space-32);height:var(--hb-space-32);flex:0 0 var(--hb-space-32);
+  border-radius:var(--hb-radius-full);background:var(--hb-color-success-container);
+  color:var(--hb-color-on-success-container);display:grid;place-items:center}
+.orderline__mark .hb-i{font-size:var(--hb-space-20)}
+.orderline__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);flex:1 1 280px;min-width:0}
+.orderline--hero .orderline__mark{width:var(--hb-space-44);height:var(--hb-space-44);flex:0 0 var(--hb-space-44)}
+
+/* the amount: the one number the buyer acts on, so it is the largest type on the page */
+.amount{display:flex;align-items:center;gap:var(--hb-space-16);
+  padding:var(--hb-space-20);border-radius:var(--hb-radius-12);
+  background:var(--hb-color-primary-container-low);border:var(--proto-hairline) solid var(--hb-color-primary-200)}
+.amount[data-tone="quiet"]{background:var(--hb-color-surface-container-low);border-color:var(--hb-color-outline-variant)}
+.amount__lines{display:flex;flex-direction:column;gap:var(--hb-space-4);flex:1;min-width:0}
+.amount__lines .hb-label-md{color:var(--hb-color-on-surface-variant)}
+.amount__lines .hb-headline-lg{color:var(--hb-color-on-surface-heading);overflow-wrap:anywhere}
+.amount__lines .hb-body-sm{color:var(--hb-color-on-surface-variant)}
+
+.copyrow[data-strong]{background:var(--hb-color-surface-container-low)}
+.qr__ph{display:grid;place-items:center;width:100%;height:100%;
+  border-radius:var(--hb-radius-8);background:var(--hb-color-surface-container);
+  color:var(--hb-color-on-surface-variant);text-align:center;padding:var(--hb-space-8)}
+
+/* version B · the step timeline (proposal — the system has no stepper) */
+.steps{display:flex;flex-direction:column;gap:var(--hb-space-12);margin:0;padding:0;list-style:none}
+.step{border-radius:var(--hb-radius-12);border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-surface);overflow:hidden}
+.step[data-open]{border-color:var(--hb-color-primary-200)}
+.step__head{display:flex;align-items:center;gap:var(--hb-space-16);width:100%;text-align:start;
+  padding:var(--hb-space-16) var(--hb-space-20);border:0;background:none;cursor:pointer;font:inherit;color:inherit}
+.step__head:hover{background:var(--hb-color-surface-container-low)}
+.step__no{width:var(--hb-space-32);height:var(--hb-space-32);flex:0 0 var(--hb-space-32);
+  border-radius:var(--hb-radius-full);display:grid;place-items:center;
+  background:var(--hb-color-surface-container);color:var(--hb-color-on-surface-variant);
+  font-weight:var(--hb-font-weight-semibold)}
+.step[data-state="done"] .step__no{background:var(--hb-color-success-container);color:var(--hb-color-on-success-container)}
+.step[data-state="now"] .step__no{background:var(--hb-color-primary);color:var(--hb-color-on-primary)}
+.step[data-state="next"] .step__head{color:var(--hb-color-on-surface-variant)}
+.step__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);flex:1;min-width:0}
+.step__body{padding:0 var(--hb-space-20) var(--hb-space-20)}
+
+/* the tracker — where the payment stands, in four states (proposal) */
+.track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--hb-space-16);margin:0;padding:0;list-style:none}
+.track li{display:flex;align-items:flex-start;gap:var(--hb-space-12);min-width:0;
+  padding-top:var(--hb-space-12);border-top:var(--hb-space-2) solid var(--hb-color-surface-container)}
+.track li[data-state="done"]{border-top-color:var(--hb-color-success)}
+.track li[data-state="now"]{border-top-color:var(--hb-color-primary)}
+.track__mark{width:var(--hb-space-24);height:var(--hb-space-24);flex:0 0 var(--hb-space-24);
+  border-radius:var(--hb-radius-full);display:grid;place-items:center;
+  background:var(--hb-color-surface-container);color:var(--hb-color-on-surface-variant)}
+.track li[data-state="done"] .track__mark{background:var(--hb-color-success-container);color:var(--hb-color-on-success-container)}
+.track li[data-state="now"] .track__mark{background:var(--hb-color-primary-container);color:var(--hb-color-on-primary-container)}
+.track__mark .hb-i{font-size:var(--hb-space-16)}
+.track__lines{display:flex;flex-direction:column;gap:var(--hb-space-2);min-width:0}
+.track li[data-state="next"] .hb-label-lg{color:var(--hb-color-on-surface-variant)}
+
+/* the disclosure used by every version for what is held back */
+.why summary{display:flex;align-items:center;gap:var(--hb-space-8);cursor:pointer;list-style:none;
+  color:var(--hb-color-primary-700);font-weight:var(--hb-font-weight-medium)}
+.why summary::-webkit-details-marker{display:none}
+.why summary .hb-i{transition:transform 140ms}
+.why[open] summary .hb-i{transform:rotate(180deg)}
+.vs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--hb-space-20);align-items:start}
+.doc-list{margin:0;padding-inline-start:var(--hb-space-20);display:flex;flex-direction:column;gap:var(--hb-space-8)}
+.doc-list li{color:var(--hb-color-on-surface)}
+.doc-page{display:flex;flex-direction:column;gap:var(--hb-space-16);padding-block:var(--hb-space-24)}
+
+/* the commit bar version C keeps on narrow widths */
+.commit-bar{display:none}
+
+/* ---------- Annotation pins (proposal) — review commentary, not product UI ---------- */
+.pin{
+  display:none;position:relative;width:var(--hb-space-20);height:var(--hb-space-20);
+  flex:0 0 var(--hb-space-20);border-radius:var(--hb-radius-full);border:0;
+  background:var(--hb-color-secondary-800);color:var(--hb-color-neutral-white);
+  line-height:var(--hb-space-20);text-align:center;vertical-align:middle;
+  margin-inline-start:var(--hb-space-6);cursor:pointer;
+  font-family:var(--hb-font-family-latin);font-size:var(--hb-font-size-10);
+  font-weight:var(--hb-font-weight-bold);
+}
+body.notes-on .pin{display:inline-block}
+.pin__tip{
+  display:none;position:absolute;z-index:60;inset-inline-start:var(--hb-space-24);top:calc(var(--hb-space-6) * -1);
+  width:280px;background:var(--hb-color-surface-dark);color:var(--hb-color-on-surface-dark);
+  padding:var(--hb-space-12);border-radius:var(--hb-radius-8);text-align:start;
+  font-size:var(--hb-font-size-12);line-height:var(--hb-font-line-height-latin-12);
+  font-weight:var(--hb-font-weight-regular);box-shadow:var(--hb-elevation-level-2);
+}
+.pin:hover .pin__tip,.pin:focus-visible .pin__tip{display:block}
+.pin__tip b{display:block;margin-bottom:var(--hb-space-2);color:var(--hb-color-secondary-300)}
+.hb-footer .pin{box-shadow:0 0 0 var(--proto-hairline) var(--hb-color-surface-dark-container)}
+
+/* ---------- Header (organism) ---------- */
+.hb-header:not([data-size="compact"]) .proto-header-menu{display:none}
+.hb-header{position:sticky;top:calc(var(--proto-bar-h) + var(--proto-hairline));z-index:70}
+.hb-header__search:has(.hb-search[data-style="compressed"]){flex:0 0 auto}
+
+/* ---------- Page composition: Header — body — Footer (proposal) ---------- */
+.hb-footer__regions,.hb-footer__rule,.hb-footer__bar{width:100%;max-width:var(--proto-page-max);margin-inline:auto}
+.proto-footer-logo{--logo-h:var(--proto-footer-logo)}
+a.hb-footer__row{color:inherit;text-decoration:none}
+a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
+.hb-scroll-top{position:fixed;inset-inline-end:var(--hb-space-20);bottom:var(--hb-space-20);z-index:80}
+
+/* ---------- Snackbar host ---------- */
+#toasts{
+  position:fixed;inset-inline-start:var(--hb-space-20);bottom:var(--hb-space-20);z-index:90;
+  display:flex;flex-direction:column;gap:var(--hb-space-8);align-items:flex-start;pointer-events:none;
+  max-width:min(420px,92vw);
+}
+#toasts .hb-snackbar{pointer-events:none}
+#toasts .hb-snackbar .hb-btn{pointer-events:auto}
+
+/* ---------- Breakpoints: compact < 744, medium 744–1279, expanded ≥ 1280 ---------- */
+@media (max-width:1279px){
+  /* Version B: three fact columns only survive the expanded width; below it the values
+     start breaking mid-word, so the grid drops to two and the map tile goes full width. */
+  .prev__facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .rail{position:static}
+  .commit-bar{
+    display:flex;align-items:center;gap:var(--hb-space-12);
+    position:fixed;inset-inline:0;bottom:0;z-index:70;
+    padding:var(--hb-space-12) var(--hb-space-16);
+    background:var(--hb-color-surface);
+    border-top:var(--proto-hairline) solid var(--hb-color-outline-variant);
+    box-shadow:var(--hb-elevation-level-2);
+  }
+  .commit-bar .hb-btn{margin-inline-start:auto}
+  .site{padding-bottom:var(--hb-space-104)}
+  #toasts{bottom:var(--hb-space-80)}
+  .hb-scroll-top{bottom:var(--hb-space-80)}
+  .facts{grid-template-columns:1fr}
+}
+.commit-bar{display:none}
+@media (max-width:1279px){
+  .two{grid-template-columns:minmax(0,1fr)}
+  .vs{grid-template-columns:minmax(0,1fr)}
+  .track{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .commit-bar{display:flex;align-items:center;gap:var(--hb-space-12);
+    position:fixed;inset-inline:0;bottom:0;z-index:70;
+    padding:var(--hb-space-12) var(--hb-space-16);background:var(--hb-color-surface);
+    border-top:var(--proto-hairline) solid var(--hb-color-outline-variant);box-shadow:var(--hb-elevation-level-2)}
+  .commit-bar .hb-btn{margin-inline-start:auto}
+  #screen-c{padding-bottom:var(--hb-space-72)}
+}
+@media (max-width:743px){
+  .track{grid-template-columns:minmax(0,1fr)}
+  .amount{flex-wrap:wrap}
+  .copyrow{flex-wrap:wrap}
+  .copyrow dt{flex:1 1 100%}
+  .pay{padding-inline:0}
+  /* the card head stops competing for one row: title and meta keep the row with the icon,
+     the status pill and Change wrap under them, both still full-size touch targets */
+  .card__row{flex-wrap:wrap}
+  .card__main{flex:1 1 60%}
+  .card__prev{padding-inline:var(--hb-space-12)}
+  .prev{flex-direction:column;padding:var(--hb-space-12)}
+  .prev__facts{grid-template-columns:1fr 1fr}
+  .prev__map{width:100%;flex:0 0 auto}
+  .doctile{flex:1 1 100%}
+  .pcred__facts,.pstats{grid-template-columns:1fr}
+  .pcred__pill{margin-inline-start:0}
+  .prcp__row{flex-wrap:wrap}
+  .prow{flex-direction:column;align-items:flex-start;gap:var(--hb-space-2)}
+  .prow dd{text-align:start}
+  .prow__file{justify-content:flex-start}
+  .pused{flex-direction:column}
+  .pused__map{width:100%;height:var(--hb-space-72);flex:0 0 auto}
+  .docsheet{flex:1 1 100%}
+  /* the switcher wraps rather than scrolling, so no segment is ever half-visible */
+  .stylebar .hb-segmented{width:100%;overflow-x:visible;flex-wrap:wrap}
+  .site{padding-inline:var(--hb-space-12)}
+  .grid2,.addr,.kv{grid-template-columns:1fr}
+  .progress{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .doc-page h2{margin-top:var(--hb-space-24)}
+  .hb-table-scroll{overflow-x:auto;contain:paint}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+@media print{.proto-bar,#toasts,.pin,.commit-bar,.hb-scroll-top{display:none !important}}
+</style>
