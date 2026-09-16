@@ -47,6 +47,7 @@
   function amountBlock(o){
     o = o || {};
     return '<div class="amount"' + (o.tone ? ' data-tone="' + o.tone + '"' : '') + '>' +
+      (o.qr ? qrMini() : '') +
       '<div class="amount__lines">' +
         '<span class="hb-label-md">' + (o.label || "Amount to transfer") + '</span>' +
         /* the system ships display-lg and the headline roles; there is no display-sm, and
@@ -57,6 +58,16 @@
       iconBtn(I.copy, "Copy the amount", { style: "outlined", size: "md",
         attrs: ' data-act="copy" data-value="' + state.order.total.toFixed(3) + '" data-label="amount"' }) +
     '</div>';
+  }
+
+  /* Version A shows the QR rather than hiding it: a small tile beside the amount, the same
+     size a phone reads from a hand's distance, with the full-size code one click away in the
+     Drawer. It costs a corner of one block instead of half the page. */
+  function qrMini(){
+    return '<button type="button" class="qrmini" data-act="open-qr" aria-label="Enlarge the payment QR code">' +
+      '<span class="qrmini__code" aria-hidden="true"><span class="hb-label-sm">QR</span></span>' +
+      '<span class="qrmini__cap hb-label-sm">Scan to pay</span>' +
+    '</button>';
   }
 
   /* The receipt upload. One zone, four states: ready, refused, uploading, uploaded. */

@@ -20,12 +20,13 @@ which is what the voice note described as "the flow is not clear, and I cannot d
 - **The receipt upload is on the page**, not one destination away. It accepts a drop or a click.
 - **The order status says where the payment stands** — Awaiting your transfer · Waiting for your
   receipt · Payment under review — in the system's own status vocabulary.
-- **The QR is a choice, not a column.** A and B hold it behind one line; C gives it a tab.
+- **The QR is a choice, not a column.** A shows it small in the amount block and full size in a Drawer;
+  B holds it behind one line; C gives it a tab.
 - **Copy is on every value** a buyer has to retype into a banking app, and on all of them at once.
 
 | | How it discloses | Buyer sees first | Best for | Trade-off |
 |---|---|---|---|---|
-| **A · One thing to do** | The confirmation drops to a line; the page becomes the amount, the account and one primary button. QR and what-happens-next behind disclosures. | How much to send, and where. | The common case — pay in the bank app, come back with a screenshot. | The confirmation is quiet. |
+| **A · One thing to do** | The confirmation drops to a line; the page becomes the amount, the account and one primary button. What-happens-next behind a disclosure; the QR is a tile in the amount block that enlarges into a Drawer. | How much to send, and where. | The common case — pay in the bank app, come back with a screenshot. | The confirmation is quiet. |
 | **B · Three steps** | A four-step timeline, one step open at a time, carrying that step's work. | Where they are in the job. | First-time buyers, and phones. | Two clicks to see everything; taller than the work. |
 | **C · Pay and prove** | Two panels at once — pay left with a Tabs molecule for bank or QR, prove right with the upload live from the first second — and the tracker beneath. | Both halves of the job. | Buyers paying on a second screen. | The busiest of the three; two primary actions. |
 
@@ -45,7 +46,7 @@ node shots.js                             # screenshots of the three versions an
 
 ## Tagged (proposal)
 
-- The **QR frame is a placeholder at its real size**. The prototype cannot generate a scannable
+- The **QR frame is a placeholder at its real size**, as is A's tile. The prototype cannot generate a scannable
   code and does not fake one; the caption says where the live code comes from.
 - The **step timeline, the amount block and the tracker** are page compositions — the system has
   no stepper, no amount block and no tracker.

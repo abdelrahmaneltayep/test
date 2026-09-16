@@ -1566,6 +1566,17 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .amount__lines .hb-headline-lg{color:var(--hb-color-on-surface-heading);overflow-wrap:anywhere}
 .amount__lines .hb-body-sm{color:var(--hb-color-on-surface-variant)}
 
+/* version A · the QR as a tile beside the amount, not a column and not a disclosure */
+.qrmini{display:flex;flex-direction:column;align-items:center;gap:var(--hb-space-6);
+  flex:0 0 auto;padding:var(--hb-space-8);border-radius:var(--hb-radius-8);
+  border:var(--proto-hairline) solid var(--hb-color-outline-variant);
+  background:var(--hb-color-surface);cursor:pointer;font:inherit;color:inherit}
+.qrmini:hover{border-color:var(--hb-color-primary)}
+.qrmini__code{width:var(--hb-space-72);height:var(--hb-space-72);border-radius:var(--hb-radius-6);
+  background:var(--hb-color-surface-container);color:var(--hb-color-on-surface-variant);
+  display:grid;place-items:center}
+.qrmini__cap{color:var(--hb-color-on-surface-variant);white-space:nowrap}
+
 .copyrow[data-strong]{background:var(--hb-color-surface-container-low)}
 .qr__ph{display:grid;place-items:center;width:100%;height:100%;
   border-radius:var(--hb-radius-8);background:var(--hb-color-surface-container);
@@ -2195,6 +2206,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   function amountBlock(o){
     o = o || {};
     return '<div class="amount"' + (o.tone ? ' data-tone="' + o.tone + '"' : '') + '>' +
+      (o.qr ? qrMini() : '') +
       '<div class="amount__lines">' +
         '<span class="hb-label-md">' + (o.label || "Amount to transfer") + '</span>' +
         /* the system ships display-lg and the headline roles; there is no display-sm, and
@@ -2205,6 +2217,16 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       iconBtn(I.copy, "Copy the amount", { style: "outlined", size: "md",
         attrs: ' data-act="copy" data-value="' + state.order.total.toFixed(3) + '" data-label="amount"' }) +
     '</div>';
+  }
+
+  /* Version A shows the QR rather than hiding it: a small tile beside the amount, the same
+     size a phone reads from a hand's distance, with the full-size code one click away in the
+     Drawer. It costs a corner of one block instead of half the page. */
+  function qrMini(){
+    return '<button type="button" class="qrmini" data-act="open-qr" aria-label="Enlarge the payment QR code">' +
+      '<span class="qrmini__code" aria-hidden="true"><span class="hb-label-sm">QR</span></span>' +
+      '<span class="qrmini__cap hb-label-sm">Scan to pay</span>' +
+    '</button>';
   }
 
   /* The receipt upload. One zone, four states: ready, refused, uploading, uploaded. */
@@ -2317,14 +2339,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
             '<p class="hb-body-md muted">' + (state.transferred
               ? "One file and you are done — a screenshot of the transfer is enough."
               : "Pay from your bank app, then send the receipt so we can match it to this order.") + '</p>' +
-            (state.transferred ? "" : amountBlock()) +
+            (state.transferred ? "" : amountBlock({ qr: true })) +
             (state.transferred ? "" : bankRows()) +
-            '<div class="row">' +
-              (state.transferred ? "" : copyAllBtn()) +
-              (state.transferred ? "" : btn(state.qrOpen ? "Hide the QR code" : "Pay by QR instead",
-                { style: "ghost", size: "md", icon: I.chevronDown, cls: state.qrOpen ? "is-open" : "", attrs: ' data-act="toggle-qr"' })) +
-            '</div>' +
-            (state.qrOpen && !state.transferred ? qrBlock() : "") +
+            '<div class="row">' + (state.transferred ? "" : copyAllBtn()) + '</div>' +
             '<hr class="hb-divider" data-orientation="horizontal">' +
             '<div class="stack" id="a-receipt">' +
               '<span class="hb-title-sm">' + (state.transferred ? "Your receipt" : "Then upload your receipt") + '</span>' +
@@ -2453,7 +2470,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   function renderWhy(){
     var V = [
       { k: "A", name: "One thing to do",
-        how: "The confirmation drops to a single line. The page becomes the amount, the account to send it to, and one primary button. The QR and what-happens-next sit behind disclosures, and the upload zone is the last thing on the card.",
+        how: "The confirmation drops to a single line. The page becomes the amount, the account to send it to, and one primary button. What-happens-next sits behind a disclosure, the QR rides in the amount block as a tile the buyer can read at arm's length and enlarge in one click, and the upload zone is the last thing on the card.",
         first: "How much to send, and where.",
         best: "The common case: a buyer who pays from their bank app and comes back with a screenshot.",
         risk: "The order confirmation is quiet. A buyer who wanted reassurance that the order exists has to read the line." },
@@ -2486,7 +2503,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '<li><b>The amount is the largest thing on the page.</b> On the live page the total appears twice in body type, once in a pill and once in a card; the buyer\'s eye has nothing to land on. Here it is the largest type role the page uses, with its own copy button.</li>' +
         '<li><b>The receipt upload is on the page.</b> The live page sends the buyer to Track Your Order to upload it — a second destination for the one thing that finishes the job. Every version accepts the file where the buyer already is.</li>' +
         '<li><b>The order status says where the payment stands.</b> Awaiting your transfer, Waiting for your receipt, Payment under review — the system\'s status vocabulary, so it reads the same here as on the order itself.</li>' +
-        '<li><b>The QR is a choice, not a column.</b> It takes half the live page whether or not the buyer uses it. A and B hold it behind one line; C gives it a tab beside the bank details.</li>' +
+        '<li><b>The QR is a choice, not a column.</b> It takes half the live page whether or not the buyer uses it. A keeps it visible but small — a tile in the amount block, full size in the Drawer on click; B holds it behind one line; C gives it a tab beside the bank details.</li>' +
         '<li><b>Copy is everywhere it is needed</b> — account name, IBAN, SWIFT, amount, and all of them at once — because every one of those values has to be retyped into a banking app.</li>' +
       '</ul>' +
       '<h2 class="hb-title-lg">Visual hierarchy, shared by all three</h2>' +
@@ -2495,7 +2512,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       '<p class="hb-body-md"><b>A</b> for the storefront: it is the shortest path for the buyer who already knows how to make a transfer, and it still answers the order question in its first line. <b>B</b> is the one to show a buyer paying Highbase for the first time, and reads best on a phone. <b>C</b> is the strongest for a buyer with two screens, and its Tabs treatment of bank-or-QR is worth keeping whichever version ships.</p>' +
       '<h2 class="hb-title-lg">Tagged (proposal)</h2>' +
       '<ul class="doc-list">' +
-        '<li>The QR frame is a placeholder at the real size — the prototype cannot generate a scannable code and does not fake one.</li>' +
+        '<li>The QR frame is a placeholder at the real size, and so is the tile in version A’s amount block — the prototype cannot generate a scannable code and does not fake one.</li>' +
         '<li>The step timeline, the amount block and the tracker are page compositions; the system has no stepper, no amount block and no tracker.</li>' +
         '<li>The two transitions (the disclosure chevron and the upload progress bar) are placeholders — motion is undefined in the system.</li>' +
       '</ul>';
@@ -2604,6 +2621,12 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       else { no(); }
     },
     "toggle-qr": function () { state.qrOpen = !state.qrOpen; renderPay(); },
+    /* the small tile is the QR's place on the page; this is the same code at scanning size */
+    "open-qr": function () {
+      drawer("Pay by QR", '<div class="stack">' + qrBlock() +
+        '<p class="hb-body-sm muted">The code carries the account, the amount and the reference, so the transfer opens already filled in.</p>' +
+        '</div>', btn("Close", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }), "sm");
+    },
     "pay-tab": function (el) { state.payTab = el.dataset.tab; renderPay(); },
     "open-step": function (el) {
       var id = Number(el.dataset.step);

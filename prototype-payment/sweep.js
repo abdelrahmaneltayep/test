@@ -13,9 +13,9 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
  for(const dir of ['ltr','rtl']){const p=await b.newPage({viewport:{width:1440,height:1000}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto('file://'+__dirname+'/sweep.html');await p.waitForTimeout(500);if(dir==='rtl'){await p.click('#t-dir');await p.waitForTimeout(300)}
   for(const sc of ['a','b','c','why']){await p.evaluate(s=>location.hash=s,sc);await p.waitForTimeout(300);
-   if(sc==='a'){await p.click('#screen-a [data-act="toggle-qr"]');await p.waitForTimeout(250);
+   if(sc==='a'){await p.click('#screen-a [data-act="open-qr"]');await p.waitForTimeout(300);
      const q=await p.evaluate(CONTRAST);q.length?(bad(`contrast ${dir}/a+qr`),q.slice(0,4).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))):ok(`contrast ${dir}/a+qr`);
-     await p.click('#screen-a [data-act="toggle-qr"]');await p.waitForTimeout(200)}
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250)}
    if(sc==='c'){await p.click('#screen-c [data-act="pay-tab"][data-tab="qr"]');await p.waitForTimeout(250);
      const q=await p.evaluate(CONTRAST);q.length?(bad(`contrast ${dir}/c+qr`),q.slice(0,4).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))):ok(`contrast ${dir}/c+qr`);
      await p.click('#screen-c [data-act="pay-tab"][data-tab="bank"]');await p.waitForTimeout(200)}
@@ -43,14 +43,19 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
        const labels=await p.$$eval('#screen-'+v+' [data-act="copy"]',e=>e.map(x=>x.dataset.label));
        if(!(labels.indexOf('iban')>=0&&labels.indexOf('amount')>=0&&labels.indexOf('bank details')>=0))okk=false}
      return okk}],
-  ['A: the QR is behind one line, not half the page',async()=>{
+  ['A: the QR is on the page as a tile, and enlarges into the Drawer',async()=>{
      await p.evaluate(()=>location.hash='a');await p.waitForTimeout(300);
-     const before=(await p.$$('#screen-a .qr')).length;
-     await p.click('#screen-a [data-act="toggle-qr"]');await p.waitForTimeout(250);
-     const after=(await p.$$('#screen-a .qr')).length;
-     const t=await txt('#screen-a .qr');
-     await p.click('#screen-a [data-act="toggle-qr"]');await p.waitForTimeout(200);
-     return before===0&&after===1&&t.includes('placeholder')}],
+     /* present, but a corner of the amount block rather than a column */
+     const tile=await p.$('#screen-a .amount .qrmini');
+     const box=tile?await tile.boundingBox():null;
+     const columns=(await p.$$('#screen-a .qr')).length;
+     const cap=await txt('#screen-a .qrmini');
+     await p.click('#screen-a [data-act="open-qr"]');await p.waitForTimeout(300);
+     const open=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
+     const t=await txt('dialog.hb-drawer-layer');
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);
+     const closed=!(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open));
+     return !!tile&&columns===0&&box.width<160&&cap.includes('Scan to pay')&&open&&closed&&t.includes('Pay by QR')&&t.includes('placeholder')}],
   ['A: marking the transfer moves the page on to the receipt',async()=>{
      await p.click('#screen-a [data-act="mark-transferred"]');await p.waitForTimeout(300);
      const t=await txt('#screen-a');

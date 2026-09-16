@@ -24,14 +24,9 @@
             '<p class="hb-body-md muted">' + (state.transferred
               ? "One file and you are done — a screenshot of the transfer is enough."
               : "Pay from your bank app, then send the receipt so we can match it to this order.") + '</p>' +
-            (state.transferred ? "" : amountBlock()) +
+            (state.transferred ? "" : amountBlock({ qr: true })) +
             (state.transferred ? "" : bankRows()) +
-            '<div class="row">' +
-              (state.transferred ? "" : copyAllBtn()) +
-              (state.transferred ? "" : btn(state.qrOpen ? "Hide the QR code" : "Pay by QR instead",
-                { style: "ghost", size: "md", icon: I.chevronDown, cls: state.qrOpen ? "is-open" : "", attrs: ' data-act="toggle-qr"' })) +
-            '</div>' +
-            (state.qrOpen && !state.transferred ? qrBlock() : "") +
+            '<div class="row">' + (state.transferred ? "" : copyAllBtn()) + '</div>' +
             '<hr class="hb-divider" data-orientation="horizontal">' +
             '<div class="stack" id="a-receipt">' +
               '<span class="hb-title-sm">' + (state.transferred ? "Your receipt" : "Then upload your receipt") + '</span>' +
