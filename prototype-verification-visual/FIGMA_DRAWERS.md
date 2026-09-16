@@ -1,9 +1,17 @@
-# Checkout Verification · the three Drawers, ready to push
+# Checkout Verification · the three Drawers — PUSHED 16 Sep 2026
 
 The Activity screen is already in the Cart Proposal file
 (`fZB13ULQEXJmAOqK6reGsT`, Prototype page, node `45:635`). These three panels are what
-**Change** and **Manage** open on it. This file is the build order for them, written while the
-Figma connection was down so the push is one step when it returns.
+**Change** and **Manage** open on it. They are now in the file:
+
+| Frame | Node |
+|---|---|
+| `Drawer · Branch Details` | `59:902` |
+| `Drawer · Delivery Address` | `61:1237` |
+| `Drawer · Business Documents` | `63:1568` |
+| `Notes · Checkout Verification Drawers` | `65:1921` |
+
+What follows is the build order they were made from, kept as the record.
 
 ## Placement
 
@@ -76,3 +84,18 @@ none has been instanced from this file yet, so their keys are not cached here.
   is how the organism mirrors in RTL without a left/right value.
 - The two-column grids inside a section's form stack in the panel, as they do in the prototype.
 - Anything the library cannot express gets flagged in `FIGMA_PUSH_STATE.md`, not invented.
+
+
+## What the push found
+
+The Drawer organism could not be instanced with this content. Its Body is the Match My Price
+sample — an Alert, a Summary, two Text Fields and a File Upload — with no slot and no
+`INSTANCE_SWAP` property, so a consuming file cannot put its own fields inside it. Each panel here
+is composed from the Drawer's own tokens (`radius/16`, `color/surface`, `spacing/20` body padding,
+`spacing/16` gap, a `spacing/40` close at `radius/8` on `color/error`, panel widths 520 and 680)
+and named for the variant it stands for.
+
+Three smaller gaps: File Upload's uploaded state ships two sample files and drives only the drop
+zone from its properties; Select never shows its Value node, so a chosen value goes in the
+Placeholder; Dialog Actions has no one-button variant. All four are logged in the design system's
+`FIGMA_PUSH_STATE.md` and repeated on the Notes panel beside the frames.
