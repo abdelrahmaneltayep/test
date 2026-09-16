@@ -1983,6 +1983,13 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .pactivity .hb-li__title{flex:0 1 auto}
 .pactivity .hb-li__time{margin-inline-start:auto}
 
+/* the two states a document takes, drawn together so both can be reviewed at once.
+   The caption is review chrome: in the product a document is in one state or the other. */
+.pcase{display:flex;flex-direction:column;gap:var(--hb-space-8);margin-block-start:var(--hb-space-16)}
+.pcase__head{display:flex;align-items:baseline;gap:var(--hb-space-8);flex-wrap:wrap}
+.pcase__head .hb-label-md{color:var(--hb-color-on-surface-heading)}
+.pcase__head .hb-body-sm{flex:1 1 220px;min-width:0}
+
 /* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
 .pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
 .pledger .hb-li__title{font-weight:var(--hb-font-weight-regular);color:var(--hb-color-on-surface-variant)}
@@ -3210,24 +3217,33 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     return list("pledger", rows);
   }
 
-  /* ---------- 13 · Activity — what was saved and when. No status pills: the row says it ---------- */
+  /* ---------- 13 · Activity — one row per value, and the two states a document takes ---------- */
   /* The chosen preview for B. A pill would repeat what the line already states, so every row
-     carries the fact in words. A document still to come is not filled in: the row keeps the
-     page's own surface and is marked by its outlined icon and its Required tag. */
+     carries the fact in words. Each value gets its own row: a buyer checking one thing — the
+     phone the driver will call, the postcode — finds it without reading a sentence. */
+  function activityRow(icon, label, value, when){
+    return li({ lead: icon, title: label, time: when || "", text: value });
+  }
+  var SAVED_AT = "12 Jan 2026";
   function activityBranch(){
     var b = state.branchDetails;
+    /* the drawer's own field labels, so the row a buyer reads and the field they edit agree */
     return list("pactivity", [
-      li({ lead: I.building, title: "Branch details saved", time: "12 Jan 2026",
-        text: esc(b.name) + ' · +973 ' + esc(b.phone) + ' · ' + esc(b.email) })
+      activityRow(I.building, "Branch name", esc(b.name), SAVED_AT),
+      activityRow(I.building, "Branch phone", phoneText(), SAVED_AT),
+      activityRow(I.building, "Branch email", esc(b.email), SAVED_AT)
     ]);
   }
   function activityAddress(){
     var a = state.address;
     return list("pactivity", [
-      li({ lead: I.location, title: "Delivery address saved", time: "12 Jan 2026",
-        text: addressLines().join(' · ') }),
-      li({ lead: I.location, state: a.pinned ? "" : "todo",
-        title: a.pinned ? "Map pin updated" : "Map pin has never been set",
+      activityRow(I.location, "Country", esc(a.country), SAVED_AT),
+      activityRow(I.location, "State / Province", esc(a.state), SAVED_AT),
+      activityRow(I.location, "City", esc(a.city), SAVED_AT),
+      activityRow(I.location, "Street address", esc(a.street), SAVED_AT),
+      activityRow(I.location, "Building", esc(a.building), SAVED_AT),
+      activityRow(I.location, "Postal code", '<span class="num">' + esc(a.zip) + '</span>', SAVED_AT),
+      li({ lead: I.location, state: a.pinned ? "" : "todo", title: "Map pin",
         time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()) })
     ]);
   }
@@ -3236,24 +3252,41 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
        never a status pill, so it does not reintroduce the state this preview drops. */
     return chip(d.required ? "Required" : "Optional", { style: "neutral", size: "sm" });
   }
+
+  /* The three documents are shown in both of the states a row can take, side by side, because
+     the two are what this section has to get right. In the product a document is in one state
+     or the other; here they are drawn together so both can be reviewed at once. */
+  var DOC_CASE_IDS = ["cr", "id", "vat"];
+  /* VAT has no file on this account, so the after case borrows the design system's own File
+     Upload sample rather than inventing a document. (proposal — sample content) */
+  var DOC_SAMPLE = { vat: { name: "vat-certificate.pdf", size: "1.1 MB", at: "12 Jan 2026" } };
+  function docBefore(k){
+    var d = state.docs[k];
+    return li({ lead: I.upload, state: "todo", title: esc(d.label), tag: reqTag(d), text: "Not uploaded" });
+  }
+  function docAfter(k){
+    var d = state.docs[k], f = d.file || DOC_SAMPLE[k];
+    if (!f) { return docBefore(k); }
+    var replaced = d.file && d.prev;
+    return li({ lead: replaced ? I.refresh : I.file, tag: reqTag(d),
+      title: esc(d.label) + (replaced ? " replaced" : " uploaded"),
+      time: esc(f.at || "just now"), text: esc(f.name) + ' · ' + esc(f.size) });
+  }
+  function docCase(title, note, rows){
+    return '<div class="pcase">' +
+      '<div class="pcase__head"><span class="hb-label-md">' + title + '</span>' +
+        '<span class="hb-body-sm muted">' + note + '</span></div>' +
+      list("pactivity", rows) + '</div>';
+  }
   function activityDocs(){
-    var rows = [];
-    docIds().forEach(function (k) {
-      var d = state.docs[k], f = d.file;
-      if (f && d.prev) {
-        rows.push(li({ lead: I.refresh, title: esc(d.label) + ' replaced', tag: reqTag(d), time: esc(f.at || 'just now'),
-          text: esc(f.name) + ' · ' + esc(f.size) }));
-      } else if (f) {
-        rows.push(li({ lead: I.file, title: esc(d.label) + ' uploaded', tag: reqTag(d), time: esc(f.at || 'just now'),
-          text: esc(f.name) + ' · ' + esc(f.size) }));
-      } else {
-        rows.push(li({ lead: I.upload, state: "todo", title: esc(d.label) + ' is missing', tag: reqTag(d),
-          text: d.required ? 'Upload it before placing this order.' : 'Add it whenever you like.' }));
-      }
-    });
-    rows.push(li({ lead: I.invoice, title: "Registration on file", time: "12 Jan 2026",
-      text: 'CR <span class="num">' + esc(state.crNumber) + '</span> · ' + vatLabel() + ': ' + vatValue() }));
-    return list("pactivity", rows);
+    return list("pactivity", [
+      activityRow(I.invoice, "CR Number", '<span class="num">' + esc(state.crNumber) + '</span>', SAVED_AT),
+      activityRow(I.invoice, vatLabel(), vatValue(), SAVED_AT)
+    ]) +
+    docCase("Before upload", "The row is not filled in: the page\u2019s own surface, an outlined icon, and what is still needed.",
+      DOC_CASE_IDS.map(docBefore)) +
+    docCase("After upload", "The file, its size and the day it arrived. A file that replaced an earlier one says so.",
+      DOC_CASE_IDS.map(docAfter));
   }
 
   /* ---------- 14 · Actions — every row carries what can be done to it ---------- */
@@ -3393,9 +3426,9 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       best: "Checking many values quickly — the alignment makes a missing or odd one obvious at a glance.",
       risk: "The densest of the fifteen; with no icons and no second line it is the least scannable on a phone." },
     { id: "activity", name: "Activity", branch: activityBranch, address: activityAddress, docs: activityDocs, noStatus: true,
-      how: "What was saved and when, the date in the time slot, and a Required or Optional tag beside each document. No status pills, and nothing filled in: a document still to come keeps the page's own surface and is marked by its outlined icon.",
+      how: "One row per value, with the date in the time slot and a Required or Optional tag beside each document. No status pills. The documents are drawn in both states — before upload, where the row keeps the page's own surface and an outlined icon, and after, where it carries the file, its size and the day it arrived.",
       best: "Returning buyers asking the real question — has anything changed since my last order? It is the chosen preview for B.",
-      risk: "It reports history, not the current record; a buyer looking for one particular value has to read a line to find it." },
+      risk: "One row per value makes the address seven rows, and showing both document states doubles that section — this is the tallest of the fifteen." },
     { id: "actions",  name: "Actions",  branch: actionsBranch,  address: actionsAddress,  docs: actionsDocs,
       how: "Every row uses the component's actions slot: Copy on an identifier, Preview on a document, Upload or Change opening the Drawer at that section.",
       best: "Doing one small thing without opening anything — copying the CR number, replacing one expired licence.",

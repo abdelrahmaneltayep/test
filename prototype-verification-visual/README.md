@@ -40,7 +40,7 @@ sheet, a cart summary); and five are the **List Item** molecule used five ways:
 | **10 Receipt** | A summary sheet: thumbnail rows, value at the end, a rule, then the line that matters set large. | The last screen before paying — same voice as the order summary beside it. | Emphasis by size means one line wins; another value is then the smallest thing on the card. |
 | **11 List** | The List Item molecule as built: leading icon, label, value beneath, status pill in the trailing slot. | The safest of the fifteen — a component buyers already meet in notifications and menus. | Every row looks equally important. |
 | **12 Ledger** | The same component with no leading slot and the value in the trailing slot: one line per value, values aligned down the end edge. | Checking many values quickly; the alignment exposes an odd one. | The densest, and the least scannable on a phone. |
-| **13 Activity · chosen** | What was saved and when, the date in the time slot, and a replaced document showing both files — the version it replaced beside the one now on file. No status pills: the row states it in words and the tint carries the exception. | Returning buyers asking whether anything changed since the last order. | Reports history, not the record; finding one value means reading a line. |
+| **13 Activity · chosen** | One row per value, with the date in the time slot. No status pills: the row states it in words. The three documents are drawn in both of the states a row takes — before upload and after — one under the other. | Returning buyers asking whether anything changed since the last order, and anyone checking one particular value. | The tallest of the fifteen: seven rows for the address, and the documents section shown twice. |
 | **14 Actions** | Every row uses the actions slot: Copy an identifier, Preview a document, Upload or Change opening the Drawer at that section. | Doing one small thing without opening anything. | The busiest of the fifteen; three actions a row is a lot of blue. |
 | **15 Grouped** | One list per section split by subheaders with a count — Where and Exactly where, Registration and Files. | Sections that keep growing: a fourth document, a second contact. | More structure than today's data needs. |
 
@@ -52,10 +52,21 @@ B opens on **Activity**. Three things follow from choosing it:
   (*saved*, *replaced*, *is missing*), the readiness banner answers whether the order can go, and
   a pill beside either would state it a second time. The exception still shows: an outstanding
   row is tinted and says what to do.
+- **One row per value.** Branch Details is three rows — branch name, branch phone, branch email —
+  and Delivery Address is seven, ending with the map pin. A buyer checking one thing, the number
+  the driver will call or the postcode, finds it without reading a sentence. The labels are the
+  drawer's own field labels, so the row you read and the field you edit agree. The cost is height,
+  and the same save date repeating down the time column; collapsing it to one date per section is
+  a one-line change if that reads better.
+- **The documents are shown in both states.** Commercial License, Personal ID and VAT Certificate
+  appear twice, in two captioned cases: *Before upload*, where the row is not filled in, and
+  *After upload*, where it carries the file, its size and the day it arrived. In the product a
+  document is in one state or the other; both are drawn here so the pair can be reviewed at once.
+  The after case uses the real files on the account; VAT has none, so it borrows the design
+  system's own File Upload sample — `vat-certificate.pdf · 1.1 MB` — rather than inventing a
+  document **(proposal — sample content)**.
 - **A replaced file reads as replaced.** `docs.cr` is seeded with the version it replaced and any
-  upload over an existing file records one, so the row says *replaced* rather than *uploaded*. The
-  side-by-side Before and After pair was removed after review: one line per document, like every
-  other row.
+  upload over an existing file records one, so the row says *replaced* rather than *uploaded*.
 - **A document still to come is not filled in.** The row keeps the page's own surface; the
   exception is carried by the leading icon's amber outline, the Required tag and the row's own
   words. Nothing on the card is a filled state.

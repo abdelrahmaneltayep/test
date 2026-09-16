@@ -83,31 +83,31 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const pressed=await p.$$eval('#screen-b [data-act="preview-style"]',e=>e.filter(x=>x.getAttribute('aria-pressed')==='true').map(x=>x.dataset.preview));
      const pills=(await p.$$('#screen-b .hb-status')).length;
      const t=await txt('#screen-b');
-     return pressed.join()==='activity'&&pills===0&&t.includes('Branch details saved')&&t.includes('Map pin updated')}],
+     return pressed.join()==='activity'&&pills===0&&t.includes('Branch name')&&t.includes('Branch phone')&&t.includes('Branch email')&&t.includes('Postal code')&&t.includes('Map pin')}],
   ['B: every document is tagged Required or Optional, and the tag is not a status pill',async()=>{
      const tags=await p.$$eval('#screen-b #card-docs .hb-chip',e=>e.map(x=>x.textContent.trim()));
      const pills=(await p.$$('#screen-b #card-docs .hb-status')).length;
-     return tags.length===2&&tags.every(t=>t==='Required')&&pills===0}],
-  ['B: a document still to come is not filled in',async()=>{
-     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(350);
-     await p.click('dialog.hb-drawer-layer [data-act="remove-doc"][data-doc="id"]');await p.waitForTimeout(250);
-     await p.click('[data-act="remove-doc-go"]');await p.waitForTimeout(350);
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(400);
-     const row=await p.$('#screen-b #card-docs .hb-li[data-state="todo"]');
+     /* three documents in two cases: CR and ID required, VAT optional, in both */
+     return tags.length===6&&tags.filter(t=>t==='Required').length===4&&tags.filter(t=>t==='Optional').length===2&&pills===0}],
+  ['B: the before-upload case is not filled in, and says what is missing',async()=>{
+     const cases=await p.$$eval('#screen-b #card-docs .pcase .hb-label-md',e=>e.map(x=>x.textContent.trim()));
+     /* :first-of-type would match the first DIV sibling, which is the list above the cases */
+     const beforeRows=await p.$$eval('#screen-b #card-docs .pcase',e=>Array.from(e[0].querySelectorAll('.hb-li')).map(x=>x.dataset.state||''));
+     const row=await p.$('#screen-b #card-docs .pcase .hb-li[data-state="todo"]');
      const bg=await p.evaluate(el=>getComputedStyle(el).backgroundColor,row);
      const plain=await p.evaluate(()=>getComputedStyle(document.querySelector('#screen-b #card-docs .hb-li:not([data-state])')).backgroundColor);
-     const pairs=(await p.$$('#screen-b .bafile')).length;
      const t=await txt('#screen-b #card-docs');
-     /* put it back so the tests after this start from a complete account */
-     fs.writeFileSync(__dirname+'/tmp-id.png',Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64'));
-     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(350);
-     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('dialog.hb-drawer-layer [data-drop="id"]')]);
-     await fc.setFiles(__dirname+'/tmp-id.png');await p.waitForTimeout(1400);
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(350);
-     return !!row&&bg===plain&&pairs===0&&t.includes('Personal ID Document is missing')&&t.includes('Upload it before placing this order')}],
-  ['B: nothing shows a before and after pair any more',async()=>{
+     return cases.length===2&&cases[0]==='Before upload'&&beforeRows.length===3&&beforeRows.every(v=>v==='todo')
+       &&bg===plain&&t.includes('Not uploaded')}],
+  ['B: the three documents are shown in both states, and the after case carries the file',async()=>{
      const t=await txt('#screen-b #card-docs');
-     return (await p.$$('#screen-b .bafile, #screen-b .ba')).length===0&&t.includes('Commercial License (CR) replaced')&&!t.includes('Before')}],
+     const afterRows=await p.$$eval('#screen-b #card-docs .pcase',e=>Array.from(e[1].querySelectorAll('.hb-li')).map(x=>x.textContent.replace(/\s+/g,' ').trim()));
+     const legacy=(await p.$$('#screen-b .bafile, #screen-b .ba')).length;
+     return legacy===0&&afterRows.length===3
+       &&t.includes('After upload')
+       &&afterRows[0].includes('Commercial License (CR) replaced')&&afterRows[0].includes('CR-5056050560-1.pdf')
+       &&afterRows[1].includes('Personal ID Document uploaded')&&afterRows[1].includes('CPR-front.jpg')
+       &&afterRows[2].includes('VAT Certificate uploaded')&&afterRows[2].includes('vat-certificate.pdf')}],
   ['B: the order breakdown is open, not folded away',async()=>{
      const open=await p.evaluate(()=>document.querySelector('#screen-b .rail details.why').open);
      const t=await txt('#screen-b .rail');

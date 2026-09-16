@@ -538,6 +538,13 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .pactivity .hb-li__title{flex:0 1 auto}
 .pactivity .hb-li__time{margin-inline-start:auto}
 
+/* the two states a document takes, drawn together so both can be reviewed at once.
+   The caption is review chrome: in the product a document is in one state or the other. */
+.pcase{display:flex;flex-direction:column;gap:var(--hb-space-8);margin-block-start:var(--hb-space-16)}
+.pcase__head{display:flex;align-items:baseline;gap:var(--hb-space-8);flex-wrap:wrap}
+.pcase__head .hb-label-md{color:var(--hb-color-on-surface-heading)}
+.pcase__head .hb-body-sm{flex:1 1 220px;min-width:0}
+
 /* 12 · Ledger — no leading slot, one line, the value aligned down the end edge */
 .pledger .hb-li{align-items:center;padding-block:var(--hb-space-12)}
 .pledger .hb-li__title{font-weight:var(--hb-font-weight-regular);color:var(--hb-color-on-surface-variant)}
