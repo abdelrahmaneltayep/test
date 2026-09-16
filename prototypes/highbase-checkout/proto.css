@@ -204,33 +204,19 @@ button{font:inherit}
 .doc{border:1px solid var(--hb-color-neutral-100);border-radius:var(--hb-radius-12);padding:var(--hb-space-16);display:flex;flex-direction:column;gap:var(--hb-space-12)}
 .doc__label{font-weight:var(--hb-font-weight-semibold);color:var(--hb-color-on-surface-heading)}
 .doc__req{color:var(--hb-color-error-base);margin-inline-start:var(--hb-space-2)}
-.drop{
-  border:1.5px dashed var(--hb-color-neutral-300);border-radius:var(--hb-radius-8);
-  background:var(--hb-color-neutral-50);
-  padding:var(--hb-space-20);display:flex;flex-direction:column;align-items:center;gap:var(--hb-space-8);
-  text-align:center;cursor:pointer;
+/* The receipt uploader uses the design system's File Upload molecule directly.
+   Only three prototype-level additions: a drag-over state and an invalid state,
+   which the component does not define, and an image thumbnail in the file-icon
+   slot — the A3 fix, so an uploaded receipt never sets page height. */
+.hb-upload[data-over="true"]{border-color:var(--hb-color-primary-600);background:var(--hb-color-primary-50)}
+.hb-upload[data-state="error"]{background:var(--hb-color-error-light)}
+.hb-upload[role="button"]{cursor:pointer}
+.hb-upload[role="button"]:focus-visible{outline:2px solid var(--hb-color-primary-600);outline-offset:2px}
+.hb-upload__thumb{
+  inline-size:var(--hb-space-40);block-size:var(--hb-space-40);
+  border-radius:var(--hb-radius-6);object-fit:cover;display:block;
 }
-.drop:focus-visible{outline:2px solid var(--hb-color-primary-600);outline-offset:2px}
-.drop[data-over="true"]{border-color:var(--hb-color-primary-600);background:var(--hb-color-primary-50)}
-.drop[data-invalid="true"]{border-color:var(--hb-color-error-base);background:var(--hb-color-error-light)}
-.drop__icon{font-size:var(--hb-font-size-24);color:var(--hb-color-primary-700)}
-.drop__title{font-weight:var(--hb-font-weight-semibold);color:var(--hb-color-on-surface-heading)}
-.drop__hint{font-size:var(--hb-font-size-12);color:var(--hb-color-on-surface-muted)}
-
-/* The fix for the full-bleed ID image: a fixed-ratio thumbnail, never the raw file. */
-.filecard{display:flex;gap:var(--hb-space-12);align-items:center;border:1px solid var(--hb-color-neutral-100);border-radius:var(--hb-radius-8);padding:var(--hb-space-8)}
-.filecard__thumb{
-  inline-size:56px;block-size:56px;flex:0 0 auto; /* LAYOUT */
-  border-radius:var(--hb-radius-6);overflow:hidden;background:var(--hb-color-neutral-100);
-  display:grid;place-items:center;color:var(--hb-color-primary-700);
-}
-.filecard__thumb img{inline-size:100%;block-size:100%;object-fit:cover}
-.filecard__meta{min-width:0;flex:1 1 auto}
-.filecard__name{font-weight:var(--hb-font-weight-medium);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.filecard__size{font-size:var(--hb-font-size-12);color:var(--hb-color-on-surface-muted)}
-.filecard__bar{block-size:var(--hb-space-4);border-radius:var(--hb-radius-full);background:var(--hb-color-neutral-100);overflow:hidden;margin-block-start:var(--hb-space-6)}
-.filecard__bar i{display:block;block-size:100%;background:var(--hb-color-primary-600);transition:inline-size .2s linear}
-.filecard__acts{display:flex;gap:var(--hb-space-4);flex:0 0 auto}
+.hb-upload__file-icon:has(.hb-upload__thumb){font-size:0;margin-block-start:0}
 
 /* ---------- payment ---------- */
 .pay{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--hb-space-16)} /* LAYOUT */
@@ -299,7 +285,7 @@ button{font:inherit}
   animation:snack-in .18s ease;
 }
 @keyframes snack-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.snack{animation:none}.mov__fill,.filecard__bar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.snack{animation:none}.mov__fill,.hb-upload__bar>i{transition:none}}
 .snack[data-status="success"]{border-color:var(--hb-color-success-border)}
 .snack[data-status="error"]{border-color:var(--hb-color-error-border)}
 .snack__icon{flex:0 0 auto;font-size:var(--hb-font-size-20)}

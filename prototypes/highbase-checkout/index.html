@@ -725,6 +725,61 @@
 .hb-select__option { display: flex; align-items: center; gap: var(--hb-space-8); min-height: 24px; font-size: var(--hb-font-size-14); color: var(--hb-color-on-surface); cursor: pointer; }
 .hb-select__chips { display: flex; flex-wrap: wrap; gap: var(--hb-space-4); flex: 1 1 auto; min-width: 0; }
 
+/* ==== FileUpload.css ==== */
+/* Highbase · File Upload (molecule) — Structure type 4 (slot: the file list is provided).
+   The icon, title and hint are PERSISTENT: every state carries them, so the control
+   keeps its own label while files are in flight. There is one container treatment —
+   the tinted, centred "ready" panel is gone; the empty state is the same panel with
+   no rows, and keeps a dashed edge because it is the only state that is a drop target.
+   data-state = empty | uploading | uploaded | error | disabled                       */
+
+.hb-upload { box-sizing: border-box; display: flex; flex-direction: column; align-items: stretch; gap: var(--hb-component-upload-gap); padding: var(--hb-component-upload-padding-y) var(--hb-component-upload-padding-x); border-radius: var(--hb-component-upload-radius); background: var(--hb-color-surface); border: 1px solid var(--hb-color-outline-variant); text-align: start; font-family: var(--hb-font-family-latin); }
+[lang="ar"] .hb-upload, [dir="rtl"] .hb-upload { font-family: var(--hb-font-family-arabic); }
+
+.hb-upload[data-state="empty"] { border-style: dashed; }
+.hb-upload[data-state="error"] { border-color: var(--hb-color-error); border-style: solid; }
+.hb-upload[data-state="disabled"] { background: var(--hb-color-surface-container-low); border-color: var(--hb-color-surface-dim); color: var(--hb-color-on-surface-disabled); }
+
+/* ---- persistent header ---- */
+.hb-upload__icon { display: inline-flex; color: var(--hb-color-primary); font-size: var(--hb-font-size-32); }
+.hb-upload__icon svg { width: 1em; height: 1em; }
+.hb-upload__title { font-size: var(--hb-font-size-18); line-height: var(--hb-font-line-height-latin-18); font-weight: var(--hb-font-weight-bold); color: var(--hb-color-primary); }
+.hb-upload__hint { font-size: var(--hb-font-size-14); line-height: var(--hb-font-line-height-latin-14); color: var(--hb-color-primary-pressed); }
+[lang="ar"] .hb-upload__title, [dir="rtl"] .hb-upload__title { line-height: var(--hb-font-line-height-arabic-18); }
+[lang="ar"] .hb-upload__hint, [dir="rtl"] .hb-upload__hint { line-height: var(--hb-font-line-height-arabic-14); }
+
+.hb-upload[data-state="error"] .hb-upload__icon, .hb-upload[data-state="error"] .hb-upload__title { color: var(--hb-color-error); }
+.hb-upload[data-state="error"] .hb-upload__hint { color: var(--hb-color-on-error-container); }
+.hb-upload[data-state="disabled"] .hb-upload__icon, .hb-upload[data-state="disabled"] .hb-upload__title, .hb-upload[data-state="disabled"] .hb-upload__hint { color: var(--hb-color-on-surface-disabled); }
+
+/* ---- file rows (slot: the parent supplies them) ---- */
+.hb-upload__files { display: flex; flex-direction: column; gap: var(--hb-space-12); width: 100%; margin-block-start: var(--hb-space-8); }
+.hb-upload__file { display: flex; align-items: flex-start; gap: var(--hb-space-12); }
+.hb-upload__file-icon { flex: 0 0 auto; display: inline-flex; margin-block-start: var(--hb-space-2); font-size: var(--hb-font-size-20); color: var(--hb-color-on-surface-variant); }
+.hb-upload__file-icon svg { width: 1em; height: 1em; }
+.hb-upload__file-meta { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: var(--hb-space-4); }
+/* name → progress → size, so the bar sits against the name it reports on */
+.hb-upload__name { font-size: var(--hb-font-size-16); line-height: var(--hb-font-line-height-latin-16); color: var(--hb-color-on-surface); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hb-upload__bar { block-size: var(--hb-space-4); border-radius: var(--hb-radius-full); background: var(--hb-color-surface-dim); overflow: hidden; }
+.hb-upload__bar > i { display: block; block-size: 100%; border-radius: inherit; background: var(--hb-color-primary); transition: inline-size .2s linear; }
+@media (prefers-reduced-motion: reduce) { .hb-upload__bar > i { transition: none; } }
+.hb-upload__size { font-size: var(--hb-font-size-14); line-height: var(--hb-font-line-height-latin-14); color: var(--hb-color-on-surface-variant); font-variant-numeric: tabular-nums; }
+/* A queued file has not started; its track stays empty rather than borrowing progress. */
+.hb-upload__file[data-status="queued"] .hb-upload__bar > i { inline-size: 0; }
+
+/* Remove takes the file out of the queue — an ×, not a delete. */
+.hb-upload__rm { flex: 0 0 auto; display: grid; place-items: center; inline-size: var(--hb-space-32); block-size: var(--hb-space-32); padding: 0; border: 0; border-radius: var(--hb-radius-8); background: transparent; color: var(--hb-color-on-surface-variant); font-size: var(--hb-font-size-20); cursor: pointer; }
+.hb-upload__rm svg { width: 1em; height: 1em; }
+.hb-upload__rm:hover { background: var(--hb-color-surface-container-low); color: var(--hb-color-on-surface); }
+.hb-upload__rm:focus-visible { outline: 2px solid var(--hb-color-primary); outline-offset: 2px; }
+
+.hb-upload__more { align-self: flex-start; margin-block-start: var(--hb-space-4); }
+
+/* Live counter — files used of the allowance, and size used of the budget.
+   Replaces the static "maximum files" line. */
+.hb-upload__count { font-size: var(--hb-font-size-14); line-height: var(--hb-font-line-height-latin-14); color: var(--hb-color-neutral-700); font-variant-numeric: tabular-nums; }
+.hb-upload[data-state="disabled"] .hb-upload__count { color: var(--hb-color-on-surface-disabled); }
+
 /* ==== InlineAlert.css ==== */
 /* Highbase · Inline Alert (molecule) — Structure type 1. Requires _base/Alert.css. (file) Small message: 52 h, r12, p12, gap 8, 24 icon, 14 Medium in the status dark colour, optional close. */
 .hb-inline-alert { min-height: 52px; }
@@ -994,33 +1049,19 @@ button{font:inherit}
 .doc{border:1px solid var(--hb-color-neutral-100);border-radius:var(--hb-radius-12);padding:var(--hb-space-16);display:flex;flex-direction:column;gap:var(--hb-space-12)}
 .doc__label{font-weight:var(--hb-font-weight-semibold);color:var(--hb-color-on-surface-heading)}
 .doc__req{color:var(--hb-color-error-base);margin-inline-start:var(--hb-space-2)}
-.drop{
-  border:1.5px dashed var(--hb-color-neutral-300);border-radius:var(--hb-radius-8);
-  background:var(--hb-color-neutral-50);
-  padding:var(--hb-space-20);display:flex;flex-direction:column;align-items:center;gap:var(--hb-space-8);
-  text-align:center;cursor:pointer;
+/* The receipt uploader uses the design system's File Upload molecule directly.
+   Only three prototype-level additions: a drag-over state and an invalid state,
+   which the component does not define, and an image thumbnail in the file-icon
+   slot — the A3 fix, so an uploaded receipt never sets page height. */
+.hb-upload[data-over="true"]{border-color:var(--hb-color-primary-600);background:var(--hb-color-primary-50)}
+.hb-upload[data-state="error"]{background:var(--hb-color-error-light)}
+.hb-upload[role="button"]{cursor:pointer}
+.hb-upload[role="button"]:focus-visible{outline:2px solid var(--hb-color-primary-600);outline-offset:2px}
+.hb-upload__thumb{
+  inline-size:var(--hb-space-40);block-size:var(--hb-space-40);
+  border-radius:var(--hb-radius-6);object-fit:cover;display:block;
 }
-.drop:focus-visible{outline:2px solid var(--hb-color-primary-600);outline-offset:2px}
-.drop[data-over="true"]{border-color:var(--hb-color-primary-600);background:var(--hb-color-primary-50)}
-.drop[data-invalid="true"]{border-color:var(--hb-color-error-base);background:var(--hb-color-error-light)}
-.drop__icon{font-size:var(--hb-font-size-24);color:var(--hb-color-primary-700)}
-.drop__title{font-weight:var(--hb-font-weight-semibold);color:var(--hb-color-on-surface-heading)}
-.drop__hint{font-size:var(--hb-font-size-12);color:var(--hb-color-on-surface-muted)}
-
-/* The fix for the full-bleed ID image: a fixed-ratio thumbnail, never the raw file. */
-.filecard{display:flex;gap:var(--hb-space-12);align-items:center;border:1px solid var(--hb-color-neutral-100);border-radius:var(--hb-radius-8);padding:var(--hb-space-8)}
-.filecard__thumb{
-  inline-size:56px;block-size:56px;flex:0 0 auto; /* LAYOUT */
-  border-radius:var(--hb-radius-6);overflow:hidden;background:var(--hb-color-neutral-100);
-  display:grid;place-items:center;color:var(--hb-color-primary-700);
-}
-.filecard__thumb img{inline-size:100%;block-size:100%;object-fit:cover}
-.filecard__meta{min-width:0;flex:1 1 auto}
-.filecard__name{font-weight:var(--hb-font-weight-medium);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.filecard__size{font-size:var(--hb-font-size-12);color:var(--hb-color-on-surface-muted)}
-.filecard__bar{block-size:var(--hb-space-4);border-radius:var(--hb-radius-full);background:var(--hb-color-neutral-100);overflow:hidden;margin-block-start:var(--hb-space-6)}
-.filecard__bar i{display:block;block-size:100%;background:var(--hb-color-primary-600);transition:inline-size .2s linear}
-.filecard__acts{display:flex;gap:var(--hb-space-4);flex:0 0 auto}
+.hb-upload__file-icon:has(.hb-upload__thumb){font-size:0;margin-block-start:0}
 
 /* ---------- payment ---------- */
 .pay{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:var(--hb-space-16)} /* LAYOUT */
@@ -1089,7 +1130,7 @@ button{font:inherit}
   animation:snack-in .18s ease;
 }
 @keyframes snack-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.snack{animation:none}.mov__fill,.filecard__bar i{transition:none}}
+@media (prefers-reduced-motion:reduce){.snack{animation:none}.mov__fill,.hb-upload__bar>i{transition:none}}
 .snack[data-status="success"]{border-color:var(--hb-color-success-border)}
 .snack[data-status="error"]{border-color:var(--hb-color-error-border)}
 .snack__icon{flex:0 0 auto;font-size:var(--hb-font-size-20)}
@@ -1638,25 +1679,43 @@ button{font:inherit}
     return { txt: h + 'h ' + String(m).padStart(2, '0') + 'm ' + String(s).padStart(2, '0') + 's', over: false };
   }
 
-  function fileCard(slot, f) {
-    // [A3] attachments are fixed-height rows; user content never sets page height
-    return '<div class="filecard"><span class="filecard__thumb">' + (f.thumb ? '<img src="' + f.thumb + '" alt="">' : ic('file')) + '</span>' +
-      '<span class="filecard__meta"><span class="filecard__name">' + esc(f.name) + '</span>' +
-      '<span class="filecard__size">' + (f.size / 1024 > 1024 ? (f.size / 1048576).toFixed(1) + ' MB' : Math.round(f.size / 1024) + ' KB') +
-      (f.pct < 100 ? ' · uploading ' + f.pct + '%' : ' · uploaded') + '</span>' +
-      (f.pct < 100 ? '<span class="filecard__bar"><i style="inline-size:' + f.pct + '%"></i></span>' : '') + '</span>' +
-      '<span class="filecard__acts">' +
-      '<button class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="sm" aria-label="Preview" data-act="noop">' + ic('view') + '</button>' +
-      '<button class="hb-btn hb-icon-btn" data-intent="danger" data-style="ghost" data-size="sm" aria-label="Remove file" data-act="rmfile" data-slot="' + slot + '">' + ic('delete') + '</button>' +
-      '</span></div>';
+  // The receipt uploader IS the design system's File Upload molecule — same
+  // markup and classes, not a lookalike. Header persists across states; rows
+  // read name -> progress -> size; remove is an x; a live counter closes it. [P1][A3]
+  var RECEIPT = { files: 1, mb: 5 };
+
+  function fileRow(slot, f) {
+    var done = f.pct >= 100;
+    var size = (f.size / 1048576).toFixed(1) + ' MB';
+    return '<div class="hb-upload__file"' + (done ? '' : ' data-status="uploading"') + '>' +
+      '<span class="hb-upload__file-icon">' +
+      (f.thumb ? '<img class="hb-upload__thumb" src="' + f.thumb + '" alt="">' : ic('file')) + '</span>' +
+      '<span class="hb-upload__file-meta">' +
+      '<span class="hb-upload__name">' + esc(f.name) + '</span>' +
+      (done ? '' : '<span class="hb-upload__bar"><i style="inline-size:' + f.pct + '%"></i></span>') +
+      '<span class="hb-upload__size">' + size + (done ? '' : ' · ' + f.pct + '%') + '</span>' +
+      '</span>' +
+      '<button class="hb-upload__rm" data-act="rmfile" data-slot="' + slot + '" aria-label="Remove ' + esc(f.name) + '">' + ic('close') + '</button>' +
+      '</div>';
   }
 
-  function dropZone(slot, title) {
+  function uploader(slot, title, f) {
     var err = S.errors['doc.' + slot];
-    return '<div class="drop" tabindex="0" role="button" data-act="pick" data-slot="' + slot + '" data-drop="' + slot + '" data-invalid="' + (!!err) + '">' +
-      '<span class="drop__icon">' + ic('upload') + '</span><span class="drop__title">' + esc(title) + '</span>' +
-      '<span class="drop__hint">Drag a file here or browse · PDF, JPG or PNG · max 5 MB</span></div>' +
-      (err ? '<span class="field__err">' + esc(err) + '</span>' : '');
+    var state = err ? 'error' : !f ? 'empty' : (f.pct < 100 ? 'uploading' : 'uploaded');
+    var used = f ? 1 : 0;
+    var mb = f ? (f.size / 1048576) : 0;
+    // Only an empty or rejected panel is itself the target; once a file is in,
+    // clicking the panel must not re-open the picker.
+    var clickable = (state === 'empty' || state === 'error');
+    return '<div class="hb-upload" data-state="' + state + '" data-drop="' + slot + '"' +
+      (clickable ? ' role="button" tabindex="0" data-act="pick" data-slot="' + slot + '"' : '') + '>' +
+      '<span class="hb-upload__icon">' + ic('upload') + '</span>' +
+      '<span class="hb-upload__title">' + esc(title) + '</span>' +
+      '<span class="hb-upload__hint">' + (err ? esc(err) : 'PDF, JPG or PNG · 1 file · max 5 MB') + '</span>' +
+      (f ? '<div class="hb-upload__files">' + fileRow(slot, f) + '</div>' : '') +
+      '<span class="hb-upload__count">' + used + ' of ' + RECEIPT.files + ' file · ' +
+      mb.toFixed(1) + ' MB of ' + RECEIPT.mb + ' MB</span>' +
+      '</div>';
   }
 
   function paymentView() {
@@ -1698,8 +1757,7 @@ button{font:inherit}
 
       // [P1] the receipt is completed here, where the payment is asked for
       '<div style="margin-block-start:var(--hb-space-20)">' +
-      '<h3 class="card__title" style="margin-block-end:var(--hb-space-12)">Upload the transfer receipt</h3>' +
-      (S.receipt ? fileCard('receipt', S.receipt) : dropZone('receipt', 'Upload your transfer receipt')) +
+      uploader('receipt', 'Upload the transfer receipt', S.receipt) +
       (paid
         ? '<p class="inline-msg" data-tone="success" style="margin-block-start:var(--hb-space-12)">' + ic('success') + '<span>Receipt received. Finance confirms within one business day.</span></p>'
         : '<div class="row" style="margin-block-start:var(--hb-space-12)">' +
@@ -1819,7 +1877,7 @@ button{font:inherit}
   function acceptFile(slot, file) {
     delete S.errors['doc.' + slot];
     if (OK.indexOf(file.type) === -1) {
-      S.errors['doc.' + slot] = 'That file is a ' + (file.type || 'unknown type') + '. Use PDF, JPG or PNG.';
+      S.errors['doc.' + slot] = (file.type ? 'That file is ' + file.type + '.' : 'That file type is not recognised.') + ' Use PDF, JPG or PNG.';
       render(); snack('Unsupported file type.', 'error'); return;
     }
     if (file.size > MAX) {
@@ -2055,7 +2113,7 @@ button{font:inherit}
 
   function onKey(e) {
     if (e.key === 'Escape' && S.dialog) { closeDialog(); return; }
-    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('drop')) {
+    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('hb-upload')) {
       e.preventDefault(); pickingSlot = e.target.dataset.slot; picker.click();
     }
     if (e.key === 'Tab' && S.dialog) {

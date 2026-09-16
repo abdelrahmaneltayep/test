@@ -422,25 +422,43 @@
     return { txt: h + 'h ' + String(m).padStart(2, '0') + 'm ' + String(s).padStart(2, '0') + 's', over: false };
   }
 
-  function fileCard(slot, f) {
-    // [A3] attachments are fixed-height rows; user content never sets page height
-    return '<div class="filecard"><span class="filecard__thumb">' + (f.thumb ? '<img src="' + f.thumb + '" alt="">' : ic('file')) + '</span>' +
-      '<span class="filecard__meta"><span class="filecard__name">' + esc(f.name) + '</span>' +
-      '<span class="filecard__size">' + (f.size / 1024 > 1024 ? (f.size / 1048576).toFixed(1) + ' MB' : Math.round(f.size / 1024) + ' KB') +
-      (f.pct < 100 ? ' · uploading ' + f.pct + '%' : ' · uploaded') + '</span>' +
-      (f.pct < 100 ? '<span class="filecard__bar"><i style="inline-size:' + f.pct + '%"></i></span>' : '') + '</span>' +
-      '<span class="filecard__acts">' +
-      '<button class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="sm" aria-label="Preview" data-act="noop">' + ic('view') + '</button>' +
-      '<button class="hb-btn hb-icon-btn" data-intent="danger" data-style="ghost" data-size="sm" aria-label="Remove file" data-act="rmfile" data-slot="' + slot + '">' + ic('delete') + '</button>' +
-      '</span></div>';
+  // The receipt uploader IS the design system's File Upload molecule — same
+  // markup and classes, not a lookalike. Header persists across states; rows
+  // read name -> progress -> size; remove is an x; a live counter closes it. [P1][A3]
+  var RECEIPT = { files: 1, mb: 5 };
+
+  function fileRow(slot, f) {
+    var done = f.pct >= 100;
+    var size = (f.size / 1048576).toFixed(1) + ' MB';
+    return '<div class="hb-upload__file"' + (done ? '' : ' data-status="uploading"') + '>' +
+      '<span class="hb-upload__file-icon">' +
+      (f.thumb ? '<img class="hb-upload__thumb" src="' + f.thumb + '" alt="">' : ic('file')) + '</span>' +
+      '<span class="hb-upload__file-meta">' +
+      '<span class="hb-upload__name">' + esc(f.name) + '</span>' +
+      (done ? '' : '<span class="hb-upload__bar"><i style="inline-size:' + f.pct + '%"></i></span>') +
+      '<span class="hb-upload__size">' + size + (done ? '' : ' · ' + f.pct + '%') + '</span>' +
+      '</span>' +
+      '<button class="hb-upload__rm" data-act="rmfile" data-slot="' + slot + '" aria-label="Remove ' + esc(f.name) + '">' + ic('close') + '</button>' +
+      '</div>';
   }
 
-  function dropZone(slot, title) {
+  function uploader(slot, title, f) {
     var err = S.errors['doc.' + slot];
-    return '<div class="drop" tabindex="0" role="button" data-act="pick" data-slot="' + slot + '" data-drop="' + slot + '" data-invalid="' + (!!err) + '">' +
-      '<span class="drop__icon">' + ic('upload') + '</span><span class="drop__title">' + esc(title) + '</span>' +
-      '<span class="drop__hint">Drag a file here or browse · PDF, JPG or PNG · max 5 MB</span></div>' +
-      (err ? '<span class="field__err">' + esc(err) + '</span>' : '');
+    var state = err ? 'error' : !f ? 'empty' : (f.pct < 100 ? 'uploading' : 'uploaded');
+    var used = f ? 1 : 0;
+    var mb = f ? (f.size / 1048576) : 0;
+    // Only an empty or rejected panel is itself the target; once a file is in,
+    // clicking the panel must not re-open the picker.
+    var clickable = (state === 'empty' || state === 'error');
+    return '<div class="hb-upload" data-state="' + state + '" data-drop="' + slot + '"' +
+      (clickable ? ' role="button" tabindex="0" data-act="pick" data-slot="' + slot + '"' : '') + '>' +
+      '<span class="hb-upload__icon">' + ic('upload') + '</span>' +
+      '<span class="hb-upload__title">' + esc(title) + '</span>' +
+      '<span class="hb-upload__hint">' + (err ? esc(err) : 'PDF, JPG or PNG · 1 file · max 5 MB') + '</span>' +
+      (f ? '<div class="hb-upload__files">' + fileRow(slot, f) + '</div>' : '') +
+      '<span class="hb-upload__count">' + used + ' of ' + RECEIPT.files + ' file · ' +
+      mb.toFixed(1) + ' MB of ' + RECEIPT.mb + ' MB</span>' +
+      '</div>';
   }
 
   function paymentView() {
@@ -482,8 +500,7 @@
 
       // [P1] the receipt is completed here, where the payment is asked for
       '<div style="margin-block-start:var(--hb-space-20)">' +
-      '<h3 class="card__title" style="margin-block-end:var(--hb-space-12)">Upload the transfer receipt</h3>' +
-      (S.receipt ? fileCard('receipt', S.receipt) : dropZone('receipt', 'Upload your transfer receipt')) +
+      uploader('receipt', 'Upload the transfer receipt', S.receipt) +
       (paid
         ? '<p class="inline-msg" data-tone="success" style="margin-block-start:var(--hb-space-12)">' + ic('success') + '<span>Receipt received. Finance confirms within one business day.</span></p>'
         : '<div class="row" style="margin-block-start:var(--hb-space-12)">' +
@@ -603,7 +620,7 @@
   function acceptFile(slot, file) {
     delete S.errors['doc.' + slot];
     if (OK.indexOf(file.type) === -1) {
-      S.errors['doc.' + slot] = 'That file is a ' + (file.type || 'unknown type') + '. Use PDF, JPG or PNG.';
+      S.errors['doc.' + slot] = (file.type ? 'That file is ' + file.type + '.' : 'That file type is not recognised.') + ' Use PDF, JPG or PNG.';
       render(); snack('Unsupported file type.', 'error'); return;
     }
     if (file.size > MAX) {
@@ -839,7 +856,7 @@
 
   function onKey(e) {
     if (e.key === 'Escape' && S.dialog) { closeDialog(); return; }
-    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('drop')) {
+    if (e.key === 'Enter' && e.target.classList && e.target.classList.contains('hb-upload')) {
       e.preventDefault(); pickingSlot = e.target.dataset.slot; picker.click();
     }
     if (e.key === 'Tab' && S.dialog) {

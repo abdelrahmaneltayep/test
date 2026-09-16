@@ -32,6 +32,7 @@ const COMPONENTS = [
   '04_Components/atoms/Chip/Chip.css',
   '04_Components/molecules/TextField/TextField.css',
   '04_Components/molecules/Select/Select.css',
+  '04_Components/molecules/FileUpload/FileUpload.css',
   '04_Components/molecules/InlineAlert/InlineAlert.css',
   '04_Components/molecules/Snackbar/Snackbar.css',
   '04_Components/molecules/DialogActions/DialogActions.css',
