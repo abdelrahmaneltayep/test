@@ -1,4 +1,4 @@
-# Checkout Verification · the three Drawers — PUSHED 16 Sep 2026
+# Checkout Verification · the three Drawers — REBUILT 16 Sep 2026
 
 The Activity screen is already in the Cart Proposal file
 (`fZB13ULQEXJmAOqK6reGsT`, Prototype page, node `45:635`). These three panels are what
@@ -6,10 +6,14 @@ The Activity screen is already in the Cart Proposal file
 
 | Frame | Node |
 |---|---|
-| `Drawer · Branch Details` | `59:902` |
-| `Drawer · Delivery Address` | `61:1237` |
-| `Drawer · Business Documents` | `63:1568` |
-| `Notes · Checkout Verification Drawers` | `65:1921` |
+| `Drawer · Branch Details` | `78:1085` |
+| `Drawer · Delivery Address` | `79:1412` |
+| `Drawer · Business Documents` | `81:1747` |
+| `Notes · Checkout Verification Drawers` | `84:2084` |
+
+The first push of these three (`59:902`, `61:1237`, `63:1568`, `65:1921`) was no longer in the
+file the next time it was opened — an undo or a version restore, most likely. These are the
+rebuild, at new node ids, to the right of the Payment A screen and its notes.
 
 What follows is the build order they were made from, kept as the record.
 
@@ -40,9 +44,20 @@ Keys already resolved from the consuming file:
 | Divider (set) | `da32758ae05ef66f8e2efb911496c527a2743ebb` |
 | icon/save · check · view · refresh · delete · add · location | `96343352…`, `cc820c40…`, see the push log |
 
-Still to resolve on the DS file when the connection returns: **Drawer**, **Dialog Header**,
-**Dialog Actions**, **Phone Field**, **Select**, **File Upload**. All six exist in the library;
-none has been instanced from this file yet, so their keys are not cached here.
+Resolved on the rebuild, by reading the DS file's own pages rather than one search at a time
+(`search_design_system` clamps a batch to a single query):
+
+| Component | Key |
+|---|---|
+| Drawer (set) | `e0e32ebee233b2a672282aea1047ce4b757f4f82` |
+| Dialog Header (set) | `7b0e87f0782ff7d91b19919f3a4eb750df3112f3` |
+| Dialog Actions (set) | `ffd5db0df62ff8b4bf7180d53da96890bae69636` |
+| Phone Field (set) | `7651f92607321dd4716dfae60bd2a73bcac6c30a` |
+| Select (set) | `3d3361a72c633f6fdfb08d715971f43af9636a2d` |
+| File Upload (set) | `64d3cede0ad9d699404e4c46a318bc05a3975eb2` |
+| Icon Button (set) | `fcf3039c69b8c0ecbc5678e1fd07924e0a445d66` |
+| icon/save · check · view · refresh · add · close · file | `96343352…`, `cc820c40…`, `b5339d2c…`, `187d844c…`, `ac26774a…`, `e6dbb24d…`, `430d144e…` |
+| color/scrim | `2f8e5f4658be591113f06c1274b5e740a45c12d5` |
 
 ## Content, verbatim from the prototype
 
@@ -95,7 +110,23 @@ is composed from the Drawer's own tokens (`radius/16`, `color/surface`, `spacing
 `spacing/16` gap, a `spacing/40` close at `radius/8` on `color/error`, panel widths 520 and 680)
 and named for the variant it stands for.
 
-Three smaller gaps: File Upload's uploaded state ships two sample files and drives only the drop
-zone from its properties; Select never shows its Value node, so a chosen value goes in the
-Placeholder; Dialog Actions has no one-button variant. All four are logged in the design system's
-`FIGMA_PUSH_STATE.md` and repeated on the Notes panel beside the frames.
+The other gaps, as the rebuild measured them:
+
+- **File Upload cannot express a file the buyer can act on.** Its uploaded variant is a drop zone
+  with two sample rows, an Upload more pill and a max-limit line, and each row carries only a close
+  icon. The prototype's on-file card is a row with Preview, Replace and remove and no drop zone
+  above it, so the two cards are composed from the same tokens.
+- **Dialog Actions has no one-button variant** (Buttons is 2 or 3), so Business Documents carries a
+  Cancel the prototype does not have.
+- **A document's state is not the order-status vocabulary.** "On file", "Required" and "Optional"
+  are none of `table/status`'s six words and that set carries its word as a variant, so the state
+  uses the Chip atom at `Style=neutral`. Chip has no success or warning style, so the prototype's
+  tonal colour cannot be reproduced.
+- **The panel widths are plain numbers.** 520 and 680 are `component/drawer/panel-width-*`, geometry
+  tokens the published library does not expose — it publishes Color, Spacing and Shape only.
+- **Correction to the first push.** It reported that Select never shows its Value node. It does:
+  `State=selected` renders Value and hides Placeholder, probed here by setting a distinct
+  placeholder string and reading back which node was visible. Country and State / Province use it.
+
+All of these are logged in the design system's `FIGMA_PUSH_STATE.md` and repeated on the Notes
+panel beside the frames.
