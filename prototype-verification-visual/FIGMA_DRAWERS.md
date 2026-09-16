@@ -1,4 +1,4 @@
-# Checkout Verification · the three Drawers — REBUILT 16 Sep 2026
+# Checkout Verification · the three Drawers — BUILT ON THE COMPONENT, 16 Sep 2026
 
 The Activity screen is already in the Cart Proposal file
 (`fZB13ULQEXJmAOqK6reGsT`, Prototype page, node `45:635`). These three panels are what
@@ -6,14 +6,25 @@ The Activity screen is already in the Cart Proposal file
 
 | Frame | Node |
 |---|---|
-| `Drawer · Branch Details` | `78:1085` |
-| `Drawer · Delivery Address` | `79:1412` |
-| `Drawer · Business Documents` | `81:1747` |
-| `Notes · Checkout Verification Drawers` | `84:2084` |
+| `Drawer · Branch Details` | `93:1585` |
+| `Drawer · Delivery Address` | `93:2240` |
+| `Drawer · Business Documents` | `94:2040` |
+| `Notes · Checkout Verification Drawers` | `96:2328` |
 
-The first push of these three (`59:902`, `61:1237`, `63:1568`, `65:1921`) was no longer in the
-file the next time it was opened — an undo or a version restore, most likely. These are the
-rebuild, at new node ids, to the right of the Payment A screen and its notes.
+Each frame is the Activity screen under `color/scrim` with **one instance of the library Drawer**
+over it — no composed panel and no detaching. The panel's content is a component in the consuming
+file, swapped into the Drawer's `Body content` slot:
+
+| Content component | Node | Width |
+|---|---|---|
+| `Branch Details · panel content` | `88:2199` | 480 (md body) |
+| `Delivery Address · panel content` | `88:2392` | 480 (md body) |
+| `Business Documents · panel content` | `94:2039` | 640 (lg body) |
+
+The file has been rolled back twice in a day. The first push (`59:902`, `61:1237`, `63:1568`,
+`65:1921`) was gone by the afternoon; the second (`78:1085`, `79:1412`, `81:1747`, `84:2084`),
+built from composed panels, was gone again by the time the Drawer's slot was published. Re-read
+the page before trusting any node id above.
 
 What follows is the build order they were made from, kept as the record.
 
@@ -103,12 +114,20 @@ Resolved on the rebuild, by reading the DS file's own pages rather than one sear
 
 ## What the push found
 
-The Drawer organism could not be instanced with this content. Its Body is the Match My Price
-sample — an Alert, a Summary, two Text Fields and a File Upload — with no slot and no
-`INSTANCE_SWAP` property, so a consuming file cannot put its own fields inside it. Each panel here
-is composed from the Drawer's own tokens (`radius/16`, `color/surface`, `spacing/20` body padding,
-`spacing/16` gap, a `spacing/40` close at `radius/8` on `color/error`, panel widths 520 and 680)
-and named for the variant it stands for.
+**This is now fixed.** The Drawer originally could not be instanced with this content: its Body was
+the Match My Price sample — an Alert, a Summary, two Text Fields and a File Upload — with no slot
+and no `INSTANCE_SWAP` property, so a consuming file could not put its own fields inside it, and a
+frame inside an instance cannot take new children. On 16 Sep the component was rebuilt (one close
+inside the header, true panel widths, the sample lifted out) and a **`Body content` INSTANCE_SWAP
+property** was added and published. Its default draws nothing, so an un-swapped Drawer still ships
+empty. These three panels are the first screens built through it.
+
+Two things to know before scripting this again:
+
+- `setProperties` on the Drawer instance **rejects a local component** as the slot's value — by id
+  and by key alike — because the property's default lives in the library. `swapComponent` on the
+  slot instance works.
+- `addComponentProperty` wants an `INSTANCE_SWAP` default as a component **id**, not a key.
 
 The other gaps, as the rebuild measured them:
 
