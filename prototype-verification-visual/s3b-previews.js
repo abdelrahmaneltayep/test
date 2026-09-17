@@ -495,13 +495,17 @@
     var d = state.docs[k];
     return li({ lead: I.upload, state: "todo", title: esc(d.label), tag: reqTag(d), text: "Not uploaded" });
   }
+  /* A document on file is something to look at, so the row carries Preview (PM, 17 Sep).
+     It is the List Item's own actions slot — the row gains an affordance, not a second column. */
   function docAfter(k){
     var d = state.docs[k], f = d.file || DOC_SAMPLE[k];
     if (!f) { return docBefore(k); }
     var replaced = d.file && d.prev;
     return li({ lead: replaced ? I.refresh : I.file, tag: reqTag(d),
       title: esc(d.label) + (replaced ? " replaced" : " uploaded"),
-      time: esc(f.at || "just now"), text: esc(f.name) + ' · ' + esc(f.size) });
+      time: esc(f.at || "just now"), text: esc(f.name) + ' · ' + esc(f.size),
+      actions: d.file ? btn("Preview", { style: "ghost", size: "sm", icon: I.view,
+        attrs: ' data-act="view-doc" data-doc="' + k + '"' }) : '' });
   }
   function docCase(title, note, rows){
     return '<div class="pcase">' +
