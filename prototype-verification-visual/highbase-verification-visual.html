@@ -3257,11 +3257,11 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         time: a.pinned ? "08 Sep 2026" : "", text: esc(pinLabel()) })
     ]);
   }
-  function reqTag(d){
-    /* Required / Optional is what the document IS, not how it is doing — a neutral Chip,
-       never a status pill, so it does not reintroduce the state this preview drops. */
-    return chip(d.required ? "Required" : "Optional", { style: "neutral", size: "sm" });
-  }
+  /* Required is a red asterisk after the name, the same mark every field label in this
+     prototype uses (PM, 17 Sep). It replaces the Required / Optional chip: the mark is the
+     form convention the buyer already reads, and it leaves the row's trailing slot to Preview.
+     Optional carries no mark — absence is the signal, as it is on a form. */
+  function reqMark(d){ return d.required ? ' <span class="hb-field__req">*</span>' : ''; }
 
   /* The three documents are shown in both of the states a row can take, side by side, because
      the two are what this section has to get right. In the product a document is in one state
@@ -3272,7 +3272,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   var DOC_SAMPLE = { vat: { name: "vat-certificate.pdf", size: "1.1 MB", at: "12 Jan 2026" } };
   function docBefore(k){
     var d = state.docs[k];
-    return li({ lead: I.upload, state: "todo", title: esc(d.label), tag: reqTag(d), text: "Not uploaded" });
+    return li({ lead: I.upload, state: "todo", title: esc(d.label) + reqMark(d), text: "Not uploaded" });
   }
   /* A document on file is something to look at, so the row carries Preview (PM, 17 Sep).
      It sits in the List Item's trailing slot, at the end of the row — the tag is beside the
@@ -3281,9 +3281,12 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     var d = state.docs[k], f = d.file || DOC_SAMPLE[k];
     if (!f) { return docBefore(k); }
     var replaced = d.file && d.prev;
-    return li({ lead: replaced ? I.refresh : I.file, tag: reqTag(d),
-      title: esc(d.label) + (replaced ? " replaced" : " uploaded"),
-      time: esc(f.at || "just now"), text: esc(f.name) + ' · ' + esc(f.size),
+    /* the mark belongs immediately after the name, so what happened to the file moves onto
+       the line below it — the row still says uploaded or replaced, just not in the title */
+    return li({ lead: replaced ? I.refresh : I.file,
+      title: esc(d.label) + reqMark(d),
+      time: esc(f.at || "just now"),
+      text: (replaced ? "Replaced · " : "Uploaded · ") + esc(f.name) + ' · ' + esc(f.size),
       trail: d.file ? iconBtn(I.view, "Preview " + esc(d.label), { style: "ghost", size: "md",
         attrs: ' data-act="view-doc" data-doc="' + k + '"' }) : '' });
   }

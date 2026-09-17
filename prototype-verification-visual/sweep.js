@@ -84,11 +84,18 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const pills=(await p.$$('#screen-b .hb-status')).length;
      const t=await txt('#screen-b');
      return pressed.join()==='activity'&&pills===0&&t.includes('Branch name')&&t.includes('Branch phone')&&t.includes('Branch email')&&t.includes('Postal code')&&t.includes('Map pin')}],
-  ['B: every document is tagged Required or Optional, and the tag is not a status pill',async()=>{
-     const tags=await p.$$eval('#screen-b #card-docs .hb-chip',e=>e.map(x=>x.textContent.trim()));
+  ['B: a required document is marked with a red asterisk, not a chip or a pill',async()=>{
+     const chips=(await p.$$('#screen-b #card-docs .hb-chip')).length;
      const pills=(await p.$$('#screen-b #card-docs .hb-status')).length;
-     /* three documents in two cases: CR and ID required, VAT optional, in both */
-     return tags.length===6&&tags.filter(t=>t==='Required').length===4&&tags.filter(t=>t==='Optional').length===2&&pills===0}],
+     const marks=await p.$$eval('#screen-b #card-docs .hb-field__req',e=>e.map(x=>({t:x.textContent.trim(),c:getComputedStyle(x).color})));
+     const titles=await p.$$eval('#screen-b #card-docs .hb-li__title',e=>e.map(x=>x.textContent.trim()));
+     const err=await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--hb-color-error').trim());
+     const errRgb=await p.evaluate(h=>{const d=document.createElement('div');d.style.color=h;document.body.appendChild(d);
+       const c=getComputedStyle(d).color;d.remove();return c},err);
+     /* CR and ID carry the mark in both cases; VAT is optional and carries none */
+     return chips===0&&pills===0&&marks.length===4&&marks.every(m=>m.t==='*'&&m.c===errRgb)
+       &&titles.filter(t=>t==='Commercial License (CR) *').length===2
+       &&titles.filter(t=>t==='VAT Certificate').length===2}],
   ['B: the before-upload case is not filled in, and says what is missing',async()=>{
      const cases=await p.$$eval('#screen-b #card-docs .pcase .hb-label-md',e=>e.map(x=>x.textContent.trim()));
      /* :first-of-type would match the first DIV sibling, which is the list above the cases */
@@ -105,9 +112,9 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const legacy=(await p.$$('#screen-b .bafile, #screen-b .ba')).length;
      return legacy===0&&afterRows.length===3
        &&t.includes('After upload')
-       &&afterRows[0].includes('Commercial License (CR) replaced')&&afterRows[0].includes('CR-5056050560-1.pdf')
-       &&afterRows[1].includes('Personal ID Document uploaded')&&afterRows[1].includes('CPR-front.jpg')
-       &&afterRows[2].includes('VAT Certificate uploaded')&&afterRows[2].includes('vat-certificate.pdf')}],
+       &&afterRows[0].includes('Commercial License (CR) *')&&afterRows[0].includes('Replaced · CR-5056050560-1.pdf')
+       &&afterRows[1].includes('Personal ID Document *')&&afterRows[1].includes('Uploaded · CPR-front.jpg')
+       &&afterRows[2].includes('VAT Certificate')&&afterRows[2].includes('Uploaded · vat-certificate.pdf')}],
   ['B: the order breakdown is open, not folded away',async()=>{
      const open=await p.evaluate(()=>document.querySelector('#screen-b .rail details.why').open);
      const t=await txt('#screen-b .rail');
