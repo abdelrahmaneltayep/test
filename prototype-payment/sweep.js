@@ -13,9 +13,6 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
  for(const dir of ['ltr','rtl']){const p=await b.newPage({viewport:{width:1440,height:1000}});const errs=[];p.on('pageerror',e=>errs.push(e.message));
   await p.goto('file://'+__dirname+'/sweep.html');await p.waitForTimeout(500);if(dir==='rtl'){await p.click('#t-dir');await p.waitForTimeout(300)}
   for(const sc of ['a','b','c','why']){await p.evaluate(s=>location.hash=s,sc);await p.waitForTimeout(300);
-   if(sc==='a'){await p.click('#screen-a [data-act="open-qr"]');await p.waitForTimeout(300);
-     const q=await p.evaluate(CONTRAST);q.length?(bad(`contrast ${dir}/a+qr`),q.slice(0,4).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))):ok(`contrast ${dir}/a+qr`);
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250)}
    if(sc==='c'){await p.click('#screen-c [data-act="pay-tab"][data-tab="qr"]');await p.waitForTimeout(250);
      const q=await p.evaluate(CONTRAST);q.length?(bad(`contrast ${dir}/c+qr`),q.slice(0,4).forEach(x=>console.log('       ',x.r+':1 need '+x.need,'|',x.sel,'|',x.txt))):ok(`contrast ${dir}/c+qr`);
      await p.click('#screen-c [data-act="pay-tab"][data-tab="bank"]');await p.waitForTimeout(200)}
@@ -43,44 +40,49 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
        const labels=await p.$$eval('#screen-'+v+' [data-act="copy"]',e=>e.map(x=>x.dataset.label));
        if(!(labels.indexOf('iban')>=0&&labels.indexOf('amount')>=0&&labels.indexOf('bank details')>=0))okk=false}
      return okk}],
-  ['A: the QR is on the page as a tile, and enlarges into the Drawer',async()=>{
+  ['A: the QR has a column of its own, at scanning size',async()=>{
      await p.evaluate(()=>location.hash='a');await p.waitForTimeout(300);
-     /* present, but a corner of the amount block rather than a column */
-     const tile=await p.$('#screen-a .amount .qrmini');
-     const box=tile?await tile.boundingBox():null;
-     const columns=(await p.$$('#screen-a .qr')).length;
-     const cap=await txt('#screen-a .qrmini');
-     await p.click('#screen-a [data-act="open-qr"]');await p.waitForTimeout(300);
-     const open=await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open);
-     const t=await txt('dialog.hb-drawer-layer');
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);
-     const closed=!(await p.evaluate(()=>document.querySelector('dialog.hb-drawer-layer').open));
-     return !!tile&&columns===0&&box.width<160&&cap.includes('Scan to pay')&&open&&closed&&t.includes('Pay by QR')&&t.includes('placeholder')}],
-  ['A: marking the transfer moves the page on to the receipt',async()=>{
-     await p.click('#screen-a [data-act="mark-transferred"]');await p.waitForTimeout(300);
+     const code=await p.$('#screen-a .qr--lg .qr__code');
+     const box=code?await code.boundingBox():null;
+     const split=(await p.$$('#screen-a .paysplit')).length;
+     const tiles=(await p.$$('#screen-a .qrmini')).length;
      const t=await txt('#screen-a');
-     return t.includes('Send us the receipt')&&t.includes('Waiting for your receipt')&&!!(await p.$('#screen-a [data-drop="receipt"]'))}],
-  ['A: uploading the receipt finishes the job on the page itself',async()=>{
+     /* bigger than the 148 the other two use, and no longer a corner of the amount block */
+     return !!code&&split===1&&tiles===0&&box.width>200&&t.includes('Scan to pay')}],
+  ['A: checkout does not ask for the receipt, and the main action is Track your order',async()=>{
+     const zones=(await p.$$('#screen-a [data-drop="receipt"], #screen-a .hb-upload')).length;
+     const marks=(await p.$$('#screen-a [data-act="mark-transferred"]')).length;
+     const primary=await p.$('#screen-a .hb-btn[data-style="filled"][data-size="lg"]');
+     const label=primary?(await p.evaluate(el=>el.textContent.trim(),primary)):'';
+     const act=primary?(await p.evaluate(el=>el.dataset.act,primary)):'';
+     const filled=(await p.$$('#screen-a .hb-btn[data-style="filled"]')).length;
+     return zones===0&&marks===0&&label.includes('Track your order')&&act==='track'&&filled===1}],
+  ['A: the page says where the receipt belongs instead of asking for it',async()=>{
+     await p.click('#screen-a details.why summary');await p.waitForTimeout(250);
+     const t=await txt('#screen-a details.why');
+     return t.includes('What happens after I transfer?')&&t.includes('add it from the order itself')}],
+  ['the receipt lives in B and C, and puts the order in the same state',async()=>{
      fs.writeFileSync(__dirname+'/tmp-receipt.png',Buffer.from(png,'base64'));
-     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('#screen-a [data-drop="receipt"]')]);
-     await fc.setFiles(__dirname+'/tmp-receipt.png');await p.waitForTimeout(200);
-     const prog=!!(await p.$('#screen-a .hb-upload[data-state="uploading"]'));await p.waitForTimeout(1100);
-     const card=!!(await p.$('#screen-a .hb-upload[data-state="uploaded"]'));
-     const t=await txt('#screen-a');
-     return prog&&card&&t.includes('Receipt received')&&t.includes('Payment under review')}],
-  ['the receipt, and the state it puts the order in, is the same in all three',async()=>{
+     await p.evaluate(()=>location.hash='b');await p.waitForTimeout(300);
+     /* step 3 refuses to open until the transfer is marked in step 2, which is the point of B */
+     await p.click('#screen-b [data-act="mark-transferred"]');await p.waitForTimeout(400);
+     const [fc]=await Promise.all([p.waitForEvent('filechooser'),p.click('#screen-b [data-drop="receipt"]')]);
+     await fc.setFiles(__dirname+'/tmp-receipt.png');await p.waitForTimeout(1300);
      let okk=true;
      for(const v of ['b','c']){await p.evaluate(s=>location.hash=s,v);await p.waitForTimeout(300);
        const t=await txt('#screen-'+v);
        if(!(t.includes('Payment under review')&&t.includes('tmp-receipt.png')))okk=false}
-     return okk}],
-  ['removing the receipt asks first, and puts the page back',async()=>{
+     /* and A stays out of it: the receipt never appears on that page */
      await p.evaluate(()=>location.hash='a');await p.waitForTimeout(300);
-     await p.click('#screen-a [data-act="remove-receipt"]');await p.waitForTimeout(250);
+     const clean=!(await txt('#screen-a')).includes('tmp-receipt.png');
+     return okk&&clean}],
+  ['removing the receipt asks first, and puts the page back',async()=>{
+     await p.evaluate(()=>location.hash='c');await p.waitForTimeout(300);
+     await p.click('#screen-c [data-act="remove-receipt"]');await p.waitForTimeout(250);
      const asked=await p.evaluate(()=>document.querySelector('dialog.proto-confirm').open);
      await p.click('[data-act="remove-receipt-go"]');await p.waitForTimeout(300);
-     const back=!!(await p.$('#screen-a [data-drop="receipt"]'));
-     return asked&&back&&!(await txt('#screen-a')).includes('Payment under review')}],
+     const back=!!(await p.$('#screen-c [data-drop="receipt"]'));
+     return asked&&back&&!(await txt('#screen-c')).includes('Payment under review')}],
   ['B: one step is open at a time, and a later step refuses to open early',async()=>{
      await p.reload();await p.waitForTimeout(600);
      await p.evaluate(()=>location.hash='b');await p.waitForTimeout(350);

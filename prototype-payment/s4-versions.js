@@ -1,44 +1,35 @@
 
   /* ============================================================
      Version A · One thing to do
-     The confirmation is a line, not a hero. The amount is the page. One primary
-     action moves the buyer on, and everything else — QR, what happens next — is
-     one level down.
+     The confirmation is a line, not a hero. The amount is the page, the QR is
+     beside it at the size a phone actually reads, and ONE primary action —
+     Track your order — moves the buyer on.
+
+     PM, 17 Sep: checkout does not ask for the receipt. The buyer can upload it
+     from inside the order, so the upload zone, the "I have made the transfer"
+     step and the paid state are all off this page. What is left is the transfer
+     itself and the way back to the order.
      ============================================================ */
   function renderA(){
-    var done = paid();
     $("#screen-a").innerHTML =
-      '<div class="pay">' +
+      '<div class="pay pay--split">' +
         orderLine() +
-        (done ?
-        /* once the receipt is in, the page still has to show WHICH file was sent — a banner
-           alone would leave the buyer with nothing to check or replace */
-        paidBanner() +
-        '<section class="panel"><div class="panel__body stack">' +
-          '<span class="hb-title-sm">Your receipt</span>' + receiptZone() +
-          '<hr class="hb-divider" data-orientation="horizontal">' + tracker() +
-        '</div></section>' :
         '<section class="panel panel--lead">' +
           '<div class="panel__body stack">' +
-            '<h1 class="hb-headline-md">' + (state.transferred ? "Send us the receipt" : "Transfer " + bhd(state.order.total) + " to Highbase") + '</h1>' +
-            '<p class="hb-body-md muted">' + (state.transferred
-              ? "One file and you are done — a screenshot of the transfer is enough."
-              : "Pay from your bank app, then send the receipt so we can match it to this order.") + '</p>' +
-            (state.transferred ? "" : amountBlock({ qr: true })) +
-            (state.transferred ? "" : bankRows()) +
-            '<div class="row">' + (state.transferred ? "" : copyAllBtn()) + '</div>' +
-            '<hr class="hb-divider" data-orientation="horizontal">' +
-            '<div class="stack" id="a-receipt">' +
-              '<span class="hb-title-sm">' + (state.transferred ? "Your receipt" : "Then upload your receipt") + '</span>' +
-              receiptZone() +
+            '<h1 class="hb-headline-md">Transfer ' + bhd(state.order.total) + ' to Highbase</h1>' +
+            '<p class="hb-body-md muted">Scan the code in your bank app, or copy the account details. We match the transfer to this order ourselves — there is nothing to send us.</p>' +
+            '<div class="paysplit">' +
+              '<div class="paysplit__pay stack">' +
+                amountBlock() + bankRows() +
+                '<div class="row">' + copyAllBtn() + '</div>' +
+              '</div>' +
+              '<div class="paysplit__qr">' + qrBlock({ size: "lg", title: "Scan to pay" }) + '</div>' +
             '</div>' +
-            (state.transferred ? "" :
-              btn("I have made the transfer", { size: "lg", block: true, icon: I.check, attrs: ' data-act="mark-transferred"' })) +
+            btn("Track your order", { size: "lg", block: true, icon: I.pkg, attrs: ' data-act="track"' }) +
           '</div>' +
-        '</section>') +
-        whatNext() +
-        '<div class="row row--end">' + btn("Go to marketplace", { style: "ghost", size: "md", attrs: ' data-act="market"' }) +
-          btn("Track your order", { style: "outlined", size: "md", icon: I.pkg, attrs: ' data-act="track"' }) + '</div>' +
+        '</section>' +
+        whatNext({ label: "What happens after I transfer?", receiptInOrder: true }) +
+        '<div class="row row--end">' + btn("Go to marketplace", { style: "ghost", size: "md", attrs: ' data-act="market"' }) + '</div>' +
       '</div>';
   }
 

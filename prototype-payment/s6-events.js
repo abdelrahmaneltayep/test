@@ -102,12 +102,6 @@
       else { no(); }
     },
     "toggle-qr": function () { state.qrOpen = !state.qrOpen; renderPay(); },
-    /* the small tile is the QR's place on the page; this is the same code at scanning size */
-    "open-qr": function () {
-      drawer("Pay by QR", '<div class="stack">' + qrBlock() +
-        '<p class="hb-body-sm muted">The code carries the account, the amount and the reference, so the transfer opens already filled in.</p>' +
-        '</div>', btn("Close", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }), "sm");
-    },
     "pay-tab": function (el) { state.payTab = el.dataset.tab; renderPay(); },
     "open-step": function (el) {
       var id = Number(el.dataset.step);

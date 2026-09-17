@@ -22,6 +22,9 @@
   --proto-footer-logo:43px;   /* (proposal) Logo README: "footer: lockup 43 (proposal — confirm)" */
   --proto-doc-thumb:64px;     /* (proposal) a document preview is a thumbnail, never a full-width image */
   --proto-qr:148px;           /* (proposal) the smallest size a phone camera reads reliably at arm's length */
+  --proto-qr-lg:224px;        /* (proposal) version A gives the code a column, so it is drawn at a size that reads across a desk */
+  --proto-qr-col:288px;       /* the column that holds it: the code, its padding, and room for the caption to wrap */
+  --proto-page-split:880px;   /* version A's measure once the QR takes a column of its own */
 }
 *,*::before,*::after{box-sizing:border-box}
 body{
@@ -154,6 +157,10 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
   display:grid;place-items:center;gap:var(--hb-space-8);background:var(--hb-color-surface);text-align:center;
 }
 .qr__code{width:var(--proto-qr);height:var(--proto-qr);color:var(--hb-color-on-surface)}
+.qr--lg{padding:var(--hb-space-20);width:100%;box-sizing:border-box}
+.qr > *{max-width:100%}
+.qr--lg .qr__code{width:var(--proto-qr-lg);height:var(--proto-qr-lg)}
+.qr--lg .hb-title-sm{color:var(--hb-color-on-surface)}
 .receipt-prev{
   width:var(--proto-doc-thumb);height:var(--proto-doc-thumb);flex:0 0 var(--proto-doc-thumb);border-radius:var(--hb-radius-8);
   border:var(--proto-hairline) solid var(--hb-color-outline-variant);overflow:hidden;
@@ -169,6 +176,8 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
   margin-inline:auto;padding-block:var(--hb-space-24)}
 .pay{max-width:720px}
 .pay--wide{max-width:var(--proto-page-max)}
+/* A carries two columns now, so it gets the room for an IBAN to stay on one line */
+.pay--split{max-width:var(--proto-page-split)}
 .panel--lead{box-shadow:var(--hb-elevation-level-2)}
 .row--end{justify-content:flex-end}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-20);align-items:start}
@@ -194,16 +203,13 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 .amount__lines .hb-headline-lg{color:var(--hb-color-on-surface-heading);overflow-wrap:anywhere}
 .amount__lines .hb-body-sm{color:var(--hb-color-on-surface-variant)}
 
-/* version A · the QR as a tile beside the amount, not a column and not a disclosure */
-.qrmini{display:flex;flex-direction:column;align-items:center;gap:var(--hb-space-6);
-  flex:0 0 auto;padding:var(--hb-space-8);border-radius:var(--hb-radius-8);
-  border:var(--proto-hairline) solid var(--hb-color-outline-variant);
-  background:var(--hb-color-surface);cursor:pointer;font:inherit;color:inherit}
-.qrmini:hover{border-color:var(--hb-color-primary)}
-.qrmini__code{width:var(--hb-space-72);height:var(--hb-space-72);border-radius:var(--hb-radius-6);
-  background:var(--hb-color-surface-container);color:var(--hb-color-on-surface-variant);
-  display:grid;place-items:center}
-.qrmini__cap{color:var(--hb-color-on-surface-variant);white-space:nowrap}
+/* version A · pay on one side, the code on the other. The QR earns a column here because
+   the page has one job left: the transfer. It stacks under the details at compact, where a
+   phone cannot scan its own screen anyway. */
+.paysplit{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--hb-space-20);align-items:start}
+@media (min-width:744px){.paysplit{grid-template-columns:minmax(0,1fr) var(--proto-qr-col)}}
+.paysplit__pay{min-width:0}
+.paysplit__qr{min-width:0}
 
 .copyrow[data-strong]{background:var(--hb-color-surface-container-low)}
 .qr__ph{display:grid;place-items:center;width:100%;height:100%;
