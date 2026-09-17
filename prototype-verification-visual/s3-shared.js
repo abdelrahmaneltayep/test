@@ -133,13 +133,15 @@
       ? field(withErr({ id: "tax-no", label: "Tax Number", value: state.taxNumber, placeholder: "Enter Tax Number", req: true, attrs: ' data-bind="taxNumber" inputmode="numeric"' })) + uploadZone("vat")
       : '');
   }
+  /* Order (PM, 17 Sep): the two required documents first, then VAT. VAT is the optional one
+     and the only one that asks a question, so it reads last rather than beside the CR. */
   function docsBlock(){
     return '<div class="stack">' +
       (state.errors.docs ? alert("error", '<span class="hb-alert__title">' + esc(state.errors.docs) + '</span>') : '') +
       '<div class="grid2">' +
         '<div class="stack">' + field({ id: "cr-no", label: "CR Number", value: state.crNumber, attrs: ' readonly', state: "disabled" }) + uploadZone("cr") + '</div>' +
-        '<div class="stack">' + vatField() + '</div>' +
-      '</div>' + uploadZone("id") +
+        '<div class="stack">' + uploadZone("id") + '</div>' +
+      '</div>' + vatField() +
     '</div>';
   }
 
