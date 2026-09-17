@@ -496,7 +496,8 @@
     return li({ lead: I.upload, state: "todo", title: esc(d.label), tag: reqTag(d), text: "Not uploaded" });
   }
   /* A document on file is something to look at, so the row carries Preview (PM, 17 Sep).
-     It is the List Item's own actions slot — the row gains an affordance, not a second column. */
+     It sits in the List Item's trailing slot, at the end of the row — the tag is beside the
+     title now, so the slot the tag used to borrow is free for the affordance it was built for. */
   function docAfter(k){
     var d = state.docs[k], f = d.file || DOC_SAMPLE[k];
     if (!f) { return docBefore(k); }
@@ -504,7 +505,7 @@
     return li({ lead: replaced ? I.refresh : I.file, tag: reqTag(d),
       title: esc(d.label) + (replaced ? " replaced" : " uploaded"),
       time: esc(f.at || "just now"), text: esc(f.name) + ' · ' + esc(f.size),
-      actions: d.file ? btn("Preview", { style: "ghost", size: "sm", icon: I.view,
+      trail: d.file ? iconBtn(I.view, "Preview " + esc(d.label), { style: "ghost", size: "md",
         attrs: ' data-act="view-doc" data-doc="' + k + '"' }) : '' });
   }
   function docCase(title, note, rows){

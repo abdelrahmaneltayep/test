@@ -1998,7 +1998,8 @@ dialog.proto-confirm::backdrop{background:var(--hb-color-scrim)}
 
 /* 14 · Actions — the component's actions slot, text buttons only */
 .pactions .hb-li__actions{flex-wrap:wrap}
-.pactivity .hb-li__actions{flex-wrap:wrap;margin-block-start:var(--hb-space-8)}
+/* the trailing slot holds Preview on a document that is on file; it is centred on the row */
+.pactivity .hb-li__trail{align-self:center}
 
 /* 15 · Grouped — subheaders inside the list */
 .pgroup__head{display:flex;align-items:baseline;justify-content:space-between;gap:var(--hb-space-12);
@@ -3274,7 +3275,8 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     return li({ lead: I.upload, state: "todo", title: esc(d.label), tag: reqTag(d), text: "Not uploaded" });
   }
   /* A document on file is something to look at, so the row carries Preview (PM, 17 Sep).
-     It is the List Item's own actions slot — the row gains an affordance, not a second column. */
+     It sits in the List Item's trailing slot, at the end of the row — the tag is beside the
+     title now, so the slot the tag used to borrow is free for the affordance it was built for. */
   function docAfter(k){
     var d = state.docs[k], f = d.file || DOC_SAMPLE[k];
     if (!f) { return docBefore(k); }
@@ -3282,7 +3284,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     return li({ lead: replaced ? I.refresh : I.file, tag: reqTag(d),
       title: esc(d.label) + (replaced ? " replaced" : " uploaded"),
       time: esc(f.at || "just now"), text: esc(f.name) + ' · ' + esc(f.size),
-      actions: d.file ? btn("Preview", { style: "ghost", size: "sm", icon: I.view,
+      trail: d.file ? iconBtn(I.view, "Preview " + esc(d.label), { style: "ghost", size: "md",
         attrs: ' data-act="view-doc" data-doc="' + k + '"' }) : '' });
   }
   function docCase(title, note, rows){
