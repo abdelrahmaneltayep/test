@@ -2714,20 +2714,26 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
         '<span class="hb-upload__hint">' + (e ? 'Choose another file' : 'Drop the file here or click to choose') + '</span>' +
         '<span class="hb-upload__max">PDF, JPG or PNG · up to 10 MB</span></div></div>';
   }
-  function docsBlock(o){
-    o = o || {};
+  /* VAT is a checkbox, not a link (PM, 17 Sep). Unticked it is one line the buyer can skip;
+     ticking it is what asks for the tax number and the certificate, so nothing about VAT is
+     on the page until the buyer says it applies to them. The Checkbox atom carries the state,
+     which a plus-link could not: a link cannot say "no, we are not VAT registered". */
+  function vatField(){
+    return '<div class="hb-field">' +
+      '<span class="hb-field__label">VAT registration</span>' +
+      check("has-vat", !!state.hasVat, "I have a VAT certificate", ' data-bind="hasVat"') +
+      '<div class="hb-field__msg">Only if you want to reclaim VAT on the tax invoice</div>' +
+    '</div>' +
+    (state.hasVat
+      ? field(withErr({ id: "tax-no", label: "Tax Number", value: state.taxNumber, placeholder: "Enter Tax Number", req: true, attrs: ' data-bind="taxNumber" inputmode="numeric"' })) + uploadZone("vat")
+      : '');
+  }
+  function docsBlock(){
     return '<div class="stack">' +
       (state.errors.docs ? alert("error", '<span class="hb-alert__title">' + esc(state.errors.docs) + '</span>') : '') +
       '<div class="grid2">' +
         '<div class="stack">' + field({ id: "cr-no", label: "CR Number", value: state.crNumber, attrs: ' readonly', state: "disabled" }) + uploadZone("cr") + '</div>' +
-        '<div class="stack">' +
-          (state.hasVat
-            ? '<div class="hb-field"><span class="hb-field__label">VAT registration</span>' + check("has-vat", true, "Have VAT certificate", ' data-bind="hasVat"') + '</div>' +
-              field(withErr({ id: "tax-no", label: "Tax Number", value: state.taxNumber, placeholder: "Enter Tax Number", req: true, attrs: ' data-bind="taxNumber" inputmode="numeric"' })) + uploadZone("vat")
-            : (o.vatAsLink
-                ? '<div class="hb-field"><span class="hb-field__label">VAT registration</span><button type="button" class="disclose hb-body-md" data-act="show-vat">' + I.add + 'Add a VAT certificate (optional)</button><div class="hb-field__msg">Only if you want to reclaim VAT on the tax invoice</div></div>'
-                : '<div class="hb-field"><span class="hb-field__label">VAT registration</span>' + check("has-vat", false, "Have VAT certificate", ' data-bind="hasVat"') + '<div class="hb-field__msg">Optional. Needed to reclaim VAT on the tax invoice.</div></div>')) +
-        '</div>' +
+        '<div class="stack">' + vatField() + '</div>' +
       '</div>' + uploadZone("id") +
     '</div>';
   }
@@ -3557,7 +3563,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
     var body;
     if (g.id === "branch") { body = branchBlock(); }
     else if (g.id === "address") { body = addressBlock(); }
-    else if (g.id === "docs") { body = docsBlock({ vatAsLink: true }); }
+    else if (g.id === "docs") { body = docsBlock(); }
     else {
       body = '<dl class="review">' +
         '<div class="review__row"><dt class="hb-label-md">Contact</dt><dd class="hb-body-md">' + branchLine() + '</dd>' + btn("Change", { style: "ghost", size: "sm", attrs: ' data-act="go-step" data-step="0"' }) + '</div>' +
@@ -3592,7 +3598,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   var TABS = [
     { id: "branch",  label: "Branch Details",     lead: "Who the driver calls when the order arrives.", body: branchBlock },
     { id: "address", label: "Delivery Address",   lead: "Where the order goes, and the pin the driver navigates to.", body: addressBlock },
-    { id: "docs",    label: "Business Documents", lead: "Kept on your account — act only if something is missing.", body: function () { return docsBlock({ vatAsLink: true }); } }
+    { id: "docs",    label: "Business Documents", lead: "Kept on your account — act only if something is missing.", body: function () { return docsBlock(); } }
   ];
   function tabPill(i){
     var t = TABS[i];
@@ -3632,7 +3638,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   var CHECKS = [
     { id: "branch",  label: "Branch details",     val: branchLine,  done: function () { return true; },  editor: function () { return state.editing.branch ? branchForm() : branchView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Details", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-branch"' }) + '</div>'; } },
     { id: "address", label: "Delivery address",   val: addressLine, done: function () { return true; },  editor: function () { return state.editing.address ? addressForm() : addressView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Address", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-address"' }) + '</div>'; } },
-    { id: "docs",    label: "Business documents", val: docsLine,    done: docsOk,                        editor: function () { return docsBlock({ vatAsLink: true }); } },
+    { id: "docs",    label: "Business documents", val: docsLine,    done: docsOk,                        editor: function () { return docsBlock(); } },
     { id: "payment", label: "Payment method",     val: function () { return 'Highbase Payment · bank transfer of <b class="num">' + bhd(totals().total) + '</b> within 48 hours'; }, done: function () { return true; }, editor: null }
   ];
   function renderE(){
@@ -3815,7 +3821,7 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Where the order goes. The pin is what the driver navigates to.</p>' + addressFields() + '</div>'; },
       foot: function () { return btn("Cancel", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }) + btn("Update Address", { size: "lg", icon: I.save, attrs: ' data-act="save-address"' }); } },
     docs:    { title: "Business Documents", size: "lg",
-      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Kept on your account and reviewed within one working day — you will not be asked again on the next order.</p>' + docsBlock({ vatAsLink: true }) + '</div>'; },
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Kept on your account and reviewed within one working day — you will not be asked again on the next order.</p>' + docsBlock() + '</div>'; },
       foot: function () { return btn("Done", { size: "lg", icon: I.check, attrs: ' data-act="close-drawer"' }); } }
   };
   function paintDrawer(reopen){
@@ -3919,7 +3925,6 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
       paintDrawer(true);
       var first = $(".hb-drawer__body input", dlg); if (first) { first.focus(); }
     },
-    "show-vat": function () { state.hasVat = true; renderVerify(); var el = $("#screen-" + state.version + " #tax-no"); if (el) { el.focus(); } },
     "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
     "cancel-branch": function () { state.errors = {}; state.editing.branch = false; renderVerify(); },
     "save-branch": saveBranch,
@@ -3970,7 +3975,16 @@ a.hb-footer__row:hover .hb-footer__value{text-decoration:underline}
   });
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t.dataset.bind === "hasVat") { state.hasVat = t.checked; delete state.errors["tax-no"]; delete state.errors.docs; renderVerify(); if (t.checked) { var f = $("#screen-" + state.version + " #tax-no"); if (f) { f.focus(); } } return; }
+    if (t.dataset.bind === "hasVat") {
+      state.hasVat = t.checked; delete state.errors["tax-no"]; delete state.errors.docs; renderVerify();
+      /* the tick is what asks for the number, so the number takes focus — and when the box is
+         inside the Drawer the field is there too, not on the page behind it */
+      if (t.checked) {
+        var f = (dlg.open ? $("#tax-no", dlg) : null) || $("#screen-" + state.version + " #tax-no");
+        if (f) { f.focus(); }
+      }
+      return;
+    }
     if (t.dataset.bind === "taxNumber") { state.taxNumber = t.value.trim(); return; }   // no re-render: the field keeps focus
   });
   document.addEventListener("input", function (e) { if (e.target.dataset.bind === "taxNumber") { state.taxNumber = e.target.value.trim(); } });

@@ -7,8 +7,15 @@ inlined **verbatim** from `abdelrahmaneltayep/highbase-ds`, icons through the re
 
 Same data everywhere: Branch Details (Buyer · +973 908070605 · branch@highbaseco.com), Delivery
 Address (Bahrain · Capital · Manama · 18 · 19 · 11111, pin saved), Business Documents (CR
-5056050560-1 · Commercial License · Have VAT certificate → Tax Number + VAT Certificate · Personal
+5056050560-1 · Commercial License · I have a VAT certificate → Tax Number + VAT Certificate · Personal
 ID Document). Same edit and upload behaviour everywhere, from the previous proposal.
+
+**VAT is a checkbox** (PM, 17 Sep). It replaces the `+ Add a VAT certificate (optional)` link that
+used to sit in the Drawer: unticked, VAT is one line the buyer can skip; ticking it is what asks
+for the Tax Number and the VAT Certificate, and the number takes focus. A link could say *add
+one*; only a checkbox can also say *no, we are not VAT registered*, which is the answer most
+buyers give. Unticking puts the panel back and clears the tax-number error. The Checkbox atom
+carries it — no new control.
 
 | | How it discloses | Buyer sees first | Best for | Trade-off |
 |---|---|---|---|---|

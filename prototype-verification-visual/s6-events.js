@@ -101,7 +101,7 @@
       body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Where the order goes. The pin is what the driver navigates to.</p>' + addressFields() + '</div>'; },
       foot: function () { return btn("Cancel", { style: "ghost", size: "lg", attrs: ' data-act="close-drawer"' }) + btn("Update Address", { size: "lg", icon: I.save, attrs: ' data-act="save-address"' }); } },
     docs:    { title: "Business Documents", size: "lg",
-      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Kept on your account and reviewed within one working day — you will not be asked again on the next order.</p>' + docsBlock({ vatAsLink: true }) + '</div>'; },
+      body: function () { return '<div class="drawerform stack"><p class="hb-body-sm muted">Kept on your account and reviewed within one working day — you will not be asked again on the next order.</p>' + docsBlock() + '</div>'; },
       foot: function () { return btn("Done", { size: "lg", icon: I.check, attrs: ' data-act="close-drawer"' }); } }
   };
   function paintDrawer(reopen){
@@ -205,7 +205,6 @@
       paintDrawer(true);
       var first = $(".hb-drawer__body input", dlg); if (first) { first.focus(); }
     },
-    "show-vat": function () { state.hasVat = true; renderVerify(); var el = $("#screen-" + state.version + " #tax-no"); if (el) { el.focus(); } },
     "edit-branch": function () { state.errors = {}; state.editing.branch = true; if (state.version === "e") { state.expand.branch = true; } renderVerify(); var el = $("#screen-" + state.version + " #b-name"); if (el) { el.focus(); } },
     "cancel-branch": function () { state.errors = {}; state.editing.branch = false; renderVerify(); },
     "save-branch": saveBranch,
@@ -256,7 +255,16 @@
   });
   document.addEventListener("change", function (e) {
     var t = e.target;
-    if (t.dataset.bind === "hasVat") { state.hasVat = t.checked; delete state.errors["tax-no"]; delete state.errors.docs; renderVerify(); if (t.checked) { var f = $("#screen-" + state.version + " #tax-no"); if (f) { f.focus(); } } return; }
+    if (t.dataset.bind === "hasVat") {
+      state.hasVat = t.checked; delete state.errors["tax-no"]; delete state.errors.docs; renderVerify();
+      /* the tick is what asks for the number, so the number takes focus — and when the box is
+         inside the Drawer the field is there too, not on the page behind it */
+      if (t.checked) {
+        var f = (dlg.open ? $("#tax-no", dlg) : null) || $("#screen-" + state.version + " #tax-no");
+        if (f) { f.focus(); }
+      }
+      return;
+    }
     if (t.dataset.bind === "taxNumber") { state.taxNumber = t.value.trim(); return; }   // no re-render: the field keeps focus
   });
   document.addEventListener("input", function (e) { if (e.target.dataset.bind === "taxNumber") { state.taxNumber = e.target.value.trim(); } });

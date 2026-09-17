@@ -119,20 +119,26 @@
         '<span class="hb-upload__hint">' + (e ? 'Choose another file' : 'Drop the file here or click to choose') + '</span>' +
         '<span class="hb-upload__max">PDF, JPG or PNG · up to 10 MB</span></div></div>';
   }
-  function docsBlock(o){
-    o = o || {};
+  /* VAT is a checkbox, not a link (PM, 17 Sep). Unticked it is one line the buyer can skip;
+     ticking it is what asks for the tax number and the certificate, so nothing about VAT is
+     on the page until the buyer says it applies to them. The Checkbox atom carries the state,
+     which a plus-link could not: a link cannot say "no, we are not VAT registered". */
+  function vatField(){
+    return '<div class="hb-field">' +
+      '<span class="hb-field__label">VAT registration</span>' +
+      check("has-vat", !!state.hasVat, "I have a VAT certificate", ' data-bind="hasVat"') +
+      '<div class="hb-field__msg">Only if you want to reclaim VAT on the tax invoice</div>' +
+    '</div>' +
+    (state.hasVat
+      ? field(withErr({ id: "tax-no", label: "Tax Number", value: state.taxNumber, placeholder: "Enter Tax Number", req: true, attrs: ' data-bind="taxNumber" inputmode="numeric"' })) + uploadZone("vat")
+      : '');
+  }
+  function docsBlock(){
     return '<div class="stack">' +
       (state.errors.docs ? alert("error", '<span class="hb-alert__title">' + esc(state.errors.docs) + '</span>') : '') +
       '<div class="grid2">' +
         '<div class="stack">' + field({ id: "cr-no", label: "CR Number", value: state.crNumber, attrs: ' readonly', state: "disabled" }) + uploadZone("cr") + '</div>' +
-        '<div class="stack">' +
-          (state.hasVat
-            ? '<div class="hb-field"><span class="hb-field__label">VAT registration</span>' + check("has-vat", true, "Have VAT certificate", ' data-bind="hasVat"') + '</div>' +
-              field(withErr({ id: "tax-no", label: "Tax Number", value: state.taxNumber, placeholder: "Enter Tax Number", req: true, attrs: ' data-bind="taxNumber" inputmode="numeric"' })) + uploadZone("vat")
-            : (o.vatAsLink
-                ? '<div class="hb-field"><span class="hb-field__label">VAT registration</span><button type="button" class="disclose hb-body-md" data-act="show-vat">' + I.add + 'Add a VAT certificate (optional)</button><div class="hb-field__msg">Only if you want to reclaim VAT on the tax invoice</div></div>'
-                : '<div class="hb-field"><span class="hb-field__label">VAT registration</span>' + check("has-vat", false, "Have VAT certificate", ' data-bind="hasVat"') + '<div class="hb-field__msg">Optional. Needed to reclaim VAT on the tax invoice.</div></div>')) +
-        '</div>' +
+        '<div class="stack">' + vatField() + '</div>' +
       '</div>' + uploadZone("id") +
     '</div>';
   }

@@ -150,10 +150,25 @@ const CONTRAST=`(()=>{const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03
      const back=(await txt('dialog.hb-drawer-layer')).includes('Commercial License (CR)');
      await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);
      return preview&&back}],
-  ['B: VAT is a link until asked for',async()=>{await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(300);
-     const link=!!(await p.$('dialog.hb-drawer-layer [data-act="show-vat"]'));await p.click('dialog.hb-drawer-layer [data-act="show-vat"]');await p.waitForTimeout(250);
-     const shown=!!(await p.$('dialog.hb-drawer-layer #tax-no'));await p.click('dialog.hb-drawer-layer #has-vat');await p.waitForTimeout(250);
-     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);return link&&shown}],
+  ['B: VAT is a checkbox, and ticking it is what asks for the number and the certificate',async()=>{
+     await p.click('#screen-b [data-act="open-drawer"][data-drawer="docs"]');await p.waitForTimeout(300);
+     /* before: one line, nothing asked for, and no plus-link anywhere */
+     const box=!!(await p.$('dialog.hb-drawer-layer #has-vat'));
+     const checkedBefore=box?await p.$eval('dialog.hb-drawer-layer #has-vat',e=>e.checked):null;
+     const noLink=(await p.$$('dialog.hb-drawer-layer [data-act="show-vat"], dialog.hb-drawer-layer .disclose')).length===0;
+     const askedBefore=(await p.$$('dialog.hb-drawer-layer #tax-no, dialog.hb-drawer-layer [data-drop="vat"]')).length;
+     const hint=(await txt('dialog.hb-drawer-layer')).includes('Only if you want to reclaim VAT');
+     /* after: the tax number and the certificate zone, and the number takes focus */
+     await p.click('dialog.hb-drawer-layer #has-vat');await p.waitForTimeout(300);
+     const checkedAfter=await p.$eval('dialog.hb-drawer-layer #has-vat',e=>e.checked);
+     const num=!!(await p.$('dialog.hb-drawer-layer #tax-no'));
+     const zone=!!(await p.$('dialog.hb-drawer-layer [data-drop="vat"]'));
+     const focused=await p.evaluate(()=>document.activeElement&&document.activeElement.id);
+     /* and unticking puts it back */
+     await p.click('dialog.hb-drawer-layer #has-vat');await p.waitForTimeout(300);
+     const goneAgain=(await p.$$('dialog.hb-drawer-layer #tax-no, dialog.hb-drawer-layer [data-drop="vat"]')).length===0;
+     await p.click('dialog.hb-drawer-layer [data-act="close-drawer"]');await p.waitForTimeout(250);
+     return box&&checkedBefore===false&&noLink&&askedBefore===0&&hint&&checkedAfter&&num&&zone&&focused==='tax-no'&&goneAgain}],
   ['D: tabs, one pane, each with its own status',async()=>{
      // C's test leaves the Confirmation Dialog open, and a modal <dialog> swallows every click
      await p.evaluate(()=>{const d=document.querySelector('dialog.proto-confirm');if(d&&d.open)d.close()});

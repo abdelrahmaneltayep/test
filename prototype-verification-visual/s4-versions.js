@@ -99,7 +99,7 @@
     var body;
     if (g.id === "branch") { body = branchBlock(); }
     else if (g.id === "address") { body = addressBlock(); }
-    else if (g.id === "docs") { body = docsBlock({ vatAsLink: true }); }
+    else if (g.id === "docs") { body = docsBlock(); }
     else {
       body = '<dl class="review">' +
         '<div class="review__row"><dt class="hb-label-md">Contact</dt><dd class="hb-body-md">' + branchLine() + '</dd>' + btn("Change", { style: "ghost", size: "sm", attrs: ' data-act="go-step" data-step="0"' }) + '</div>' +
@@ -134,7 +134,7 @@
   var TABS = [
     { id: "branch",  label: "Branch Details",     lead: "Who the driver calls when the order arrives.", body: branchBlock },
     { id: "address", label: "Delivery Address",   lead: "Where the order goes, and the pin the driver navigates to.", body: addressBlock },
-    { id: "docs",    label: "Business Documents", lead: "Kept on your account — act only if something is missing.", body: function () { return docsBlock({ vatAsLink: true }); } }
+    { id: "docs",    label: "Business Documents", lead: "Kept on your account — act only if something is missing.", body: function () { return docsBlock(); } }
   ];
   function tabPill(i){
     var t = TABS[i];
@@ -174,7 +174,7 @@
   var CHECKS = [
     { id: "branch",  label: "Branch details",     val: branchLine,  done: function () { return true; },  editor: function () { return state.editing.branch ? branchForm() : branchView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Details", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-branch"' }) + '</div>'; } },
     { id: "address", label: "Delivery address",   val: addressLine, done: function () { return true; },  editor: function () { return state.editing.address ? addressForm() : addressView() + '<div class="row-end" style="margin-top:var(--hb-space-12)">' + btn("Edit Address", { style: "outlined", size: "sm", icon: I.edit, attrs: ' data-act="edit-address"' }) + '</div>'; } },
-    { id: "docs",    label: "Business documents", val: docsLine,    done: docsOk,                        editor: function () { return docsBlock({ vatAsLink: true }); } },
+    { id: "docs",    label: "Business documents", val: docsLine,    done: docsOk,                        editor: function () { return docsBlock(); } },
     { id: "payment", label: "Payment method",     val: function () { return 'Highbase Payment · bank transfer of <b class="num">' + bhd(totals().total) + '</b> within 48 hours'; }, done: function () { return true; }, editor: null }
   ];
   function renderE(){
