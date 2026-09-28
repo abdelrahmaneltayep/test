@@ -1,0 +1,289 @@
+<meta charset="utf-8">
+<title>بانرات مستودعات سلة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --brand:#004956; --brand-2:#0b5f6c; --ink:#1f2a2e; --ink-2:#4b5a5f; --muted:#7a878b;
+  --mint:#a8f0dc; --mint-2:#76e8cd; --mint-bg:#e6fbf4; --mint-bg2:#d2f6ea; --mint-line:#bdeedf;
+  --orange:#f2663a; --ok:#0f9f6e; --bad:#e0504a; --line:#e6ebec; --page:#f4f6f6; --white:#fff;
+  --font:'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+h1,h2,h3,p{margin:0} h1,h2,h3{text-wrap:balance}
+button,input{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:32px 80px}
+.intro{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.intro h1{font-size:26px;color:var(--brand)}
+.intro p{color:var(--ink-2);max-width:62ch}
+.jump{display:flex;gap:6px;flex-wrap:wrap}
+.jump a{border:1px solid var(--line);background:var(--white);border-radius:20px;padding:3px 11px;font-size:12px;text-decoration:none;color:var(--brand)}
+.opt{margin-top:40px;scroll-margin-top:16px}
+.opt-head{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.opt-no{font-weight:700;color:var(--brand);background:var(--mint-bg2);border-radius:6px;padding:0 8px;font-size:13px}
+.opt-head h2{font-size:17px}
+.opt-head p{color:var(--muted);font-size:13px;flex-basis:100%}
+.frame{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px}
+
+/* ---- shared banner pieces ---- */
+.bn{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(115deg,var(--mint-bg2) 0%,var(--mint-bg) 45%,#f2fdf9 100%);border:1.5px solid var(--mint-line)}
+.bn-x{position:absolute;top:12px;inset-inline-end:12px;border:0;background:rgba(255,255,255,.7);border-radius:50%;width:28px;height:28px;cursor:pointer;display:grid;place-items:center;color:var(--ink-2);z-index:2}
+.h{color:var(--brand);font-weight:700;font-size:clamp(22px,2.6vw,32px);line-height:1.35}
+.sub{color:var(--ink-2);font-size:clamp(14px,1.3vw,17px);margin-top:10px;max-width:52ch}
+.sub em{font-style:normal;color:var(--orange);font-weight:600}
+.cta{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--mint);color:var(--brand);font-weight:700;border-radius:12px;padding:12px 24px;cursor:pointer;font-size:15px;text-decoration:none;white-space:nowrap}
+.cta:hover{background:var(--mint-2)}
+.cta.dark{background:var(--brand);color:#fff}
+.link{color:var(--brand);font-weight:600;background:none;border:0;cursor:pointer;padding:12px 6px;text-decoration:underline;text-underline-offset:4px}
+.icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat{background:var(--white);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.stat .ic{width:48px;height:48px;border-radius:50%;background:#eef5f5;display:grid;place-items:center;color:var(--brand);flex:none}
+.stat span{display:block;color:var(--ink-2);font-size:13px}
+.stat b{display:block;font-size:21px;color:var(--brand);line-height:1.3;white-space:nowrap}
+.stat span{white-space:nowrap}
+.stat.soft{background:rgba(255,255,255,.65)}
+
+/* dashboard mock */
+.mock{background:var(--white);border-radius:12px;box-shadow:0 18px 40px rgba(0,73,86,.14);padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:11px}
+.mock .w{border:1px solid var(--line);border-radius:8px;padding:10px}
+.mock .t{color:var(--ink-2);font-size:10.5px}
+.mock .big{font-size:22px;font-weight:700;color:var(--brand);text-align:center;margin-top:6px}
+.mock .big small{font-size:11px;font-weight:500}
+.mock .up{display:block;width:max-content;margin:8px auto 0;background:#e3f7ee;color:var(--ok);border-radius:10px;padding:0 6px;font-size:9.5px;font-weight:600}
+.mock .ln{display:flex;justify-content:space-between;padding:4px 0;border-top:1px dashed var(--line);font-size:10px;color:var(--ink-2)}
+.mock .ln b{color:var(--bad);font-weight:600} .mock .ln b.p{color:var(--ok)}
+.donut{width:78px;height:78px;margin:6px auto 4px;border-radius:50%;background:conic-gradient(var(--mint-2) 0 54%,#eef1f1 54% 100%);display:grid;place-items:center}
+.donut i{width:56px;height:56px;border-radius:50%;background:#fff;display:grid;place-items:center;font-style:normal;font-weight:700;color:var(--brand);font-size:15px}
+.legend{display:flex;justify-content:center;gap:10px;font-size:9.5px;color:var(--muted)}
+.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-inline-end:3px}
+
+/* ---- option layouts ---- */
+.o1 .stat{padding:12px}
+.o1 .stat .ic{width:40px;height:40px}
+.o1{display:grid;grid-template-columns:1.45fr 1fr;gap:36px;padding:34px 36px;align-items:center}
+.o1 .mock{transform:rotate(-1.2deg)}
+.o2 .top{display:grid;grid-template-columns:1.2fr 1fr;gap:36px;padding:40px 40px 36px;align-items:center}
+.o2-stats{grid-template-columns:repeat(4,1fr);margin-top:14px}
+.o2-stats .stat{background:var(--mint-bg);border:1px solid var(--mint-line)}
+.o3{display:flex;align-items:center;gap:20px;padding:14px 20px;flex-wrap:wrap;border-radius:12px}
+.o3 .h{font-size:17px}
+.o3 .mini{display:flex;gap:18px;margin-inline-start:auto;flex-wrap:wrap}
+.o3 .mini div{font-size:12px;color:var(--ink-2)} .o3 .mini b{color:var(--brand);font-size:15px;margin-inline-end:4px}
+.o3 .cta{padding:8px 16px;font-size:13px}
+.o4{padding:32px 36px}
+.path{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:26px;position:relative}
+.path .s{position:relative;padding-inline-end:18px}
+.path .s::after{content:"";position:absolute;top:22px;inset-inline-start:52px;inset-inline-end:8px;border-top:2px dashed #9edfcc}
+.path .s:last-child::after{display:none}
+.path .c{width:46px;height:46px;border-radius:50%;background:#fff;border:2px solid var(--mint-2);display:grid;place-items:center;color:var(--brand);position:relative;z-index:1}
+.path .s:last-child .c{background:var(--brand);color:var(--mint);border-color:var(--brand)}
+.path b{display:block;margin-top:10px;color:var(--brand)} .path span{font-size:12.5px;color:var(--ink-2)}
+.path em{font-style:normal;font-size:11px;color:var(--muted);display:block}
+.o4 .foot{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:26px;flex-wrap:wrap}
+.o5{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;padding:34px 36px;align-items:center}
+.map{position:relative;aspect-ratio:1.25;max-width:100%;background:radial-gradient(circle,#b9ebdc 1.3px,transparent 1.6px) 0 0/13px 13px;border-radius:14px;
+ -webkit-mask:radial-gradient(ellipse 60% 55% at 52% 50%,#000 70%,transparent 100%);mask:radial-gradient(ellipse 60% 55% at 52% 50%,#000 70%,transparent 100%)}
+.map-wrap{position:relative}
+.pin{position:absolute;transform:translate(50%,-100%);display:flex;flex-direction:column;align-items:center;gap:2px}
+.pin i{width:14px;height:14px;border-radius:50%;background:var(--brand);border:3px solid #fff;box-shadow:0 0 0 6px rgba(0,73,86,.12)}
+.pin span{background:#fff;border-radius:6px;padding:1px 7px;font-size:11px;font-weight:600;color:var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.08);white-space:nowrap}
+.pin.hot i{background:var(--orange);box-shadow:0 0 0 8px rgba(242,102,58,.18)}
+.near{margin-top:18px;background:#fff;border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;max-width:430px}
+.near .ic{width:40px;height:40px;border-radius:10px;background:var(--mint-bg2);display:grid;place-items:center;color:var(--brand)}
+.o6{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;padding:34px 36px;align-items:center}
+.calc{background:#fff;border-radius:16px;padding:20px;box-shadow:0 14px 32px rgba(0,73,86,.1)}
+.calc label{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-2)}
+.calc input[type=range]{width:100%;accent-color:var(--brand);margin:8px 0 16px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp div{border-radius:10px;padding:10px 12px;background:#f6f8f8}
+.cmp div.win{background:var(--mint-bg);border:1px solid var(--mint-line)}
+.cmp span{font-size:12px;color:var(--muted);display:block}
+.cmp b{font-size:20px;color:var(--brand)}
+.save{margin-top:12px;font-size:13px;color:var(--ok);font-weight:600}
+.o7{display:grid;grid-template-columns:1.1fr 1fr;gap:30px;padding:34px 36px;align-items:center}
+.tag{display:inline-flex;gap:6px;align-items:center;background:#fff;border-radius:20px;padding:3px 12px;font-size:12px;color:var(--brand);font-weight:600;margin-bottom:12px}
+.bars{background:#fff;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.bar{display:grid;grid-template-columns:90px 1fr 44px;gap:10px;align-items:center;font-size:13px}
+.bar .tr{height:12px;border-radius:6px;background:#eef3f3;overflow:hidden}
+.bar .tr i{display:block;height:100%;border-radius:6px;background:#b8e7d9}
+.bar.top .tr i{background:var(--brand)} .bar.top{font-weight:700;color:var(--brand)}
+.o8{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;padding:34px 36px;align-items:center}
+.phone{justify-self:center;width:230px;max-width:100%;background:#fff;border-radius:26px;border:6px solid #16323a;padding:12px;box-shadow:0 20px 44px rgba(0,50,60,.2)}
+.phone .img{height:120px;border-radius:12px;background:linear-gradient(135deg,#f7e3d4,#f3c9ad);display:grid;place-items:center;font-size:42px}
+.phone h4{margin:10px 0 2px;font-size:14px} .phone .pr{color:var(--brand);font-weight:700}
+.badge{display:flex;align-items:center;gap:6px;margin-top:8px;background:#fff1eb;color:var(--orange);border-radius:8px;padding:6px 8px;font-size:12px;font-weight:700}
+.phone .buy{margin-top:10px;background:var(--brand);color:#fff;border-radius:10px;text-align:center;padding:8px;font-size:13px;font-weight:600}
+.checks{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+.checks div{display:flex;gap:8px;align-items:center;color:var(--ink-2)}
+.checks .icon{color:var(--ok)}
+.o9{background:linear-gradient(120deg,#003a45 0%,#004956 60%,#0b5f6c 100%);border-color:#0b5f6c;display:grid;grid-template-columns:1fr auto;gap:30px;padding:36px 40px;align-items:center}
+.o9 .h{color:#fff} .o9 .sub{color:#c7e4e8} .o9 .sub em{color:#ffb08f}
+.bignum{color:var(--mint);font-weight:700;font-size:clamp(60px,8vw,104px);line-height:1;text-align:center}
+.bignum small{display:block;font-size:16px;color:#c7e4e8;font-weight:500;margin-top:10px}
+.o9 .stats{margin-top:24px} .o9 .stat{background:rgba(255,255,255,.07);border:1px solid rgba(168,240,220,.22)}
+.o9 .stat b{color:#fff} .o9 .stat span{color:#c7e4e8} .o9 .stat .ic{background:rgba(168,240,220,.15);color:var(--mint)}
+.o10{padding:30px 36px}
+.tabs{display:inline-flex;background:rgba(255,255,255,.7);border-radius:12px;padding:4px;gap:4px;margin-bottom:22px;flex-wrap:wrap}
+.tabs button{border:0;background:none;border-radius:9px;padding:7px 16px;cursor:pointer;color:var(--ink-2);font-weight:500}
+.tabs button[aria-selected=true]{background:#fff;color:var(--brand);font-weight:700;box-shadow:0 2px 6px rgba(0,73,86,.08)}
+.o10 .pane{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center}
+.feat{background:#fff;border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.feat .r{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--ink-2)}
+.feat .r i{width:34px;height:34px;border-radius:9px;background:var(--mint-bg2);display:grid;place-items:center;color:var(--brand);font-style:normal;flex:none}
+.feat .r b{color:var(--ink);display:block;font-size:13.5px}
+
+@media (max-width:900px){
+  .o1,.o2 .top,.o5,.o6,.o7,.o8,.o9,.o10 .pane{grid-template-columns:1fr}
+  .o2-stats{grid-template-columns:1fr 1fr}
+  .o1 .mock{transform:none}
+}
+@media (max-width:640px){
+  .wrap{padding-inline:16px}
+  .frame{padding:10px}
+  .o1,.o2 .top,.o4,.o5,.o6,.o7,.o8,.o9,.o10{padding:22px 18px}
+  .stats,.o2-stats{grid-template-columns:1fr}
+  .path{grid-template-columns:1fr 1fr;row-gap:20px}
+  .path .s:nth-child(2)::after{display:none}
+  .mock{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <div>
+      <h1>بانر مستودعات سلة: 10 اختيارات</h1>
+      <p>كل الاختيارات بنفس لغة المرجع: خلفية نعناعية، عنوان بلون سلة الداكن، «محلي إكسبريس» بالبرتقالي، وزر رئيسي واحد. الاختلاف في الفكرة التي يبيعها كل بانر.</p>
+    </div>
+    <nav class="jump" aria-label="انتقل إلى اختيار" id="jump"></nav>
+  </header>
+  <div id="list"></div>
+</div>
+
+<script>
+const I={
+  rocket:'<svg class="icon" viewBox="0 0 24 24"><path d="M5 15c-1.5 1.5-2 5-2 5s3.5-.5 5-2"/><path d="M9 15l-3-3c1-3.5 4.5-9 12-9 0 7.5-5.5 11-9 12z"/><circle cx="14.5" cy="9.5" r="1.6"/><path d="M6 12H3l3-4h4M12 18v3l4-3v-4"/></svg>',
+  box:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>',
+  truck:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
+  pin:'<svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  check:'<svg class="icon" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
+  shield:'<svg class="icon" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/></svg>',
+  clock:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  store:'<svg class="icon" viewBox="0 0 24 24"><path d="M4 10v10h16V10M3 10l2-6h14l2 6zM9 20v-5h6v5"/></svg>',
+  x:'<svg class="icon" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  arrow:'<svg class="icon" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>',
+  chart:'<svg class="icon" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+};
+const SUB='خزّن منتجاتك وجهّزها واشحنها عبر شبكة شركاء سلة، وفعّل توصيل <em>محلي إكسبريس</em> خلال الساعة نفسها لكل طلب مؤهل.';
+const H='تحكّم كامل في مخزونك مع مستودعات سلة';
+const X='<button class="bn-x" type="button" aria-label="إخفاء البانر">'+I.x+'</button>';
+const stat=(ic,l,v,cls='')=>`<div class="stat ${cls}"><div><span>${l}</span><b class="num">${v}</b></div><div class="ic">${ic}</div></div>`;
+const STATS=(cls)=>stat(I.rocket,'متوسط وقت التوصيل','24 ساعة',cls)+stat(I.rocket,'مستودع في المملكة','+15',cls)+stat(I.rocket,'تاجر يستخدم الخدمة','+50 ألف',cls);
+const mock=()=>`<div class="mock" aria-hidden="true">
+  <div class="w"><div class="t">إجمالي المخزون</div><span class="up">▲ 34%</span><div class="big num">12,500 <small>وحدة</small></div></div>
+  <div class="w"><div class="t">الطلبات المستلمة</div><span class="up">▲ 34%</span><div class="big num">350 <small>طلب</small></div></div>
+  <div class="w"><div class="t">سعة التخزين</div><div class="donut"><i class="num">54%</i></div><div class="legend"><span><i style="background:var(--mint-2)"></i>مستخدمة 54%</span><span><i style="background:#e3e8e8"></i>متاحة 46%</span></div></div>
+  <div class="w"><div class="t" style="display:flex;justify-content:space-between"><span>رصيد المحفظة <b class="num" style="color:var(--brand)">5,000 ر.س</b></span></div>
+    <div class="ln"><span>رسوم التخزين</span><b class="num">13.54 -</b></div><div class="ln"><span>الالتقاط والتغليف</span><b class="num">11,253 -</b></div>
+    <div class="ln"><span>شحن المحفظة</span><b class="num p">8,405 +</b></div><div class="ln"><span>رسوم النقل</span><b class="num">930 -</b></div></div>
+</div>`;
+
+const OPTS=[
+ {name:'الأصل المحسّن: نص وأرقام ولوحة',when:'الأقرب للمرجع الأول. يناسب أول زيارة للصفحة لأنه يشرح الخدمة ويعرض أثرها في لوحة التاجر.',
+  html:()=>`<section class="bn o1">${X}<div><h2 class="h">${H}</h2><p class="sub">${SUB}</p>
+   <div style="margin:22px 0 24px"><a class="cta" href="#">اكتشف مستودعات سلة</a></div><div class="stats">${STATS()}</div></div>${mock()}</section>`},
+
+ {name:'بطاقة كبيرة وشريط أرقام تحتها',when:'مثل المرجع الثاني. الأرقام خارج البطاقة فيبقى البانر أنظف، وتصلح الأرقام كصف مستقل حتى بعد إخفاء البانر.',
+  html:()=>`<div><section class="bn o2">${X}<div class="top"><div><h2 class="h">${H}</h2><p class="sub">${SUB}</p><div style="margin-top:24px"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>${mock()}</div></section>
+   <div class="stats o2-stats">${stat(I.clock,'متوسط وقت التوصيل','24 ساعة')+stat(I.pin,'مستودع في المملكة','+15')+stat(I.store,'تاجر يستخدم الخدمة','+50 ألف')+stat(I.shield,'دقة المخزون','99.8%')}</div></div>`},
+
+ {name:'شريط مختصر للزيارات المتكررة',when:'حالة البانر بعد أول إغلاق، أو لتاجر حجز مستودعاً. سطر واحد لا يدفع البطاقات للأسفل.',
+  html:()=>`<section class="bn o3"><span class="ic" style="color:var(--brand)">${I.rocket}</span><h2 class="h">وصّل طلباتك خلال 24 ساعة من مستودعات سلة</h2>
+   <div class="mini"><div><b class="num">+15</b>مستودع</div><div><b class="num">+50 ألف</b>تاجر</div><div><b class="num">4 ر.س</b>يبدأ من / طلب</div></div>
+   <a class="cta" href="#">احجز مستودعاً</a><button class="bn-x" type="button" aria-label="إخفاء" style="position:static">${I.x}</button></section>`},
+
+ {name:'رحلة من 4 خطوات',when:'يجيب عن «كيف تعمل؟» قبل «لماذا؟». مناسب إن كانت أكبر عقبة هي عدم فهم خطوة نقل المخزون.',
+  html:()=>`<section class="bn o4">${X}<h2 class="h">من مستودعك إلى باب عميلك في 4 خطوات</h2><p class="sub">${SUB}</p>
+   <div class="path">
+    <div class="s"><div class="c">${I.pin}</div><b>احجز مستودعاً</b><span>قارن المدن والخدمات والأسعار</span><em>دقيقتان</em></div>
+    <div class="s"><div class="c">${I.truck}</div><b>انقل مخزونك</b><span>أوصله بنفسك أو دع سلة تستلمه</span><em>1 – 3 أيام</em></div>
+    <div class="s"><div class="c">${I.shield}</div><b>الاستلام والفحص</b><span>يُعدّ ويُفحص ثم يُخزّن</span><em>خلال 24 ساعة</em></div>
+    <div class="s"><div class="c">${I.rocket}</div><b>ابدأ البيع</b><span>الطلبات تُجهّز وتُشحن تلقائياً</span><em>فوراً</em></div>
+   </div><div class="foot"><span class="sub" style="margin:0">لا رسوم حجز. تدفع لكل طلب يُشحن.</span><a class="cta" href="#">ابدأ بحجز مستودع</a></div></section>`},
+
+ {name:'خريطة المستودعات',when:'يبيع القرب من العميل. يبرز أقرب مستودع لأكثر مدينة يُطلب منها، ويوصل مباشرة لبطاقته.',
+  html:()=>`<section class="bn o5">${X}<div><h2 class="h">مستودع قريب من عملائك في كل منطقة</h2><p class="sub">${SUB}</p>
+    <div class="near"><div class="ic">${I.pin}</div><div style="flex:1"><b style="color:var(--brand)">أقرب مستودع لأغلب عملائك: الرياض</b><div style="font-size:12px;color:var(--ink-2)">حي السليمانية · يبدأ من 4 ر.س / طلب</div></div><a class="link" href="#">عرض</a></div>
+    <div style="margin-top:20px"><a class="cta" href="#">استعرض كل المستودعات</a></div></div>
+   <div class="map-wrap"><div class="map"></div>
+    <div class="pin hot" style="right:44%;top:46%"><span>الرياض</span><i></i></div>
+    <div class="pin" style="right:75%;top:56%"><span>جدة</span><i></i></div>
+    <div class="pin" style="right:70%;top:50%"><span>مكة</span><i></i></div>
+    <div class="pin" style="right:66%;top:36%"><span>المدينة</span><i></i></div>
+    <div class="pin" style="right:22%;top:36%"><span>الدمام</span><i></i></div>
+    <div class="pin" style="right:62%;top:80%"><span>أبها</span><i></i></div></div></section>`},
+
+ {name:'حاسبة التوفير',when:'يبيع القيمة المالية برقم يخص التاجر. البانر الوحيد التفاعلي، وقد يحتاج موافقة على طريقة الحساب.',
+  html:()=>`<section class="bn o6">${X}<div><h2 class="h">كم توفّر لو شحنت من مستودعات سلة؟</h2><p class="sub">سعر ثابت لكل طلب يشمل التخزين والتجهيز والتوصيل، بلا إيجار ولا موظفين. وفعّل <em>محلي إكسبريس</em> لطلبات نفس المدينة.</p>
+    <div style="margin-top:24px"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+   <div class="calc"><label for="orders"><span>طلباتك الشهرية</span><b class="num" data-out="orders">600 طلب</b></label>
+    <input id="orders" type="range" min="100" max="3000" step="50" value="600" data-calc>
+    <div class="cmp"><div><span>تشغيل ذاتي تقريبي</span><b class="num" data-out="self">—</b></div><div class="win"><span>مع مستودعات سلة</span><b class="num" data-out="salla">—</b></div></div>
+    <div class="save" data-out="save"></div><div style="font-size:11px;color:var(--muted);margin-top:6px">تقدير: 11 ر.س للطلب ذاتياً + 4,500 ر.س تكاليف ثابتة، مقابل 6 ر.س للطلب.</div></div></section>`},
+
+ {name:'مخصّص من بيانات المتجر',when:'يستخدم طلبات التاجر الفعلية ليقول له أين يخزّن. أقوى إقناعاً، ويحتاج بيانات توزيع الطلبات حسب المدينة.',
+  html:()=>`<section class="bn o7">${X}<div><span class="tag">${I.chart} من بيانات متجرك آخر 30 يوماً</span>
+    <h2 class="h">62% من طلباتك تذهب إلى الرياض</h2><p class="sub">خزّن جزءاً من مخزونك في مستودع الرياض ليصل عملاؤك خلال 24 ساعة، أو في الساعة نفسها عبر <em>محلي إكسبريس</em>.</p>
+    <div style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap"><a class="cta" href="#">احجز مستودع الرياض</a><a class="link" href="#">مدن أخرى</a></div></div>
+   <div class="bars">${[['الرياض',62],['جدة',17],['الدمام',9],['مكة',7],['أخرى',5]].map((c,i)=>`<div class="bar ${i?'':'top'}"><span>${c[0]}</span><div class="tr"><i style="width:${c[1]}%"></i></div><span class="num">${c[1]}%</span></div>`).join('')}</div></section>`},
+
+ {name:'ما يراه عميلك',when:'يبيع النتيجة في المتجر بدل العمليات: شارة «يصلك اليوم» على صفحة المنتج. مناسب لربط الخدمة بمحلي إكسبريس.',
+  html:()=>`<section class="bn o8">${X}<div><h2 class="h">اجعل منتجاتك تصل «اليوم»</h2><p class="sub">المنتجات المخزّنة في مستودعات سلة تحصل على شارة <em>محلي إكسبريس</em> في متجرك، فيرى عميلك موعد التوصيل قبل الشراء.</p>
+    <div class="checks"><div>${I.check}شارة توصيل تظهر تلقائياً على المنتجات المؤهلة</div><div>${I.check}تجهيز وشحن من المستودع بدون تدخل منك</div><div>${I.check}تتبع لحظي للعميل حتى التسليم</div></div>
+    <div style="margin-top:22px"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+   <div class="phone" aria-hidden="true"><div class="img">🧴</div><h4>عطر عود 100 مل</h4><div class="pr num">249 ر.س</div>
+    <div class="badge">${I.rocket} محلي إكسبريس · يصلك اليوم قبل 9 م</div><div class="buy">أضف للسلة</div></div></section>`},
+
+ {name:'الرقم الكبير على خلفية داكنة',when:'أعلى تباين في الصفحة، ويركّز على وعد واحد: 24 ساعة. مناسب لحملة إطلاق أو للصفحة الرئيسية للوحة التحكم.',
+  html:()=>`<section class="bn o9">${X}<div><h2 class="h">${H}</h2><p class="sub">${SUB}</p><div style="margin-top:22px"><a class="cta" href="#">اكتشف مستودعات سلة</a></div>
+    <div class="stats">${stat(I.pin,'مستودع في المملكة','+15')+stat(I.store,'تاجر يستخدم الخدمة','+50 ألف')+stat(I.box,'يبدأ من','4 ر.س / طلب')}</div></div>
+   <div class="bignum num">24<small>ساعة متوسط التوصيل</small></div></section>`},
+
+ {name:'تبويبات: تخزين، تجهيز، توصيل',when:'يشرح الخدمات الثلاث في مساحة واحدة بدون نص طويل. مفيد إن كانت الخدمات تختلف بين المستودعات.',
+  html:(n)=>{const T=[
+    ['التخزين','مخزونك في أمان وتحت عينك',[['box','تخزين عادي ومبرد','رفوف مخصصة ومناطق 2–8 درجات'],['shield','فحص عند الاستلام','كل شحنة تُعدّ وتُفحص قبل التخزين'],['chart','مزامنة لحظية','الكميات تتحدث في متجرك فوراً']]],
+    ['التجهيز','طلباتك تُجهّز فور وصولها',[['box','التقاط وتغليف','بهوية متجرك وتغليف آمن للقابل للكسر'],['clock','خلال ساعات','قبل وقت القطع اليومي'],['shield','معالجة المرتجعات','فحص وإعادة تخزين أو إرجاع']]],
+    ['التوصيل','ثلاثة مسارات بأسعار ثابتة',[['rocket','سريع · محلي إكسبريس','خلال ساعات داخل المدينة'],['truck','عادي','2 – 5 أيام لكل المملكة'],['truck','اقتصادي','أرخص خيار للطلبات غير المستعجلة']]]];
+   return `<section class="bn o10" data-tabs>${X}<div class="tabs" role="tablist">${T.map((t,i)=>`<button role="tab" type="button" aria-selected="${i===0}" data-tab="${i}">${t[0]}</button>`).join('')}</div>
+    ${T.map((t,i)=>`<div class="pane" data-pane="${i}" ${i?'hidden':''}><div><h2 class="h">${t[1]}</h2><p class="sub">${SUB}</p><div style="margin-top:22px"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+      <div class="feat">${t[2].map(r=>`<div class="r"><i>${I[r[0]]}</i><div><b>${r[1]}</b>${r[2]}</div></div>`).join('')}</div></div>`).join('')}</section>`}},
+];
+
+document.getElementById('jump').innerHTML=OPTS.map((o,i)=>`<a href="#o${i+1}">${i+1}</a>`).join('');
+document.getElementById('list').innerHTML=OPTS.map((o,i)=>`<article class="opt" id="o${i+1}">
+  <div class="opt-head"><span class="opt-no num">${i+1}</span><h2>${o.name}</h2><p>${o.when}</p></div>
+  <div class="frame">${o.html(i)}</div></article>`).join('');
+
+function calc(){
+  const r=document.querySelector('[data-calc]'); if(!r) return; const n=+r.value;
+  const self=n*11+4500, salla=n*6, fmt=v=>v.toLocaleString('en')+' ر.س';
+  const out=k=>document.querySelector(`[data-out="${k}"]`);
+  out('orders').textContent=n.toLocaleString('en')+' طلب'; out('self').textContent=fmt(self); out('salla').textContent=fmt(salla);
+  out('save').textContent='توفير تقريبي '+fmt(self-salla)+' شهرياً';
+}
+document.addEventListener('input',e=>{if(e.target.matches('[data-calc]'))calc();});
+calc();
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-tab]');
+  if(t){const box=t.closest('[data-tabs]');box.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b===t)));
+    box.querySelectorAll('[data-pane]').forEach(p=>p.hidden=p.dataset.pane!==t.dataset.tab);}
+  const x=e.target.closest('.bn-x'); if(x){const b=x.closest('.bn'); b.style.opacity='.35'; setTimeout(()=>b.style.opacity='',900);}
+  if(e.target.closest('a.cta,a.link')&&e.target.closest('a').getAttribute('href')==='#') e.preventDefault();
+});
+</script>
