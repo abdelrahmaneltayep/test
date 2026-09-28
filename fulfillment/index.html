@@ -183,6 +183,7 @@ th[rowspan]{vertical-align:bottom}
 .st.cur .dot{border-color:var(--brand);color:var(--brand);box-shadow:0 0 0 4px var(--brand-50)}
 .st b{font-size:13px} .st span{font-size:11px;color:var(--muted)}
 .st.cur span{color:var(--brand);font-weight:600}
+.st span{white-space:nowrap}
 .branches{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .branch{border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;gap:12px;align-items:center}
 .branch .ic{width:36px;height:36px;border-radius:8px;background:var(--line-2);display:grid;place-items:center;color:var(--ink-2)}
@@ -304,6 +305,7 @@ th[rowspan]{vertical-align:bottom}
   .hero-steps{grid-template-columns:1fr 1fr}
   .routes,.branches,.instr-list,.expect{grid-template-columns:1fr}
   .stepper{grid-template-columns:repeat(3,1fr);row-gap:16px}
+  .st span{white-space:normal}
   .st:nth-child(3)::after{display:none}
   .pad{padding:16px}
 }
@@ -699,11 +701,12 @@ const flagHtml = p => p.flag?`<span class="flag ${p.flag}" title="${p.flag==='fr
 
 function screenTransfer(){
   const t=S.tstate;
-  const steps=[['تم الإنشاء',''],['مراجعة المستودع',''],['قيد النقل',''],['الاستلام',''],['فحص الجودة',''],['تم التخزين','']];
+  // [label, actual date/time, expected date]
+  const steps=[['تم الإنشاء','14 سبتمبر · 11:17 م'],['مراجعة المستودع','15 سبتمبر · 10:02 ص'],['قيد النقل','16 سبتمبر · 2:40 م','16 سبتمبر'],['الاستلام','17 سبتمبر · 9:30 ص','17 سبتمبر'],['فحص الجودة','18 سبتمبر · 1:05 م','18 سبتمبر'],['تم التخزين','18 سبتمبر · 4:15 م','18 سبتمبر']];
   const cur = t===1?1:t===2?2:6; // index of current step
   const stepHtml = steps.map((s,i)=>{const done = i<cur || (t===3&&i===5); const c = i===cur&&!done;
-    const sub = done?'مكتمل':c?'الآن':'بالانتظار';
-    return `<div class="st ${done?'done':''} ${c?'cur':''}"><div class="dot">${done?I.check:i+1}</div><b>${s[0]}</b><span>${sub}</span></div>`}).join('');
+    const sub = done||c ? s[1] : (s[2]||'');
+    return `<div class="st ${done?'done':''} ${c?'cur':''}"><div class="dot">${done?I.check:i+1}</div><b>${s[0]}</b><span class="num"${!done&&!c?' style="opacity:.7"':''}>${sub}</span></div>`}).join('');
   const statusPill = t===1?'<span class="pill warn">بانتظار تأكيد المستودع</span>':t===2?'<span class="pill info">مقبول جزئياً · قيد النقل</span>':'<span class="pill ok">تم التخزين</span>';
 
   return crumbs(['الشحن والتوصيل','browse'],['طلبات نقل المخزون','mine'],['طلب #274607591','']) + `
