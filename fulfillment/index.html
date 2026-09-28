@@ -721,11 +721,11 @@ function screenTransfer(){
       <div class="row sm ink2"><span>طريقة النقل: <b>استلام من سلة</b></span><span>·</span><span>أُنشئ في <span class="num">14 سبتمبر 2026، 11:17 م</span></span></div>
     </section>
 
-    <section class="panel pad stack"><h2>مراحل نقل المخزون</h2><div class="stepper">${stepHtml}</div></section>
+    ${t===1?stagesEmpty():`<section class="panel pad stack"><h2>مراحل نقل المخزون</h2><div class="stepper">${stepHtml}</div></section>`}
 
     ${t===3?qcSummary():''}
     ${instructions(t)}
-    ${t===1?shipmentEmpty():shipmentDetails(t)}
+    ${t===1?'':shipmentDetails(t)}
     ${productsSection(t)}
     ${t===3?returnCard():''}
     ${logSection(t)}
@@ -745,11 +745,11 @@ function instructions(t){
     </div></section>`;
 }
 
-function shipmentEmpty(){
-  return `<section class="panel pad"><h2>المنتجات ونتيجة المراجعة</h2>
-    <div class="empty"><div class="ill">${I.clock}</div><b>المستودع يراجع طلبك</b>
-      <p>ستظهر هنا الكميات المقبولة والمرفوضة وملاحظات المستودع، ثم تفاصيل الشحنة بعد التأكيد. يراجع المستودع الطلبات عادة خلال 24 ساعة عمل.</p>
-      <div class="expect"><div><b>ماذا يراجع المستودع؟</b>نوع المنتجات، الكميات، والسعة المتاحة.</div><div><b>ماذا يحدث بعدها؟</b>تُنشأ بوليصة الاستلام ويُحدد موعده.</div><div><b>هل يمكنني التعديل؟</b>نعم، ويمكنك إلغاء الطلب قبل التأكيد.</div></div>
+function stagesEmpty(){
+  return `<section class="panel pad"><h2>مراحل نقل المخزون</h2>
+    <div class="empty"><div class="ill">${I.clock}</div><b>بانتظار تأكيد مستودع جدة</b>
+      <p>أرسلنا طلب النقل إلى المستودع لمراجعة المنتجات والكميات. ستظهر مراحل النقل وتفاصيل الشحنة هنا فور تأكيد المستودع، عادةً خلال 24 ساعة عمل.</p>
+      <p class="sm">يمكنك تعديل الطلب أو إلغاؤه حتى يؤكده المستودع.</p>
     </div></section>`;
 }
 
