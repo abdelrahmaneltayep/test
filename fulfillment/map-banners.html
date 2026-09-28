@@ -1,0 +1,222 @@
+<meta charset="utf-8">
+<title>خرائط مستودعات سلة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --brand:#004956; --ink:#1f2a2e; --ink-2:#4b5a5f; --muted:#7a878b;
+  --mint:#a8f0dc; --mint-2:#76e8cd; --mint-bg:#e6fbf4; --mint-bg2:#d2f6ea; --mint-line:#bdeedf;
+  --orange:#f2663a; --ok:#0f9f6e; --line:#e6ebec; --page:#f4f6f6; --white:#fff;
+  --land:#c9efe3; --land-line:#9fdcc9;
+  --font:'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+h1,h2,h3,p{margin:0} h1,h2{text-wrap:balance}
+button{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:32px 80px}
+.intro h1{font-size:26px;color:var(--brand)}
+.intro p{color:var(--ink-2);max-width:66ch;margin-top:4px}
+.opt{margin-top:40px}
+.opt-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.opt-no{font-weight:700;color:var(--brand);background:var(--mint-bg2);border-radius:6px;padding:0 8px;font-size:13px}
+.opt-head h2{font-size:17px}
+.opt-head p{color:var(--muted);font-size:13px;flex-basis:100%}
+.frame{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px}
+
+.bn{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(115deg,var(--mint-bg2) 0%,var(--mint-bg) 45%,#f2fdf9 100%);border:1.5px solid var(--mint-line);
+  display:grid;grid-template-columns:1.05fr 1fr;gap:28px;padding:32px 36px;align-items:center}
+.bn-x{position:absolute;top:12px;inset-inline-end:12px;border:0;background:rgba(255,255,255,.75);border-radius:50%;width:28px;height:28px;cursor:pointer;display:grid;place-items:center;color:var(--ink-2);z-index:2}
+.h{color:var(--brand);font-weight:700;font-size:clamp(22px,2.5vw,30px);line-height:1.35}
+.sub{color:var(--ink-2);font-size:clamp(14px,1.25vw,16px);margin-top:10px;max-width:50ch}
+.sub em{font-style:normal;color:var(--orange);font-weight:600}
+.cta{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--mint);color:var(--brand);font-weight:700;border-radius:12px;padding:12px 24px;cursor:pointer;font-size:15px;text-decoration:none;white-space:nowrap}
+.cta:hover{background:var(--mint-2)}
+.link{color:var(--brand);font-weight:600;text-decoration:underline;text-underline-offset:4px;background:none;border:0;cursor:pointer;padding:0}
+.icon{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.actions{margin-top:22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.mapbox{position:relative;width:100%;max-width:520px;justify-self:center}
+.mapbox svg{width:100%;height:auto;display:block;overflow:visible}
+.lbl{font:600 11px var(--font);fill:var(--brand)}
+.lbl-bg{fill:#fff}
+.card{background:#fff;border-radius:12px;padding:12px 14px;display:flex;gap:12px;align-items:center;margin-top:16px;max-width:440px;box-shadow:0 6px 18px rgba(0,73,86,.06)}
+.card .ic{width:40px;height:40px;border-radius:10px;background:var(--mint-bg2);display:grid;place-items:center;color:var(--brand);flex:none}
+.card b{color:var(--brand)} .card small{display:block;color:var(--ink-2);font-size:12px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:10px;justify-content:center}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-inline-end:5px;vertical-align:middle}
+.seg{display:inline-flex;background:rgba(255,255,255,.75);border-radius:10px;padding:3px;gap:3px;margin-top:18px}
+.seg button{border:0;background:none;border-radius:8px;padding:6px 14px;cursor:pointer;color:var(--ink-2)}
+.seg button[aria-pressed=true]{background:#fff;color:var(--brand);font-weight:700;box-shadow:0 2px 6px rgba(0,73,86,.08)}
+.kpis{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.kpi{background:rgba(255,255,255,.8);border-radius:12px;padding:10px 14px;min-width:120px}
+.kpi b{display:block;font-size:20px;color:var(--brand)} .kpi span{font-size:12px;color:var(--ink-2)}
+.kpi.warn b{color:var(--orange)}
+.cities{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.cities button{border:1px solid var(--mint-line);background:rgba(255,255,255,.8);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:13px;color:var(--ink-2)}
+.cities button[aria-pressed=true]{background:var(--brand);border-color:var(--brand);color:#fff}
+.pick{background:#fff;border-radius:14px;padding:14px 16px;margin-top:16px;max-width:460px;display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:center;box-shadow:0 6px 18px rgba(0,73,86,.06)}
+.pick h3{font-size:16px;color:var(--brand)}
+.pick .meta{font-size:12px;color:var(--ink-2)}
+.pick .chips{display:flex;gap:6px;flex-wrap:wrap;grid-column:1/-1}
+.chip{background:var(--mint-bg);color:var(--brand);border-radius:20px;padding:1px 9px;font-size:12px}
+.pick .price{font-weight:700;color:var(--brand);font-size:18px;text-align:end}
+.pick .price small{font-size:11px;color:var(--muted);font-weight:500;display:block}
+.pin-hit{cursor:pointer}
+.times{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px;max-width:460px}
+.times div{background:rgba(255,255,255,.8);border-radius:12px;padding:10px 12px}
+.times b{display:block;color:var(--brand);font-size:17px}
+.times span{font-size:12px;color:var(--ink-2)}
+.dash{stroke-dasharray:5 6;animation:flow 1.6s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-22}}
+.pulse{animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%{opacity:.55;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
+
+@media (max-width:900px){.bn{grid-template-columns:1fr}.mapbox{max-width:460px}}
+@media (max-width:640px){
+  .wrap{padding-inline:16px} .frame{padding:10px} .bn{padding:22px 18px}
+  .times{grid-template-columns:1fr 1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){.dash,.pulse{animation:none}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>خريطة مستودعات سلة: 5 خيارات</h1>
+    <p>كل خيار يستخدم الخريطة لغرض مختلف: التعريف بالشبكة، أو نطاق التوصيل، أو مقارنة عملاء التاجر بالمستودعات، أو اختيار مستودع، أو مدة التوصيل. الأرقام والمواقع تقريبية للنموذج.</p>
+  </header>
+  <div id="list"></div>
+</div>
+
+<script>
+/* ---------- geography (approximate) ---------- */
+const K=20, LON0=34.3, LAT0=32.6;
+const P=(lon,lat)=>[+((lon-LON0)*K).toFixed(1),+((LAT0-lat)*K).toFixed(1)];
+const BORDER=[[34.95,29.36],[36.07,29.19],[36.5,29.5],[37.5,30.0],[38.0,30.5],[37.0,31.5],[39.0,32.0],[39.2,32.15],[40.4,31.9],[41.4,31.4],[42.1,31.1],[44.7,29.2],[46.5,29.1],[47.7,28.5],[48.4,28.55],
+ [48.8,27.7],[49.3,27.1],[50.1,26.7],[50.2,26.2],[50.1,25.6],[50.6,25.0],[50.8,24.75],[51.6,24.25],[52.0,23.0],[55.0,22.7],[55.7,22.0],[55.0,20.0],[52.0,19.0],[49.1,18.6],[48.2,18.2],[47.0,17.0],[46.4,17.2],[45.2,17.4],[44.0,17.4],[43.4,17.5],[43.1,16.7],[42.8,16.4],
+ [42.6,16.8],[42.2,17.8],[41.2,19.0],[40.5,20.2],[39.6,21.3],[39.1,22.0],[38.5,23.6],[37.5,24.6],[37.2,25.2],[36.5,26.0],[35.5,27.5],[34.8,28.1],[34.6,28.4]];
+const PATH='M'+BORDER.map(p=>P(...p).join(' ')).join(' L')+' Z';
+const VB='0 0 440 340';
+const C={ // city: [lon,lat]
+  ruh:{n:'الرياض',ll:[46.72,24.69]}, jed:{n:'جدة',ll:[39.17,21.54]}, mak:{n:'مكة المكرمة',ll:[39.83,21.42]}, med:{n:'المدينة المنورة',ll:[39.61,24.47]},
+  dmm:{n:'الدمام',ll:[50.10,26.43]}, abh:{n:'أبها',ll:[42.5,18.22]}, tbk:{n:'تبوك',ll:[36.57,28.38]}, bur:{n:'بريدة',ll:[43.97,26.33]}, hail:{n:'حائل',ll:[41.69,27.52]}, jaz:{n:'جازان',ll:[42.55,16.89]}, hof:{n:'الأحساء',ll:[49.59,25.38]}, taif:{n:'الطائف',ll:[40.42,21.27]},
+};
+const xy=id=>P(...C[id].ll);
+const WH=[ // warehouses
+  {id:'ruh',name:'حي السليمانية',price:4,svc:['تخزين','تجهيز','تبريد','مرتجعات'],sla:'نفس اليوم داخل الرياض'},
+  {id:'jed',name:'حي الأمير فواز',price:5,svc:['تخزين','تجهيز','قابل للكسر'],sla:'نفس اليوم داخل جدة'},
+  {id:'dmm',name:'حي الفيصلية',price:6,svc:['تخزين','تجهيز','تبريد'],sla:'نفس اليوم داخل الدمام والخبر'},
+  {id:'med',name:'حي النرجس',price:5,svc:['تخزين','تجهيز'],sla:'اليوم التالي'},
+  {id:'abh',name:'حي المنسك',price:6,svc:['تخزين','تجهيز','مرتجعات'],sla:'اليوم التالي'},
+];
+
+/* ---------- svg helpers ---------- */
+const svg=(inner,defs='')=>`<svg viewBox="${VB}" role="img" aria-label="خريطة المملكة العربية السعودية بمواقع المستودعات" direction="ltr"><defs>${defs}</defs>${inner}</svg>`;
+const land=(fill='var(--land)',stroke='var(--land-line)')=>`<path d="${PATH}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" stroke-linejoin="round"/>`;
+function label(x,y,t,{dy=-16,color='var(--brand)',size=11}={}){const w=t.length*(size*.58)+14;return `<g><rect class="lbl-bg" x="${x-w/2}" y="${y+dy-11}" width="${w}" height="18" rx="5" fill="#fff" filter="url(#sh)"/><text class="lbl" x="${x}" y="${y+dy+2}" text-anchor="middle" direction="rtl" style="fill:${color};unicode-bidi:embed">${t}</text></g>`;}
+function pin(id,{hot=false,lbl=true,r=6}={}){const [x,y]=xy(id);const col=hot?'var(--orange)':'var(--brand)';
+  return `<g>${hot?`<circle class="pulse" cx="${x}" cy="${y}" r="${r+8}" fill="${col}" opacity=".4"/>`:''}<circle cx="${x}" cy="${y}" r="${r+4}" fill="${col}" opacity=".15"/><circle cx="${x}" cy="${y}" r="${r}" fill="${col}" stroke="#fff" stroke-width="2.5"/>${lbl?label(x,y,C[id].n,{color:col}):''}</g>`;}
+const SH='<filter id="sh" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#004956" flood-opacity=".15"/></filter>';
+
+const I={
+  pin:'<svg class="icon" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  x:'<svg class="icon" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  chart:'<svg class="icon" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+};
+const X=`<button class="bn-x" type="button" aria-label="إخفاء البانر">${I.x}</button>`;
+const SUB='خزّن منتجاتك وجهّزها واشحنها عبر شبكة شركاء سلة، وفعّل توصيل <em>محلي إكسبريس</em> خلال الساعة نفسها لكل طلب مؤهل.';
+
+/* ---------- 1. dotted network ---------- */
+function opt1(){
+  const dots=`<pattern id="dots" width="9" height="9" patternUnits="userSpaceOnUse"><circle cx="4.5" cy="4.5" r="1.9" fill="#7fd3bb"/></pattern><clipPath id="ksa"><path d="${PATH}"/></clipPath>`;
+  const inner=`<path d="${PATH}" fill="#e9faf4"/><rect width="440" height="340" fill="url(#dots)" clip-path="url(#ksa)"/><path d="${PATH}" fill="none" stroke="var(--land-line)" stroke-width="1.2"/>
+    ${WH.map(w=>pin(w.id,{hot:w.id==='ruh'})).join('')}`;
+  return `<section class="bn">${X}<div><h2 class="h">مستودع قريب من عملائك في كل منطقة</h2><p class="sub">${SUB}</p>
+    <div class="card"><div class="ic">${I.pin}</div><div style="flex:1"><b>أقرب مستودع لأغلب عملائك: الرياض</b><small>حي السليمانية · يبدأ من 4 ر.س / طلب</small></div><a class="link" href="#">عرض</a></div>
+    <div class="actions"><a class="cta" href="#">استعرض كل المستودعات</a><span class="sub" style="margin:0;font-size:13px"><b class="num" style="color:var(--brand)">5</b> مستودعات في <b class="num" style="color:var(--brand)">5</b> مناطق</span></div></div>
+    <div class="mapbox">${svg(inner,SH+dots)}</div></section>`;
+}
+
+/* ---------- 2. coverage rings ---------- */
+function opt2(){
+  const ring=(mode)=>WH.map(w=>{const [x,y]=xy(w.id);const r=mode==='exp'?(['ruh','jed','dmm'].includes(w.id)?22:0):mode==='std'?78:0;
+    return r?`<circle cx="${x}" cy="${y}" r="${r}" fill="${mode==='exp'?'var(--orange)':'var(--brand)'}" opacity="${mode==='exp'?.22:.1}" stroke="${mode==='exp'?'var(--orange)':'var(--brand)'}" stroke-opacity=".35" stroke-dasharray="3 4"/>`:''}).join('');
+  const layer=(mode)=>`<g data-layer="${mode}" ${mode==='exp'?'':'hidden'}>${ring(mode)}</g>`;
+  const inner=`<clipPath id="ksa2"><path d="${PATH}"/></clipPath>${land()}<g clip-path="url(#ksa2)">${layer('exp')}${layer('std')}</g>${WH.map(w=>pin(w.id)).join('')}`;
+  return `<section class="bn" data-o2>${X}<div><h2 class="h">شاهد إلى أين يصل كل مستودع</h2><p class="sub">كل مستودع يغطي مدينته بتوصيل <em>محلي إكسبريس</em> في الساعة نفسها، ويغطي باقي المملكة بالشحن العادي.</p>
+    <div class="seg" role="group" aria-label="نوع التوصيل"><button type="button" aria-pressed="true" data-mode="exp">محلي إكسبريس</button><button type="button" aria-pressed="false" data-mode="std">خلال 24 – 48 ساعة</button></div>
+    <p class="sub" data-cap style="font-size:13px">3 مدن تغطيها خدمة الساعة الواحدة: الرياض، جدة، الدمام.</p>
+    <div class="actions"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+    <div class="mapbox">${svg(inner,SH)}<div class="legend"><span><i style="background:var(--orange);opacity:.6"></i>نطاق محلي إكسبريس</span><span><i style="background:var(--brand);opacity:.35"></i>نطاق 24 – 48 ساعة</span><span><i style="background:var(--brand)"></i>مستودع</span></div></div></section>`;
+}
+
+/* ---------- 3. demand vs warehouses ---------- */
+function opt3(){
+  const D=[['ruh',38],['jed',17],['dmm',9],['mak',7],['bur',8],['tbk',6],['hail',5],['jaz',4],['hof',6]];
+  const gaps=['bur','tbk','hail','jaz'];
+  const bubbles=D.map(([id,v])=>{const [x,y]=xy(id);const r=5+Math.sqrt(v)*3.4;const gap=gaps.includes(id);
+    return `<circle cx="${x}" cy="${y}" r="${r}" fill="${gap?'var(--orange)':'#6fcfb4'}" opacity="${gap?.35:.4}"/>${gap?label(x,y,`${C[id].n} ${v}٪`,{dy:id==='jaz'?r+10:-r-6,color:'var(--orange)'}):''}`}).join('');
+  const inner=`${land('#eaf8f3','#bfe7da')}${bubbles}${['ruh','jed','dmm','med','abh'].map(id=>pin(id,{lbl:id==='ruh'||id==='jed'||id==='dmm',r:5})).join('')}`;
+  return `<section class="bn">${X}<div><span class="card" style="display:inline-flex;margin:0 0 12px;padding:4px 12px;font-size:12px;color:var(--brand);font-weight:600">${I.chart} من طلبات متجرك آخر 30 يوماً</span>
+    <h2 class="h">71% من عملائك قريبون من مستودع سلة</h2><p class="sub">الدوائر تمثّل طلبات متجرك حسب المدينة. المدن بالبرتقالي بعيدة عن مستودعاتك الحالية وتُشحن بالشحن العادي.</p>
+    <div class="kpis"><div class="kpi"><b class="num">71%</b><span>طلبات قرب مستودع</span></div><div class="kpi warn"><b class="num">23%</b><span>طلبات في مدن بعيدة</span></div><div class="kpi"><b class="num">24 ساعة</b><span>متوسط التوصيل المتوقع</span></div></div>
+    <div class="actions"><a class="cta" href="#">احجز مستودع الرياض</a><a class="link" href="#">قارن المستودعات</a></div></div>
+    <div class="mapbox">${svg(inner,SH)}<div class="legend"><span><i style="background:#6fcfb4"></i>طلباتك قرب مستودع</span><span><i style="background:var(--orange);opacity:.6"></i>طلباتك في مدن بعيدة</span><span><i style="background:var(--brand)"></i>مستودع سلة</span></div></div></section>`;
+}
+
+/* ---------- 4. interactive picker ---------- */
+function opt4(){
+  const inner=`${land()}${WH.map(w=>{const [x,y]=xy(w.id);return `<g class="pin-hit" data-pick="${w.id}" tabindex="0" role="button" aria-label="${C[w.id].n}">
+     <circle cx="${x}" cy="${y}" r="16" fill="transparent"/><circle data-halo cx="${x}" cy="${y}" r="12" fill="var(--orange)" opacity="0"/>
+     <circle data-dot cx="${x}" cy="${y}" r="7" fill="var(--brand)" stroke="#fff" stroke-width="2.5"/>${label(x,y,C[w.id].n)}</g>`}).join('')}`;
+  return `<section class="bn" data-o4>${X}<div><h2 class="h">اختر المدينة وشاهد مستودعها</h2><p class="sub">اضغط على مدينة في الخريطة أو من القائمة لترى السعر والخدمات، واحجز من البانر مباشرة.</p>
+    <div class="cities" role="group" aria-label="المدن">${WH.map((w,i)=>`<button type="button" data-pick="${w.id}" aria-pressed="${i===0}">${C[w.id].n}</button>`).join('')}</div>
+    <div class="pick" data-card></div></div>
+    <div class="mapbox">${svg(inner,SH)}</div></section>`;
+}
+function renderPick(box,id){
+  const w=WH.find(x=>x.id===id);
+  box.querySelectorAll('button[data-pick]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pick===id)));
+  box.querySelectorAll('g[data-pick]').forEach(g=>{const on=g.dataset.pick===id;g.querySelector('[data-dot]').setAttribute('fill',on?'var(--orange)':'var(--brand)');g.querySelector('[data-halo]').setAttribute('opacity',on?.25:0);});
+  box.querySelector('[data-card]').innerHTML=`<div><h3>${C[id].n} · ${w.name}</h3><div class="meta">${w.sla}</div></div>
+    <div class="price num">${w.price} ر.س<small>يبدأ من / طلب</small></div><div class="chips">${w.svc.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+    <div style="grid-column:1/-1;display:flex;gap:14px;align-items:center;margin-top:6px"><a class="cta" href="#" style="padding:9px 20px;font-size:14px">احجز مستودع ${C[id].n}</a><a class="link" href="#">التفاصيل</a></div>`;
+}
+
+/* ---------- 5. delivery routes ---------- */
+function opt5(){
+  const R=[['ruh','bur','24 س'],['ruh','hof','24 س'],['jed','taif','24 س'],['jed','med','48 س'],['dmm','hof','ساعات'],['ruh','abh','48 س'],['med','tbk','48 س'],['ruh','hail','48 س']];
+  const lines=R.map(([a,b])=>{const [x1,y1]=xy(a),[x2,y2]=xy(b);const mx=(x1+x2)/2,my=(y1+y2)/2-Math.hypot(x2-x1,y2-y1)*.22;
+    return `<path class="dash" d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="var(--brand)" stroke-width="1.6" opacity=".55"/><circle cx="${x2}" cy="${y2}" r="3.5" fill="#fff" stroke="var(--brand)" stroke-width="1.5"/>`}).join('');
+  const dest=['bur','hof','taif','tbk','hail'].map(id=>{const [x,y]=xy(id);return label(x,y,C[id].n,{dy:(id==='hof'||id==='taif')?20:-12})}).join('');
+  const inner=`${land('#e3f7f0','#bfe7da')}${lines}${dest}${['ruh','jed','dmm','med','abh'].map(id=>pin(id,{r:6,lbl:['ruh','jed','dmm'].includes(id)})).join('')}`;
+  return `<section class="bn">${X}<div><h2 class="h">من مستودعات سلة إلى كل مدن المملكة</h2><p class="sub">${SUB}</p>
+    <div class="times"><div><b>ساعات</b><span>داخل مدينة المستودع عبر <em style="font-style:normal;color:var(--orange);font-weight:600">محلي إكسبريس</em></span></div><div><b class="num">24 ساعة</b><span>للمدن القريبة</span></div><div><b class="num">48 ساعة</b><span>لباقي المملكة</span></div></div>
+    <div class="actions"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+    <div class="mapbox">${svg(inner,SH)}</div></section>`;
+}
+
+const OPTS=[
+  ['شبكة منقّطة مع أقرب مستودع','تطوير للخيار 5 السابق بشكل المملكة الحقيقي. يعرّف بالشبكة ويبرز أقرب مستودع لأغلب عملاء التاجر. الأنسب كبانر ثابت لأول زيارة.',opt1],
+  ['نطاق التغطية','دوائر حول كل مستودع تبيّن أين يصل التوصيل في الساعة نفسها وأين يصل خلال 24 – 48 ساعة. زر للتبديل بين النوعين. يجيب عن «هل يغطي عملائي؟».',opt2],
+  ['طلباتك مقابل المستودعات','الأكثر إقناعاً: فقاعات من طلبات التاجر الفعلية فوق مواقع المستودعات، والمدن البعيدة بالبرتقالي. يحتاج بيانات الطلبات حسب المدينة.',opt3],
+  ['اختيار مستودع من الخريطة','البانر نفسه أداة: اضغط مدينة فتظهر بطاقة المستودع بالسعر والخدمات وزر الحجز. يختصر خطوة الانتقال لبطاقات المستودعات.',opt4],
+  ['مسارات ومدة التوصيل','خطوط متحركة من المستودعات إلى المدن مع ثلاثة وعود واضحة للتوصيل. يبيع السرعة أكثر من المواقع. الحركة تتوقف عند تفعيل تقليل الحركة.',opt5],
+];
+document.getElementById('list').innerHTML=OPTS.map((o,i)=>`<article class="opt" id="m${i+1}"><div class="opt-head"><span class="opt-no num">${i+1}</span><h2>${o[0]}</h2><p>${o[1]}</p></div><div class="frame">${o[2]()}</div></article>`).join('');
+const o4=document.querySelector('[data-o4]'); renderPick(o4,'ruh');
+
+document.addEventListener('click',e=>{
+  const m=e.target.closest('[data-mode]');
+  if(m){const box=m.closest('[data-o2]');box.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===m)));
+    box.querySelectorAll('[data-layer]').forEach(l=>l.toggleAttribute('hidden',l.dataset.layer!==m.dataset.mode));
+    box.querySelector('[data-cap]').textContent=m.dataset.mode==='exp'?'3 مدن تغطيها خدمة الساعة الواحدة: الرياض، جدة، الدمام.':'تقريباً كل المدن الرئيسية تصلها الطلبات خلال 24 – 48 ساعة.';}
+  const p=e.target.closest('[data-pick]'); if(p) renderPick(p.closest('[data-o4]'),p.dataset.pick);
+  const x=e.target.closest('.bn-x'); if(x){const b=x.closest('.bn');b.style.opacity='.35';setTimeout(()=>b.style.opacity='',900);}
+  const a=e.target.closest('a'); if(a&&a.getAttribute('href')==='#') e.preventDefault();
+});
+document.addEventListener('keydown',e=>{const p=e.target.closest&&e.target.closest('g[data-pick]');if(p&&(e.key==='Enter'||e.key===' ')){e.preventDefault();renderPick(p.closest('[data-o4]'),p.dataset.pick);}});
+</script>
