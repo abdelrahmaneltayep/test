@@ -1,0 +1,277 @@
+<meta charset="utf-8">
+<title>خرائط مستودعات سلة 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --brand:#004956; --ink:#1f2a2e; --ink-2:#4b5a5f; --muted:#7a878b;
+  --mint:#a8f0dc; --mint-2:#76e8cd; --mint-bg:#e6fbf4; --mint-bg2:#d2f6ea; --mint-line:#bdeedf;
+  --orange:#f2663a; --line:#e6ebec; --page:#f4f6f6;
+  --font:'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+h1,h2,p{margin:0} h1,h2{text-wrap:balance}
+button{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:32px 80px}
+.intro h1{font-size:26px;color:var(--brand)}
+.intro p{color:var(--ink-2);max-width:70ch;margin-top:4px}
+.jump{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.jump a{border:1px solid var(--line);background:#fff;border-radius:20px;padding:3px 11px;font-size:12px;text-decoration:none;color:var(--brand)}
+.opt{margin-top:40px;scroll-margin-top:16px}
+.opt-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.opt-no{font-weight:700;color:var(--brand);background:var(--mint-bg2);border-radius:6px;padding:0 8px;font-size:13px}
+.opt-head h2{font-size:17px}
+.opt-head p{color:var(--muted);font-size:13px;flex-basis:100%}
+.frame{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+.bn{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(115deg,var(--mint-bg2) 0%,var(--mint-bg) 45%,#f2fdf9 100%);border:1.5px solid var(--mint-line);
+  display:grid;grid-template-columns:1fr 1.1fr;gap:24px;padding:30px 36px;align-items:center}
+.bn.dark{background:radial-gradient(120% 140% at 20% 0%,#0b6a7a 0%,#004956 45%,#00323c 100%);border-color:#0b5f6c}
+.bn.dark .h{color:#fff} .bn.dark .sub{color:#c7e4e8} .bn.dark .sub em{color:#ffb08f}
+.bn-x{position:absolute;top:12px;inset-inline-end:12px;border:0;background:rgba(255,255,255,.75);border-radius:50%;width:28px;height:28px;cursor:pointer;display:grid;place-items:center;color:var(--ink-2);z-index:2}
+.h{color:var(--brand);font-weight:700;font-size:clamp(22px,2.5vw,30px);line-height:1.35}
+.sub{color:var(--ink-2);font-size:clamp(14px,1.25vw,16px);margin-top:10px;max-width:48ch}
+.sub em{font-style:normal;color:var(--orange);font-weight:600}
+.cta{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--mint);color:var(--brand);font-weight:700;border-radius:12px;padding:12px 24px;cursor:pointer;font-size:15px;text-decoration:none;white-space:nowrap}
+.cta:hover{background:var(--mint-2)}
+.actions{margin-top:22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.art{width:100%;max-width:600px;justify-self:center}
+.art svg{width:100%;height:auto;display:block;overflow:visible}
+.dl{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.copy{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;color:var(--brand);font-weight:600}
+.copy:hover{border-color:var(--mint-2)}
+.fname{font-size:12px;color:var(--muted);direction:ltr}
+@media (max-width:900px){.bn{grid-template-columns:1fr}}
+@media (max-width:640px){.wrap{padding-inline:16px}.frame{padding:10px}.bn{padding:22px 18px}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>خريطة مستودعات سلة: 10 خيارات بأسلوب 3D</h1>
+    <p>أيقونات مجسّمة مرسومة كـ SVG (مستودع، صندوق، شاحنة، دبوس، عملات، ساعة، درع، جوال) فوق خريطة المملكة بعمق وظلال. تحت كل خيار زر لنسخ الرسم، وملفات SVG الجاهزة في مجلد <span dir="ltr">map-svg</span>.</p>
+    <nav class="jump" id="jump" aria-label="انتقل إلى خيار"></nav>
+  </header>
+  <div id="list"></div>
+</div>
+
+<script>
+/* ---------- geography (approximate) ---------- */
+const K=20, LON0=34.3, LAT0=32.6;
+const P=(lon,lat)=>[+((lon-LON0)*K).toFixed(1),+((LAT0-lat)*K).toFixed(1)];
+const BORDER=[[34.95,29.36],[36.07,29.19],[36.5,29.5],[37.5,30.0],[38.0,30.5],[37.0,31.5],[39.0,32.0],[39.2,32.15],[40.4,31.9],[41.4,31.4],[42.1,31.1],[44.7,29.2],[46.5,29.1],[47.7,28.5],[48.4,28.55],
+ [48.8,27.7],[49.3,27.1],[50.1,26.7],[50.2,26.2],[50.1,25.6],[50.6,25.0],[50.8,24.75],[51.6,24.25],[52.0,23.0],[55.0,22.7],[55.7,22.0],[55.0,20.0],[52.0,19.0],[49.1,18.6],[48.2,18.2],[47.0,17.0],[46.4,17.2],[45.2,17.4],[44.0,17.4],[43.4,17.5],[43.1,16.7],[42.8,16.4],
+ [42.6,16.8],[42.2,17.8],[41.2,19.0],[40.5,20.2],[39.6,21.3],[39.1,22.0],[38.5,23.6],[37.5,24.6],[37.2,25.2],[36.5,26.0],[35.5,27.5],[34.8,28.1],[34.6,28.4]];
+const PATH='M'+BORDER.map(p=>P(...p).join(' ')).join(' L')+' Z';
+const VB='0 0 440 340';
+const C={ // city: [lon,lat]
+  ruh:{n:'الرياض',ll:[46.72,24.69]}, jed:{n:'جدة',ll:[39.17,21.54]}, mak:{n:'مكة المكرمة',ll:[39.83,21.42]}, med:{n:'المدينة المنورة',ll:[39.61,24.47]},
+  dmm:{n:'الدمام',ll:[50.10,26.43]}, abh:{n:'أبها',ll:[42.5,18.22]}, tbk:{n:'تبوك',ll:[36.57,28.38]}, bur:{n:'بريدة',ll:[43.97,26.33]}, hail:{n:'حائل',ll:[41.69,27.52]}, jaz:{n:'جازان',ll:[42.55,16.89]}, hof:{n:'الأحساء',ll:[49.59,25.38]}, taif:{n:'الطائف',ll:[40.42,21.27]},
+};
+const xy=id=>P(...C[id].ll);
+const WH=[ // warehouses
+  {id:'ruh',name:'حي السليمانية',price:4,svc:['تخزين','تجهيز','تبريد','مرتجعات'],sla:'نفس اليوم داخل الرياض'},
+  {id:'jed',name:'حي الأمير فواز',price:5,svc:['تخزين','تجهيز','قابل للكسر'],sla:'نفس اليوم داخل جدة'},
+  {id:'dmm',name:'حي الفيصلية',price:6,svc:['تخزين','تجهيز','تبريد'],sla:'نفس اليوم داخل الدمام والخبر'},
+  {id:'med',name:'حي النرجس',price:5,svc:['تخزين','تجهيز'],sla:'اليوم التالي'},
+  {id:'abh',name:'حي المنسك',price:6,svc:['تخزين','تجهيز','مرتجعات'],sla:'اليوم التالي'},
+];
+
+
+
+/* ================= shared defs: gradients & filters ================= */
+const DEFS=`
+<linearGradient id="gTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f1fdf9"/><stop offset=".55" stop-color="#d4f6ea"/><stop offset="1" stop-color="#b7ecdb"/></linearGradient>
+<linearGradient id="gTopDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1b7d8c"/><stop offset="1" stop-color="#0a5866"/></linearGradient>
+<linearGradient id="gBrand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#157a8a"/><stop offset="1" stop-color="#003a45"/></linearGradient>
+<linearGradient id="gOrange" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffa379"/><stop offset="1" stop-color="#dc4a1f"/></linearGradient>
+<linearGradient id="gMint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9f8eb"/><stop offset="1" stop-color="#63d6b8"/></linearGradient>
+<linearGradient id="gWallL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e2ebed"/></linearGradient>
+<linearGradient id="gWallR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d3e1e4"/><stop offset="1" stop-color="#b3c7cc"/></linearGradient>
+<linearGradient id="gBoxT" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe8cc"/><stop offset="1" stop-color="#f0d1a3"/></linearGradient>
+<linearGradient id="gBoxL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ebc48e"/><stop offset="1" stop-color="#dcae6e"/></linearGradient>
+<linearGradient id="gBoxR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4a262"/><stop offset="1" stop-color="#bb864a"/></linearGradient>
+<radialGradient id="gShine" cx=".32" cy=".3" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset=".4" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<linearGradient id="gGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".92"/><stop offset="1" stop-color="#fff" stop-opacity=".62"/></linearGradient>
+<linearGradient id="gArc" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#63d6b8"/><stop offset="1" stop-color="#f2663a"/></linearGradient>
+<filter id="blur8" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="8"/></filter>
+<filter id="blur3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3"/></filter>
+<filter id="sh" x="-20%" y="-40%" width="140%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#004956" flood-opacity=".18"/></filter>`;
+const FONT="IBM Plex Sans Arabic, PingARLT, sans-serif";
+const svgWrap=(vb,inner)=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" role="img" aria-label="رسم مجسّم لخريطة مستودعات سلة" direction="ltr"><defs>${DEFS}</defs>${inner}</svg>`;
+const f1=n=>+n.toFixed(1);
+const pts=a=>a.map(p=>p.map(f1).join(',')).join(' ');
+function T_(x,y,z=0){return [x,y-z]}
+function txt(x,y,t,{size=12,w=700,color='#004956',anchor='middle'}={}){return `<text x="${f1(x)}" y="${f1(y)}" text-anchor="${anchor}" direction="rtl" font-family="${FONT}" font-size="${size}" font-weight="${w}" fill="${color}" style="unicode-bidi:embed">${t}</text>`;}
+function chip(x,y,t,{color='#004956',size=11,bg='#fff'}={}){const w=t.length*size*.6+18;return `<g filter="url(#sh)"><rect x="${f1(x-w/2)}" y="${f1(y-12)}" width="${f1(w)}" height="23" rx="11.5" fill="${bg}"/></g>${txt(x,y+4,t,{size,color})}`;}
+const shadow=(x,y,rx,ry,o=.18)=>`<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(rx)}" ry="${f1(ry)}" fill="#003a45" opacity="${o}" filter="url(#blur3)"/>`;
+
+/* ================= map slab (oblique 3D) ================= */
+function slab({th=-12,sq=.56,s=1,ox=0,oy=0,thick=16,top='url(#gTop)',side=['#3fa88d','#9fe0cd'],edge='#fff'}={}){
+  const r=th*Math.PI/180, a=Math.cos(r), b=sq*Math.sin(r), c=-Math.sin(r), d=sq*Math.cos(r);
+  const T=(x,y)=>[a*x*s+c*y*s+ox, b*x*s+d*y*s+oy];
+  const poly=BORDER.map(p=>T(...P(...p)));
+  const xs=poly.map(p=>p[0]), ys=poly.map(p=>p[1]);
+  const bb={x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)};
+  const mix=(t)=>{const h=v=>parseInt(v,16);const A=side[0],B=side[1];const ch=i=>Math.round(h(A.substr(1+2*i,2))*(1-t)+h(B.substr(1+2*i,2))*t).toString(16).padStart(2,'0');return '#'+ch(0)+ch(1)+ch(2);};
+  let layers='';for(let k=thick;k>=1;k-=2){layers+=`<polygon points="${pts(poly.map(([x,y])=>[x,y+k]))}" fill="${mix(1-k/thick)}"/>`;}
+  const svg=`${shadow((bb.x0+bb.x1)/2,bb.y1+thick+6,(bb.x1-bb.x0)*.42,14,.22)}${layers}<polygon points="${pts(poly)}" fill="${top}" stroke="${edge}" stroke-width="1.6" stroke-linejoin="round"/>`;
+  return {svg,T,poly,bb,at:id=>T(...xy(id))};
+}
+const vbOf=(bb,[l,t,r,b])=>`${f1(bb.x0-l)} ${f1(bb.y0-t)} ${f1(bb.x1-bb.x0+l+r)} ${f1(bb.y1-bb.y0+t+b)}`;
+
+/* ================= 3D icon library ================= */
+// isometric prism: front-bottom corner at (x,y); w along right axis, d along left axis, h up
+function prism(x,y,w,d,h,{t,l,r,stroke='none'}){
+  const R=[.866,-.5], L=[-.866,-.5];
+  const fb=[x,y], rb=[x+R[0]*w,y+R[1]*w], lb=[x+L[0]*d,y+L[1]*d];
+  const f=[x,y-h], rr=[rb[0],rb[1]-h], ll=[lb[0],lb[1]-h], bk=[rr[0]+L[0]*d,rr[1]+L[1]*d];
+  return {svg:`<polygon points="${pts([fb,lb,ll,f])}" fill="${l}" stroke="${stroke}"/><polygon points="${pts([fb,rb,rr,f])}" fill="${r}" stroke="${stroke}"/><polygon points="${pts([f,rr,bk,ll])}" fill="${t}" stroke="${stroke}"/>`,f,rr,ll,bk,fb,rb,lb};
+}
+function box3d(x,y,s=1){const p=prism(x,y,20*s,20*s,17*s,{t:'url(#gBoxT)',l:'url(#gBoxL)',r:'url(#gBoxR)'});
+  const m=(A,B,k=.5)=>[A[0]+(B[0]-A[0])*k,A[1]+(B[1]-A[1])*k];
+  return shadow(x,y+1,16*s,5*s,.16)+p.svg+`<line x1="${f1(m(p.f,p.ll)[0])}" y1="${f1(m(p.f,p.ll)[1])}" x2="${f1(m(p.rr,p.bk)[0])}" y2="${f1(m(p.rr,p.bk)[1])}" stroke="#fff5e6" stroke-width="${3*s}" opacity=".85"/>
+   <line x1="${f1(m(p.f,p.ll)[0])}" y1="${f1(m(p.f,p.ll)[1])}" x2="${f1(m(p.fb,p.lb)[0])}" y2="${f1(m(p.fb,p.lb)[1])}" stroke="#f3dcb6" stroke-width="${3*s}" opacity=".8"/>`;}
+function boxStack(x,y,s=1){return box3d(x,y,s)+box3d(x+19*s,y-11*s,s*.9)+box3d(x+6*s,y-17*s,s*.85);}
+function warehouse3d(x,y,s=1,roof='url(#gBrand)'){
+  const p=prism(x,y,40*s,26*s,20*s,{t:'#eef4f5',l:'url(#gWallL)',r:'url(#gWallR)'});
+  const up=12*s, m1=[(p.f[0]+p.ll[0])/2,(p.f[1]+p.ll[1])/2-up], m2=[(p.rr[0]+p.bk[0])/2,(p.rr[1]+p.bk[1])/2-up];
+  const door=[[x+.866*14*s,y-.5*14*s],[x+.866*30*s,y-.5*30*s],[x+.866*30*s,y-.5*30*s-13*s],[x+.866*14*s,y-.5*14*s-13*s]];
+  let lines='';for(let k=1;k<5;k++){const yy=13*s*k/5;lines+=`<line x1="${f1(door[0][0])}" y1="${f1(door[0][1]-yy)}" x2="${f1(door[1][0])}" y2="${f1(door[1][1]-yy)}" stroke="#8fa9af" stroke-width="${.8*s}"/>`;}
+  return shadow(x+8*s,y+2*s,36*s,9*s,.2)+
+   `<polygon points="${pts([p.fb,p.lb,p.ll,p.f])}" fill="url(#gWallL)"/><polygon points="${pts([p.fb,p.rb,p.rr,p.f])}" fill="url(#gWallR)"/>
+    <polygon points="${pts([p.f,p.ll,m1])}" fill="#f7fbfb"/><polygon points="${pts([p.ll,m1,m2,p.bk])}" fill="#0a5866"/>
+    <polygon points="${pts([p.f,m1,m2,p.rr])}" fill="${roof}"/><line x1="${f1(m1[0])}" y1="${f1(m1[1])}" x2="${f1(m2[0])}" y2="${f1(m2[1])}" stroke="#fff" stroke-opacity=".5" stroke-width="${1.2*s}"/>
+    <polygon points="${pts(door)}" fill="#c4d5d9"/>${lines}
+    <polygon points="${pts([[x-.866*8*s,y-.5*8*s-7*s],[x-.866*18*s,y-.5*18*s-7*s],[x-.866*18*s,y-.5*18*s-13*s],[x-.866*8*s,y-.5*8*s-13*s]])}" fill="#a8f0dc"/>`;}
+function truck3d(x,y,s=1){
+  const cab=prism(x+.866*32*s,y-.5*32*s,11*s,15*s,12*s,{t:'#2a8d9c',l:'#0b6a7a',r:'#004956'});
+  const cargo=prism(x,y,32*s,15*s,17*s,{t:'#f6fafa',l:'url(#gWallL)',r:'url(#gWallR)'});
+  const w=(k)=>`<ellipse cx="${f1(x+.866*k*s)}" cy="${f1(y-.5*k*s+1*s)}" rx="${f1(3.6*s)}" ry="${f1(4.2*s)}" fill="#1f2a2e"/><ellipse cx="${f1(x+.866*k*s)}" cy="${f1(y-.5*k*s+1*s)}" rx="${f1(1.5*s)}" ry="${f1(1.8*s)}" fill="#9aa5a8"/>`;
+  const win=prism(x+.866*37*s,y-.5*37*s-6*s,5*s,.1,4*s,{t:'none',l:'none',r:'#a8f0dc'});
+  const label=`<g transform="matrix(.866 -.5 0 1 ${f1(x+.866*6*s)} ${f1(y-.5*6*s-6*s)})"><rect x="0" y="-4" width="${f1(20*s)}" height="${f1(4.5*s)}" fill="#76e8cd"/></g>
+   <text transform="matrix(.866 -.5 0 1 ${f1(x+.866*16*s)} ${f1(y-.5*16*s-8*s)})" text-anchor="middle" font-family="${FONT}" font-size="${f1(8*s)}" font-weight="700" fill="#004956">سلة</text>`;
+  return shadow(x+14*s,y+3*s,30*s,7*s,.2)+cab.svg+win.svg+cargo.svg+label+w(7)+w(25)+w(38);}
+function pin3d(x,y,s=1,col='b'){const g=col==='o'?'url(#gOrange)':'url(#gBrand)';const hy=y-30*s,r=13*s;
+  return shadow(x,y+1,10*s,3.4*s,.25)+`<path d="M${f1(x)} ${f1(y)} C${f1(x-4*s)} ${f1(y-9*s)} ${f1(x-r)} ${f1(hy+10*s)} ${f1(x-r)} ${f1(hy)} A${f1(r)} ${f1(r)} 0 1 1 ${f1(x+r)} ${f1(hy)} C${f1(x+r)} ${f1(hy+10*s)} ${f1(x+4*s)} ${f1(y-9*s)} ${f1(x)} ${f1(y)} Z" fill="${g}"/>
+   <circle cx="${f1(x)}" cy="${f1(hy)}" r="${f1(r)}" fill="url(#gShine)"/><circle cx="${f1(x)}" cy="${f1(hy)}" r="${f1(5.2*s)}" fill="#fff"/>`;}
+function coins3d(x,y,s=1,n=3){let o=shadow(x,y+5*s,18*s,5*s,.18);for(let i=0;i<n;i++){const yy=y-i*6*s;
+  o+=`<path d="M${f1(x-16*s)} ${f1(yy)} v${f1(5*s)} a${f1(16*s)} ${f1(6*s)} 0 0 0 ${f1(32*s)} 0 v${f1(-5*s)}" fill="#2fa487"/><ellipse cx="${f1(x)}" cy="${f1(yy)}" rx="${f1(16*s)}" ry="${f1(6*s)}" fill="url(#gMint)" stroke="#fff" stroke-opacity=".6"/>`;}
+  return o+txt(x,y-(n-1)*6*s+3.5*s,'ر.س',{size:8*s,color:'#004956'});}
+function clock3d(x,y,s=1){const r=17*s;return shadow(x,y+r+4*s,14*s,4*s,.18)+`<circle cx="${f1(x+3.5*s)}" cy="${f1(y+2*s)}" r="${f1(r)}" fill="#0a5866"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="url(#gBrand)"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r-4*s)}" fill="#fff"/>
+  <path d="M${f1(x)} ${f1(y)} V${f1(y-8*s)} M${f1(x)} ${f1(y)} L${f1(x+6*s)} ${f1(y+3*s)}" stroke="#f2663a" stroke-width="${f1(2.2*s)}" stroke-linecap="round"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(1.8*s)}" fill="#004956"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="url(#gShine)"/>`;}
+function shield3d(x,y,s=1){const d=(dx,dy)=>`M${f1(x+dx)} ${f1(y-18*s+dy)} L${f1(x+15*s+dx)} ${f1(y-12*s+dy)} V${f1(y+dy)} C${f1(x+15*s+dx)} ${f1(y+10*s+dy)} ${f1(x+7*s+dx)} ${f1(y+16*s+dy)} ${f1(x+dx)} ${f1(y+19*s+dy)} C${f1(x-7*s+dx)} ${f1(y+16*s+dy)} ${f1(x-15*s+dx)} ${f1(y+10*s+dy)} ${f1(x-15*s+dx)} ${f1(y+dy)} V${f1(y-12*s+dy)} Z`;
+  return shadow(x,y+22*s,12*s,3.5*s,.18)+`<path d="${d(3.5*s,2.5*s)}" fill="#0a5866"/><path d="${d(0,0)}" fill="url(#gBrand)"/><path d="${d(0,0)}" fill="url(#gShine)"/><path d="M${f1(x-6*s)} ${f1(y)} l${f1(4.5*s)} ${f1(4.5*s)} l${f1(8*s)} ${f1(-9*s)}" stroke="#a8f0dc" stroke-width="${f1(3*s)}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;}
+function pedestal(x,y,s=1){return shadow(x,y+10*s,30*s,7*s,.16)+`<path d="M${f1(x-28*s)} ${f1(y)} v${f1(7*s)} a${f1(28*s)} ${f1(9*s)} 0 0 0 ${f1(56*s)} 0 v${f1(-7*s)}" fill="#9fdcc9"/><ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(28*s)}" ry="${f1(9*s)}" fill="url(#gMint)"/><ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(28*s)}" ry="${f1(9*s)}" fill="url(#gShine)"/>`;}
+
+/* ================= copy ================= */
+const SUB='خزّن منتجاتك وجهّزها واشحنها عبر شبكة شركاء سلة، وفعّل توصيل <em>محلي إكسبريس</em> خلال الساعة نفسها لكل طلب مؤهل.';
+const X='<button class="bn-x" type="button" aria-label="إخفاء البانر"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+const banner=(h,sub,art,{dark=false,cta='اكتشف مستودعات سلة'}={})=>`<section class="bn ${dark?'dark':''}">${X}<div><h2 class="h">${h}</h2><p class="sub">${sub}</p><div class="actions"><a class="cta" href="#">${cta}</a></div></div><div class="art">${art}</div></section>`;
+const PRICE={ruh:'4 ر.س',jed:'5 ر.س',dmm:'6 ر.س',med:'5 ر.س',abh:'6 ر.س'};
+
+/* ================= 10 options ================= */
+const OPTS=[
+ {file:'3d-01-pins-slab',name:'منصة مجسّمة ودبابيس 3D',when:'الخريطة كقطعة سميكة بظل ناعم، ودبوس مجسّم لكل مستودع مع سعره. أبسط خيار 3D وأقربه للهوية الحالية.',
+  art(){const m=slab({thick:20});let o=m.svg;const off={ruh:[-86,-44],dmm:[70,-34],med:[-84,-34],jed:[-70,-20],abh:[66,-26]};
+   WH.forEach(w=>{const [x,y]=m.at(w.id);const hot=w.id==='ruh';o+=pin3d(x,y,hot?1.3:1,hot?'o':'b');});
+   WH.forEach(w=>{const [x,y]=m.at(w.id);const hot=w.id==='ruh';const [dx,dy]=off[w.id];o+=chip(x+dx,y+dy,`${C[w.id].n} · ${PRICE[w.id]}`,{color:hot?'#dc4a1f':'#004956'});});
+   return svgWrap(vbOf(m.bb,[70,80,70,50]),o);},
+  h:'مستودع قريب من عملائك في كل منطقة'},
+ {file:'3d-02-warehouse-island',name:'جزيرة المستودعات',when:'مبانٍ مجسّمة على الخريطة، وصناديق عند الرياض، وشاحنة سلة على الطريق إلى جدة. رسم توضيحي يحكي الخدمة كاملة.',
+  art(){const m=slab({thick:22});const [rx,ry]=m.at('ruh'),[jx,jy]=m.at('jed');let o=m.svg;
+   o+=`<path d="M${f1(rx)} ${f1(ry)} Q${f1((rx+jx)/2)} ${f1(ry+30)} ${f1(jx)} ${f1(jy)}" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" opacity=".9"/><path d="M${f1(rx)} ${f1(ry)} Q${f1((rx+jx)/2)} ${f1(ry+30)} ${f1(jx)} ${f1(jy)}" fill="none" stroke="#9fdcc9" stroke-width="1.5" stroke-dasharray="4 5"/>`;
+   const lo={med:[-44,-26],abh:[40,20],dmm:[46,-30],jed:[-50,6]};const ch2=[];
+   ['med','abh','dmm','jed'].forEach(id=>{const [x,y]=m.at(id);o+=warehouse3d(x-10,y+6,.55);ch2.push(chip(x+lo[id][0],y+lo[id][1],C[id].n,{size:10}));});
+   o+=warehouse3d(rx-14,ry+10,.9,'url(#gOrange)')+boxStack(rx+26,ry+12,.8)+chip(rx-30,ry-52,'الرياض · نفس اليوم',{color:'#dc4a1f'});
+   o+=truck3d((rx+jx)/2-18,(ry+jy)/2+26,.8)+ch2.join('');
+   return svgWrap(vbOf(m.bb,[60,70,60,50]),o);},
+  h:'من المستودع إلى باب عميلك'},
+ {file:'3d-03-hero-pin-orbit',name:'دبوس كبير وأيقونات تدور حوله',when:'دبوس مجسّم كبير فوق الرياض، وحوله مدار بأربع أيقونات 3D: صندوق، شاحنة، ساعة، عملات. يلخص الخدمة بدون نص كثير.',
+  art(){const m=slab({thick:12,s:.85,ox:40,oy:120});const [x,y]=m.at('ruh');let o=m.svg;
+   o+=`<ellipse cx="${f1(x)}" cy="${f1(y-54)}" rx="150" ry="56" fill="none" stroke="#63d6b8" stroke-width="1.6" stroke-dasharray="3 6"/>`;
+   const orb=[[-150,0,'box'],[-60,-52,'clock'],[80,-50,'coin'],[150,4,'truck']];
+   o+=pin3d(x,y,2.6,'o');
+   orb.forEach(([dx,dy,k])=>{const cx=x+dx,cy=y-54+dy;o+=k==='box'?box3d(cx-8,cy+10,1.2):k==='clock'?clock3d(cx,cy-4,1.05):k==='coin'?coins3d(cx,cy+6,1):truck3d(cx-24,cy+14,1);});
+   o+=chip(x-150,y-12,'تخزين',{size:10})+chip(x-60,y-126,'خلال ساعات',{size:10})+chip(x+80,y-126,'من 4 ر.س',{size:10})+chip(x+150,y-8,'توصيل',{size:10});
+   return svgWrap(`${f1(x-220)} ${f1(y-170)} 440 ${f1(m.bb.y1-(y-170)+40)}`,o);},
+  h:'كل ما يحتاجه طلبك في مكان واحد'},
+ {file:'3d-04-stacked-layers',name:'طبقات الخدمة',when:'ثلاث نسخ من الخريطة فوق بعض: التخزين، ثم التجهيز، ثم التوصيل، وخط يربطها عند الرياض. يشرح أن سلة تدير الطبقات الثلاث.',
+  art(){const L=[['التوصيل','url(#gTop)',0],['التجهيز','#c3efe1',118],['التخزين','#9fdcc9',236]];let o='';let bb;const conn=[];
+   [...L].reverse().forEach(([t,top,dy])=>{const m=slab({sq:.4,s:.74,thick:9,oy:dy,top,side:['#3fa88d','#86d3bd']});bb=bb||m.bb;const [x,y]=m.at('ruh');conn.push([x,y]);o+=m.svg;
+     o+=txt(m.bb.x1+14,(m.bb.y0+m.bb.y1)/2+8,t,{size:15,anchor:'start'});
+     if(t==='التخزين'){o+=warehouse3d(x-12,y+8,.55)+warehouse3d(m.at('jed')[0]-10,m.at('jed')[1]+6,.45);}
+     if(t==='التجهيز'){o+=boxStack(x-10,y+8,.7);}
+     if(t==='التوصيل'){WH.forEach(w=>{const [px,py]=m.at(w.id);o+=pin3d(px,py,.75,w.id==='ruh'?'o':'b');});}});
+   const top=conn[2],bot=conn[0];o=`<line x1="${f1(top[0])}" y1="${f1(top[1])}" x2="${f1(bot[0])}" y2="${f1(bot[1])}" stroke="#004956" stroke-width="1.4" stroke-dasharray="3 4" opacity=".5"/>`+o;
+   const m0=slab({sq:.4,s:.74,thick:9});return svgWrap(`${f1(m0.bb.x0-30)} ${f1(m0.bb.y0-50)} ${f1(m0.bb.x1-m0.bb.x0+130)} ${f1(m0.bb.y1-m0.bb.y0+236+70)}`,o);},
+  h:'تخزين وتجهيز وتوصيل في شبكة واحدة'},
+ {file:'3d-05-columns',name:'أعمدة الطلب المجسّمة',when:'عمود مجسّم فوق كل مدينة طوله يمثل نسبة طلبات التاجر منها، والرياض بالبرتقالي. رسم بياني 3D يناسب البانر المخصّص ببيانات المتجر.',
+  art(){const m=slab({thick:16});let o=m.svg;const D=[['tbk',5],['jed',17],['abh',6],['dmm',9],['ruh',38]];
+   D.forEach(([id,v])=>{const [x,y]=m.at(id);const h=v*3.4;const hot=id==='ruh';const p=prism(x-9,y+5,14,14,h,{t:hot?'#ffb895':'#6fdcc0',l:hot?'#f2663a':'#15808f',r:hot?'#c9441c':'#005664'});
+     o+=shadow(x,y+6,14,4,.2)+p.svg+txt(x-2,y-h-8,`${v}٪`,{size:12,color:hot?'#dc4a1f':'#004956'})+txt(x-2,y+24,C[id].n,{size:10,w:600,color:'#4b5a5f'});});
+   return svgWrap(vbOf(m.bb,[40,160,40,40]),o);},
+  h:'38٪ من طلباتك تذهب إلى الرياض'},
+ {file:'3d-06-warehouse-scene',name:'مشهد المستودع عن قرب',when:'لقطة قريبة: مستودع كبير وشاحنة عند الرصيف وصناديق على طبلية، وخريطة صغيرة بموقعه. يعطي إحساساً ملموساً بالمكان.',
+  art(){let o=`<polygon points="${pts([[240,330],[450,210],[240,90],[30,210]])}" fill="url(#gTop)"/><polygon points="${pts([[30,210],[240,330],[240,344],[30,224]])}" fill="#8fd5c1"/><polygon points="${pts([[240,330],[450,210],[450,224],[240,344]])}" fill="#6cc4aa"/>`;
+   o+=`<polygon points="${pts([[200,300],[300,242],[330,259],[230,317]])}" fill="#e9f1f2" opacity=".8"/>`;
+   o+=warehouse3d(180,238,2.4)+truck3d(252,300,1.6)+boxStack(96,262,1.2)+box3d(140,290,1);
+   const mm=slab({s:.28,thick:4,ox:318,oy:40,sq:.6,th:-8});const [px,py]=mm.at('ruh');
+   o+=`<g filter="url(#sh)"><rect x="${f1(mm.bb.x0-12)}" y="${f1(mm.bb.y0-24)}" width="${f1(mm.bb.x1-mm.bb.x0+24)}" height="${f1(mm.bb.y1-mm.bb.y0+44)}" rx="12" fill="#fff"/></g>`+mm.svg+pin3d(px,py,.5,'o')+txt((mm.bb.x0+mm.bb.x1)/2,mm.bb.y0-8,'مستودع الرياض',{size:9.5});
+   return svgWrap('10 20 470 340',o);},
+  h:'مستودعك في الرياض جاهز لاستقبال مخزونك'},
+ {file:'3d-07-phone',name:'جوال مجسّم وصندوق يخرج منه',when:'جوال مائل يعرض الخريطة وبطاقة «يصلك اليوم»، وصندوق ودبوس يطفوان خارجه. يربط المستودع بتجربة عميل التاجر.',
+  art(){const px=150,py=40,W=150,H=290;const sk=`matrix(1 .16 -.22 1 ${px} ${py})`;
+   const mm=slab({s:.3,thick:3,sq:.9,th:0,ox:12,oy:74,top:'#d4f6ea'});const [rx,ry]=mm.at('ruh');
+   let o=shadow(px+60,py+H+18,100,16,.2)+`<g transform="${sk}"><rect x="8" y="8" width="${W}" height="${H}" rx="24" fill="#00323c"/><rect x="0" y="0" width="${W}" height="${H}" rx="24" fill="#16323a"/><rect x="7" y="7" width="${W-14}" height="${H-14}" rx="18" fill="#f4fbf9"/>
+     <rect x="${W/2-22}" y="12" width="44" height="7" rx="3.5" fill="#16323a"/>${txt(W-18,44,'تتبع طلبك',{size:11,anchor:'start'})}${mm.svg}${pin3d(rx,ry,.55,'o')}
+     <rect x="16" y="${H-96}" width="${W-32}" height="72" rx="12" fill="#fff" filter="url(#sh)"/>${txt(W-26,H-70,'محلي إكسبريس',{size:10,color:'#dc4a1f',anchor:'start'})}${txt(W-26,H-50,'يصلك اليوم قبل 9 م',{size:11,anchor:'start'})}<rect x="26" y="${H-40}" width="${W-52}" height="6" rx="3" fill="#e3eeee"/><rect x="${W-26-60}" y="${H-40}" width="60" height="6" rx="3" fill="#63d6b8"/></g>`;
+   o+=box3d(62,238,2)+pin3d(360,150,1.8,'b')+clock3d(372,262,1.1)+chip(360,78,'من مستودع الرياض',{size:10.5});
+   return svgWrap('10 20 440 350',o);},
+  h:'اجعل منتجاتك تصل في نفس اليوم'},
+ {file:'3d-08-glass-cards',name:'بطاقات زجاجية فوق الخريطة',when:'بطاقات شبه شفافة تطفو فوق المدن بظل على الخريطة، فيها السعر ومدة التوصيل. أسلوب حديث بعمق خفيف.',
+  art(){const m=slab({thick:18});let o=m.svg;const info={ruh:['4 ر.س','نفس اليوم'],jed:['5 ر.س','نفس اليوم'],dmm:['6 ر.س','يدعم التبريد']};
+   const co={ruh:[-70,-60],dmm:[56,-44],jed:[-40,-40]};Object.keys(info).forEach(id=>{const [x,y]=m.at(id);const cw=112,ch=58,cx=x+co[id][0]-cw/2,cy=y+co[id][1]-ch;const hot=id==='ruh';
+     o+=`<ellipse cx="${f1(x)}" cy="${f1(y)}" rx="26" ry="8" fill="#003a45" opacity=".14" filter="url(#blur3)"/><circle cx="${f1(x)}" cy="${f1(y)}" r="5" fill="${hot?'#f2663a':'#004956'}" stroke="#fff" stroke-width="2"/><line x1="${f1(x)}" y1="${f1(y-6)}" x2="${f1(cx+cw/2)}" y2="${f1(cy+ch+Math.tan(-6*Math.PI/180)*(cx+cw/2)+Math.tan(6*Math.PI/180)*x)}" stroke="#004956" stroke-opacity=".35" stroke-dasharray="2 3"/>
+      <g transform="skewY(-6)"><g transform="translate(0 ${f1(Math.tan(6*Math.PI/180)*x)})"><rect x="${f1(cx)}" y="${f1(cy)}" width="${cw}" height="${ch}" rx="12" fill="url(#gGlass)" stroke="#fff" stroke-width="1.5" filter="url(#sh)"/>
+      ${txt(cx+cw-12,cy+22,C[id].n,{size:12,anchor:'start'})}${txt(cx+12,cy+22,info[id][0],{size:13,color:hot?'#dc4a1f':'#004956',anchor:'end'})}${txt(cx+cw-12,cy+43,info[id][1],{size:10.5,w:500,color:'#4b5a5f',anchor:'start'})}</g></g>`;});
+   ['med','abh'].forEach(id=>{const [x,y]=m.at(id);o+=`<circle cx="${f1(x)}" cy="${f1(y)}" r="5" fill="#004956" stroke="#fff" stroke-width="2"/>`;});
+   return svgWrap(vbOf(m.bb,[90,120,90,50]),o);},
+  h:'قارن المستودعات من نظرة واحدة'},
+ {file:'3d-09-arcs',name:'أقواس التوصيل المرتفعة',when:'أقواس عالية تنطلق من المستودعات إلى المدن فوق خريطة داكنة، بتدرج من النعناعي إلى البرتقالي. مناسب لبانر إطلاق بخلفية داكنة.',dark:true,
+  art(){const m=slab({thick:20,top:'url(#gTopDark)',side:['#00262e','#0a4a55'],edge:'#1f93a3'});let o=m.svg;
+   const R=[['ruh','bur'],['ruh','abh'],['ruh','hail'],['jed','med'],['jed','taif'],['dmm','hof'],['med','tbk'],['jed','jaz']];
+   R.forEach(([a,b])=>{const [x1,y1]=m.at(a),[x2,y2]=m.at(b);const lift=40+Math.hypot(x2-x1,y2-y1)*.45;const d=`M${f1(x1)} ${f1(y1)} Q${f1((x1+x2)/2)} ${f1((y1+y2)/2-lift)} ${f1(x2)} ${f1(y2)}`;
+     o+=`<path d="${d}" fill="none" stroke="#a8f0dc" stroke-width="6" opacity=".12"/><path d="${d}" fill="none" stroke="url(#gArc)" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="${f1(x2)}" cy="${f1(y2)}" rx="5" ry="2.4" fill="#f2663a"/>`;});
+   ['ruh','jed','dmm','med'].forEach(id=>{const [x,y]=m.at(id);o+=pin3d(x,y,id==='ruh'?1:.75,'o').replace(/url\(#gOrange\)/,'url(#gMint)');});
+   o+=chip(m.at('ruh')[0],m.at('ruh')[1]-52,'الرياض',{size:10.5});
+   return svgWrap(vbOf(m.bb,[40,110,40,50]),o);},
+  h:'من مستودعات سلة إلى كل مدن المملكة'},
+ {file:'3d-10-icons-stats',name:'أيقونات 3D مع الأرقام',when:'خريطة صغيرة في الوسط وحولها أربع أيقونات مجسّمة على قواعد، مع رقم تحت كل أيقونة. بديل مرئي لصف الأرقام في البانر الأصلي.',
+  art(){const m=slab({s:.62,thick:12,ox:150,oy:120});let o=m.svg;WH.forEach(w=>{const [x,y]=m.at(w.id);o+=pin3d(x,y,.7,w.id==='ruh'?'o':'b');});
+   const I=[[60,110,'clock','24 ساعة','متوسط التوصيل'],[520,110,'wh','+15','مستودع'],[60,300,'coin','4 ر.س','يبدأ من / طلب'],[520,300,'shield','99.8٪','دقة المخزون']];
+   I.forEach(([x,y,k,v,l])=>{o+=pedestal(x,y,1);o+=k==='clock'?clock3d(x,y-24,1.2):k==='wh'?warehouse3d(x-14,y-4,.62):k==='coin'?coins3d(x,y-8,1.05):shield3d(x,y-26,1.15);
+     o+=txt(x,y+40,v,{size:17})+txt(x,y+58,l,{size:11,w:500,color:'#4b5a5f'});});
+   return svgWrap('0 40 580 340',o);},
+  h:'تحكّم كامل في مخزونك مع مستودعات سلة'},
+];
+
+document.getElementById('jump').innerHTML=OPTS.map((o,i)=>`<a href="#d${i+1}">${i+1}</a>`).join('');
+document.getElementById('list').innerHTML=OPTS.map((o,i)=>`<article class="opt" id="d${i+1}"><div class="opt-head"><span class="opt-no num">${i+1}</span><h2>${o.name}</h2><p>${o.when}</p></div>
+  <div class="frame">${banner(o.h,SUB,o.art(),{dark:!!o.dark})}<div class="dl"><button class="copy" type="button" data-copy="${i}">نسخ كود SVG</button><span class="fname">map-svg/${o.file}.svg</span></div></div></article>`).join('');
+
+function exportSvg(i){const el=document.querySelectorAll('.opt')[i].querySelector('.art svg').cloneNode(true);
+  const vb=el.getAttribute('viewBox').split(' ').map(Number);el.setAttribute('width',Math.round(vb[2]*2));el.setAttribute('height',Math.round(vb[3]*2));
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'+el.outerHTML;}
+window.exportSvg=exportSvg; window.SVG_FILES=OPTS.map(o=>o.file);
+document.addEventListener('click',e=>{
+  const cp=e.target.closest('[data-copy]');
+  if(cp){const done=ok=>{cp.textContent=ok?'تم النسخ':'تعذّر النسخ';setTimeout(()=>cp.textContent='نسخ كود SVG',1600);};
+    try{navigator.clipboard.writeText(exportSvg(+cp.dataset.copy)).then(()=>done(true),()=>done(false));}catch(err){done(false);}}
+  const x=e.target.closest('.bn-x'); if(x){const b=x.closest('.bn');b.style.opacity='.35';setTimeout(()=>b.style.opacity='',900);}
+  const a=e.target.closest('a'); if(a&&a.getAttribute('href')==='#') e.preventDefault();
+});
+</script>
