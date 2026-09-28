@@ -103,11 +103,15 @@ th{background:#f8fafa;color:var(--ink-2);font-weight:500;text-align:start;paddin
 td{padding:13px 14px;border-top:1px solid var(--line);vertical-align:middle}
 tr.muted-row td{background:#fcfcfc}
 td.n,th.n{text-align:center;font-variant-numeric:tabular-nums}
+th.grp{border-bottom:1px solid var(--line);color:var(--brand);font-weight:600}
+th.grp-wait{color:var(--muted)}
+thead tr+tr th{background:#fbfcfc;font-size:12px}
+th[rowspan]{vertical-align:bottom}
 .prod{display:flex;align-items:center;gap:10px}
 .thumb{width:38px;height:38px;border-radius:6px;background:var(--line-2);display:grid;place-items:center;flex:none;font-size:11px;color:var(--muted)}
 .qty-bad{color:var(--bad);font-weight:600}
 .qty-ok{color:var(--ok);font-weight:600}
-.note{font-size:12px;color:var(--ink-2);max-width:260px}
+.note{font-size:12px;color:var(--ink-2);min-width:220px;max-width:280px}
 
 /* ---------- banner (comment 1) ---------- */
 .hero{position:relative;background:linear-gradient(135deg,var(--brand) 0%,#0b5f6c 100%);color:#fff;border-radius:var(--r-lg);padding:24px 28px;display:grid;grid-template-columns:1.1fr 1.6fr;gap:28px;overflow:hidden;margin-bottom:20px}
@@ -652,35 +656,45 @@ function productsSection(t){
       <div class="tbl-wrap"><table><thead><tr><th>المنتج</th><th>SKU</th><th class="n">الكمية المرسلة</th><th>نتيجة المراجعة</th></tr></thead>
       <tbody>${PRODUCTS.map(p=>`<tr><td>${prodCell(p)}</td><td class="num">${p.sku}</td><td class="n">${p.sent}</td><td><span class="pill gray">بانتظار المراجعة</span></td></tr>`).join('')}</tbody></table></div></section>`;
   }
-  if(t===2){
-    const full=PRODUCTS.filter(p=>REVIEW[p.sku].acc===p.sent).length, part=PRODUCTS.filter(p=>REVIEW[p.sku].acc>0&&REVIEW[p.sku].acc<p.sent).length, rej=PRODUCTS.filter(p=>REVIEW[p.sku].acc===0).length;
-    const accU=PRODUCTS.reduce((a,p)=>a+REVIEW[p.sku].acc,0), sentU=PRODUCTS.reduce((a,p)=>a+p.sent,0);
-    return `<section class="panel pad stack">
-      <div class="row between"><h2>المنتجات ونتيجة المراجعة</h2><span class="sm muted">راجعها المستودع في 15 سبتمبر 2026</span></div>
-      <div class="summary">
+  const full=PRODUCTS.filter(p=>REVIEW[p.sku].acc===p.sent).length, part=PRODUCTS.filter(p=>REVIEW[p.sku].acc>0&&REVIEW[p.sku].acc<p.sent).length, rej=PRODUCTS.filter(p=>REVIEW[p.sku].acc===0).length;
+  const accU=PRODUCTS.reduce((a,p)=>a+REVIEW[p.sku].acc,0), sentU=PRODUCTS.reduce((a,p)=>a+p.sent,0);
+  return `<section class="panel pad stack">
+    <div class="row between"><h2>المنتجات</h2>
+      ${t===2?'<span class="sm muted">راجعها المستودع في 15 سبتمبر 2026 · الاستلام والفحص بعد وصول الشحنة</span>'
+             :`<button class="btn btn-sm" type="button" data-act="toast" data-msg="جارٍ تنزيل إشعار الاستلام GRN">${I.file}إشعار الاستلام (GRN)</button>`}</div>
+    ${t===2?`<div class="summary">
         <div class="sum"><b>${accU}<small class="muted" style="font-size:13px"> / ${sentU}</small></b><span>وحدة مقبولة</span></div>
         <div class="sum ok"><b>${full}</b><span>مقبول بالكامل</span></div>
         <div class="sum warn"><b>${part}</b><span>مقبول جزئياً</span></div>
         <div class="sum bad"><b>${rej}</b><span>مرفوض</span></div>
       </div>
-      <div class="alert info">${I.info}<span class="grow">أرسل الكميات المقبولة فقط. الكميات المرفوضة تبقى في فرعك ولن تُحتسب في الشحنة.</span></div>
-      <div class="tbl-wrap"><table><thead><tr><th>المنتج</th><th>SKU</th><th class="n">المرسلة</th><th class="n">المقبولة</th><th class="n">المرفوضة</th><th>الحالة</th><th>ملاحظات المستودع</th></tr></thead>
-      <tbody>${PRODUCTS.map(p=>{const r=REVIEW[p.sku],rej=p.sent-r.acc;const st=r.acc===p.sent?'<span class="pill ok">مقبول</span>':r.acc===0?'<span class="pill bad">مرفوض</span>':'<span class="pill warn">مقبول جزئياً</span>';
-        return `<tr class="${r.acc===0?'muted-row':''}"><td>${prodCell(p)}</td><td class="num">${p.sku}</td><td class="n">${p.sent}</td><td class="n qty-ok">${r.acc}</td><td class="n ${rej?'qty-bad':''}">${rej||'—'}</td><td>${st}</td><td class="note">${r.note||'<span class="muted">—</span>'}</td></tr>`}).join('')}</tbody></table></div>
-    </section>`;
-  }
-  // t===3
-  const rows = PRODUCTS.filter(p=>REVIEW[p.sku].acc>0);
-  return `<section class="panel pad stack">
-    <div class="row between"><h2>نتيجة الاستلام وفحص الجودة</h2><button class="btn btn-sm" type="button" data-act="toast" data-msg="جارٍ تنزيل إشعار الاستلام GRN">${I.file}إشعار الاستلام (GRN)</button></div>
-    <div class="qc-legend"><span><i style="background:var(--ok)"></i>مخزّن ومتاح للبيع</span><span><i style="background:var(--bad)"></i>تالف</span><span><i style="background:#9aa5a8"></i>مفقود</span></div>
-    <div class="tbl-wrap"><table><thead><tr><th>المنتج</th><th class="n">المقبولة</th><th class="n">المستلمة</th><th class="n">اجتازت الفحص</th><th class="n">تالفة</th><th class="n">مفقودة</th><th>التوزيع</th><th>ملاحظات الفحص</th></tr></thead>
-    <tbody>${rows.map(p=>{const a=REVIEW[p.sku].acc,q=QC[p.sku],ok=q.rec-q.dmg;
-      return `<tr><td>${prodCell(p)}</td><td class="n">${a}</td><td class="n">${q.rec}</td><td class="n qty-ok">${ok}</td><td class="n ${q.dmg?'qty-bad':''}">${q.dmg||'—'}</td><td class="n ${q.miss?'qty-bad':''}">${q.miss||'—'}</td>
-      <td><div class="bar" title="${ok} مخزّن، ${q.dmg} تالف، ${q.miss} مفقود"><i style="width:${ok/a*100}%;background:var(--ok)"></i><i style="width:${q.dmg/a*100}%;background:var(--bad)"></i><i style="width:${q.miss/a*100}%;background:#9aa5a8"></i></div></td>
-      <td class="note">${q.note||'<span class="muted">مطابق</span>'}${q.dmg?` <a href="#transfer" data-act="toast" data-msg="صور الفحص: 3 صور">عرض الصور</a>`:''}</td></tr>`}).join('')}
-      ${PRODUCTS.filter(p=>REVIEW[p.sku].acc===0).map(p=>`<tr class="muted-row"><td>${prodCell(p)}</td><td class="n muted" colspan="5">رُفض في مرحلة المراجعة ولم يُرسل</td><td></td><td class="note">${REVIEW[p.sku].note}</td></tr>`).join('')}
-    </tbody></table></div></section>`;
+      <div class="alert info">${I.info}<span class="grow">أرسل الكميات المقبولة فقط. الكميات المرفوضة تبقى في فرعك ولن تُحتسب في الشحنة.</span></div>`:''}
+    ${unifiedTable(t)}
+  </section>`;
+}
+
+/* one table for review (state 2) and QC (state 3): same columns, QC group fills in after arrival */
+function unifiedTable(t){
+  const wait='<span class="muted sm">بالانتظار</span>';
+  const rows=PRODUCTS.map(p=>{
+    const r=REVIEW[p.sku], rej=p.sent-r.acc, q=QC[p.sku], rejected=r.acc===0;
+    let qc, st, notes=[];
+    if(rejected){ qc=`<td class="n muted sm" colspan="4">لم يُرسل للمستودع</td>`; st='<span class="pill bad">مرفوض</span>'; }
+    else if(t===2){ qc=`<td class="n">${wait}</td><td class="n">${wait}</td><td class="n">${wait}</td><td class="n">${wait}</td>`;
+      st=r.acc===p.sent?'<span class="pill ok">مقبول</span>':'<span class="pill warn">مقبول جزئياً</span>'; }
+    else { const ok=q.rec-q.dmg;
+      qc=`<td class="n">${q.rec}</td><td class="n qty-ok">${ok}</td><td class="n ${q.dmg?'qty-bad':''}">${q.dmg||'—'}</td><td class="n ${q.miss?'qty-bad':''}">${q.miss||'—'}</td>`;
+      st=ok===p.sent?'<span class="pill ok">مخزّن</span>':'<span class="pill warn">مخزّن جزئياً</span>'; }
+    if(r.note) notes.push(`<div><b class="sm">المراجعة:</b> ${r.note}</div>`);
+    if(t===3&&q&&q.note) notes.push(`<div><b class="sm">الفحص:</b> ${q.note}${q.dmg?` <a href="#transfer" data-act="toast" data-msg="صور الفحص: 3 صور">عرض الصور</a>`:''}</div>`);
+    return `<tr class="${rejected?'muted-row':''}"><td>${prodCell(p)}</td><td class="num" style="white-space:nowrap">${p.sku}</td>
+      <td class="n">${p.sent}</td><td class="n qty-ok">${r.acc}</td><td class="n ${rej?'qty-bad':''}">${rej||'—'}</td>
+      ${qc}<td>${st}</td><td class="note">${notes.join('')||'<span class="muted">—</span>'}</td></tr>`;
+  }).join('');
+  return `<div class="tbl-wrap"><table style="min-width:1080px"><thead>
+    <tr><th rowspan="2">المنتج</th><th rowspan="2">SKU</th><th class="n grp" colspan="3">مراجعة المستودع</th><th class="n grp ${t===2?'grp-wait':''}" colspan="4">الاستلام وفحص الجودة</th><th rowspan="2">الحالة</th><th rowspan="2">ملاحظات المستودع</th></tr>
+    <tr><th class="n">المرسلة</th><th class="n">المقبولة</th><th class="n">المرفوضة</th><th class="n">المستلمة</th><th class="n">اجتازت الفحص</th><th class="n">تالفة</th><th class="n">مفقودة</th></tr>
+  </thead><tbody>${rows}</tbody></table></div>`;
 }
 function qcSummary(){
   const acc=PRODUCTS.reduce((a,p)=>a+REVIEW[p.sku].acc,0);
