@@ -1,0 +1,221 @@
+<meta charset="utf-8">
+<title>خرائط مستودعات سلة 2D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme:light;
+  --brand:#004956; --ink:#1f2a2e; --ink-2:#4b5a5f; --muted:#7a878b;
+  --mint:#a8f0dc; --mint-2:#76e8cd; --mint-bg:#e6fbf4; --mint-bg2:#d2f6ea; --mint-line:#bdeedf;
+  --orange:#f2663a; --line:#e6ebec; --page:#f4f6f6;
+  --font:'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+h1,h2,p{margin:0} h1,h2{text-wrap:balance}
+button{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:32px 80px}
+.intro h1{font-size:26px;color:var(--brand)}
+.intro p{color:var(--ink-2);max-width:70ch;margin-top:4px}
+.jump{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.jump a{border:1px solid var(--line);background:#fff;border-radius:20px;padding:3px 11px;font-size:12px;text-decoration:none;color:var(--brand)}
+.opt{margin-top:40px;scroll-margin-top:16px}
+.opt-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:12px}
+.opt-no{font-weight:700;color:var(--brand);background:var(--mint-bg2);border-radius:6px;padding:0 8px;font-size:13px}
+.opt-head h2{font-size:17px}
+.opt-head p{color:var(--muted);font-size:13px;flex-basis:100%}
+.frame{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px}
+.bn{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(115deg,var(--mint-bg2) 0%,var(--mint-bg) 45%,#f2fdf9 100%);border:1.5px solid var(--mint-line);
+  display:grid;grid-template-columns:1fr 1.1fr;gap:24px;padding:30px 36px;align-items:center}
+.bn.dark{background:radial-gradient(120% 140% at 20% 0%,#0b6a7a 0%,#004956 45%,#00323c 100%);border-color:#0b5f6c}
+.bn.dark .h{color:#fff} .bn.dark .sub{color:#c7e4e8} .bn.dark .sub em{color:#ffb08f}
+.bn-x{position:absolute;top:12px;inset-inline-end:12px;border:0;background:rgba(255,255,255,.75);border-radius:50%;width:28px;height:28px;cursor:pointer;display:grid;place-items:center;color:var(--ink-2);z-index:2}
+.h{color:var(--brand);font-weight:700;font-size:clamp(22px,2.5vw,30px);line-height:1.35}
+.sub{color:var(--ink-2);font-size:clamp(14px,1.25vw,16px);margin-top:10px;max-width:48ch}
+.sub em{font-style:normal;color:var(--orange);font-weight:600}
+.cta{display:inline-flex;align-items:center;gap:8px;border:0;background:var(--mint);color:var(--brand);font-weight:700;border-radius:12px;padding:12px 24px;cursor:pointer;font-size:15px;text-decoration:none;white-space:nowrap}
+.cta:hover{background:var(--mint-2)}
+.actions{margin-top:22px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.art{width:100%;max-width:600px;justify-self:center}
+.art svg{width:100%;height:auto;display:block;overflow:visible}
+.dl{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.copy{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;color:var(--brand);font-weight:600}
+.copy:hover{border-color:var(--mint-2)}
+.fname{font-size:12px;color:var(--muted);direction:ltr}
+@media (max-width:900px){.bn{grid-template-columns:1fr}}
+@media (max-width:640px){.wrap{padding-inline:16px}.frame{padding:10px}.bn{padding:22px 18px}}
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <h1>خريطة مستودعات سلة: 10 خيارات بأسلوب 2D مسطّح</h1>
+    <p>رسومات مسطّحة بألوان سلة بدون تدرجات أو ظلال: أيقونات مسطّحة، خط رفيع، فسيفساء، خريطة مترو، طابع بريدي وغيرها. تحت كل خيار زر لنسخ الرسم، وملفات SVG الجاهزة في مجلد <span dir="ltr">map-svg</span>.</p>
+    <nav class="jump" id="jump" aria-label="انتقل إلى خيار"></nav>
+  </header>
+  <div id="list"></div>
+</div>
+
+<script>
+
+/* ---------- geography (approximate) ---------- */
+const K=20, LON0=34.3, LAT0=32.6;
+const P=(lon,lat)=>[+((lon-LON0)*K).toFixed(1),+((LAT0-lat)*K).toFixed(1)];
+const BORDER=[[34.95,29.36],[36.07,29.19],[36.5,29.5],[37.5,30.0],[38.0,30.5],[37.0,31.5],[39.0,32.0],[39.2,32.15],[40.4,31.9],[41.4,31.4],[42.1,31.1],[44.7,29.2],[46.5,29.1],[47.7,28.5],[48.4,28.55],
+ [48.8,27.7],[49.3,27.1],[50.1,26.7],[50.2,26.2],[50.1,25.6],[50.6,25.0],[50.8,24.75],[51.6,24.25],[52.0,23.0],[55.0,22.7],[55.7,22.0],[55.0,20.0],[52.0,19.0],[49.1,18.6],[48.2,18.2],[47.0,17.0],[46.4,17.2],[45.2,17.4],[44.0,17.4],[43.4,17.5],[43.1,16.7],[42.8,16.4],
+ [42.6,16.8],[42.2,17.8],[41.2,19.0],[40.5,20.2],[39.6,21.3],[39.1,22.0],[38.5,23.6],[37.5,24.6],[37.2,25.2],[36.5,26.0],[35.5,27.5],[34.8,28.1],[34.6,28.4]];
+const PATH='M'+BORDER.map(p=>P(...p).join(' ')).join(' L')+' Z';
+const VB='0 0 440 340';
+const C={ // city: [lon,lat]
+  ruh:{n:'الرياض',ll:[46.72,24.69]}, jed:{n:'جدة',ll:[39.17,21.54]}, mak:{n:'مكة المكرمة',ll:[39.83,21.42]}, med:{n:'المدينة المنورة',ll:[39.61,24.47]},
+  dmm:{n:'الدمام',ll:[50.10,26.43]}, abh:{n:'أبها',ll:[42.5,18.22]}, tbk:{n:'تبوك',ll:[36.57,28.38]}, bur:{n:'بريدة',ll:[43.97,26.33]}, hail:{n:'حائل',ll:[41.69,27.52]}, jaz:{n:'جازان',ll:[42.55,16.89]}, hof:{n:'الأحساء',ll:[49.59,25.38]}, taif:{n:'الطائف',ll:[40.42,21.27]},
+};
+const xy=id=>P(...C[id].ll);
+const WH=[ // warehouses
+  {id:'ruh',name:'حي السليمانية',price:4,svc:['تخزين','تجهيز','تبريد','مرتجعات'],sla:'نفس اليوم داخل الرياض'},
+  {id:'jed',name:'حي الأمير فواز',price:5,svc:['تخزين','تجهيز','قابل للكسر'],sla:'نفس اليوم داخل جدة'},
+  {id:'dmm',name:'حي الفيصلية',price:6,svc:['تخزين','تجهيز','تبريد'],sla:'نفس اليوم داخل الدمام والخبر'},
+  {id:'med',name:'حي النرجس',price:5,svc:['تخزين','تجهيز'],sla:'اليوم التالي'},
+  {id:'abh',name:'حي المنسك',price:6,svc:['تخزين','تجهيز','مرتجعات'],sla:'اليوم التالي'},
+];
+
+
+/* ================= flat 2D kit (no gradients) ================= */
+const B='#004956',B2='#0b6a7a',M='#a8f0dc',M2='#63d6b8',M3='#d2f6ea',M4='#eafaf5',O='#f2663a',O2='#ffd9c9',INK='#1f2a2e',G='#4b5a5f',W='#fff',KR='#e9c38f',KR2='#d6a766';
+const FONT="IBM Plex Sans Arabic, PingARLT, sans-serif";
+const f1=n=>+(+n).toFixed(1);
+const svgWrap=(vb,inner,defs='')=>`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" role="img" aria-label="رسم مسطّح لخريطة مستودعات سلة" direction="ltr"><defs>${defs}</defs>${inner}</svg>`;
+function txt(x,y,t,{size=12,w=700,color=B,anchor='middle'}={}){return `<text x="${f1(x)}" y="${f1(y)}" text-anchor="${anchor}" direction="rtl" font-family="${FONT}" font-size="${size}" font-weight="${w}" fill="${color}" style="unicode-bidi:embed">${t}</text>`;}
+function chip(x,y,t,{color=B,size=11,bg=W,stroke='#bdeedf'}={}){const w=t.length*size*.6+18;return `<rect x="${f1(x-w/2)}" y="${f1(y-12)}" width="${f1(w)}" height="23" rx="11.5" fill="${bg}" stroke="${stroke}" stroke-width="1.2"/>${txt(x,y+4,t,{size,color})}`;}
+// plain (untilted) map
+function flat(s=1,ox=0,oy=0){const T=([x,y])=>[x*s+ox,y*s+oy];const poly=BORDER.map(p=>T(P(...p)));
+  const d='M'+poly.map(p=>p.map(f1).join(' ')).join(' L')+' Z';const xs=poly.map(p=>p[0]),ys=poly.map(p=>p[1]);
+  return {d,poly,T,at:id=>T(xy(id)),bb:{x0:Math.min(...xs),x1:Math.max(...xs),y0:Math.min(...ys),y1:Math.max(...ys)},
+    inside(x,y){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [xi,yi]=poly[i],[xj,yj]=poly[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;}return c;}};}
+const vbOf=(bb,[l,t,r,b])=>`${f1(bb.x0-l)} ${f1(bb.y0-t)} ${f1(bb.x1-bb.x0+l+r)} ${f1(bb.y1-bb.y0+t+b)}`;
+/* flat icons, anchored at bottom-centre (x,y) */
+function iWarehouse(x,y,s=1,c=B){const w=36*s,h=22*s;return `<path d="M${f1(x-w/2)} ${f1(y)} V${f1(y-h)} L${f1(x)} ${f1(y-h-12*s)} L${f1(x+w/2)} ${f1(y-h)} V${f1(y)} Z" fill="${c}"/><rect x="${f1(x-10*s)}" y="${f1(y-15*s)}" width="${f1(20*s)}" height="${f1(15*s)}" fill="${M}"/>${[0,1,2].map(k=>`<rect x="${f1(x-10*s)}" y="${f1(y-15*s+4*s*k+3*s)}" width="${f1(20*s)}" height="${f1(1.3*s)}" fill="${B2}"/>`).join('')}<rect x="${f1(x-w/2-3*s)}" y="${f1(y)}" width="${f1(w+6*s)}" height="${f1(2.5*s)}" rx="${f1(1.2*s)}" fill="${INK}" opacity=".85"/>`;}
+function iBox(x,y,s=1){const w=22*s;return `<rect x="${f1(x-w/2)}" y="${f1(y-w)}" width="${f1(w)}" height="${f1(w)}" rx="${f1(2*s)}" fill="${KR}"/><rect x="${f1(x-w/2)}" y="${f1(y-w)}" width="${f1(w)}" height="${f1(6*s)}" rx="${f1(2*s)}" fill="${KR2}"/><rect x="${f1(x-3*s)}" y="${f1(y-w)}" width="${f1(6*s)}" height="${f1(w)}" fill="#f6e2c2"/>`;}
+function iTruck(x,y,s=1,c=B){return `<rect x="${f1(x-26*s)}" y="${f1(y-20*s)}" width="${f1(32*s)}" height="${f1(17*s)}" rx="${f1(2*s)}" fill="${W}" stroke="${c}" stroke-width="${f1(1.8*s)}"/><path d="M${f1(x+6*s)} ${f1(y-15*s)} h${f1(10*s)} l${f1(7*s)} ${f1(7*s)} v${f1(5*s)} h${f1(-17*s)} Z" fill="${c}"/><rect x="${f1(x+9*s)}" y="${f1(y-12.5*s)}" width="${f1(6*s)}" height="${f1(4.5*s)}" fill="${M}"/>${txt(x-10*s,y-8*s,'سلة',{size:8*s,color:c})}<circle cx="${f1(x-17*s)}" cy="${f1(y-2*s)}" r="${f1(4*s)}" fill="${INK}"/><circle cx="${f1(x+13*s)}" cy="${f1(y-2*s)}" r="${f1(4*s)}" fill="${INK}"/><circle cx="${f1(x-17*s)}" cy="${f1(y-2*s)}" r="${f1(1.5*s)}" fill="${W}"/><circle cx="${f1(x+13*s)}" cy="${f1(y-2*s)}" r="${f1(1.5*s)}" fill="${W}"/>`;}
+function iPin(x,y,s=1,c=B,inner=W){const r=10*s,hy=y-24*s;return `<path d="M${f1(x)} ${f1(y)} C${f1(x-3*s)} ${f1(y-7*s)} ${f1(x-r)} ${f1(hy+8*s)} ${f1(x-r)} ${f1(hy)} A${f1(r)} ${f1(r)} 0 1 1 ${f1(x+r)} ${f1(hy)} C${f1(x+r)} ${f1(hy+8*s)} ${f1(x+3*s)} ${f1(y-7*s)} ${f1(x)} ${f1(y)} Z" fill="${c}"/><circle cx="${f1(x)}" cy="${f1(hy)}" r="${f1(4*s)}" fill="${inner}"/>`;}
+function iClock(x,y,s=1){return `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(15*s)}" fill="${B}"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(11*s)}" fill="${W}"/><path d="M${f1(x)} ${f1(y)} V${f1(y-7*s)} M${f1(x)} ${f1(y)} L${f1(x+5*s)} ${f1(y+3*s)}" stroke="${O}" stroke-width="${f1(2*s)}" stroke-linecap="round"/>`;}
+function iShield(x,y,s=1){return `<path d="M${f1(x)} ${f1(y-16*s)} L${f1(x+13*s)} ${f1(y-11*s)} V${f1(y)} C${f1(x+13*s)} ${f1(y+9*s)} ${f1(x+6*s)} ${f1(y+14*s)} ${f1(x)} ${f1(y+16*s)} C${f1(x-6*s)} ${f1(y+14*s)} ${f1(x-13*s)} ${f1(y+9*s)} ${f1(x-13*s)} ${f1(y)} V${f1(y-11*s)} Z" fill="${B}"/><path d="M${f1(x-5*s)} ${f1(y)} l${f1(4*s)} ${f1(4*s)} l${f1(7*s)} ${f1(-8*s)}" stroke="${M}" stroke-width="${f1(2.6*s)}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;}
+function iCoin(x,y,s=1){return `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(15*s)}" fill="${M2}"/><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(11*s)}" fill="${M}"/>${txt(x,y+4*s,'ر.س',{size:9*s})}`;}
+/* monoline variants for option 2 */
+const LN=(d,c=B,w=1.8)=>`<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+function lWarehouse(x,y,s=1,c=B){return LN(`M${x-18*s} ${y} V${y-20*s} L${x} ${y-32*s} L${x+18*s} ${y-20*s} V${y} Z M${x-8*s} ${y} V${y-12*s} H${x+8*s} V${y} M${x-8*s} ${y-8*s} H${x+8*s} M${x-8*s} ${y-4*s} H${x+8*s}`,c);}
+function lBox(x,y,s=1,c=B){return LN(`M${x-11*s} ${y} V${y-20*s} H${x+11*s} V${y} Z M${x-11*s} ${y-14*s} H${x+11*s} M${x-3*s} ${y-20*s} V${y-14*s} H${x+3*s} V${y-20*s}`,c);}
+function lTruck(x,y,s=1,c=B){return LN(`M${x-26*s} ${y-4*s} V${y-22*s} H${x+4*s} V${y-4*s} M${x+4*s} ${y-16*s} H${x+14*s} L${x+22*s} ${y-9*s} V${y-4*s} H${x+20*s} M${x-8*s} ${y-4*s} H${x+8*s}`,c)+`<circle cx="${f1(x-15*s)}" cy="${f1(y-3*s)}" r="${f1(4*s)}" fill="${W}" stroke="${c}" stroke-width="1.8"/><circle cx="${f1(x+14*s)}" cy="${f1(y-3*s)}" r="${f1(4*s)}" fill="${W}" stroke="${c}" stroke-width="1.8"/>`;}
+
+const SUB='خزّن منتجاتك وجهّزها واشحنها عبر شبكة شركاء سلة، وفعّل توصيل <em>محلي إكسبريس</em> خلال الساعة نفسها لكل طلب مؤهل.';
+const X='<button class="bn-x" type="button" aria-label="إخفاء البانر"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+const banner=(h,sub,art,{dark=false,cta='اكتشف مستودعات سلة'}={})=>`<section class="bn ${dark?'dark':''}">${X}<div><h2 class="h">${h}</h2><p class="sub">${sub}</p><div class="actions"><a class="cta" href="#">${cta}</a></div></div><div class="art">${art}</div></section>`;
+const PRICE={ruh:'4 ر.س',jed:'5 ر.س',dmm:'6 ر.س',med:'5 ر.س',abh:'6 ر.س'};
+
+/* ================= 10 flat options ================= */
+const OPTS=[
+ {file:'2d-01-flat-icons',name:'مسطّح بأيقونات المستودعات',when:'خريطة بلون واحد وأيقونة مستودع مسطّحة على كل مدينة، وصناديق وشاحنة عند الرياض. أنظف أسلوب وأسهل تطويراً.',h:'مستودع قريب من عملائك في كل منطقة',
+  art(){const m=flat();let o=`<path d="${m.d}" fill="${M3}" stroke="${W}" stroke-width="3" stroke-linejoin="round"/>`;
+   const [rx,ry]=m.at('ruh');
+   ['med','jed','abh','dmm'].forEach(id=>{const [x,y]=m.at(id);o+=iWarehouse(x,y+6,.8)+chip(x,y+22,C[id].n,{size:10});});
+   o+=iWarehouse(rx,ry+8,1.2,O)+iBox(rx+34,ry+8,.9)+iBox(rx+52,ry+8,.7)+iTruck(rx-44,ry+8,.9)+chip(rx,ry+26,'الرياض · 4 ر.س',{color:O,stroke:O2});
+   return svgWrap(vbOf(m.bb,[20,30,30,30]),o);}},
+ {file:'2d-02-monoline',name:'خط رفيع (Line art)',when:'كل شيء مرسوم بخط واحد بلون سلة، واللون البرتقالي فقط للرياض. هادئ ومناسب للصفحات المزدحمة.',h:'شبكة مستودعات تغطي المملكة',
+  art(){const m=flat();let o=`<path d="${m.d}" fill="none" stroke="${B}" stroke-width="1.8" stroke-linejoin="round"/>`;
+   const [rx,ry]=m.at('ruh');
+   ['med','jed','abh','dmm'].forEach(id=>{const [x,y]=m.at(id);o+=lWarehouse(x,y+4,.65)+txt(x,y+20,C[id].n,{size:10,w:600});});
+   o+=lWarehouse(rx,ry+6,1,O)+lBox(rx+30,ry+6,.8)+lTruck(rx-40,ry+6,.9)+txt(rx,ry+24,'الرياض',{size:11,color:O});
+   o+=`<path d="M${f1(rx-60)} ${f1(ry+2)} Q${f1(rx-110)} ${f1(ry+30)} ${f1(m.at('jed')[0]+14)} ${f1(m.at('jed')[1])}" fill="none" stroke="${O}" stroke-width="1.5" stroke-dasharray="1 5" stroke-linecap="round"/>`;
+   return svgWrap(vbOf(m.bb,[20,30,30,30]),o);}},
+ {file:'2d-03-blob',name:'خلفية عضوية ودوائر',when:'الخريطة فوق شكل عضوي بلون النعناع، ودبوس دائري بأيقونة لكل مستودع. أسلوب ودود يناسب التسويق.',h:'خزّن قريباً من عملائك',
+  art(){const m=flat(.9,30,20);const {x0,x1,y0,y1}=m.bb,cx=(x0+x1)/2,cy=(y0+y1)/2;
+   let o=`<path d="M${cx-210} ${cy-20} C${cx-220} ${cy-150} ${cx-40} ${cy-190} ${cx+80} ${cy-150} C${cx+210} ${cy-110} ${cx+250} ${cy-10} ${cx+200} ${cy+90} C${cx+150} ${cy+180} ${cx-60} ${cy+190} ${cx-150} ${cy+130} C${cx-210} ${cy+90} ${cx-205} ${cy+40} ${cx-210} ${cy-20} Z" fill="${M3}"/>
+    <circle cx="${cx+190}" cy="${cy-130}" r="14" fill="${O2}"/><circle cx="${cx-200}" cy="${cy+120}" r="9" fill="${M}"/><circle cx="${cx+215}" cy="${cy+120}" r="5" fill="${B}" opacity=".3"/>
+    <path d="${m.d}" fill="${W}" stroke="${M2}" stroke-width="2" stroke-linejoin="round"/>`;
+   const ic={ruh:'wh',jed:'box',dmm:'truck',med:'box',abh:'wh'};
+   WH.forEach(w=>{const [x,y]=m.at(w.id);const hot=w.id==='ruh';const r=hot?20:15;const col=hot?O:B;
+     o+=`<circle cx="${f1(x)}" cy="${f1(y-r-4)}" r="${r}" fill="${col}"/><path d="M${f1(x-5)} ${f1(y-8)} L${f1(x)} ${f1(y)} L${f1(x+5)} ${f1(y-8)} Z" fill="${col}"/>`;
+     const k=ic[w.id],sc=hot?.55:.42;o+=k==='wh'?iWarehouse(x,y-r+6*sc-2,sc,W).replace(new RegExp(M,'g'),col):k==='box'?iBox(x,y-r+2,sc*1.2):iTruck(x+2,y-r+4,sc*1.1,W);});
+   return svgWrap(`${f1(cx-240)} ${f1(cy-205)} 480 410`,o);}},
+ {file:'2d-04-stickers',name:'ملصقات',when:'الخريطة كملصق بإطار أبيض سميك، وحولها ملصقات صغيرة: «جديد»، «24 ساعة»، «محلي إكسبريس». أسلوب مرح لحملة إطلاق.',h:'مستودعات سلة وصلت!',
+  art(){const m=flat();let o=`<path d="${m.d}" fill="${B}" transform="translate(5 6)" stroke="${B}" stroke-width="14" stroke-linejoin="round"/><path d="${m.d}" fill="${M}" stroke="${W}" stroke-width="12" stroke-linejoin="round"/>`;
+   WH.forEach(w=>{const [x,y]=m.at(w.id);o+=iPin(x,y,w.id==='ruh'?1.2:.9,w.id==='ruh'?O:B);});
+   const star=(cx,cy,r1,r2,n=12)=>Array.from({length:n*2},(_,k)=>{const r=k%2?r2:r1,a=Math.PI*k/n;return `${f1(cx+r*Math.cos(a))},${f1(cy+r*Math.sin(a))}`}).join(' ');
+   const {x0,x1,y0,y1}=m.bb;
+   o+=`<g transform="rotate(-10 ${x1-20} ${y0+10})"><polygon points="${star(x1-20,y0+10,40,32)}" fill="${O}" stroke="${W}" stroke-width="4"/>${txt(x1-20,y0+16,'جديد',{size:16,color:W})}</g>`;
+   o+=`<g transform="rotate(6 ${x0+40} ${y1-10})"><rect x="${x0-10}" y="${y1-36}" width="104" height="48" rx="24" fill="${W}" stroke="${B}" stroke-width="3"/>${txt(x0+42,y1-6,'24 ساعة',{size:16})}</g>`;
+   o+=`<g transform="rotate(-4 ${x1-60} ${y1-10})"><rect x="${x1-140}" y="${y1-30}" width="150" height="40" rx="10" fill="${O2}" stroke="${W}" stroke-width="4"/>${txt(x1-65,y1-4,'محلي إكسبريس',{size:14,color:O})}</g>`;
+   o+=`<g transform="rotate(8 ${x0+60} ${y0+40})">${iBox(x0+60,y0+60,1.6)}</g>`;
+   return svgWrap(vbOf(m.bb,[40,60,40,40]),o);}},
+ {file:'2d-05-mosaic',name:'فسيفساء مناطق المستودعات',when:'المملكة مقسّمة لمربعات صغيرة، ولون كل مربع حسب المستودع الأقرب له. يوضّح أي مستودع يخدم أي منطقة.',h:'كل منطقة لها مستودع يخدمها',
+  art(){const m=flat();const col={ruh:'#ffb899',jed:M2,dmm:'#2aa38a',med:M,abh:'#8fd5c1'};const pts=WH.map(w=>[w.id,...m.at(w.id)]);let o='';
+   for(let y=m.bb.y0;y<m.bb.y1;y+=9)for(let x=m.bb.x0;x<m.bb.x1;x+=9){if(!m.inside(x+4,y+4))continue;let best=pts[0],bd=1e9;pts.forEach(p=>{const d=Math.hypot(x-p[1],y-p[2]);if(d<bd){bd=d;best=p;}});
+     o+=`<rect x="${f1(x)}" y="${f1(y)}" width="7.6" height="7.6" rx="1.6" fill="${bd<9?(best[0]==='ruh'?O:B):col[best[0]]}"/>`;}
+   WH.forEach(w=>{const [x,y]=m.at(w.id);o+=chip(x,y-18,C[w.id].n,{size:10,color:w.id==='ruh'?O:B});});
+   return svgWrap(vbOf(m.bb,[20,34,20,20]),o);}},
+ {file:'2d-06-metro',name:'خريطة مترو',when:'خطوط ملوّنة بزوايا 45° تربط كل مستودع بالمدن التي يخدمها، مثل خرائط المترو. طريقة ممتعة لعرض المسارات.',h:'خطوط توصيل من كل مستودع',
+  art(){const m=flat();let o=`<path d="${m.d}" fill="${M4}" stroke="${M3}" stroke-width="2"/>`;
+   const route=(a,b)=>{const [x1,y1]=m.at(a),[x2,y2]=m.at(b);const dx=x2-x1,dy=y2-y1,d=Math.min(Math.abs(dx),Math.abs(dy));const mx=x1+Math.sign(dx)*d,my=y1+Math.sign(dy)*d;return `M${f1(x1)} ${f1(y1)} L${f1(mx)} ${f1(my)} L${f1(x2)} ${f1(y2)}`;};
+   const LINES=[[O,['ruh','bur','hail']],[O,['ruh','hof']],[B,['jed','mak','taif']],[B,['jed','med','tbk']],['#2aa38a',['dmm','hof']],['#8a6cd1',['abh','jaz']],['#8a6cd1',['ruh','abh']]];
+   LINES.forEach(([c,ids])=>{for(let i=0;i<ids.length-1;i++)o+=`<path d="${route(ids[i],ids[i+1])}" fill="none" stroke="${c}" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>`;});
+   const hubs=['ruh','jed','dmm','med','abh'];const stops=['bur','hail','hof','mak','taif','tbk','jaz'];
+   const lp={bur:[0,-10,'middle'],hail:[0,-10,'middle'],hof:[0,16,'middle'],mak:[0,17,'middle'],taif:[8,4,'end'],tbk:[8,4,'end'],jaz:[8,4,'end']};
+   stops.forEach(id=>{const [x,y]=m.at(id);const [dx,dy,an]=lp[id];o+=`<circle cx="${f1(x)}" cy="${f1(y)}" r="4.5" fill="${W}" stroke="${INK}" stroke-width="2"/>`+txt(x+dx,y+dy,C[id].n,{size:9.5,w:600,color:G,anchor:an});});
+   const hp={ruh:[0,26,'middle'],jed:[-13,4,'start'],dmm:[0,-15,'middle'],med:[-13,4,'start'],abh:[-13,4,'start']};
+   hubs.forEach(id=>{const [x,y]=m.at(id);const [hx,hy,ha]=hp[id];o+=`<rect x="${f1(x-9)}" y="${f1(y-9)}" width="18" height="18" rx="5" fill="${W}" stroke="${id==='ruh'?O:B}" stroke-width="3"/>`+txt(x+hx,y+hy,C[id].n,{size:10.5,color:id==='ruh'?O:B,anchor:ha});});
+   return svgWrap(vbOf(m.bb,[40,30,40,26]),o);}},
+ {file:'2d-07-rings',name:'حلقات زمن التوصيل',when:'حلقات حول الرياض بألوان متدرجة داخل حدود المملكة، وعلى كل حلقة مدة التوصيل. يجيب عن «متى يصل الطلب؟» بنظرة.',h:'كم يحتاج طلبك ليصل؟',
+  art(){const m=flat();const [rx,ry]=m.at('ruh');const R=[[260,M4],[170,M3],[100,M],[45,M2]];
+   let o=`<clipPath id="k7"><path d="${m.d}"/></clipPath><path d="${m.d}" fill="${M4}"/><g clip-path="url(#k7)">${R.map(([r,c])=>`<circle cx="${f1(rx)}" cy="${f1(ry)}" r="${r}" fill="${c}"/>`).join('')}</g><path d="${m.d}" fill="none" stroke="${B}" stroke-width="1.6" stroke-linejoin="round"/>`;
+   o+=iPin(rx,ry,1.2,O);
+   [[45,'ساعات'],[100,'24 ساعة'],[170,'48 ساعة']].forEach(([r,t])=>{o+=chip(rx+r*.72,ry+r*.7,t,{size:10});});
+   return svgWrap(vbOf(m.bb,[20,30,20,20]),o);}},
+ {file:'2d-08-stamp',name:'طابع بريدي',when:'الخريطة داخل طابع بريد بحواف مثقّبة وختم سلة، مع طرد مسطّح. تلميح بصري للشحن بأسلوب كلاسيكي.',h:'من مستودعات سلة إلى عملائك',
+  art(){const m=flat(.62,70,52);const X0=40,Y0=30,Wd=340,Ht=270;let holes='';
+   for(let x=X0;x<=X0+Wd;x+=17){holes+=`<circle cx="${x}" cy="${Y0}" r="6"/><circle cx="${x}" cy="${Y0+Ht}" r="6"/>`;}for(let y=Y0;y<=Y0+Ht;y+=17){holes+=`<circle cx="${X0}" cy="${y}" r="6"/><circle cx="${X0+Wd}" cy="${y}" r="6"/>`;}
+   const defs=`<mask id="perf"><rect x="0" y="0" width="520" height="360" fill="#fff"/><g fill="#000">${holes}</g></mask>`;
+   let o=`<rect x="${X0}" y="${Y0}" width="${Wd}" height="${Ht}" fill="${W}" mask="url(#perf)" stroke="none"/><rect x="${X0+16}" y="${Y0+16}" width="${Wd-32}" height="${Ht-32}" fill="${M3}"/>
+    <path d="${m.d}" fill="${W}" stroke="${B}" stroke-width="1.4"/>`;
+   WH.forEach(w=>{const [x,y]=m.at(w.id);o+=iPin(x,y,.7,w.id==='ruh'?O:B);});
+   o+=txt(X0+Wd-28,Y0+Ht-30,'4 ر.س',{size:20,anchor:'start'})+txt(X0+30,Y0+Ht-30,'المملكة العربية السعودية',{size:10,w:600,color:G,anchor:'end'});
+   o+=`<g transform="rotate(-14 400 90)" opacity=".85"><circle cx="400" cy="90" r="46" fill="none" stroke="${O}" stroke-width="3"/><circle cx="400" cy="90" r="36" fill="none" stroke="${O}" stroke-width="1.5"/>${txt(400,86,'سلة',{size:16,color:O})}${txt(400,104,'مستودعات',{size:9,color:O})}
+    <path d="M310 70 q12 -8 24 0 t24 0 t24 0 M310 84 q12 -8 24 0 t24 0 t24 0 M310 98 q12 -8 24 0 t24 0 t24 0" fill="none" stroke="${O}" stroke-width="2"/></g>`;
+   o+=iBox(430,300,2.2)+`<rect x="408" y="268" width="30" height="16" rx="2" fill="${W}"/>`+txt(423,280,'سلة',{size:9});
+   return svgWrap('20 10 480 320',o,defs);}},
+ {file:'2d-09-lowpoly',name:'مضلّعات هندسية',when:'الخريطة مبنية من مثلثات بدرجات النعناع، والمستودعات نقاط واضحة فوقها. أسلوب هندسي حديث بدون ظلال.',h:'شبكة مستودعات ذكية',
+  art(){const m=flat();const {x0,x1,y0,y1}=m.bb;const shades=['#bfeedd','#a8f0dc','#d2f6ea','#8fd5c1','#c9f3e6','#b3ebd9'];const S=24,Hh=S*.866;let o=`<clipPath id="k9"><path d="${m.d}"/></clipPath><g clip-path="url(#k9)">`;
+   let k=0;for(let r=0,y=y0-Hh;y<y1+Hh;r++,y+=Hh)for(let x=x0-S+(r%2?S/2:0);x<x1+S;x+=S){const h=(i)=>shades[(Math.abs(Math.sin((x*12.9898+y*78.233+i)*.01)*43758.5)|0)%6];
+     o+=`<polygon points="${f1(x)},${f1(y+Hh)} ${f1(x+S/2)},${f1(y)} ${f1(x+S)},${f1(y+Hh)}" fill="${h(1)}" stroke="${W}" stroke-width=".7"/><polygon points="${f1(x+S/2)},${f1(y)} ${f1(x+S*1.5)},${f1(y)} ${f1(x+S)},${f1(y+Hh)}" fill="${h(2)}" stroke="${W}" stroke-width=".7"/>`;}
+   o+=`</g><path d="${m.d}" fill="none" stroke="${B}" stroke-width="1.4" stroke-linejoin="round"/>`;
+   const hubs=WH.map(w=>m.at(w.id));for(let i=0;i<hubs.length;i++)for(let j=i+1;j<hubs.length;j++)o+=`<line x1="${f1(hubs[i][0])}" y1="${f1(hubs[i][1])}" x2="${f1(hubs[j][0])}" y2="${f1(hubs[j][1])}" stroke="${B}" stroke-width="1" opacity=".35"/>`;
+   WH.forEach(w=>{const [x,y]=m.at(w.id);const hot=w.id==='ruh';o+=`<circle cx="${f1(x)}" cy="${f1(y)}" r="${hot?10:7}" fill="${hot?O:B}" stroke="${W}" stroke-width="3"/>`+chip(x,y-22,`${C[w.id].n} · ${PRICE[w.id]}`,{size:10,color:hot?O:B});});
+   return svgWrap(vbOf(m.bb,[30,40,30,20]),o);}},
+ {file:'2d-10-scene',name:'مشهد مسطّح بأفق مدينة',when:'رسم توضيحي كامل: أفق مباني خلف الخريطة، وشمس، وطريق عليه شاحنة سلة، ومستودع وصناديق. يصلح بديلاً للوحة التحكم في البانر الأصلي.',h:'تحكّم كامل في مخزونك مع مستودعات سلة',
+  art(){const m=flat(.72,70,70);let o=`<circle cx="400" cy="70" r="34" fill="${O2}"/><circle cx="400" cy="70" r="22" fill="#ffc2a8"/>`;
+   const sky=[[40,70],[62,110],[84,60],[104,130],[124,90],[146,150],[168,80],[190,120],[212,70],[234,140],[256,100],[278,60],[300,125],[322,90],[344,110],[366,75],[388,120],[410,95],[432,130]];
+   sky.forEach(([x,h])=>{o+=`<rect x="${x}" y="${250-h}" width="20" height="${h}" fill="${M3}"/>`;for(let yy=250-h+8;yy<240;yy+=12)o+=`<rect x="${x+5}" y="${yy}" width="3" height="5" fill="${W}"/><rect x="${x+12}" y="${yy}" width="3" height="5" fill="${W}"/>`;});
+   o+=`<path d="${m.d}" fill="${M}" stroke="${W}" stroke-width="3"/>`;
+   WH.forEach(w=>{const [x,y]=m.at(w.id);o+=iPin(x,y,.75,w.id==='ruh'?O:B);});
+   o+=`<rect x="20" y="300" width="460" height="46" fill="${B}"/>${[40,100,160,220,280,340,400,460].map(x=>`<rect x="${x}" y="321" width="30" height="4" rx="2" fill="${M}"/>`).join('')}`;
+   o+=iWarehouse(90,300,1.6)+iBox(140,300,1)+iBox(162,300,.8)+iTruck(330,318,1.6,O);
+   return svgWrap('20 20 460 330',o);}},
+];
+
+document.getElementById('jump').innerHTML=OPTS.map((o,i)=>`<a href="#d${i+1}">${i+1}</a>`).join('');
+document.getElementById('list').innerHTML=OPTS.map((o,i)=>`<article class="opt" id="d${i+1}"><div class="opt-head"><span class="opt-no num">${i+1}</span><h2>${o.name}</h2><p>${o.when}</p></div>
+  <div class="frame">${banner(o.h,SUB,o.art(),{dark:!!o.dark})}<div class="dl"><button class="copy" type="button" data-copy="${i}">نسخ كود SVG</button><span class="fname">map-svg/${o.file}.svg</span></div></div></article>`).join('');
+
+function exportSvg(i){const el=document.querySelectorAll('.opt')[i].querySelector('.art svg').cloneNode(true);
+  const vb=el.getAttribute('viewBox').split(' ').map(Number);el.setAttribute('width',Math.round(vb[2]*2));el.setAttribute('height',Math.round(vb[3]*2));
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'+el.outerHTML;}
+window.exportSvg=exportSvg; window.SVG_FILES=OPTS.map(o=>o.file);
+document.addEventListener('click',e=>{
+  const cp=e.target.closest('[data-copy]');
+  if(cp){const done=ok=>{cp.textContent=ok?'تم النسخ':'تعذّر النسخ';setTimeout(()=>cp.textContent='نسخ كود SVG',1600);};
+    try{navigator.clipboard.writeText(exportSvg(+cp.dataset.copy)).then(()=>done(true),()=>done(false));}catch(err){done(false);}}
+  const x=e.target.closest('.bn-x'); if(x){const b=x.closest('.bn');b.style.opacity='.35';setTimeout(()=>b.style.opacity='',900);}
+  const a=e.target.closest('a'); if(a&&a.getAttribute('href')==='#') e.preventDefault();
+});
+</script>
