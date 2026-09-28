@@ -1,0 +1,791 @@
+<meta charset="utf-8">
+<title>مستودعات سلة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --brand:#004956; --brand-700:#003a45; --brand-50:#e8f3f4;
+  --mint:#baf3e6; --mint-strong:#76e8cd; --mint-50:#effbf8;
+  --ink:#1f2a2e; --ink-2:#4b5a5f; --muted:#7a878b;
+  --line:#e6ebec; --line-2:#f0f3f3; --bg:#f4f6f6; --surface:#ffffff;
+  --ok:#0f9f6e; --ok-bg:#e7f7f0; --warn:#b7791f; --warn-bg:#fdf4e3; --bad:#d14343; --bad-bg:#fdecec; --info:#2563a8; --info-bg:#eaf2fb;
+  --r:8px; --r-lg:12px;
+  --font:'PingARLT','IBM Plex Sans Arabic','PT Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+button,input,select{font:inherit;color:inherit}
+a{color:var(--brand)}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:700}
+h1{font-size:22px} h2{font-size:17px} h3{font-size:15px}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+
+/* ---------- app shell ---------- */
+.topbar{background:var(--brand);color:#fff}
+.topbar-in{display:flex;align-items:center;gap:24px;padding:14px 24px;overflow-x:auto;scrollbar-width:none}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px;color:var(--mint);white-space:nowrap}
+.logo-box{width:34px;height:28px;border:2.5px solid var(--mint);border-radius:9px;display:grid;place-items:end center;padding-bottom:4px}
+.logo-box i{width:14px;height:5px;border:2.5px solid var(--mint);border-top:0;border-radius:0 0 8px 8px}
+.topnav{display:flex;gap:22px;white-space:nowrap;font-size:14px;opacity:.95}
+.topnav span{display:flex;align-items:center;gap:6px}
+.user{margin-inline-start:auto;display:flex;align-items:center;gap:10px;white-space:nowrap}
+.avatar{width:36px;height:36px;border-radius:50%;background:#dfe9ea;border:2px solid #fff;display:grid;place-items:center;color:var(--brand);font-weight:700}
+.plan{font-size:11px;border:1px solid var(--mint);color:var(--mint);border-radius:20px;padding:0 8px}
+.subnav{background:var(--surface);border-bottom:1px solid var(--line)}
+.subnav-in{display:flex;align-items:center;gap:22px;padding:0 24px;overflow-x:auto;scrollbar-width:none}
+.subnav a{padding:14px 0;white-space:nowrap;text-decoration:none;color:var(--ink-2);border-bottom:2px solid transparent}
+.subnav a.on{color:var(--brand);font-weight:700;border-color:var(--brand)}
+.help{margin-inline-start:auto;border:1px solid var(--mint-strong);border-radius:6px;padding:4px 10px;font-size:12px;white-space:nowrap;color:var(--brand)}
+
+.page{max-width:1240px;margin:0 auto;padding-inline:24px;padding-block:18px 64px}
+.crumbs{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-bottom:16px;flex-wrap:wrap}
+.crumbs a{color:var(--muted);text-decoration:none}
+.crumbs b{color:var(--brand);font-weight:500}
+.panel{background:var(--surface);border-radius:var(--r-lg);border:1px solid var(--line)}
+.pad{padding:24px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.muted{color:var(--muted)} .sm{font-size:12px} .ink2{color:var(--ink-2)}
+
+/* ---------- controls ---------- */
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:9px 18px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:#cfd8da}
+.btn-p{background:var(--mint);border-color:var(--mint);color:var(--brand)}
+.btn-p:hover{background:var(--mint-strong);border-color:var(--mint-strong)}
+.btn-d{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn-ghost{border-color:transparent;background:transparent;color:var(--brand)}
+.btn-sm{padding:5px 12px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.tabs{display:flex;gap:24px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+.tabs button{border:0;background:none;padding:10px 0;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.tabs button.on{color:var(--brand);font-weight:700;border-color:var(--brand)}
+.tabs .count{background:var(--brand-50);color:var(--brand);border-radius:10px;padding:0 7px;font-size:11px;margin-inline-start:4px}
+.search{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;background:var(--surface);flex:1;min-width:0}
+.search input{border:0;outline:0;flex:1;min-width:0;background:transparent}
+.select{border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;background:var(--surface)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;color:var(--ink-2)}
+.seg button.on{background:var(--brand-50);color:var(--brand);font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--brand-50);color:var(--brand);border-radius:20px;padding:2px 10px;font-size:12px;white-space:nowrap}
+.chip.gray{background:var(--line-2);color:var(--ink-2)}
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:20px;padding:2px 10px;font-size:12px;border:1px solid;white-space:nowrap;font-weight:500}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.ok{color:var(--ok);background:var(--ok-bg);border-color:#bfe8d7}
+.pill.warn{color:var(--warn);background:var(--warn-bg);border-color:#f2dcb1}
+.pill.bad{color:var(--bad);background:var(--bad-bg);border-color:#f5c7c7}
+.pill.info{color:var(--info);background:var(--info-bg);border-color:#c9dcf2}
+.pill.gray{color:var(--muted);background:var(--line-2);border-color:var(--line)}
+.flag{display:inline-flex;align-items:center;gap:4px;font-size:11px;border-radius:4px;padding:1px 6px;font-weight:600}
+.flag.fragile{background:#fff1e6;color:#b45309}
+.flag.cold{background:#e6f4fb;color:#0e6ba8}
+.toggle{position:relative;width:40px;height:22px;flex:none}
+.toggle input{opacity:0;width:100%;height:100%;margin:0;cursor:pointer;position:absolute;z-index:1}
+.toggle span{position:absolute;inset:0;background:#d5dcde;border-radius:20px;transition:.2s}
+.toggle span::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.toggle input:checked+span{background:var(--brand)}
+.toggle input:checked+span::after{inset-inline-start:21px}
+.toggle input:disabled{cursor:not-allowed}
+.toggle input:disabled+span{opacity:.55}
+.field{display:flex;align-items:center;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.field input{border:0;outline:0;padding:7px 10px;width:80px;background:transparent}
+.field em{font-style:normal;background:var(--line-2);padding:7px 10px;color:var(--muted);font-size:12px}
+.icon{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.icon.sm{width:15px;height:15px}
+
+/* ---------- table ---------- */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r)}
+table{width:100%;border-collapse:collapse;min-width:720px}
+th{background:#f8fafa;color:var(--ink-2);font-weight:500;text-align:start;padding:11px 14px;font-size:13px;white-space:nowrap}
+td{padding:13px 14px;border-top:1px solid var(--line);vertical-align:middle}
+tr.muted-row td{background:#fcfcfc}
+td.n,th.n{text-align:center;font-variant-numeric:tabular-nums}
+.prod{display:flex;align-items:center;gap:10px}
+.thumb{width:38px;height:38px;border-radius:6px;background:var(--line-2);display:grid;place-items:center;flex:none;font-size:11px;color:var(--muted)}
+.qty-bad{color:var(--bad);font-weight:600}
+.qty-ok{color:var(--ok);font-weight:600}
+.note{font-size:12px;color:var(--ink-2);max-width:260px}
+
+/* ---------- banner (comment 1) ---------- */
+.hero{position:relative;background:linear-gradient(135deg,var(--brand) 0%,#0b5f6c 100%);color:#fff;border-radius:var(--r-lg);padding:24px 28px;display:grid;grid-template-columns:1.1fr 1.6fr;gap:28px;overflow:hidden;margin-bottom:20px}
+.hero h2{font-size:20px;color:#fff}
+.hero p{color:#cfe7ea;font-size:13px;margin-top:6px;max-width:44ch}
+.hero .btn-p{margin-top:14px}
+.hero-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;counter-reset:s;align-self:center}
+.hero-step{background:rgba(255,255,255,.08);border:1px solid rgba(186,243,230,.25);border-radius:10px;padding:12px}
+.hero-step b{display:flex;align-items:center;gap:8px;font-size:13px;color:#fff}
+.hero-step b::before{counter-increment:s;content:counter(s);width:22px;height:22px;border-radius:50%;background:var(--mint);color:var(--brand);display:grid;place-items:center;font-size:12px;flex:none}
+.hero-step span{display:block;color:#cfe7ea;font-size:12px;margin-top:6px}
+.hero-x{position:absolute;top:10px;inset-inline-end:10px;background:none;border:0;color:#cfe7ea;cursor:pointer;padding:4px}
+.hero-mini{display:flex;align-items:center;gap:10px;background:var(--mint-50);border:1px solid var(--mint);border-radius:var(--r);padding:10px 14px;margin-bottom:20px;font-size:13px}
+
+/* ---------- warehouse cards (comment 2 / 4) ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+.wcard{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+.wcard-head{display:flex;gap:12px;align-items:flex-start}
+.wimg{width:64px;height:64px;border-radius:10px;flex:none;overflow:hidden;background:var(--brand-50)}
+.wimg svg{width:100%;height:100%;display:block}
+.city{display:flex;align-items:center;gap:4px;font-weight:700;font-size:15px}
+.wname{color:var(--ink-2);font-size:13px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.price{display:flex;align-items:baseline;gap:6px;border-top:1px solid var(--line);padding-top:12px;margin-top:auto}
+.price strong{font-size:20px;color:var(--ink)}
+.cta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.progress{display:flex;gap:4px}
+.progress i{height:4px;flex:1;border-radius:4px;background:var(--line)}
+.progress i.done{background:var(--ok)} .progress i.cur{background:var(--warn)}
+.kv{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:#f8fafa;border-radius:var(--r);padding:10px}
+.kv div{display:flex;flex-direction:column}
+.kv b{font-size:15px}
+.kv span{font-size:11px;color:var(--muted)}
+.next{background:var(--warn-bg);color:#7a5210;border-radius:var(--r);padding:8px 10px;font-size:12px;display:flex;gap:6px;align-items:flex-start}
+
+/* ---------- detail ---------- */
+.two{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+.sticky{position:sticky;top:12px}
+.routes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.route{border:1px solid var(--line);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:6px}
+.route .p{font-size:20px;font-weight:700}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:13px}
+.dl dt{color:var(--muted)} .dl dd{margin:0}
+
+/* ---------- settings (comment 3) ---------- */
+.set-row{display:grid;grid-template-columns:auto minmax(150px,1.3fr) 1fr 1fr 1fr 1.2fr;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.set-row.head{border-top:0;color:var(--muted);font-size:12px;padding-top:0}
+.lock{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--muted)}
+.ro{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.ro div{background:#f8fafa;border-radius:var(--r);padding:10px 12px}
+.ro span{display:block;font-size:12px;color:var(--muted)}
+.zones{display:flex;gap:8px;flex-wrap:wrap}
+.zone{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:4px 6px 4px 12px;font-size:13px}
+.zone button{border:0;background:var(--line-2);border-radius:50%;width:20px;height:20px;cursor:pointer;display:grid;place-items:center;padding:0}
+.radio{display:flex;gap:18px;flex-wrap:wrap}
+.radio label{display:flex;gap:6px;align-items:center;cursor:pointer}
+
+/* ---------- transfer (comments 5 & 6) ---------- */
+.proto-bar{background:#fff8db;border:1px dashed #e0c65a;border-radius:var(--r);padding:10px 14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:16px;font-size:13px}
+.stepper{display:grid;grid-template-columns:repeat(6,1fr);position:relative}
+.st{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;position:relative;padding-inline:4px}
+.st::after{content:"";position:absolute;top:15px;inset-inline-start:calc(50% + 18px);width:calc(100% - 36px);border-top:2px dashed var(--line)}
+.st:last-child::after{display:none}
+.st.done::after{border-top-style:solid;border-color:var(--ok)}
+.dot{width:32px;height:32px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;background:var(--surface);font-weight:600;color:var(--muted);font-size:13px;z-index:1}
+.st.done .dot{background:var(--ok);border-color:var(--ok);color:#fff}
+.st.cur .dot{border-color:var(--brand);color:var(--brand);box-shadow:0 0 0 4px var(--brand-50)}
+.st b{font-size:13px} .st span{font-size:11px;color:var(--muted)}
+.st.cur span{color:var(--brand);font-weight:600}
+.branches{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.branch{border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;gap:12px;align-items:center}
+.branch .ic{width:36px;height:36px;border-radius:8px;background:var(--line-2);display:grid;place-items:center;color:var(--ink-2)}
+.empty{text-align:center;padding:28px 16px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.empty .ill{width:64px;height:64px;border-radius:50%;background:var(--brand-50);display:grid;place-items:center;color:var(--brand)}
+.empty p{max-width:52ch;color:var(--muted);font-size:13px}
+.expect{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px;width:100%;max-width:640px;text-align:start}
+.expect div{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--ink-2)}
+.expect b{display:block;font-size:13px;color:var(--ink)}
+.instr{border:1px solid #f1d9b5;background:#fffaf2;border-radius:var(--r-lg);padding:16px 18px}
+.instr-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 20px;margin-top:10px}
+.instr-item{display:flex;gap:10px;align-items:flex-start;font-size:13px}
+.instr-item .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;flex:none}
+.instr-item b{display:block}
+.instr-item span{color:var(--ink-2);font-size:12px}
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.sum{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.sum b{font-size:22px;display:block;font-variant-numeric:tabular-nums;line-height:1.3}
+.sum span{font-size:12px;color:var(--muted)}
+.sum.ok b{color:var(--ok)} .sum.bad b{color:var(--bad)} .sum.warn b{color:var(--warn)}
+.alert{display:flex;gap:10px;align-items:flex-start;border-radius:var(--r);padding:12px 14px;font-size:13px}
+.alert.ok{background:var(--ok-bg);color:#0b6b4b}
+.alert.info{background:var(--info-bg);color:#1d4f86}
+.alert.warn{background:var(--warn-bg);color:#7a5210}
+.alert.bad{background:var(--bad-bg);color:#9b2c2c}
+.alert .grow{flex:1}
+.log{display:flex;flex-direction:column;gap:0}
+.log-i{display:grid;grid-template-columns:auto 1fr auto;gap:12px;padding:10px 0;border-top:1px solid var(--line-2);font-size:13px}
+.log-i:first-child{border-top:0}
+.log-i i{width:10px;height:10px;border-radius:50%;background:var(--brand);margin-top:6px}
+.bar{height:6px;border-radius:6px;background:var(--line);display:flex;overflow:hidden;min-width:80px}
+.bar i{display:block;height:100%}
+.qc-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+.qc-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-inline-end:4px;vertical-align:middle}
+
+/* ---------- modal / toast / notes ---------- */
+.overlay{position:fixed;inset:0;background:rgba(10,30,35,.45);display:grid;place-items:center;padding:16px;z-index:50}
+.modal{background:var(--surface);border-radius:var(--r-lg);max-width:460px;width:100%;padding:24px}
+.toast{position:fixed;top:calc(16px + env(safe-area-inset-top,0px));inset-inline-start:24px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,40,50,.12);padding:12px 16px;display:flex;gap:10px;align-items:center;z-index:60;font-weight:600;color:var(--brand);border-bottom:3px solid var(--mint-strong)}
+.notes-btn{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline-start:20px;z-index:40;box-shadow:0 6px 18px rgba(0,40,50,.2)}
+.notes{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom,0px));inset-inline-start:20px;width:min(380px,calc(100vw - 40px));max-height:70vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:0 12px 32px rgba(0,40,50,.18);padding:16px;z-index:40}
+.notes ol{margin:8px 0 0;padding-inline-start:20px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.notes a{cursor:pointer}
+
+@media (max-width:980px){
+  .two{grid-template-columns:1fr} .sticky{position:static}
+  .hero{grid-template-columns:1fr}
+  .set-row{grid-template-columns:auto 1fr;}
+  .set-row.head{display:none}
+  .set-row > .span{grid-column:1/-1}
+}
+@media (max-width:640px){
+  .page{padding-inline:16px}
+  .topbar-in,.subnav-in{padding-inline:16px}
+  .hero{padding:20px}
+  .hero-steps{grid-template-columns:1fr 1fr}
+  .routes,.branches,.instr-list,.expect{grid-template-columns:1fr}
+  .stepper{grid-template-columns:repeat(3,1fr);row-gap:16px}
+  .st:nth-child(3)::after{display:none}
+  .pad{padding:16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="logo"><div class="logo-box"><i></i></div>سلة</div>
+    <nav class="topnav" aria-label="القائمة الرئيسية">
+      <span>الكل</span><span>الرئيسية</span><span>الطلبات</span><span>المنتجات</span><span>التسويق</span><span>المتجر وقنوات البيع</span><span>التقارير</span>
+    </nav>
+    <div class="user"><div><div>وليد عيسى</div><span class="plan">سبيشل</span></div><div class="avatar">و</div></div>
+  </div>
+</header>
+<nav class="subnav" aria-label="الشحن والتوصيل">
+  <div class="subnav-in">
+    <a href="#browse">الشحن والتوصيل</a><a href="#browse">إدارة التشغيل</a><a href="#browse">مواد التغليف</a><a href="#browse">التقارير</a><a href="#browse">أرشيف البوليصات</a>
+    <a href="#browse" class="on">مستودعات سلة</a><a href="#browse">المزيد</a>
+    <span class="help">مركز المساعدة</span>
+  </div>
+</nav>
+
+<main class="page" id="app"></main>
+
+<button class="btn btn-d notes-btn" id="notesBtn" type="button" aria-expanded="false">ملاحظات (6)</button>
+<aside class="notes" id="notes" hidden>
+  <div class="row between"><h3>أين تجد كل ملاحظة؟</h3><button class="btn btn-ghost btn-sm" type="button" id="notesX">إغلاق</button></div>
+  <ol>
+    <li>بانر يشرح مستودعات سلة ← <a data-go="browse">تصفح المستودعات</a></li>
+    <li>كارد المستودع: صورة، مدينة، اسم المستودع، الخدمات، السعر، الأزرار ← <a data-go="browse">تصفح المستودعات</a></li>
+    <li>إعدادات المستودع بعد الحجز: نطاق التغطية وتسعيرة (عادي، سريع، اقتصادي) ← <a data-go="settings-ruh">إعدادات مستودع الرياض</a></li>
+    <li>شكل المستودع بعد الحجز: كارد أو جدول ← <a data-go="mine">مستودعاتي</a> (بدّل العرض من الأعلى)</li>
+    <li>تعليمات المستودع ومنتجات تحتاج معاملة خاصة ← <a data-go="transfer">صفحة نقل المخزون</a></li>
+    <li>حالات نقل المخزون: بانتظار التأكيد، نتيجة المراجعة، بعد فحص الجودة ← <a data-go="transfer">صفحة نقل المخزون</a> (بدّل الحالة من الشريط الأصفر)</li>
+  </ol>
+</aside>
+
+<script>
+/* ============ data ============ */
+const SVC = {store:'تخزين',pick:'تجهيز الطلبات',cold:'تخزين مبرد',fragile:'منتجات قابلة للكسر',returns:'معالجة المرتجعات',express:'توصيل سريع'};
+const WH = [
+  {id:'ruh',city:'الرياض',name:'مستودع سلة – حي السليمانية',provider:'شركة النخبة للخدمات اللوجستية',svc:['store','pick','cold','returns','express'],price:4,hue:'#d6eef0',rating:4.8,reviews:32,
+   desc:'مستودع مركزي للشحنات الصغيرة والمتوسطة، يخدم الرياض والمنطقة الوسطى مع توصيل في نفس اليوم داخل المدينة.',
+   hours:[['الأحد – الخميس','7:00 ص – 7:30 م'],['السبت','9:00 ص – 3:00 م'],['الجمعة','مغلق']]},
+  {id:'jed',city:'جدة',name:'مستودع سلة – حي الأمير فواز',provider:'شركة الصفوة للخدمات اللوجستية',svc:['store','pick','fragile','express'],price:5,hue:'#e3ecf8',rating:4.6,reviews:20,
+   desc:'مستودع مخصص للشحنات السريعة والتوصيل المحلي، مع خبرة في تغليف المنتجات القابلة للكسر.',
+   hours:[['الأحد – الخميس','8:00 ص – 8:00 م'],['السبت','9:00 ص – 3:00 م'],['الجمعة','مغلق']]},
+  {id:'dmm',city:'الدمام',name:'مستودع سلة – حي الفيصلية',provider:'شركة الريادة للخدمات اللوجستية',svc:['store','pick','cold'],price:6,hue:'#f1ebdd',rating:4.4,reviews:11,
+   desc:'مستودع للشحنات التجارية والمتوسطة في المنطقة الشرقية، يدعم التخزين المبرد بين 2 و8 درجات.',
+   hours:[['الأحد – الخميس','7:00 ص – 6:00 م'],['السبت','مغلق'],['الجمعة','مغلق']]},
+  {id:'mak',city:'مكة المكرمة',name:'مستودع سلة – حي الزاهر',provider:'شركة الواحة للخدمات اللوجستية',svc:['store','pick','returns'],price:5,hue:'#e9e6f3',rating:4.5,reviews:9,
+   desc:'مستودع قريب من مكة وجدة لتقليل زمن التوصيل في المنطقة الغربية، مع معالجة كاملة للمرتجعات.',
+   hours:[['الأحد – الخميس','8:00 ص – 6:00 م'],['السبت','9:00 ص – 1:00 م'],['الجمعة','مغلق']]},
+  {id:'med',city:'المدينة المنورة',name:'مستودع سلة – حي النرجس',provider:'شركة الواحة للخدمات اللوجستية',svc:['store','pick'],price:5,hue:'#e4f0e6',rating:4.3,reviews:6,
+   desc:'مستودع صغير لخدمة المدينة المنورة وينبع بتوصيل في اليوم التالي.',
+   hours:[['الأحد – الخميس','8:00 ص – 5:00 م'],['السبت','مغلق'],['الجمعة','مغلق']]},
+  {id:'khb',city:'الخبر',name:'مستودع سلة – حي العقربية',provider:'شركة الريادة للخدمات اللوجستية',svc:['store','pick','fragile','returns'],price:6,hue:'#f5e6e6',rating:4.7,reviews:14,
+   desc:'مستودع للإلكترونيات والمنتجات القابلة للكسر في المنطقة الشرقية.',
+   hours:[['الأحد – الخميس','7:00 ص – 7:00 م'],['السبت','9:00 ص – 3:00 م'],['الجمعة','مغلق']]},
+];
+const ROUTES = [
+  {id:'std',name:'شحن عادي',cost:25,promise:'2 – 5 أيام',cover:'كل مدن المملكة',carrier:'أرامكس',locked:true},
+  {id:'exp',name:'شحن سريع',cost:35,promise:'2 – 4 ساعات',cover:'نفس المدينة فقط',carrier:'سلة إكسبرس'},
+  {id:'eco',name:'شحن اقتصادي',cost:10,promise:'5 – 7 أيام',cover:'كل مدن المملكة',carrier:'سمسا'},
+];
+const CITIES = ['الرياض','جدة','مكة المكرمة','المدينة المنورة','الدمام','الخبر','الطائف','أبها','تبوك','بريدة'];
+
+const S = {
+  mine:{ ruh:{status:'active',stock:1240,skus:38,orders:212,routes:{std:true,exp:true,eco:false},price:{std:29,exp:39,eco:15},zoneMode:'custom',zones:['الرياض','بريدة','الخرج']},
+         jed:{status:'receiving',stock:0,skus:0,orders:0,routes:{std:true,exp:true,eco:true},price:{std:29,exp:39,eco:15},zoneMode:'all',zones:[]},
+         dmm:{status:'awaiting',stock:0,skus:0,orders:0,routes:{std:true,exp:false,eco:true},price:{std:29,exp:39,eco:15},zoneMode:'all',zones:[]} },
+  view: load('fm-view','card'),
+  hero: load('fm-hero','open'),
+  tstate: 1,
+  city:'all', q:'',
+};
+function load(k,d){try{return localStorage.getItem(k)||d}catch(e){return d}}
+function save(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+
+const STATUS = {
+  awaiting:{label:'بانتظار نقل المخزون',cls:'warn',step:1,next:'انقل مخزونك لتفعيل المستودع وبدء استقبال الطلبات منه.'},
+  receiving:{label:'جارٍ استلام المخزون',cls:'info',step:2,next:'المستودع يستلم شحنتك ويفحصها. يتفعّل تلقائياً بعد التخزين.'},
+  active:{label:'نشط',cls:'ok',step:4,next:''},
+};
+
+/* ============ icons ============ */
+const I = {
+  pin:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  search:'<svg class="icon sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  grid:'<svg class="icon sm" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>',
+  list:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+  x:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>',
+  check:'<svg class="icon sm" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>',
+  lock:'<svg class="icon sm" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>',
+  info:'<svg class="icon sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
+  warn:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M12 4 2.5 20h19z"/><path d="M12 10v4M12 17h.01"/></svg>',
+  box:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></svg>',
+  truck:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
+  up:'<svg class="icon" viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg>',
+  down:'<svg class="icon" viewBox="0 0 24 24"><path d="M17 7 7 17M15 17H7V9"/></svg>',
+  snow:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/></svg>',
+  glass:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M7 3h10l-1 8a4 4 0 0 1-8 0zM12 15v5M8 21h8"/></svg>',
+  tag:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>',
+  scale:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M6 20h12l-2-12H8zM9 8a3 3 0 0 1 6 0"/></svg>',
+  file:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></svg>',
+  back:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M3 12h13M11 6l6 6-6 6" transform="rotate(180 12 12)"/></svg>',
+  chev:'<svg class="icon sm" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg>',
+  clock:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+};
+function whImg(w){ // small warehouse illustration, tinted per warehouse
+  return `<svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="${w.hue}"/><path d="M10 30 32 18l22 12v22H10z" fill="#fff" stroke="#004956" stroke-width="2"/><rect x="20" y="36" width="24" height="16" fill="#baf3e6" stroke="#004956" stroke-width="2"/><path d="M20 41h24M20 46h24" stroke="#004956" stroke-width="1.5"/><rect x="27" y="26" width="10" height="5" rx="1" fill="#004956"/></svg>`;
+}
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const wh = id => WH.find(w=>w.id===id);
+const crumbs = (...xs) => `<nav class="crumbs">${xs.map((x,i)=> i<xs.length-1?`<a href="#${x[1]}">${x[0]}</a>${I.chev}`:`<b>${x[0]}</b>`).join('')}</nav>`;
+const svcChips = (w,max=3) => { const s=w.svc.slice(0,max).map(k=>`<span class="chip">${SVC[k]}</span>`).join(''); const more=w.svc.length-max; return s+(more>0?`<span class="chip gray" title="${w.svc.slice(max).map(k=>SVC[k]).join('، ')}">+${more}</span>`:''); };
+
+/* ============ screens ============ */
+function screenList(tab){
+  const mineIds = Object.keys(S.mine);
+  const tabs = `<div class="tabs" role="tablist">
+      <button class="${tab==='browse'?'on':''}" data-go="browse">تصفح المستودعات</button>
+      <button class="${tab==='mine'?'on':''}" data-go="mine">مستودعاتي <span class="count num">${mineIds.length}</span></button></div>`;
+  return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse']) +
+    `<section class="panel pad">${tabs}${tab==='browse'?browseBody():mineBody()}</section>`;
+}
+
+function heroBanner(){
+  if(S.hero==='closed') return `<div class="hero-mini">${I.info}<span class="grow">مستودعات سلة تخزّن منتجاتك وتجهّز طلباتك وتشحنها نيابة عنك.</span><button class="btn btn-ghost btn-sm" data-act="hero-open" type="button">كيف تعمل؟</button></div>`;
+  return `<div class="hero" role="region" aria-label="عن مستودعات سلة">
+    <button class="hero-x" data-act="hero-close" aria-label="إخفاء البانر" type="button">${I.x}</button>
+    <div>
+      <span class="chip" style="background:rgba(186,243,230,.18);color:var(--mint)">جديد في سلة</span>
+      <h2 style="margin-top:10px">خزّن منتجاتك في مستودعات سلة، ونحن نجهّز طلباتك ونشحنها</h2>
+      <p>اختر مستودعاً قريباً من عملائك. كل مستودع تحجزه يُضاف كفرع في متجرك، وتُشحن منه الطلبات تلقائياً بأسعار شحن ثابتة.</p>
+      <button class="btn btn-p btn-sm" type="button" data-act="scroll-cards">تصفح المستودعات</button>
+    </div>
+    <div class="hero-steps">
+      <div class="hero-step"><b>احجز مستودعاً</b><span>قارن المدن والخدمات والأسعار</span></div>
+      <div class="hero-step"><b>انقل مخزونك</b><span>أوصله بنفسك أو دع سلة تستلمه</span></div>
+      <div class="hero-step"><b>الاستلام والفحص</b><span>يُعدّ ويُفحص ثم يُخزَّن</span></div>
+      <div class="hero-step"><b>ابدأ الشحن</b><span>الطلبات تُجهَّز وتُشحن من المستودع</span></div>
+    </div>
+  </div>`;
+}
+
+function browseBody(){
+  const list = WH.filter(w=>(S.city==='all'||w.city===S.city)&&(!S.q||(w.city+w.name+w.provider).includes(S.q)));
+  return heroBanner() + `
+    <div class="row between" style="margin-bottom:6px"><div><h1>مستودعات سلة</h1><p class="muted">ثبّت مستودعاً أو أكثر، كل مستودع يصبح موقع تخزين وتوصيل في متجرك.</p></div></div>
+    <div class="row" style="margin:14px 0 18px" id="cards">
+      <label class="search">${I.search}<input id="q" placeholder="ابحث باسم المدينة أو المستودع" value="${esc(S.q)}"></label>
+      <select class="select" id="city" aria-label="المدينة"><option value="all">كل المدن</option>${[...new Set(WH.map(w=>w.city))].map(c=>`<option ${S.city===c?'selected':''}>${c}</option>`).join('')}</select>
+    </div>
+    <div class="grid">${list.map(browseCard).join('') || `<div class="empty"><p>لا توجد مستودعات تطابق البحث.</p></div>`}</div>`;
+}
+
+function browseCard(w){
+  const booked = S.mine[w.id];
+  return `<article class="wcard">
+    <div class="wcard-head">
+      <div class="wimg">${whImg(w)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="row between"><span class="city">${I.pin}${w.city}</span>${booked?`<span class="pill ok">محجوز</span>`:''}</div>
+        <div class="wname">${w.name}</div>
+        <div class="sm muted">${w.provider}</div>
+      </div>
+    </div>
+    <div class="chips">${svcChips(w)}</div>
+    <div class="price"><span class="sm muted">يبدأ من</span><strong class="num">${w.price} ر.س</strong><span class="ink2">/ طلب</span><span class="sm muted" style="margin-inline-start:auto">شامل التخزين والتجهيز والتوصيل</span></div>
+    <div class="cta">
+      ${booked?`<button class="btn" data-go="mine" type="button">عرض في مستودعاتي</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز</button>`}
+      <button class="btn" data-go="detail-${w.id}" type="button">التفاصيل</button>
+    </div>
+  </article>`;
+}
+
+function mineBody(){
+  const ids = Object.keys(S.mine);
+  const head = `<div class="row between" style="margin-bottom:14px">
+      <div><h1>مستودعاتي</h1><p class="muted">المستودعات التي حجزتها وحالة تفعيل كل منها.</p></div>
+      <div class="seg" role="group" aria-label="طريقة العرض">
+        <button class="${S.view==='card'?'on':''}" data-act="view" data-v="card" type="button">${I.grid}بطاقات</button>
+        <button class="${S.view==='table'?'on':''}" data-act="view" data-v="table" type="button">${I.list}جدول</button>
+      </div></div>`;
+  if(!ids.length) return head + `<div class="empty"><div class="ill">${I.box}</div><b>لم تحجز أي مستودع بعد</b><p>احجز مستودعاً لتبدأ بتخزين منتجاتك وشحنها من سلة.</p><button class="btn btn-p" data-go="browse">تصفح المستودعات</button></div>`;
+  return head + (S.view==='card' ? `<div class="grid">${ids.map(mineCard).join('')}</div>` : mineTable(ids));
+}
+
+function actionsFor(id){
+  const m=S.mine[id];
+  if(m.status==='awaiting') return [`<button class="btn btn-p" data-go="transfer" type="button">نقل المخزون</button>`,`<button class="btn" data-go="settings-${id}" type="button">الإعدادات</button>`];
+  if(m.status==='receiving') return [`<button class="btn btn-p" data-go="transfer" type="button">متابعة طلب النقل</button>`,`<button class="btn" data-go="settings-${id}" type="button">الإعدادات</button>`];
+  return [`<button class="btn btn-p" data-go="settings-${id}" type="button">الإعدادات والأسعار</button>`,`<button class="btn" data-go="transfer" type="button">نقل مخزون إضافي</button>`];
+}
+function routeChips(m){ return ROUTES.map(r=>`<span class="chip ${m.routes[r.id]?'':'gray'}">${m.routes[r.id]?'':'<s>'}${r.name}${m.routes[r.id]?'':'</s>'}</span>`).join(''); }
+
+function mineCard(id){
+  const w=wh(id), m=S.mine[id], st=STATUS[m.status];
+  const prog = [1,2,3,4].map(i=>`<i class="${i<st.step?'done':i===st.step&&m.status!=='active'?'cur':i<=st.step?'done':''}"></i>`).join('');
+  const body = m.status==='active'
+    ? `<div class="kv"><div><b class="num">${m.stock.toLocaleString('en')}</b><span>وحدة مخزنة</span></div><div><b class="num">${m.skus}</b><span>منتج</span></div><div><b class="num">${m.orders}</b><span>طلب هذا الشهر</span></div></div>`
+    : `<div class="next">${I.info}<span>${st.next}</span></div>`;
+  return `<article class="wcard">
+    <div class="wcard-head">
+      <div class="wimg">${whImg(w)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="row between"><span class="city">${I.pin}${w.city}</span><span class="pill ${st.cls}">${st.label}</span></div>
+        <div class="wname">${w.name}</div>
+      </div>
+    </div>
+    <div><div class="row between sm muted" style="margin-bottom:4px"><span>حجز ← نقل ← فحص ← نشط</span><span class="num">${Math.min(st.step,4)}/4</span></div><div class="progress">${prog}</div></div>
+    ${body}
+    <div><div class="sm muted" style="margin-bottom:6px">مسارات الشحن</div><div class="chips">${routeChips(m)}</div></div>
+    <div class="cta" style="margin-top:auto">${actionsFor(id).join('')}</div>
+  </article>`;
+}
+
+function mineTable(ids){
+  return `<div class="tbl-wrap"><table>
+    <thead><tr><th>المستودع</th><th>الحالة</th><th class="n">المخزون</th><th class="n">طلبات الشهر</th><th>مسارات الشحن</th><th>الإجراءات</th></tr></thead>
+    <tbody>${ids.map(id=>{const w=wh(id),m=S.mine[id],st=STATUS[m.status];return `<tr>
+      <td><div class="prod"><div class="wimg" style="width:38px;height:38px;border-radius:6px">${whImg(w)}</div><div><b>${w.city}</b><div class="sm muted">${w.name}</div></div></div></td>
+      <td><span class="pill ${st.cls}">${st.label}</span></td>
+      <td class="n">${m.status==='active'?m.stock.toLocaleString('en'):'—'}</td>
+      <td class="n">${m.status==='active'?m.orders:'—'}</td>
+      <td><div class="chips">${routeChips(m)}</div></td>
+      <td><div class="row" style="flex-wrap:nowrap">${actionsFor(id).map(b=>b.replace('class="btn','class="btn btn-sm')).join('')}</div></td></tr>`}).join('')}</tbody></table></div>`;
+}
+
+function screenDetail(id){
+  const w=wh(id); if(!w) return screenList('browse');
+  const booked=S.mine[id];
+  return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[w.city,'']) + `
+  <div class="two">
+    <div class="stack">
+      <section class="panel pad stack">
+        <div class="wcard-head"><div class="wimg" style="width:80px;height:80px">${whImg(w)}</div>
+          <div style="flex:1"><h1 class="city" style="font-size:20px">${I.pin}${w.city}</h1><div class="ink2">${w.name}</div>
+          <div class="sm muted">${w.provider} · <span class="num">★ ${w.rating}</span> (${w.reviews} تقييم)</div></div></div>
+        <p class="ink2">${w.desc}</p>
+        <div class="chips">${w.svc.map(k=>`<span class="chip">${SVC[k]}</span>`).join('')}</div>
+      </section>
+      <section class="panel pad stack">
+        <h2>الأسعار ومسارات الشحن</h2>
+        <p class="sm muted">سعر ثابت لكل طلب، يشمل التخزين والتجهيز والتوصيل. تحدده سلة.</p>
+        <div class="routes">${ROUTES.map(r=>`<div class="route"><b>${r.name}</b><span class="p num">${r.cost} ر.س <small class="muted" style="font-size:12px;font-weight:400">/ طلب</small></span><dl class="dl"><dt>مدة التوصيل</dt><dd>${r.promise}</dd><dt>التغطية</dt><dd>${r.cover}</dd></dl></div>`).join('')}</div>
+      </section>
+      <section class="panel pad stack">
+        <h2>المنتجات المقبولة وشروط الاستلام</h2>
+        <div class="dl"><dt>يقبل</dt><dd>الملابس والإكسسوارات، الإلكترونيات، مستحضرات التجميل، السلع المنزلية${w.svc.includes('cold')?'، الأغذية المبردة (2–8°م)':''}</dd>
+        <dt>لا يقبل</dt><dd>المواد الخطرة والقابلة للاشتعال${w.svc.includes('cold')?'':'، المنتجات المبردة'}</dd>
+        <dt>الكرتونة</dt><dd>حد أقصى 25 كجم، وملصق SKU على كل قطعة</dd></div>
+      </section>
+    </div>
+    <aside class="stack sticky">
+      <section class="panel pad stack" style="background:var(--mint-50);border-color:var(--mint)">
+        <div class="row"><span class="sm muted">يبدأ من</span><strong class="num" style="font-size:24px">${w.price} ر.س</strong><span>/ طلب</span></div>
+        ${booked?`<button class="btn" data-go="mine" type="button">محجوز · عرض في مستودعاتي</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز المستودع</button>`}
+        <p class="sm ink2">الحجز لا يفعّل المستودع. يتفعّل بعد نقل مخزونك واستلامه وفحصه.</p>
+      </section>
+      <section class="panel pad stack"><h2>ساعات العمل</h2>
+        <div class="dl">${w.hours.map(h=>`<dt>${h[0]}</dt><dd class="num" style="${h[1]==='مغلق'?'color:var(--bad)':''}">${h[1]}</dd>`).join('')}</div></section>
+    </aside>
+  </div>`;
+}
+
+function screenSettings(id){
+  const w=wh(id), m=S.mine[id]; if(!w||!m) return screenList('mine');
+  const st=STATUS[m.status];
+  return crumbs(['الشحن والتوصيل','browse'],['مستودعاتي','mine'],[`إعدادات ${w.city}`,'']) + `
+  <div class="stack">
+    <section class="panel pad row between">
+      <div class="wcard-head"><div class="wimg">${whImg(w)}</div><div><h1 style="font-size:19px">${w.city} · ${w.name}</h1><div class="row sm"><span class="pill ${st.cls}">${st.label}</span><span class="muted">فرع سلة للمستودعات · يُدار من المستودع</span></div></div></div>
+      <button class="btn btn-p" data-act="save" type="button">حفظ التغييرات</button>
+    </section>
+    ${m.status!=='active'?`<div class="alert warn">${I.info}<span class="grow">المسارات والأسعار تبدأ بالعمل بعد تفعيل المستودع. يمكنك تجهيزها الآن.</span>${m.status==='awaiting'?'<button class="btn btn-sm" data-go="transfer" type="button">نقل المخزون</button>':''}</div>`:''}
+
+    <section class="panel pad stack">
+      <div><h2>مسارات الشحن والتسعيرة</h2><p class="sm muted">سلة تحدد شركة الشحن وتكلفتها. أنت تحدد السعر الذي يراه عميلك وتفعّل المسارات التي تريدها.</p></div>
+      <div>
+        <div class="set-row head"><span>تفعيل</span><span>المسار</span><span>مدة التوصيل</span><span>التغطية</span><span>تكلفتك من سلة</span><span>السعر للعميل</span></div>
+        ${ROUTES.map(r=>`<div class="set-row">
+          <label class="toggle" title="${r.locked?'لا يمكن إيقاف الشحن العادي':''}"><input type="checkbox" data-route="${r.id}" ${m.routes[r.id]?'checked':''} ${r.locked?'disabled':''} aria-label="تفعيل ${r.name}"><span></span></label>
+          <div><b>${r.name}</b><div class="sm muted">عبر ${r.carrier}</div>${r.locked?`<span class="lock">${I.lock}إلزامي ولا يمكن إيقافه</span>`:''}</div>
+          <div class="span"><span class="sm muted" hidden>مدة التوصيل: </span>${r.promise}</div>
+          <div class="span">${r.cover}</div>
+          <div class="span num">${r.cost} ر.س <span class="sm muted">/ طلب</span></div>
+          <div class="span"><div class="row" style="flex-wrap:nowrap"><label class="field"><input id="price-${r.id}" type="number" min="0" value="${m.price[r.id]}" data-price="${r.id}" aria-label="سعر ${r.name} للعميل"><em>ر.س</em></label>
+            <span class="sm ${m.price[r.id]-r.cost>=0?'qty-ok':'qty-bad'} num" data-margin="${r.id}">${fmtMargin(m.price[r.id]-r.cost)}</span></div></div>
+        </div>`).join('')}
+      </div>
+    </section>
+
+    <section class="panel pad stack">
+      <div><h2>نطاق التغطية</h2><p class="sm muted">المدن التي يظهر فيها شحن هذا المستودع لعملائك في صفحة الدفع.</p></div>
+      <div class="radio">
+        <label><input type="radio" name="zm" value="all" ${m.zoneMode==='all'?'checked':''}> كل مدن المملكة</label>
+        <label><input type="radio" name="zm" value="custom" ${m.zoneMode==='custom'?'checked':''}> مدن محددة</label>
+      </div>
+      <div id="zonesBox" ${m.zoneMode==='all'?'hidden':''} class="stack">
+        <div class="zones">${m.zones.map(z=>`<span class="zone">${z}<button type="button" data-zone-rm="${z}" aria-label="إزالة ${z}">${I.x}</button></span>`).join('') || '<span class="muted sm">لم تُضف مدناً بعد.</span>'}</div>
+        <div class="row"><select class="select" id="zoneAdd" aria-label="إضافة مدينة"><option value="">أضف مدينة…</option>${CITIES.filter(c=>!m.zones.includes(c)).map(c=>`<option>${c}</option>`).join('')}</select>
+        <span class="sm muted">الشحن السريع يعمل داخل ${w.city} فقط مهما كان النطاق.</span></div>
+      </div>
+    </section>
+
+    <section class="panel pad stack">
+      <div class="row between"><h2>بيانات الفرع</h2><span class="lock">${I.lock}يديرها المستودع ولا يمكن تعديلها</span></div>
+      <div class="ro">
+        <div><span>اسم الفرع</span>${w.name}</div><div><span>المدينة</span>${w.city}</div><div><span>المزوّد</span>${w.provider}</div>
+        <div><span>ساعات العمل</span>${w.hours[0][0]} ${w.hours[0][1]}</div><div><span>وقت التجهيز</span>حتى 24 ساعة</div><div><span>الاستلام من الفرع</span>غير متاح</div>
+      </div>
+    </section>
+  </div>`;
+}
+function fmtMargin(v){return (v>=0?'ربحك +':'خسارة ')+Math.abs(v)+' ر.س'}
+
+/* ---------- transfer ---------- */
+const PRODUCTS = [
+  {n:'تيشيرت قطني',v:'XL',sku:'TS-1042',sent:40,thumb:'👕'},
+  {n:'عطر عود 100 مل',v:'زجاج',sku:'PF-2210',sent:20,flag:'fragile',thumb:'🧴'},
+  {n:'شوكولاتة داكنة',v:'علبة 12',sku:'CH-0331',sent:30,flag:'cold',thumb:'🍫'},
+  {n:'كوب سيراميك',v:'أبيض',sku:'MG-0907',sent:12,flag:'fragile',thumb:'☕'},
+  {n:'قميص كتان',v:'L',sku:'SH-5530',sent:18,thumb:'👔'},
+];
+// review result (state 2)
+const REVIEW = {
+  'TS-1042':{acc:40,note:''},
+  'PF-2210':{acc:15,note:'السعة المتاحة لهذا الصنف 15 وحدة حالياً.'},
+  'CH-0331':{acc:0,note:'المستودع لا يدعم التخزين المبرد.'},
+  'MG-0907':{acc:12,note:'يُشترط تغليف كل كوب بالفقاعات.'},
+  'SH-5530':{acc:18,note:''},
+};
+// QC result (state 3)
+const QC = {
+  'TS-1042':{rec:40,dmg:0,miss:0,note:''},
+  'PF-2210':{rec:15,dmg:2,miss:0,note:'كسر في عبوتين بسبب تغليف غير كافٍ. صور الفحص مرفقة.'},
+  'MG-0907':{rec:11,dmg:1,miss:1,note:'وصلت 11 من 12. كوب واحد مكسور.'},
+  'SH-5530':{rec:18,dmg:0,miss:0,note:''},
+};
+const FLAG = {fragile:{t:'قابل للكسر',ic:I.glass},cold:{t:'يحتاج تبريد',ic:I.snow}};
+const flagHtml = p => p.flag?`<span class="flag ${p.flag}" title="${p.flag==='fragile'?'غلّف كل قطعة بالفقاعات واكتب «قابل للكسر» على الكرتونة':'يُنقل مبرداً بين 2 و8 درجات'}">${FLAG[p.flag].ic}${FLAG[p.flag].t}</span>`:'';
+
+function screenTransfer(){
+  const t=S.tstate;
+  const steps=[['تم الإنشاء',''],['مراجعة المستودع',''],['قيد النقل',''],['الاستلام',''],['فحص الجودة',''],['تم التخزين','']];
+  const cur = t===1?1:t===2?2:6; // index of current step
+  const stepHtml = steps.map((s,i)=>{const done = i<cur || (t===3&&i===5); const c = i===cur&&!done;
+    const sub = done?'مكتمل':c?'الآن':'بالانتظار';
+    return `<div class="st ${done?'done':''} ${c?'cur':''}"><div class="dot">${done?I.check:i+1}</div><b>${s[0]}</b><span>${sub}</span></div>`}).join('');
+  const statusPill = t===1?'<span class="pill warn">بانتظار تأكيد المستودع</span>':t===2?'<span class="pill info">مقبول جزئياً · قيد النقل</span>':'<span class="pill ok">تم التخزين</span>';
+
+  return crumbs(['الشحن والتوصيل','browse'],['طلبات نقل المخزون','mine'],['طلب #274607591','']) + `
+  <div class="proto-bar" role="group" aria-label="حالة النموذج"><b>عرض الحالة:</b>
+    <div class="seg">${[['1','بانتظار التأكيد'],['2','نتيجة المراجعة'],['3','بعد فحص الجودة']].map(([k,l])=>`<button type="button" class="${String(t)===k?'on':''}" data-act="tstate" data-v="${k}">${k}. ${l}</button>`).join('')}</div>
+    <span class="muted sm">هذا الشريط للنموذج فقط وليس جزءاً من الواجهة.</span></div>
+  <div class="stack">
+    <section class="panel pad stack">
+      <div class="row between"><div class="row"><h1 style="font-size:19px">نقل المخزون <span class="num">#274607591</span></h1>${statusPill}</div>
+        ${t===1?'<button class="btn btn-sm" style="color:var(--bad);border-color:#f5c7c7" type="button" data-act="toast" data-msg="أُلغي طلب النقل">إلغاء الطلب</button>':''}</div>
+      <div class="branches">
+        <div class="branch"><div class="ic">${I.up}</div><div><div class="sm muted">من فرع</div><b>المستودع الرئيسي – جدة، حي النعيم</b></div></div>
+        <div class="branch"><div class="ic" style="background:var(--mint-50);color:var(--brand)">${I.down}</div><div><div class="sm muted">إلى مستودع سلة</div><b>جدة · مستودع سلة – حي الأمير فواز</b></div></div>
+      </div>
+      <div class="row sm ink2"><span>طريقة النقل: <b>استلام من سلة</b></span><span>·</span><span>أُنشئ في <span class="num">14 سبتمبر 2026، 11:17 م</span></span></div>
+    </section>
+
+    <section class="panel pad stack"><h2>مراحل نقل المخزون</h2><div class="stepper">${stepHtml}</div></section>
+
+    ${t===3?qcSummary():''}
+    ${instructions(t)}
+    ${t===1?shipmentEmpty():shipmentDetails(t)}
+    ${productsSection(t)}
+    ${t===3?returnCard():''}
+    ${logSection(t)}
+  </div>`;
+}
+
+function instructions(t){
+  const flagged = PRODUCTS.filter(p=>p.flag && (t===1 || (REVIEW[p.sku].acc>0)));
+  return `<section class="instr">
+    <div class="row between"><h2 class="row" style="gap:8px">${I.warn}تعليمات المستودع قبل الشحن</h2>
+      ${flagged.length?`<span class="sm" style="color:#7a5210">${flagged.length} منتجات في طلبك تحتاج معاملة خاصة</span>`:''}</div>
+    <div class="instr-list">
+      <div class="instr-item"><div class="ic" style="background:#fff1e6;color:#b45309">${I.glass}</div><div><b>المنتجات القابلة للكسر</b><span>غلّف كل قطعة بالفقاعات، واكتب «قابل للكسر» على الكرتونة. ينطبق على: ${PRODUCTS.filter(p=>p.flag==='fragile').map(p=>p.n).join('، ')}.</span></div></div>
+      <div class="instr-item"><div class="ic" style="background:#e6f4fb;color:#0e6ba8">${I.snow}</div><div><b>المنتجات المبردة</b><span>${t===1?'تُنقل في صناديق مبردة بين 2 و8 درجات. هذا المستودع لا يدعم التخزين المبرد وقد تُرفض.':'رُفضت في هذا الطلب لأن المستودع لا يدعم التخزين المبرد.'}</span></div></div>
+      <div class="instr-item"><div class="ic" style="background:var(--brand-50);color:var(--brand)">${I.tag}</div><div><b>ملصق SKU على كل قطعة</b><span>القطع بلا ملصق تُعاد أو تُحتسب رسوم ملصقات.</span></div></div>
+      <div class="instr-item"><div class="ic" style="background:var(--line-2);color:var(--ink-2)">${I.scale}</div><div><b>وزن الكرتونة 25 كجم كحد أقصى</b><span>ضع قائمة المحتويات داخل كل كرتونة.</span></div></div>
+    </div></section>`;
+}
+
+function shipmentEmpty(){
+  return `<section class="panel pad"><h2>المنتجات ونتيجة المراجعة</h2>
+    <div class="empty"><div class="ill">${I.clock}</div><b>المستودع يراجع طلبك</b>
+      <p>ستظهر هنا الكميات المقبولة والمرفوضة وملاحظات المستودع، ثم تفاصيل الشحنة بعد التأكيد. يراجع المستودع الطلبات عادة خلال 24 ساعة عمل.</p>
+      <div class="expect"><div><b>ماذا يراجع المستودع؟</b>نوع المنتجات، الكميات، والسعة المتاحة.</div><div><b>ماذا يحدث بعدها؟</b>تُنشأ بوليصة الاستلام ويُحدد موعده.</div><div><b>هل يمكنني التعديل؟</b>نعم، ويمكنك إلغاء الطلب قبل التأكيد.</div></div>
+    </div></section>`;
+}
+
+function shipmentDetails(t){
+  return `<section class="panel pad stack"><h2>تفاصيل الشحنة</h2>
+    <div class="dl" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));display:grid;gap:14px">
+      <div><div class="sm muted">شركة الشحن</div><b>سلة</b></div>
+      <div><div class="sm muted">رقم التتبع</div><b class="num">SA274607591</b></div>
+      <div><div class="sm muted">الكراتين</div><b class="num">4 كراتين</b></div>
+      <div><div class="sm muted">${t===3?'وصلت في':'الوصول المتوقع'}</div><b class="num">${t===3?'17 سبتمبر 2026':'17 سبتمبر 2026'}</b></div>
+    </div></section>`;
+}
+
+function productsSection(t){
+  if(t===1){
+    return `<section class="panel pad stack"><div class="row between"><h2>المنتجات المرسلة</h2><span class="sm muted num">${PRODUCTS.length} منتجات · ${PRODUCTS.reduce((a,p)=>a+p.sent,0)} وحدة</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>المنتج</th><th>SKU</th><th class="n">الكمية المرسلة</th><th>نتيجة المراجعة</th></tr></thead>
+      <tbody>${PRODUCTS.map(p=>`<tr><td>${prodCell(p)}</td><td class="num">${p.sku}</td><td class="n">${p.sent}</td><td><span class="pill gray">بانتظار المراجعة</span></td></tr>`).join('')}</tbody></table></div></section>`;
+  }
+  if(t===2){
+    const full=PRODUCTS.filter(p=>REVIEW[p.sku].acc===p.sent).length, part=PRODUCTS.filter(p=>REVIEW[p.sku].acc>0&&REVIEW[p.sku].acc<p.sent).length, rej=PRODUCTS.filter(p=>REVIEW[p.sku].acc===0).length;
+    const accU=PRODUCTS.reduce((a,p)=>a+REVIEW[p.sku].acc,0), sentU=PRODUCTS.reduce((a,p)=>a+p.sent,0);
+    return `<section class="panel pad stack">
+      <div class="row between"><h2>المنتجات ونتيجة المراجعة</h2><span class="sm muted">راجعها المستودع في 15 سبتمبر 2026</span></div>
+      <div class="summary">
+        <div class="sum"><b>${accU}<small class="muted" style="font-size:13px"> / ${sentU}</small></b><span>وحدة مقبولة</span></div>
+        <div class="sum ok"><b>${full}</b><span>مقبول بالكامل</span></div>
+        <div class="sum warn"><b>${part}</b><span>مقبول جزئياً</span></div>
+        <div class="sum bad"><b>${rej}</b><span>مرفوض</span></div>
+      </div>
+      <div class="alert info">${I.info}<span class="grow">أرسل الكميات المقبولة فقط. الكميات المرفوضة تبقى في فرعك ولن تُحتسب في الشحنة.</span></div>
+      <div class="tbl-wrap"><table><thead><tr><th>المنتج</th><th>SKU</th><th class="n">المرسلة</th><th class="n">المقبولة</th><th class="n">المرفوضة</th><th>الحالة</th><th>ملاحظات المستودع</th></tr></thead>
+      <tbody>${PRODUCTS.map(p=>{const r=REVIEW[p.sku],rej=p.sent-r.acc;const st=r.acc===p.sent?'<span class="pill ok">مقبول</span>':r.acc===0?'<span class="pill bad">مرفوض</span>':'<span class="pill warn">مقبول جزئياً</span>';
+        return `<tr class="${r.acc===0?'muted-row':''}"><td>${prodCell(p)}</td><td class="num">${p.sku}</td><td class="n">${p.sent}</td><td class="n qty-ok">${r.acc}</td><td class="n ${rej?'qty-bad':''}">${rej||'—'}</td><td>${st}</td><td class="note">${r.note||'<span class="muted">—</span>'}</td></tr>`}).join('')}</tbody></table></div>
+    </section>`;
+  }
+  // t===3
+  const rows = PRODUCTS.filter(p=>REVIEW[p.sku].acc>0);
+  return `<section class="panel pad stack">
+    <div class="row between"><h2>نتيجة الاستلام وفحص الجودة</h2><button class="btn btn-sm" type="button" data-act="toast" data-msg="جارٍ تنزيل إشعار الاستلام GRN">${I.file}إشعار الاستلام (GRN)</button></div>
+    <div class="qc-legend"><span><i style="background:var(--ok)"></i>مخزّن ومتاح للبيع</span><span><i style="background:var(--bad)"></i>تالف</span><span><i style="background:#9aa5a8"></i>مفقود</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>المنتج</th><th class="n">المقبولة</th><th class="n">المستلمة</th><th class="n">اجتازت الفحص</th><th class="n">تالفة</th><th class="n">مفقودة</th><th>التوزيع</th><th>ملاحظات الفحص</th></tr></thead>
+    <tbody>${rows.map(p=>{const a=REVIEW[p.sku].acc,q=QC[p.sku],ok=q.rec-q.dmg;
+      return `<tr><td>${prodCell(p)}</td><td class="n">${a}</td><td class="n">${q.rec}</td><td class="n qty-ok">${ok}</td><td class="n ${q.dmg?'qty-bad':''}">${q.dmg||'—'}</td><td class="n ${q.miss?'qty-bad':''}">${q.miss||'—'}</td>
+      <td><div class="bar" title="${ok} مخزّن، ${q.dmg} تالف، ${q.miss} مفقود"><i style="width:${ok/a*100}%;background:var(--ok)"></i><i style="width:${q.dmg/a*100}%;background:var(--bad)"></i><i style="width:${q.miss/a*100}%;background:#9aa5a8"></i></div></td>
+      <td class="note">${q.note||'<span class="muted">مطابق</span>'}${q.dmg?` <a href="#transfer" data-act="toast" data-msg="صور الفحص: 3 صور">عرض الصور</a>`:''}</td></tr>`}).join('')}
+      ${PRODUCTS.filter(p=>REVIEW[p.sku].acc===0).map(p=>`<tr class="muted-row"><td>${prodCell(p)}</td><td class="n muted" colspan="5">رُفض في مرحلة المراجعة ولم يُرسل</td><td></td><td class="note">${REVIEW[p.sku].note}</td></tr>`).join('')}
+    </tbody></table></div></section>`;
+}
+function qcSummary(){
+  const acc=PRODUCTS.reduce((a,p)=>a+REVIEW[p.sku].acc,0);
+  const rec=Object.values(QC).reduce((a,q)=>a+q.rec,0), dmg=Object.values(QC).reduce((a,q)=>a+q.dmg,0), miss=Object.values(QC).reduce((a,q)=>a+q.miss,0);
+  return `<div class="alert ok">${I.check}<span class="grow"><b>تم تخزين ${rec-dmg} وحدة وأصبحت متاحة للبيع من مستودع جدة.</b> تفعّل المستودع وبدأت مسارات الشحن بالعمل.</span><button class="btn btn-sm" data-go="settings-jed" type="button">إعدادات المستودع</button></div>
+  <section class="panel pad stack"><h2>ملخص الاستلام</h2><div class="summary">
+    <div class="sum"><b>${acc}</b><span>مقبولة للإرسال</span></div>
+    <div class="sum"><b>${rec}</b><span>مستلمة</span></div>
+    <div class="sum ok"><b>${rec-dmg}</b><span>اجتازت الفحص وخُزّنت</span></div>
+    <div class="sum bad"><b>${dmg}</b><span>تالفة</span></div>
+    <div class="sum warn"><b>${miss}</b><span>مفقودة</span></div></div></section>`;
+}
+function returnCard(){
+  return `<section class="panel pad stack"><div class="row between"><h2>الإرجاع والمطالبات</h2></div>
+    <div class="alert bad">${I.warn}<span class="grow"><b>3 وحدات تالفة تُعاد إلى فرعك</b> عبر طلب الإرجاع <span class="num">#RT-274607591</span>. تصل خلال 3 – 5 أيام.</span><button class="btn btn-sm" type="button" data-act="toast" data-msg="فُتح طلب الإرجاع #RT-274607591">عرض طلب الإرجاع</button></div>
+    <div class="alert warn">${I.info}<span class="grow">وحدة واحدة مفقودة من «كوب سيراميك». إن كانت أُرسلت فعلاً، اعترض خلال 7 أيام وسيراجعها فريق سلة.</span><button class="btn btn-sm" type="button" data-act="toast" data-msg="أُرسل الاعتراض إلى فريق سلة">اعتراض</button></div>
+  </section>`;
+}
+function prodCell(p){return `<div class="prod"><div class="thumb" aria-hidden="true" style="font-size:18px">${p.thumb}</div><div><b>${p.n}</b> <span class="muted sm">${p.v}</span><div>${flagHtml(p)}</div></div></div>`}
+function logSection(t){
+  const all=[ // oldest first
+    [1,'أنشأت طلب النقل','وليد عيسى','14 سبتمبر، 11:17 م'],
+    [2,'قبل المستودع 85 من 120 وحدة، ورفض «شوكولاتة داكنة»','مستودع جدة','15 سبتمبر، 10:02 ص'],
+    [2,'استلم المندوب 4 كراتين من فرعك','سلة','16 سبتمبر، 2:40 م'],
+    [3,'وصلت الشحنة إلى المستودع','مستودع جدة','17 سبتمبر، 9:30 ص'],
+    [3,'اكتمل فحص الجودة: 3 تالفة، 1 مفقودة','مستودع جدة','18 سبتمبر، 1:05 م'],
+    [3,'خُزّنت 81 وحدة وتفعّل المستودع','مستودع جدة','18 سبتمبر، 4:15 م'],
+  ];
+  const items=all.filter(i=>i[0]<=t).map(i=>i.slice(1)).reverse();
+  return `<section class="panel pad stack"><h2>سجل الطلب</h2>
+    <label class="search"><input id="comment" placeholder="اكتب تعليقاً أو ملاحظة للمستودع"></label>
+    <div class="log">${items.map(i=>`<div class="log-i"><i></i><div><b style="font-weight:500">${i[0]}</b><div class="sm muted">${i[1]}</div></div><span class="sm muted num">${i[2]}</span></div>`).join('')}</div></section>`;
+}
+
+/* ============ router & events ============ */
+const app=document.getElementById('app');
+function route(){
+  const h=(location.hash||'#browse').slice(1);
+  let html;
+  if(h==='browse'||h==='mine') html=screenList(h);
+  else if(h.startsWith('detail-')) html=screenDetail(h.slice(7));
+  else if(h.startsWith('settings-')) html=screenSettings(h.slice(9));
+  else if(h==='transfer') html=screenTransfer();
+  else html=screenList('browse');
+  app.innerHTML=html;
+}
+function go(h){ if(location.hash==='#'+h) route(); else location.hash=h; window.scrollTo(0,0); }
+function toast(msg){
+  const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.innerHTML=I.check+esc(msg);
+  document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
+}
+function bookModal(id){
+  const w=wh(id);
+  const o=document.createElement('div'); o.className='overlay';
+  o.innerHTML=`<div class="modal stack" role="dialog" aria-modal="true" aria-labelledby="mt">
+    <h2 id="mt">حجز مستودع ${w.city}</h2>
+    <p class="ink2">سيُضاف <b>${w.name}</b> كفرع في متجرك بحالة «بانتظار نقل المخزون». يتفعّل بعد نقل مخزونك وفحصه.</p>
+    <div class="dl"><dt>يبدأ من</dt><dd class="num">${w.price} ر.س / طلب</dd><dt>مسارات الشحن</dt><dd>عادي، سريع، اقتصادي</dd></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-x type="button">إلغاء</button><button class="btn btn-p" data-ok type="button">تأكيد الحجز</button></div></div>`;
+  document.body.appendChild(o);
+  o.querySelector('[data-ok]').focus();
+  o.addEventListener('click',e=>{
+    if(e.target===o||e.target.closest('[data-x]')) o.remove();
+    if(e.target.closest('[data-ok]')){ o.remove();
+      S.mine[id]={status:'awaiting',stock:0,skus:0,orders:0,routes:{std:true,exp:true,eco:true},price:{std:29,exp:39,eco:15},zoneMode:'all',zones:[]};
+      go('mine'); toast('تم حجز المستودع. الخطوة التالية: نقل المخزون'); }
+  });
+}
+
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]'); if(g){e.preventDefault(); go(g.dataset.go); document.getElementById('notes').hidden=true; return;}
+  const a=e.target.closest('[data-act]'); if(!a) return;
+  const act=a.dataset.act;
+  if(act==='book') bookModal(a.dataset.id);
+  if(act==='hero-close'){S.hero='closed';save('fm-hero','closed');route();}
+  if(act==='hero-open'){S.hero='open';save('fm-hero','open');route();}
+  if(act==='scroll-cards') document.getElementById('cards')?.scrollIntoView({behavior:'smooth'});
+  if(act==='view'){S.view=a.dataset.v;save('fm-view',S.view);route();}
+  if(act==='tstate'){S.tstate=+a.dataset.v;route();}
+  if(act==='save') toast('حُفظت إعدادات المستودع');
+  if(act==='toast'){e.preventDefault(); toast(a.dataset.msg);}
+});
+document.addEventListener('click',e=>{
+  const zr=e.target.closest('[data-zone-rm]'); if(!zr) return;
+  const id=location.hash.slice(10); const m=S.mine[id]; m.zones=m.zones.filter(z=>z!==zr.dataset.zoneRm); route();
+});
+document.addEventListener('input',e=>{
+  if(e.target.id==='q'){S.q=e.target.value.trim(); const pos=e.target.selectionStart; route(); const q=document.getElementById('q'); q.focus(); q.setSelectionRange(pos,pos);}
+  if(e.target.dataset.price){
+    const id=location.hash.slice(10), r=ROUTES.find(x=>x.id===e.target.dataset.price), v=+e.target.value||0;
+    S.mine[id].price[r.id]=v; const el=document.querySelector(`[data-margin="${r.id}"]`);
+    el.textContent=fmtMargin(v-r.cost); el.className='sm num '+(v-r.cost>=0?'qty-ok':'qty-bad');
+  }
+});
+document.addEventListener('change',e=>{
+  const id=location.hash.slice(10);
+  if(e.target.id==='city'){S.city=e.target.value;route();}
+  if(e.target.dataset.route){S.mine[id].routes[e.target.dataset.route]=e.target.checked;}
+  if(e.target.name==='zm'){S.mine[id].zoneMode=e.target.value;document.getElementById('zonesBox').hidden=e.target.value==='all';}
+  if(e.target.id==='zoneAdd'&&e.target.value){S.mine[id].zones.push(e.target.value);route();}
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelector('.overlay')?.remove(); });
+const nb=document.getElementById('notesBtn'), nt=document.getElementById('notes');
+nb.addEventListener('click',()=>{nt.hidden=!nt.hidden; nb.setAttribute('aria-expanded',String(!nt.hidden));});
+document.getElementById('notesX').addEventListener('click',()=>{nt.hidden=true;nb.setAttribute('aria-expanded','false');});
+window.addEventListener('hashchange',route);
+route();
+</script>
