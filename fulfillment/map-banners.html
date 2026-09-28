@@ -75,6 +75,10 @@ button{font:inherit;color:inherit}
 .pulse{animation:pulse 2.2s ease-out infinite;transform-box:fill-box;transform-origin:center}
 @keyframes pulse{0%{opacity:.55;transform:scale(.6)}100%{opacity:0;transform:scale(1.9)}}
 
+.dl{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.copy{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 14px;cursor:pointer;color:var(--brand);font-weight:600}
+.copy:hover{border-color:var(--mint-2)}
+.muted-sm{font-size:12px;color:var(--muted);direction:ltr}
 @media (max-width:900px){.bn{grid-template-columns:1fr}.mapbox{max-width:460px}}
 @media (max-width:640px){
   .wrap{padding-inline:16px} .frame{padding:10px} .bn{padding:22px 18px}
@@ -85,8 +89,8 @@ button{font:inherit;color:inherit}
 
 <div class="wrap">
   <header class="intro">
-    <h1>خريطة مستودعات سلة: 5 خيارات</h1>
-    <p>كل خيار يستخدم الخريطة لغرض مختلف: التعريف بالشبكة، أو نطاق التوصيل، أو مقارنة عملاء التاجر بالمستودعات، أو اختيار مستودع، أو مدة التوصيل. الأرقام والمواقع تقريبية للنموذج.</p>
+    <h1>خريطة مستودعات سلة: 10 خيارات</h1>
+    <p>كل خيار يستخدم الخريطة لغرض مختلف: التعريف بالشبكة، أو نطاق التوصيل، أو مقارنة عملاء التاجر بالمستودعات، أو اختيار مستودع، أو مدة التوصيل. الأرقام والمواقع تقريبية للنموذج. تحت كل خيار زر لنسخ الرسم كـ SVG، وملفات SVG الجاهزة في مجلد <span dir="ltr">map-svg</span>.</p>
   </header>
   <div id="list"></div>
 </div>
@@ -199,14 +203,133 @@ function opt5(){
     <div class="mapbox">${svg(inner,SH)}</div></section>`;
 }
 
+
+/* ---------- geometry helpers for options 6-10 ---------- */
+const POLY=BORDER.map(p=>P(...p));
+function inPoly(x,y){let c=false;for(let i=0,j=POLY.length-1;i<POLY.length;j=i++){const [xi,yi]=POLY[i],[xj,yj]=POLY[j];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c;}return c;}
+const WHX=WH.map(w=>xy(w.id));
+const nearest=(x,y,pts=WHX)=>Math.min(...pts.map(([a,b])=>Math.hypot(x-a,y-b)));
+const svgv=(vb,inner,defs='')=>`<svg viewBox="${vb}" role="img" aria-label="خريطة المملكة العربية السعودية بمواقع المستودعات" direction="ltr"><defs>${defs}</defs>${inner}</svg>`;
+function textL(x,y,t,{size=12,w=600,color='var(--brand)',anchor='middle'}={}){return `<text x="${x}" y="${y}" text-anchor="${anchor}" direction="rtl" style="font:${w} ${size}px var(--font);fill:${color};unicode-bidi:embed">${t}</text>`;}
+function building(x,y,s=1,col='var(--brand)'){ // small isometric warehouse, base centre at x,y
+  const w=16*s,h=11*s,r=7*s;
+  return `<g><ellipse cx="${x}" cy="${y+2}" rx="${w*1.1}" ry="${4*s}" fill="#004956" opacity=".12"/>
+   <path d="M${x-w} ${y-h} L${x} ${y-h+5*s} L${x} ${y+5*s} L${x-w} ${y} Z" fill="${col}"/>
+   <path d="M${x} ${y-h+5*s} L${x+w} ${y-h} L${x+w} ${y} L${x} ${y+5*s} Z" fill="${col}" opacity=".78"/>
+   <path d="M${x-w} ${y-h} L${x} ${y-h-r+5*s} L${x+w} ${y-h} L${x} ${y-h+5*s} Z" fill="#a8f0dc"/>
+   <path d="M${x-w*.62} ${y-2*s} L${x-w*.25} ${y-.3*s} L${x-w*.25} ${y-6*s} L${x-w*.62} ${y-7.6*s} Z" fill="#a8f0dc" opacity=".9"/></g>`;}
+function chip(x,y,t,{color='var(--brand)',bg='#fff',size=11}={}){const w=t.length*size*.58+16;return `<g><rect x="${x-w/2}" y="${y-12}" width="${w}" height="22" rx="11" fill="${bg}" filter="url(#sh)"/>${textL(x,y+3.5,t,{size,color})}</g>`;}
+
+/* ---------- 6. isometric map with buildings ---------- */
+function opt6(){
+  const th=-12*Math.PI/180, a=Math.cos(th), b=.6*Math.sin(th), c=-Math.sin(th), d=.6*Math.cos(th), e=18, f=118;
+  const T=([x,y])=>[a*x+c*y+e,b*x+d*y+f];
+  const M=`matrix(${a.toFixed(3)} ${b.toFixed(3)} ${c.toFixed(3)} ${d.toFixed(3)} ${e} ${f})`;
+  const tag={ruh:'4 ر.س · نفس اليوم',jed:'5 ر.س · نفس اليوم',dmm:'6 ر.س',med:'5 ر.س',abh:'6 ر.س'};
+  const off={ruh:[-70,-46],dmm:[52,-30],med:[-44,-28],jed:[-48,24],abh:[-10,30]};
+  const bl=WH.map(w=>{const [x,y]=T(xy(w.id));const big=w.id==='ruh';const [ox,oy]=off[w.id];const col=big?'var(--orange)':'var(--brand)';
+    return `<path d="M${x} ${y-8} L${x+ox} ${y+oy+(oy<0?10:-10)}" stroke="${col}" stroke-width="1" opacity=".5"/>`+building(x,y,big?1.35:1,col)+chip(x+ox,y+oy,`${C[w.id].n} · ${tag[w.id]}`,{color:col})}).join('');
+  const pts=POLY.map(T), xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]);
+  const vb6=`${(Math.min(...xs)-70).toFixed(0)} ${(Math.min(...ys)-70).toFixed(0)} ${(Math.max(...xs)-Math.min(...xs)+140).toFixed(0)} ${(Math.max(...ys)-Math.min(...ys)+120).toFixed(0)}`;
+  const inner=`<g transform="translate(0 16)"><path d="${PATH}" transform="${M}" fill="#8fd5c1"/></g><g transform="translate(0 8)"><path d="${PATH}" transform="${M}" fill="#a9e2d2"/></g>
+    <path d="${PATH}" transform="${M}" fill="url(#top6)" stroke="#fff" stroke-width="2"/>${bl}`;
+  const defs=SH+`<linearGradient id="top6" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6fbf4"/><stop offset="1" stop-color="#c3efe1"/></linearGradient>`;
+  return `<section class="bn">${X}<div><h2 class="h">5 مستودعات جاهزة لاستقبال مخزونك</h2><p class="sub">${SUB}</p>
+    <div class="actions"><a class="cta" href="#">اكتشف مستودعات سلة</a><a class="link" href="#">كيف تعمل؟</a></div></div>
+    <div class="mapbox" style="max-width:560px">${svgv(vb6,inner,defs)}</div></section>`;
+}
+
+/* ---------- 7. hex tiles by distance ---------- */
+function opt7(){
+  const r=6.4, dx=Math.sqrt(3)*r, dy=1.5*r; let hex='';
+  const hp=(cx,cy)=>Array.from({length:6},(_,k)=>{const an=Math.PI/180*(60*k-30);return `${(cx+r*.92*Math.cos(an)).toFixed(1)},${(cy+r*.92*Math.sin(an)).toFixed(1)}`}).join(' ');
+  for(let row=0,y=0;y<340;row++,y+=dy) for(let x=(row%2?dx/2:0);x<440;x+=dx){ if(!inPoly(x,y)) continue;
+    const dd=nearest(x,y); const col=dd<9?'#004956':dd<34?'#5fcfb2':dd<75?'#a6e8d5':'#dcefe9'; hex+=`<polygon points="${hp(x,y)}" fill="${col}"/>`;}
+  const lbls=WH.map(w=>{const [x,y]=xy(w.id);return label(x,y,C[w.id].n,{dy:-14})}).join('');
+  return `<section class="bn">${X}<div><h2 class="h">كل خلية خضراء تصلها طلباتك أسرع</h2><p class="sub">الخلايا الداكنة قريبة من مستودعات سلة وتصلها الطلبات في الساعة نفسها عبر <em>محلي إكسبريس</em>، والأفتح تصلها خلال 24 – 48 ساعة.</p>
+    <div class="actions"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+    <div class="mapbox">${svgv(VB,hex+lbls,SH)}<div class="legend"><span><i style="background:#004956"></i>مستودع</span><span><i style="background:#5fcfb2"></i>خلال ساعات</span><span><i style="background:#a6e8d5"></i>24 ساعة</span><span><i style="background:#dcefe9"></i>48 ساعة</span></div></div></section>`;
+}
+
+/* ---------- 8. outline with callout cards ---------- */
+function opt8(){
+  const info={ruh:['4 ر.س','نفس اليوم في الرياض'],jed:['5 ر.س','نفس اليوم في جدة'],dmm:['6 ر.س','يدعم التبريد'],med:['5 ر.س','اليوم التالي'],abh:['6 ر.س','معالجة المرتجعات']};
+  const pos={med:[-180,70],jed:[-180,175],abh:[-180,280],dmm:[462,70],ruh:[462,185]};
+  const cards=WH.map(w=>{const [x,y]=xy(w.id);const [cx,cy]=pos[w.id];const left=cx<0;const cw=158,ch=54;const ax=left?cx+cw:cx;
+    return `<path d="M${x} ${y} C${(x+ax)/2} ${y}, ${(x+ax)/2} ${cy+ch/2}, ${ax} ${cy+ch/2}" fill="none" stroke="var(--brand)" stroke-width="1.2" stroke-dasharray="3 3" opacity=".6"/>
+     <circle cx="${x}" cy="${y}" r="6" fill="var(--brand)" stroke="#fff" stroke-width="2.5"/>
+     <g><rect x="${cx}" y="${cy}" width="${cw}" height="${ch}" rx="10" fill="#fff" filter="url(#sh)"/>
+     ${textL(cx+cw-10,cy+20,C[w.id].n,{size:12.5,w:700,anchor:'start'})}${textL(cx+10,cy+20,info[w.id][0],{size:12.5,w:700,anchor:'end'})}
+     ${textL(cx+cw-10,cy+39,info[w.id][1],{size:10.5,w:500,color:'#4b5a5f',anchor:'start'})}</g>`}).join('');
+  const inner=`<path d="${PATH}" fill="#effbf7" stroke="var(--brand)" stroke-width="1.6" stroke-linejoin="round" opacity=".9"/>${cards}`;
+  return `<section class="bn" style="grid-template-columns:.85fr 1.15fr">${X}<div><h2 class="h">قارن المستودعات من نظرة واحدة</h2><p class="sub">السعر لكل طلب وأبرز ميزة لكل مستودع على الخريطة مباشرة. اختر الأقرب لعملائك واحجزه.</p>
+    <div class="actions"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+    <div class="mapbox" style="max-width:640px">${svgv('-190 20 820 330',inner,SH)}</div></section>`;
+}
+
+/* ---------- 9. before / after delivery time ---------- */
+function opt9(){
+  const dots=(origins)=>{let o='';for(let y=4;y<340;y+=9)for(let x=4;x<440;x+=9){if(!inPoly(x,y))continue;const dd=nearest(x,y,origins);
+    const col=dd<30?'#0f9f6e':dd<90?'#5fcfb2':dd<170?'#f6b25c':'#f2663a';o+=`<circle cx="${x}" cy="${y}" r="3.1" fill="${col}"/>`;}return o;};
+  const one=[xy('jed')], many=WHX;
+  const pinAt=([x,y])=>`<circle cx="${x}" cy="${y}" r="7" fill="var(--brand)" stroke="#fff" stroke-width="2.5"/>`;
+  const inner=`<g>${textL(220,18,'اليوم: تشحن من فرع واحد في جدة',{size:15,w:700,color:'#4b5a5f'})}<g transform="translate(0 34)">${dots(one)}${one.map(pinAt).join('')}</g></g>
+    <g transform="translate(480 0)">${textL(220,18,'مع مستودعات سلة: 5 مواقع',{size:15,w:700})}<g transform="translate(0 34)">${dots(many)}${many.map(pinAt).join('')}</g></g>
+    <path d="M452 190 l14 0 m-6 -6 l6 6 l-6 6" stroke="var(--brand)" stroke-width="2" fill="none"/>`;
+  return `<section class="bn" style="grid-template-columns:1fr">${X}<div style="display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:end">
+    <div><h2 class="h">من 3 – 5 أيام إلى 24 ساعة لأغلب عملائك</h2><p class="sub">كل نقطة منطقة في المملكة، ولونها مدة وصول الطلب إليها. وزّع مخزونك على مستودعات سلة ليقترب من عملائك.</p></div>
+    <a class="cta" href="#">اكتشف مستودعات سلة</a></div>
+    <div class="mapbox" style="max-width:100%">${svgv('0 0 920 380',inner,SH)}<div class="legend"><span><i style="background:#0f9f6e"></i>خلال ساعات</span><span><i style="background:#5fcfb2"></i>24 ساعة</span><span><i style="background:#f6b25c"></i>48 ساعة</span><span><i style="background:#f2663a"></i>3 – 5 أيام</span></div></div></section>`;
+}
+
+/* ---------- 10. hero illustration ---------- */
+function opt10(){
+  const [rx,ry]=xy('ruh'), [jx,jy]=xy('jed');
+  const box=(x,y,s=1,c='#e8c9a0')=>`<g><path d="M${x} ${y} l${14*s} ${-7*s} l${14*s} ${7*s} l${-14*s} ${7*s} Z" fill="#f3dcbc"/><path d="M${x} ${y} l${14*s} ${7*s} l0 ${14*s} l${-14*s} ${-7*s} Z" fill="${c}"/><path d="M${x+14*s} ${y+7*s} l${14*s} ${-7*s} l0 ${14*s} l${-14*s} ${7*s} Z" fill="#d8b384"/><path d="M${x+7*s} ${y-3.5*s} l${14*s} ${7*s} l0 ${4*s}" stroke="#fff" stroke-width="${1.6*s}" fill="none" opacity=".7"/></g>`;
+  const truck=(x,y)=>`<g transform="translate(${x} ${y})"><ellipse cx="18" cy="24" rx="24" ry="4" fill="#004956" opacity=".12"/><rect x="0" y="0" width="26" height="18" rx="3" fill="#fff" stroke="var(--brand)" stroke-width="1.5"/><path d="M26 6 h8 l6 6 v6 h-14 Z" fill="var(--brand)"/><rect x="30" y="8" width="5" height="4" fill="#a8f0dc"/><circle cx="8" cy="20" r="3.6" fill="#1f2a2e"/><circle cx="32" cy="20" r="3.6" fill="#1f2a2e"/>${textL(13,12.5,'سلة',{size:7.5,w:700})}</g>`;
+  const bigPin=`<g transform="translate(${rx} ${ry})"><ellipse cx="0" cy="4" rx="22" ry="6" fill="#004956" opacity=".15"/>
+    <path d="M0 0 C -8 -14 -30 -30 -30 -54 A30 30 0 1 1 30 -54 C30 -30 8 -14 0 0 Z" fill="var(--brand)"/><circle cx="0" cy="-54" r="21" fill="#fff"/>${building(0,-46,.95)}</g>`;
+  const inner=`<path d="${PATH}" fill="#d6f5eb" stroke="#fff" stroke-width="3"/><circle cx="${rx}" cy="${ry}" r="46" fill="var(--orange)" opacity=".12"/><circle cx="${rx}" cy="${ry}" r="24" fill="var(--orange)" opacity=".15"/>
+    <path d="M${rx} ${ry} Q${(rx+jx)/2} ${ry-10} ${jx} ${jy}" fill="none" stroke="var(--brand)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/>
+    <circle cx="${jx}" cy="${jy}" r="6" fill="var(--brand)" stroke="#fff" stroke-width="2.5"/>${label(jx,jy,'جدة')}
+    ${truck((rx+jx)/2-20,ry-24)}${box(rx+34,ry+2,1)}${box(rx+54,ry+12,.8)}${box(rx+40,ry-14,.7,'#e2bf92')}${bigPin}
+    ${chip(rx-8,ry-112,'محلي إكسبريس · خلال ساعات',{color:'var(--orange)'})}
+    <g transform="translate(300 240)"><rect width="128" height="58" rx="12" fill="#fff" filter="url(#sh)"/>${textL(116,22,'طلب #1042',{size:11,w:700,anchor:'start'})}${textL(116,42,'خرج من مستودع الرياض',{size:10,w:500,color:'#4b5a5f',anchor:'start'})}<circle cx="16" cy="29" r="8" fill="#e3f7ee"/><path d="M12 29 l3 3 l5 -6" stroke="#0f9f6e" stroke-width="1.8" fill="none"/></g>`;
+  return `<section class="bn">${X}<div><h2 class="h">${'تحكّم كامل في مخزونك مع مستودعات سلة'}</h2><p class="sub">${SUB}</p>
+    <div class="kpis"><div class="kpi"><b class="num">24 ساعة</b><span>متوسط التوصيل</span></div><div class="kpi"><b class="num">+15</b><span>مستودع في المملكة</span></div><div class="kpi"><b class="num">+50 ألف</b><span>تاجر</span></div></div>
+    <div class="actions"><a class="cta" href="#">اكتشف مستودعات سلة</a></div></div>
+    <div class="mapbox">${svgv('0 -20 440 360',inner,SH)}</div></section>`;
+}
+
+/* ---------- SVG export (standalone file, CSS variables resolved) ---------- */
+const FILES=['01-dotted-network','02-coverage','03-demand','04-picker','05-routes','06-isometric','07-hex-tiles','08-callouts','09-before-after','10-hero-illustration'];
+function exportSvg(i){
+  const src=document.querySelectorAll('.opt')[i].querySelector('.mapbox svg');
+  const el=src.cloneNode(true); el.querySelectorAll('[hidden]').forEach(n=>n.remove());
+  el.querySelectorAll('.pulse').forEach(n=>n.remove());
+  el.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  const vb=el.getAttribute('viewBox').split(' ').map(Number); el.setAttribute('width',vb[2]*2); el.setAttribute('height',vb[3]*2);
+  const cs=getComputedStyle(document.documentElement);
+  let out=el.outerHTML.replace(/var\((--[\w-]+)\)/g,(m,v)=>cs.getPropertyValue(v).trim()||m);
+  out=out.replace(/class="lbl"/g,'font-family="IBM Plex Sans Arabic, PingARLT, sans-serif" font-size="11" font-weight="600"')
+         .replace(/class="[^"]*"/g,'').replace(/ tabindex="0"| role="button"/g,'');
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'+out;
+}
+window.exportSvg=exportSvg; window.SVG_FILES=FILES;
+
 const OPTS=[
   ['شبكة منقّطة مع أقرب مستودع','تطوير للخيار 5 السابق بشكل المملكة الحقيقي. يعرّف بالشبكة ويبرز أقرب مستودع لأغلب عملاء التاجر. الأنسب كبانر ثابت لأول زيارة.',opt1],
   ['نطاق التغطية','دوائر حول كل مستودع تبيّن أين يصل التوصيل في الساعة نفسها وأين يصل خلال 24 – 48 ساعة. زر للتبديل بين النوعين. يجيب عن «هل يغطي عملائي؟».',opt2],
   ['طلباتك مقابل المستودعات','الأكثر إقناعاً: فقاعات من طلبات التاجر الفعلية فوق مواقع المستودعات، والمدن البعيدة بالبرتقالي. يحتاج بيانات الطلبات حسب المدينة.',opt3],
   ['اختيار مستودع من الخريطة','البانر نفسه أداة: اضغط مدينة فتظهر بطاقة المستودع بالسعر والخدمات وزر الحجز. يختصر خطوة الانتقال لبطاقات المستودعات.',opt4],
   ['مسارات ومدة التوصيل','خطوط متحركة من المستودعات إلى المدن مع ثلاثة وعود واضحة للتوصيل. يبيع السرعة أكثر من المواقع. الحركة تتوقف عند تفعيل تقليل الحركة.',opt5],
+  ['خريطة مجسّمة بمبانٍ','خريطة مائلة بعمق، وعلى كل مدينة مبنى مستودع صغير وسعره. أقرب لأسلوب الرسوم التوضيحية التسويقية، ومستودع الرياض بارز بالبرتقالي.',opt6],
+  ['خلايا حسب سرعة التوصيل','المملكة مقسّمة لخلايا سداسية، ولون كل خلية حسب قربها من أقرب مستودع. يوصل فكرة «أسرع قرب المستودعات» بدون أرقام.',opt7],
+  ['بطاقات على الخريطة','خريطة بخط رفيع وبطاقة لكل مستودع موصولة بموقعه: السعر وأبرز ميزة. يغني عن فتح بطاقات المستودعات للمقارنة السريعة.',opt8],
+  ['قبل وبعد','خريطتان متجاورتان: الشحن من فرع واحد مقابل خمسة مستودعات، ولون النقاط حسب مدة التوصيل. يبيع الفرق بصرياً ويحتاج عرضاً كاملاً.',opt9],
+  ['رسم توضيحي للبانر الرئيسي','دبوس كبير بمبنى المستودع في الرياض، وصناديق، وشاحنة سلة في طريقها إلى جدة، وبطاقة طلب خرج من المستودع. بديل للوحة التحكم في البانر الأصلي.',opt10],
 ];
-document.getElementById('list').innerHTML=OPTS.map((o,i)=>`<article class="opt" id="m${i+1}"><div class="opt-head"><span class="opt-no num">${i+1}</span><h2>${o[0]}</h2><p>${o[1]}</p></div><div class="frame">${o[2]()}</div></article>`).join('');
+document.getElementById('list').innerHTML=OPTS.map((o,i)=>`<article class="opt" id="m${i+1}"><div class="opt-head"><span class="opt-no num">${i+1}</span><h2>${o[0]}</h2><p>${o[1]}</p></div><div class="frame">${o[2]()}<div class="dl"><button class="copy" type="button" data-copy="${i}">نسخ كود SVG</button><span class="muted-sm">الملف: map-svg/${FILES[i]}.svg</span></div></div></article>`).join('');
 const o4=document.querySelector('[data-o4]'); renderPick(o4,'ruh');
 
 document.addEventListener('click',e=>{
@@ -217,6 +340,9 @@ document.addEventListener('click',e=>{
   const p=e.target.closest('[data-pick]'); if(p) renderPick(p.closest('[data-o4]'),p.dataset.pick);
   const x=e.target.closest('.bn-x'); if(x){const b=x.closest('.bn');b.style.opacity='.35';setTimeout(()=>b.style.opacity='',900);}
   const a=e.target.closest('a'); if(a&&a.getAttribute('href')==='#') e.preventDefault();
+  const cp=e.target.closest('[data-copy]');
+  if(cp){const txt=exportSvg(+cp.dataset.copy);const done=ok=>{cp.textContent=ok?'تم النسخ':'تعذّر النسخ';setTimeout(()=>cp.textContent='نسخ كود SVG',1600);};
+    try{navigator.clipboard.writeText(txt).then(()=>done(true),()=>done(false));}catch(err){done(false);}}
 });
 document.addEventListener('keydown',e=>{const p=e.target.closest&&e.target.closest('g[data-pick]');if(p&&(e.key==='Enter'||e.key===' ')){e.preventDefault();renderPick(p.closest('[data-o4]'),p.dataset.pick);}});
 </script>
