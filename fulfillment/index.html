@@ -264,6 +264,20 @@ th[rowspan]{vertical-align:bottom}
 .mapmock{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);height:220px}
 .mapmock svg{width:100%;height:100%;display:block}
 .map-hint{position:absolute;bottom:8px;inset-inline-start:8px;background:rgba(255,255,255,.92);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--ink-2)}
+.svc-list{display:flex;flex-direction:column;gap:10px}
+.svc{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.svc.open{border-color:var(--mint-strong);box-shadow:0 0 0 3px var(--mint-50)}
+.svc.off .svc-name b{color:var(--muted)}
+.svc-row{display:grid;grid-template-columns:auto minmax(0,1.2fr) minmax(0,1.4fr) auto;gap:14px;align-items:center;padding:14px 16px}
+.svc-name .lock{margin-inline-start:8px}
+.svc-price{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.svc-body{border-top:1px solid var(--line);padding:16px}
+.fld.half{max-width:50%}
+.checkout-prev{border:1px dashed var(--line);border-radius:var(--r-lg);padding:14px 16px;background:#fbfcfc}
+.co-row{display:flex;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);margin-top:8px}
+.co-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--brand);flex:none}
+.co-row.sel .co-radio{box-shadow:inset 0 0 0 3px #fff;background:var(--brand)}
+@media (max-width:640px){.svc-row{grid-template-columns:auto 1fr}.svc-price{grid-column:1/-1}.svc-row .btn{grid-column:1/-1}.fld.half{max-width:none}}
 .ptabs{display:flex;gap:6px;border-bottom:1px solid var(--line);overflow-x:auto}
 .ptabs button{border:0;background:none;padding:9px 14px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .ptabs button[aria-selected=true]{color:var(--brand);font-weight:700;border-color:var(--brand)}
@@ -547,7 +561,7 @@ S.rows = [
 const rowBy = k => S.rows.find(r=>r.key===k);
 const cityOf = r => (wh(r.wh)||{}).city || (r.wh==='mak'?'مكة المكرمة':'');
 S.setMode = 'drawer';   // prototype switch: drawer | page
-S.priceTab = 'std';
+S.priceOpen = ['std'];
 S.zoneEdit = null;      // {idx, draft}
 S.menu = null;
 
@@ -614,21 +628,41 @@ function zoneForm(d){
     <div class="row" style="justify-content:flex-start"><button class="btn btn-p btn-sm" type="button" data-act="zone-save">حفظ</button><button class="btn btn-sm" type="button" data-act="zone-cancel">إلغاء</button></div></div>`;
 }
 
+function priceLine(p,R){
+  if(!p.unify) return `<span class="muted">تسعيرة سلة الافتراضية · <b class="num">${R.cost} ر.س</b></span>`;
+  if(p.fee==='') return `<span class="qty-bad">أكمل التسعيرة</span>`;
+  return p.type==='fixed'?`<b class="num">${p.fee} ر.س</b> <span class="muted">سعر ثابت</span>`
+    :`<b class="num">${p.fee} ر.س</b> <span class="muted">لأول ${p.baseW||'—'} كجم + ${p.extra||'—'} ر.س لكل ${p.per||'—'} كجم</span>`;
+}
 function pricingBody(r){
-  const t=S.priceTab, p=r.pricing[t], R=ROUTES.find(x=>x.id===t);
-  const tabs=`<div class="ptabs" role="tablist">${ROUTES.map(x=>`<button role="tab" type="button" aria-selected="${t===x.id}" data-act="ptab" data-v="${x.id}">${x.name}<span class="dot-s ${r.pricing[x.id].on?'on':''}" aria-hidden="true"></span></button>`).join('')}</div>`;
-  return tabs+`<div class="route-head"><div><b>${R.name}</b><div class="sm muted">عبر ${R.carrier} · ${R.promise} · ${R.cover}</div></div>
-      <div class="row">${R.locked?`<span class="lock">${I.lock}إلزامي ولا يمكن إيقافه</span>`:''}<label class="toggle"><input type="checkbox" data-pf="on" ${p.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label></div></div>
-    <div class="note-line">${I.info}<span>تكلفتك من سلة: <b class="num">${R.cost} ر.س</b> لكل طلب حتى 5 كجم، و<b class="num">2 ر.س</b> لكل كجم إضافي.</span></div>
-    <label class="chk"><input type="checkbox" data-pf="unify" ${p.unify?'checked':''}><span><b>توحيد تسعيرة الشحن</b> <span class="muted">(اختياري)</span><small>عند التفعيل، سيُستخدم السعر الذي تحدده هنا بدلاً من تسعيرة سلة الافتراضية لهذا المسار.</small></span></label>
-    ${p.unify?`<div class="stack price-form">
-      <div class="fld"><label for="pf-type">نوع التسعيرة <i>*</i></label><select class="inp" id="pf-type" data-pf="type"><option value="fixed" ${p.type==='fixed'?'selected':''}>ثابتة</option><option value="weight" ${p.type==='weight'?'selected':''}>حسب الوزن</option></select></div>
-      <div class="fld"><label for="pf-fee">رسوم الشحن للعميل <i>*</i></label><div class="field wide"><input id="pf-fee" type="number" min="0" data-pf="fee" value="${esc(p.fee)}" placeholder="رسوم الشحن للعميل"><em>ر.س</em></div><small class="muted">تأكد مما إذا كانت الرسوم شاملة الضريبة.</small></div>
-      ${p.type==='weight'?`<div class="grid2"><div class="fld"><label for="pf-w">وزن الشحنة <i>*</i></label><div class="field wide"><input id="pf-w" type="number" min="0" data-pf="baseW" value="${esc(p.baseW)}" placeholder="وزن الشحنة"><em>كجم</em></div></div>
-        <div class="fld"><label for="pf-x">تكلفة الزيادة <i>*</i></label><div class="field wide"><input id="pf-x" type="number" min="0" data-pf="extra" value="${esc(p.extra)}" placeholder="تكلفة الزيادة"><em>ر.س</em></div></div></div>
-        <div class="fld" style="max-width:50%"><label for="pf-per">لكل <i>*</i></label><div class="field wide"><input id="pf-per" type="number" min="0" data-pf="per" value="${esc(p.per)}" placeholder="لكل"><em>كجم</em></div><small class="muted">التكلفة لكل كيلوجرام إضافي على وزن الشحنة.</small></div>`:''}
-      <div class="summary-box" id="psum">${priceSummary(p,R)}</div></div>`:''}
-    <label class="chk"><input type="checkbox" data-pf="cod" ${p.cod?'checked':''}><span><b>إتاحة الدفع عند الاستلام</b><small>يظهر خيار الدفع عند الاستلام لعملائك مع هذا المسار.</small></span></label>`;
+  const open=S.priceOpen;
+  return `<p class="sm ink2">لكل خدمة شحن تسعيرة مستقلة. يرى عميلك في صفحة الدفع كل الخدمات المفعّلة بأسعارها.</p>
+   <div class="svc-list">${ROUTES.map(R=>{const p=r.pricing[R.id], isOpen=open.includes(R.id), id=R.id;
+    return `<div class="svc ${isOpen?'open':''} ${p.on?'':'off'}" data-r="${id}">
+     <div class="svc-row">
+       <label class="toggle" title="${R.locked?'إلزامي ولا يمكن إيقافه':'تفعيل '+R.name}"><input type="checkbox" data-pf="on" ${p.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label>
+       <div class="svc-name"><b>${R.name}</b>${R.locked?`<span class="lock">${I.lock}إلزامي</span>`:''}<div class="sm muted">عبر ${R.carrier} · ${R.promise} · ${R.cover}</div></div>
+       <div class="svc-price">${p.on?priceLine(p,R):'<span class="muted">غير مفعّل</span>'}${p.on&&p.cod?'<span class="chip gray">دفع عند الاستلام</span>':''}</div>
+       <button class="btn btn-sm" type="button" data-act="svc-toggle" data-v="${id}" aria-expanded="${isOpen}" ${p.on?'':'disabled'}>${isOpen?'إغلاق':'تعديل التسعيرة'}</button>
+     </div>
+     ${isOpen&&p.on?`<div class="svc-body stack">
+       <div class="note-line">${I.info}<span>تكلفتك من سلة: <b class="num">${R.cost} ر.س</b> لكل طلب حتى 5 كجم، و<b class="num">2 ر.س</b> لكل كجم إضافي.</span></div>
+       <label class="chk"><input type="checkbox" data-pf="unify" ${p.unify?'checked':''}><span><b>توحيد تسعيرة الشحن</b> <span class="muted">(اختياري)</span><small>عند التفعيل، يُستخدم السعر الذي تحدده هنا بدلاً من تسعيرة سلة الافتراضية لـ«${R.name}».</small></span></label>
+       ${p.unify?`<div class="stack price-form">
+         <div class="fld"><label for="pf-type-${id}">نوع التسعيرة <i>*</i></label><select class="inp" id="pf-type-${id}" data-pf="type"><option value="fixed" ${p.type==='fixed'?'selected':''}>ثابتة</option><option value="weight" ${p.type==='weight'?'selected':''}>حسب الوزن</option></select></div>
+         <div class="fld"><label for="pf-fee-${id}">رسوم الشحن للعميل <i>*</i></label><div class="field wide"><input id="pf-fee-${id}" type="number" min="0" data-pf="fee" value="${esc(p.fee)}" placeholder="رسوم الشحن للعميل"><em>ر.س</em></div><small class="muted">تأكد مما إذا كانت الرسوم شاملة الضريبة.</small></div>
+         ${p.type==='weight'?`<div class="grid2"><div class="fld"><label for="pf-w-${id}">وزن الشحنة <i>*</i></label><div class="field wide"><input id="pf-w-${id}" type="number" min="0" data-pf="baseW" value="${esc(p.baseW)}" placeholder="وزن الشحنة"><em>كجم</em></div></div>
+           <div class="fld"><label for="pf-x-${id}">تكلفة الزيادة <i>*</i></label><div class="field wide"><input id="pf-x-${id}" type="number" min="0" data-pf="extra" value="${esc(p.extra)}" placeholder="تكلفة الزيادة"><em>ر.س</em></div></div></div>
+           <div class="fld half"><label for="pf-per-${id}">لكل <i>*</i></label><div class="field wide"><input id="pf-per-${id}" type="number" min="0" data-pf="per" value="${esc(p.per)}" placeholder="لكل"><em>كجم</em></div><small class="muted">التكلفة لكل كيلوجرام إضافي على وزن الشحنة.</small></div>`:''}
+         <div class="summary-box" data-sum>${priceSummary(p,R)}</div></div>`:''}
+       <label class="chk"><input type="checkbox" data-pf="cod" ${p.cod?'checked':''}><span><b>إتاحة الدفع عند الاستلام</b><small>يظهر خيار الدفع عند الاستلام لعملائك مع «${R.name}».</small></span></label>
+     </div>`:''}</div>`}).join('')}</div>
+   <div class="checkout-prev" id="coPrev">${checkoutPrev(r)}</div>`;
+}
+function checkoutPrev(r){
+  return `<div class="sm muted" style="margin-bottom:8px">هكذا تظهر الخدمات لعميلك في صفحة الدفع</div>`+
+    ROUTES.filter(R=>r.pricing[R.id].on).map((R,i)=>{const p=r.pricing[R.id];const price=p.unify&&p.fee!==''?p.fee:R.cost;
+      return `<div class="co-row ${i===0?'sel':''}"><span class="co-radio"></span><div style="flex:1"><b>${R.name}</b><div class="sm muted">${R.promise}${p.cod?' · الدفع عند الاستلام متاح':''}</div></div><b class="num">${price} ر.س</b></div>`}).join('');
 }
 function priceSummary(p,R){
   const v=x=>x===''||x==null?'—':x;
@@ -903,13 +937,13 @@ document.addEventListener('click',e=>{
   const cur=()=>rowBy(document.getElementById('setRoot')?.dataset.k);
   if(act==='menu'){S.menu=S.menu===k?null:k; route(); document.querySelector('.menu button')?.focus();}
   if(act==='setmode'){S.setMode=a.dataset.v; route();}
-  if(act==='open-settings'){e.preventDefault(); S.menu=null; S.zoneEdit=null; S.priceTab='std'; document.getElementById('notes').hidden=true;
+  if(act==='open-settings'){e.preventDefault(); S.menu=null; S.zoneEdit=null; S.priceOpen=['std']; document.getElementById('notes').hidden=true;
     if(S.setMode==='page'){closeDrawer(); go('settings-'+k);} else {if(!location.hash.startsWith('#mine')) go('mine'); else route(); openDrawer(k);} }
   if(act==='delete'){S.menu=null; route(); deleteModal(k);}
   if(act==='drawer-close') closeDrawer();
   if(act==='drawer-expand'){const kk=S.drawer; closeDrawer(); go('settings-'+kk);}
   if(act==='save-settings'){ if(document.querySelector('.drawer-wrap')) closeDrawer(); else go('mine'); toast('تم حفظ إعدادات المستودع'); }
-  if(act==='ptab'){S.priceTab=a.dataset.v; rerenderSettings();}
+  if(act==='svc-toggle'){const v=a.dataset.v; S.priceOpen=S.priceOpen.includes(v)?S.priceOpen.filter(x=>x!==v):[...S.priceOpen,v]; rerenderSettings();}
   if(act==='zone-add'){S.zoneEdit={idx:-1,draft:{name:'',method:'city',country:'السعودية',city:cityOf(cur()),districts:'',hours:'all',from:'08:00',to:'22:00',radius:5}}; rerenderSettings(); document.getElementById('zf-name')?.focus();}
   if(act==='zone-edit'){const i=+a.dataset.i; S.zoneEdit={idx:i,draft:{...cur().zones[i]}}; rerenderSettings();}
   if(act==='zone-del'){cur().zones.splice(+a.dataset.i,1); rerenderSettings(); toast('تم حذف النطاق');}
@@ -921,14 +955,15 @@ document.addEventListener('input',e=>{
   if(e.target.id==='mq'){S.mq=e.target.value; const pos=e.target.selectionStart; route(); const q=document.getElementById('mq'); q.focus(); q.setSelectionRange(pos,pos);}
   if(e.target.dataset.zfi&&S.zoneEdit){S.zoneEdit.draft[e.target.dataset.zfi]=e.target.value; if(e.target.dataset.zfi==='radius'){rerenderSettings(); document.getElementById('zf-rad')?.focus();}}
   const f=e.target.dataset.pf;
-  if(f&&e.target.type==='number'){const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[S.priceTab]; p[f]=e.target.value;
-    const sm=document.getElementById('psum'); if(sm) sm.innerHTML=priceSummary(p,ROUTES.find(x=>x.id===S.priceTab));}
+  if(f&&e.target.type==='number'){const box=e.target.closest('[data-r]'), rid=box.dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[rid], R=ROUTES.find(x=>x.id===rid); p[f]=e.target.value;
+    const sm=box.querySelector('[data-sum]'); if(sm) sm.innerHTML=priceSummary(p,R); const pr=box.querySelector('.svc-price'); if(pr) pr.innerHTML=priceLine(p,R)+(p.cod?'<span class="chip gray">دفع عند الاستلام</span>':''); const cp=document.getElementById('coPrev'); if(cp) cp.innerHTML=checkoutPrev(r);}
 });
 document.addEventListener('change',e=>{
   if(e.target.id==='city'){S.city=e.target.value;route();}
   if(e.target.dataset.rowon){const r=rowBy(e.target.dataset.rowon); r.on=e.target.checked; toast(r.on?'تم تفعيل '+r.name:'تم إيقاف '+r.name);}
   const f=e.target.dataset.pf;
-  if(f&&e.target.type!=='number'){const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[S.priceTab]; p[f]=e.target.type==='checkbox'?e.target.checked:e.target.value; rerenderSettings();}
+  if(f&&e.target.type!=='number'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[rid]; p[f]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+    if(f==='on'&&p.on&&!S.priceOpen.includes(rid)) S.priceOpen=[...S.priceOpen,rid]; rerenderSettings();}
 });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(document.querySelector('.overlay')) document.querySelector('.overlay').remove(); else if(document.querySelector('.drawer-wrap')) closeDrawer(); else if(S.menu){S.menu=null; route();} });
 const nb=document.getElementById('notesBtn'), nt=document.getElementById('notes');
