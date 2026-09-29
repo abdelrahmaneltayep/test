@@ -264,6 +264,22 @@ th[rowspan]{vertical-align:bottom}
 .mapmock{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);height:220px}
 .mapmock svg{width:100%;height:100%;display:block}
 .map-hint{position:absolute;bottom:8px;inset-inline-start:8px;background:rgba(255,255,255,.92);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--ink-2)}
+.btn-block{width:100%;padding-block:13px;font-size:15px}
+.icon-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink-2);flex:none}
+.icon-btn:hover{border-color:#cfd8da}
+.icon-btn.danger{color:var(--bad);border-color:#f0b8b8}
+.zone-card .zc-ic{width:48px;height:48px;border-radius:12px;background:var(--line-2)}
+.zc-off b{color:var(--muted)}
+.cp-list{display:flex;flex-direction:column;gap:12px}
+.cp-svc{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.cp-head{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.cp-ic{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;flex:none}
+.cp-std{background:var(--brand-50);color:var(--brand)}.cp-exp{background:#fff1eb;color:#dc4a1f}.cp-eco{background:#f1effa;color:#6b54c6}
+.cp-body{border-top:1px solid var(--line-2);padding:14px 16px;display:flex;flex-direction:column;gap:14px}
+.cp-line{background:var(--mint-50);border-radius:var(--r);padding:10px 12px;font-size:13px;color:var(--ink-2)}
+.cp-copy{align-self:flex-start;padding-inline:0}
+.cp-offnote{padding:0 16px 14px}
+.cp-svc.off .cp-head b{color:var(--muted)}
 .seg-wrap{flex-wrap:wrap}
 .sm-inp{padding:6px 8px;font-size:13px}
 .num-inp{width:78px;text-align:center}
@@ -444,6 +460,9 @@ const STATUS = {
 
 /* ============ icons ============ */
 const I = {
+  map:'<svg class="icon" viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v5"/><circle cx="17.5" cy="15.5" r="2.5"/></svg>',
+  pen:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/></svg>',
+  truckS:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>',
   gear:'<svg class="icon sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/><circle cx="12" cy="12" r="6.5"/></svg>',
   trash:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg>',
   expand:'<svg class="icon sm" viewBox="0 0 24 24"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/></svg>',
@@ -637,9 +656,11 @@ function settingsBody(k,mode){
 const METHOD={city:'حسب المدينة أو الحي',manual:'تحديد يدوي',radius:'نطاق دائري'};
 function zonesBody(r){
   const z=S.zoneEdit;
-  const list=r.zones.map((zn,i)=>`<div class="zone-card"><div class="zc-ic">${I.pin}</div><div style="flex:1;min-width:0"><b>${zn.name}</b>
-      <div class="sm muted">${METHOD[zn.method]} · ${zn.method==='city'?zn.city+(zn.districts?' ('+zn.districts+')':''):zn.method==='radius'?`${zn.radius||5} كم حول المستودع`:'حدود مرسومة على الخريطة'} · ${zn.hours==='all'?'يومياً (24/7)':`${zn.from} – ${zn.to}`}</div></div>
-      <button class="btn btn-sm btn-ghost" type="button" data-act="zone-edit" data-i="${i}">تعديل</button><button class="btn btn-sm btn-ghost" style="color:var(--bad)" type="button" data-act="zone-del" data-i="${i}" aria-label="حذف ${zn.name}">${I.trash}</button></div>`).join('');
+  const list=r.zones.map((zn,i)=>`<div class="zone-card ${zn.off?'zc-off':''}"><div class="zc-ic">${I.map}</div><div style="flex:1;min-width:0"><b>${zn.name}</b>
+      <div class="sm"><span class="muted">نطاق التغطية:</span> ${METHOD[zn.method]}${zn.method==='city'&&zn.city?` · ${zn.city}`:''} · ${zn.hours==='all'?'يومياً (24/7)':`${zn.from} – ${zn.to}`}</div></div>
+      <label class="toggle" title="تفعيل النطاق"><input type="checkbox" data-zon="${i}" ${zn.off?'':'checked'} aria-label="تفعيل ${zn.name}"><span></span></label>
+      <button class="icon-btn" type="button" data-act="zone-edit" data-i="${i}" aria-label="تعديل ${zn.name}">${I.pen}</button>
+      <button class="icon-btn danger" type="button" data-act="zone-del" data-i="${i}" aria-label="حذف ${zn.name}">${I.trash}</button></div>`).join('');
   return `<div class="alert info">${I.info}<span class="grow">اترك نطاق التغطية فارغاً ليستقبل هذا المستودع طلبات كل المناطق غير المشمولة بنطاقات أخرى.</span></div>
     ${list?`<div class="stack" style="gap:8px">${list}</div>`:(z?'':`<p class="sm muted">لا توجد نطاقات. المستودع يغطي كامل الدولة حالياً.</p>`)}
     ${z?zoneForm(z.draft):`<div><button class="btn" type="button" data-act="zone-add">+ إضافة نطاق تغطية</button></div>`}`;
@@ -671,10 +692,10 @@ function priceLine(p,R){
     :`<b class="num">${p.fee} ر.س</b> <span class="muted">لأول ${p.baseW||'—'} كجم + ${p.extra||'—'} ر.س لكل ${p.per||'—'} كجم</span>`;
 }
 /* ---------- pricing UI variants (prototype switch) ---------- */
-S.priceUI = 'list';
+S.priceUI = 'compact';
 S.wiz = 0;
 S.coEdit = null;
-const PRICE_UIS = [['list','قائمة'],['matrix','جدول مقارنة'],['cols','أعمدة جنب بعض'],['wizard','خطوة بخطوة'],['rel','سعر أساسي + فرق'],['checkout','من صفحة الدفع']];
+const PRICE_UIS = [['compact','التصميم المرفق'],['list','قائمة'],['matrix','جدول مقارنة'],['cols','أعمدة جنب بعض'],['wizard','خطوة بخطوة'],['rel','سعر أساسي + فرق'],['checkout','من صفحة الدفع']];
 const custPrice = (p,R) => p.unify&&p.fee!=='' ? +p.fee : R.cost;
 function profitHTML(p,R){ if(!(p.unify&&p.fee!=='')) return '<span class="muted">—</span>'; const d=+p.fee-R.cost; return `<span class="${d>=0?'qty-ok':'qty-bad'} num">${d>=0?'+':'−'}${Math.abs(d)} ر.س</span>`; }
 function liveHTML(kind,rid,r){
@@ -684,6 +705,7 @@ function liveHTML(kind,rid,r){
   if(kind==='profit') return profitHTML(p,R);
   if(kind==='final') return `${custPrice(p,R)} ر.س`;
   if(kind==='co') return checkoutPrev(r);
+  if(kind==='cline') return cLine(p,R);
   if(kind==='rel') return relResult(r,rid);
   return '';
 }
@@ -773,11 +795,39 @@ function pvCheckout(r){
      ${ed&&p.on?`<div class="co-editor"><div class="sm muted" style="margin-bottom:8px">تكلفتك من سلة ${R.cost} ر.س · ربحك <span ${live('profit',R.id)}>${profitHTML(p,R)}</span></div>${serviceFields(R,p)}<div class="summary-box" ${live('sum',R.id)}>${priceSummary(p,R)}</div></div>`:''}</div>`}).join('')}</div>`;
 }
 
+// 0) approved compact design, one block per service
+function cLine(p,R){
+  if(!p.on) return '';
+  if(!(p.unify&&p.fee!=='')) return `<span class="muted">أدخل تكلفة الشحن للعميل. حتى ذلك يُستخدم سعر سلة (${R.cost} ر.س).</span>`;
+  return p.type==='fixed'?`يدفع عميلك <b class="num">${p.fee} ر.س</b> لأي وزن`
+    :`يدفع عميلك <b class="num">${p.fee} ر.س</b> للشحنة حتى <b class="num">${p.baseW||'—'} كجم</b>، و<b class="num">${p.extra||'—'} ر.س</b> لكل <b class="num">${p.per||'—'} كجم</b> إضافي`;
+}
+function pvCompact(r){
+  const ICON={std:'🚚',exp:'⚡',eco:'📦'};
+  return `<p class="sm ink2">حدّد تسعيرة كل خدمة شحن على حدة. يرى عميلك في صفحة الدفع الخدمات المفعّلة فقط، كل واحدة بسعرها.</p>
+  <div class="cp-list">${ROUTES.map(R=>{const p=r.pricing[R.id], id=R.id, w=p.type==='weight';
+   return `<div class="cp-svc ${p.on?'':'off'}" data-r="${id}">
+    <div class="cp-head"><span class="cp-ic cp-${id}" aria-hidden="true">${I.truckS}</span>
+      <div style="flex:1;min-width:0"><b>${R.name}</b> <span class="chip gray">${R.promise}</span><div class="sm muted">${R.carrier} · ${R.cover} · تكلفتك ${R.cost} ر.س</div></div>
+      ${R.locked?`<span class="lock">${I.lock}إلزامي</span>`:''}<label class="toggle"><input type="checkbox" data-pf="on" ${p.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label></div>
+    ${p.on?`<div class="cp-body">
+      <div class="fld"><label for="cp-type-${id}">نوع التسعير <i>*</i></label><select class="inp" id="cp-type-${id}" data-pf="type"><option value="weight" ${w?'selected':''}>حسب الوزن</option><option value="fixed" ${!w?'selected':''}>ثابت</option></select></div>
+      <div class="grid2">
+        <div class="fld"><label for="cp-fee-${id}">تكلفة الشحن للعميل <i>*</i></label><div class="field wide"><input id="cp-fee-${id}" type="number" min="0" data-pf="fee" value="${esc(p.fee)}" placeholder="${R.cost}"><em>ر.س</em></div></div>
+        ${w?`<div class="fld"><label for="cp-w-${id}">حد وزن الشحنة <i>*</i></label><div class="field wide"><input id="cp-w-${id}" type="number" min="0" data-pf="baseW" value="${esc(p.baseW)}"><em>كجم</em></div></div>
+        <div class="fld"><label for="cp-x-${id}">تكلفة الوزن الإضافي <i>*</i></label><div class="field wide"><input id="cp-x-${id}" type="number" min="0" data-pf="extra" value="${esc(p.extra)}"><em>ر.س</em></div></div>
+        <div class="fld"><label for="cp-per-${id}">لكل <i>*</i></label><div class="field wide"><input id="cp-per-${id}" type="number" min="0" data-pf="per" value="${esc(p.per)}"><em>كجم</em></div></div>`:''}
+      </div>
+      <div class="cp-line" ${live('cline',id)}>${cLine(p,R)}</div>
+      ${id!=='std'?`<button class="btn btn-ghost btn-sm cp-copy" type="button" data-act="copy-std" data-v="${id}">نسخ تسعيرة الشحن العادي</button>`:''}
+    </div>`:`<div class="cp-offnote sm muted">هذه الخدمة لا تظهر لعملائك. فعّلها لتحديد سعرها.</div>`}
+   </div>`}).join('')}</div>`;
+}
 function pricingSwitch(){ return `<div class="proto-bar" style="margin-bottom:0"><b>طريقة التسعير:</b><div class="seg seg-wrap">${PRICE_UIS.map(([k,l],i)=>`<button type="button" class="${S.priceUI===k?'on':''}" data-act="price-ui" data-v="${k}">${i+1}. ${l}</button>`).join('')}</div><span class="muted sm">للمقارنة في النموذج فقط.</span></div>`; }
 
 function pricingBody(r){
   const v=S.priceUI;
-  return pricingSwitch()+(v==='matrix'?pvMatrix(r):v==='cols'?pvCols(r):v==='wizard'?pvWizard(r):v==='rel'?pvRel(r):v==='checkout'?pvCheckout(r):pvList(r));
+  return pricingSwitch()+(v==='compact'?pvCompact(r):v==='matrix'?pvMatrix(r):v==='cols'?pvCols(r):v==='wizard'?pvWizard(r):v==='rel'?pvRel(r):v==='checkout'?pvCheckout(r):pvList(r));
 }
 function pvList(r){
   const open=S.priceOpen;
@@ -835,7 +885,7 @@ function openDrawer(k){
       <header class="drawer-h"><div><h2 id="dwT">إعدادات ${r.name}</h2><div class="sm muted">${cityOf(r)} · ${r.dist}</div></div>
         <div class="row"><button class="btn btn-sm" type="button" data-act="drawer-expand" title="فتح كصفحة كاملة">${I.expand}فتح كصفحة</button><button class="btn btn-sm btn-ghost" type="button" data-act="drawer-close" aria-label="إغلاق">${I.x}</button></div></header>
       <div class="drawer-b" id="setRoot" data-k="${k}" data-mode="drawer">${settingsBody(k,'drawer')}</div>
-      <footer class="drawer-f"><button class="btn" type="button" data-act="drawer-close">إلغاء</button><button class="btn btn-p" type="button" data-act="save-settings">حفظ التغييرات</button></footer></aside>`;
+      <footer class="drawer-f"><button class="btn btn-p btn-block" type="button" data-act="save-settings">حفظ التغييرات</button></footer></aside>`;
   document.body.appendChild(d); document.body.style.overflow='hidden'; requestAnimationFrame(()=>d.classList.add('open'));
   d.querySelector('.drawer-h button').focus();
 }
@@ -1094,6 +1144,7 @@ document.addEventListener('click',e=>{
   if(act==='wiz-go'){S.wiz=+a.dataset.v; rerenderSettings();}
   if(act==='co-edit'){S.coEdit=S.coEdit===a.dataset.v?null:a.dataset.v; rerenderSettings();}
   if(act==='co-vis'){const r=cur(), p=r.pricing[a.dataset.v]; p.on=!p.on; if(!p.on&&S.coEdit===a.dataset.v) S.coEdit=null; rerenderSettings();}
+  if(act==='copy-std'){const r=cur(), b=r.pricing.std, t=r.pricing[a.dataset.v]; Object.assign(t,{unify:b.unify,type:b.type,fee:b.fee,baseW:b.baseW,extra:b.extra,per:b.per}); rerenderSettings(); toast('تم نسخ تسعيرة الشحن العادي');}
   if(act==='svc-toggle'){const v=a.dataset.v; S.priceOpen=S.priceOpen.includes(v)?S.priceOpen.filter(x=>x!==v):[...S.priceOpen,v]; rerenderSettings();}
   if(act==='zone-add'){S.zoneEdit={idx:-1,draft:{name:'',method:'city',country:'السعودية',city:cityOf(cur()),districts:'',hours:'all',from:'08:00',to:'22:00',radius:5}}; rerenderSettings(); document.getElementById('zf-name')?.focus();}
   if(act==='zone-edit'){const i=+a.dataset.i; S.zoneEdit={idx:i,draft:{...cur().zones[i]}}; rerenderSettings();}
@@ -1117,6 +1168,7 @@ document.addEventListener('change',e=>{
   if(e.target.id==='city'){S.city=e.target.value;route();}
   if(e.target.dataset.rowon){const r=rowBy(e.target.dataset.rowon); r.on=e.target.checked; toast(r.on?'تم تفعيل '+r.name:'تم إيقاف '+r.name);}
   const f=e.target.dataset.pf;
+  if(e.target.dataset.zon){const r=rowBy(document.getElementById('setRoot').dataset.k); const z=r.zones[+e.target.dataset.zon]; z.off=!e.target.checked; rerenderSettings(); toast(z.off?'تم إيقاف النطاق':'تم تفعيل النطاق'); return;}
   if(e.target.dataset.rel==='mode'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); relOf(r)[rid].mode=e.target.value; syncRel(r); rerenderSettings(); return;}
   if(f&&e.target.type!=='number'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[rid]; p[f]=e.target.type==='checkbox'?e.target.checked:e.target.value;
     if(S.priceUI==='rel') syncRel(r);
