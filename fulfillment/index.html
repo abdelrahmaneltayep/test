@@ -264,6 +264,42 @@ th[rowspan]{vertical-align:bottom}
 .mapmock{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);height:220px}
 .mapmock svg{width:100%;height:100%;display:block}
 .map-hint{position:absolute;bottom:8px;inset-inline-start:8px;background:rgba(255,255,255,.92);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--ink-2)}
+.seg-wrap{flex-wrap:wrap}
+.sm-inp{padding:6px 8px;font-size:13px}
+.num-inp{width:78px;text-align:center}
+.ptbl{min-width:860px}.ptbl td{padding:10px}
+.pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.pcol{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+.pcol.off{opacity:.6}
+.pcol-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pcol-price{background:var(--mint-50);border-radius:var(--r);padding:10px;text-align:center;display:flex;flex-direction:column;gap:2px}
+.pcol-price b{font-size:22px;color:var(--brand)}
+.g-tight{gap:8px;grid-template-columns:1fr}
+.wiz-steps{list-style:none;margin:0;padding:0;display:flex;gap:6px;flex-wrap:wrap}
+.wiz-steps li{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);padding:4px 10px 4px 4px;border-radius:20px;background:var(--line-2)}
+.wiz-steps li span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:#fff;font-size:12px;font-weight:700}
+.wiz-steps li.cur{background:var(--brand-50);color:var(--brand);font-weight:600}.wiz-steps li.cur span{background:var(--brand);color:#fff}
+.wiz-steps li.done span{background:var(--ok);color:#fff}
+.wiz-body{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;min-height:160px}
+.wiz-opt{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer}
+.wiz-opt.on{border-color:var(--mint-strong);background:var(--mint-50)}
+.wiz-opt input{width:18px;height:18px;accent-color:var(--brand)}
+.rel-base{border:1px solid var(--mint-strong);background:#fbfefd;border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:12px}
+.rel-row{display:grid;grid-template-columns:auto minmax(120px,1fr) minmax(150px,1fr) auto minmax(120px,1fr);gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.rel-row.off{opacity:.6}
+.rel-row .field input{width:64px}
+.rel-out{font-size:13px;color:var(--ink-2)}
+.co-mock{border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;overflow:hidden}
+.co-mock-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--line);background:#fbfcfc}
+.co-opt{border-bottom:1px solid var(--line-2)}.co-opt:last-child{border-bottom:0}
+.co-opt-row{display:flex;align-items:center;gap:10px;padding:12px 14px;flex-wrap:wrap}
+.co-opt.editing{background:var(--mint-50)}
+.co-opt.hidden-opt .co-opt-row>*:not(.btn){opacity:.45}
+.co-price{font-size:16px;color:var(--brand)}
+.co-radio.selx{background:var(--brand);box-shadow:inset 0 0 0 3px #fff}
+.co-note{padding:0 14px 10px}
+.co-editor{padding:0 14px 14px}
+@media (max-width:640px){.rel-row{grid-template-columns:auto 1fr}.rel-row>select,.rel-row>.field,.rel-row>.rel-out{grid-column:1/-1}}
 .svc-list{display:flex;flex-direction:column;gap:10px}
 .svc{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
 .svc.open{border-color:var(--mint-strong);box-shadow:0 0 0 3px var(--mint-50)}
@@ -634,7 +670,116 @@ function priceLine(p,R){
   return p.type==='fixed'?`<b class="num">${p.fee} ر.س</b> <span class="muted">سعر ثابت</span>`
     :`<b class="num">${p.fee} ر.س</b> <span class="muted">لأول ${p.baseW||'—'} كجم + ${p.extra||'—'} ر.س لكل ${p.per||'—'} كجم</span>`;
 }
+/* ---------- pricing UI variants (prototype switch) ---------- */
+S.priceUI = 'list';
+S.wiz = 0;
+S.coEdit = null;
+const PRICE_UIS = [['list','قائمة'],['matrix','جدول مقارنة'],['cols','أعمدة جنب بعض'],['wizard','خطوة بخطوة'],['rel','سعر أساسي + فرق'],['checkout','من صفحة الدفع']];
+const custPrice = (p,R) => p.unify&&p.fee!=='' ? +p.fee : R.cost;
+function profitHTML(p,R){ if(!(p.unify&&p.fee!=='')) return '<span class="muted">—</span>'; const d=+p.fee-R.cost; return `<span class="${d>=0?'qty-ok':'qty-bad'} num">${d>=0?'+':'−'}${Math.abs(d)} ر.س</span>`; }
+function liveHTML(kind,rid,r){
+  const p=r.pricing[rid], R=ROUTES.find(x=>x.id===rid);
+  if(kind==='line') return p.on?priceLine(p,R):'<span class="muted">غير مفعّل</span>';
+  if(kind==='sum') return priceSummary(p,R);
+  if(kind==='profit') return profitHTML(p,R);
+  if(kind==='final') return `${custPrice(p,R)} ر.س`;
+  if(kind==='co') return checkoutPrev(r);
+  if(kind==='rel') return relResult(r,rid);
+  return '';
+}
+const live=(kind,rid='std')=>`data-live="${kind}:${rid}"`;
+function refreshLive(r){ document.querySelectorAll('[data-live]').forEach(el=>{const [k,rid]=el.dataset.live.split(':'); el.innerHTML=liveHTML(k,rid,r);}); }
+
+// shared pricing fields for one service (used by cols / wizard / checkout)
+function serviceFields(R,p,{compact=false}={}){
+  const id=R.id;
+  return `<div class="stack" style="gap:12px">
+    <div class="fld"><label for="vf-type-${id}">نوع التسعيرة</label><select class="inp" id="vf-type-${id}" data-pf="type"><option value="fixed" ${p.type==='fixed'?'selected':''}>ثابتة</option><option value="weight" ${p.type==='weight'?'selected':''}>حسب الوزن</option></select></div>
+    <div class="fld"><label for="vf-fee-${id}">رسوم الشحن للعميل</label><div class="field wide"><input id="vf-fee-${id}" type="number" min="0" data-pf="fee" value="${esc(p.fee)}" placeholder="${R.cost} (تسعيرة سلة)"><em>ر.س</em></div></div>
+    ${p.type==='weight'?`<div class="grid2 ${compact?'g-tight':''}"><div class="fld"><label for="vf-w-${id}">لأول</label><div class="field wide"><input id="vf-w-${id}" type="number" min="0" data-pf="baseW" value="${esc(p.baseW)}"><em>كجم</em></div></div>
+      <div class="fld"><label for="vf-x-${id}">زيادة</label><div class="field wide"><input id="vf-x-${id}" type="number" min="0" data-pf="extra" value="${esc(p.extra)}"><em>ر.س</em></div></div></div>
+      <div class="fld"><label for="vf-per-${id}">لكل</label><div class="field wide"><input id="vf-per-${id}" type="number" min="0" data-pf="per" value="${esc(p.per)}"><em>كجم</em></div></div>`:''}
+    <label class="chk"><input type="checkbox" data-pf="cod" ${p.cod?'checked':''}><span><b>الدفع عند الاستلام</b></span></label></div>`;
+}
+
+// 1) comparison table
+function pvMatrix(r){
+  return `<p class="sm ink2">كل صف خدمة مستقلة. اترك رسوم العميل فارغة لاستخدام تسعيرة سلة.</p>
+  <div class="tbl-wrap"><table class="ptbl"><thead><tr><th>تفعيل</th><th>الخدمة</th><th class="n">تكلفتك</th><th>نوع التسعيرة</th><th class="n">رسوم العميل</th><th class="n">لأول (كجم)</th><th class="n">زيادة (ر.س)</th><th class="n">لكل (كجم)</th><th class="n">ربحك / طلب</th><th class="n">دفع عند الاستلام</th></tr></thead>
+  <tbody>${ROUTES.map(R=>{const p=r.pricing[R.id];const w=p.type==='weight';const dis=p.on?'':'disabled';return `<tr data-r="${R.id}" class="${p.on?'':'muted-row'}">
+    <td><label class="toggle"><input type="checkbox" data-pf="on" ${p.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label></td>
+    <td><b>${R.name}</b><div class="sm muted">${R.promise}</div></td><td class="n">${R.cost} ر.س</td>
+    <td><select class="inp sm-inp" data-pf="type" ${dis} aria-label="نوع التسعيرة ${R.name}"><option value="fixed" ${!w?'selected':''}>ثابتة</option><option value="weight" ${w?'selected':''}>حسب الوزن</option></select></td>
+    <td class="n"><input class="inp sm-inp num-inp" type="number" min="0" data-pf="fee" value="${esc(p.fee)}" placeholder="${R.cost}" ${dis} aria-label="رسوم العميل ${R.name}"></td>
+    ${['baseW','extra','per'].map(k=>`<td class="n">${w?`<input class="inp sm-inp num-inp" type="number" min="0" data-pf="${k}" value="${esc(p[k])}" ${dis} aria-label="${k}">`:'<span class="muted">—</span>'}</td>`).join('')}
+    <td class="n" ${live('profit',R.id)}>${profitHTML(p,R)}</td>
+    <td class="n"><input type="checkbox" data-pf="cod" ${p.cod?'checked':''} ${dis} aria-label="الدفع عند الاستلام ${R.name}" style="accent-color:var(--brand);width:18px;height:18px"></td></tr>`}).join('')}</tbody></table></div>
+  <div class="checkout-prev" ${live('co')}>${checkoutPrev(r)}</div>`;
+}
+
+// 2) side-by-side columns
+function pvCols(r){
+  return `<div class="pcols">${ROUTES.map(R=>{const p=r.pricing[R.id];return `<div class="pcol ${p.on?'':'off'}" data-r="${R.id}">
+    <div class="pcol-h"><div><b>${R.name}</b><div class="sm muted">${R.promise}</div></div><label class="toggle"><input type="checkbox" data-pf="on" ${p.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label></div>
+    <div class="pcol-price"><span class="sm muted">يدفع عميلك</span><b class="num" ${live('final',R.id)}>${custPrice(p,R)} ر.س</b><span class="sm muted">تكلفتك ${R.cost} ر.س · ربحك <span ${live('profit',R.id)}>${profitHTML(p,R)}</span></span></div>
+    ${p.on?serviceFields(R,p,{compact:true}):`<p class="sm muted" style="text-align:center">فعّل الخدمة لتحديد سعرها.</p>`}</div>`}).join('')}</div>`;
+}
+
+// 3) wizard
+function pvWizard(r){
+  const on=ROUTES.filter(R=>r.pricing[R.id].on); const steps=['اختيار الخدمات',...on.map(R=>R.name),'المراجعة']; const i=Math.min(S.wiz,steps.length-1);
+  const head=`<ol class="wiz-steps">${steps.map((t,k)=>`<li class="${k<i?'done':k===i?'cur':''}"><span>${k<i?'✓':k+1}</span>${t}</li>`).join('')}</ol>`;
+  let body;
+  if(i===0) body=`<p class="ink2">اختر خدمات الشحن التي تريد تقديمها من هذا المستودع. ستحدد سعر كل خدمة في الخطوات التالية.</p>
+     <div class="stack" style="gap:8px">${ROUTES.map(R=>{const p=r.pricing[R.id];return `<label class="wiz-opt ${p.on?'on':''}" data-r="${R.id}"><input type="checkbox" data-pf="on" ${p.on?'checked':''} ${R.locked?'disabled':''}><div style="flex:1"><b>${R.name}</b>${R.locked?' <span class="lock">'+I.lock+'إلزامي</span>':''}<div class="sm muted">${R.carrier} · ${R.promise} · ${R.cover}</div></div><span class="sm muted">تكلفتك ${R.cost} ر.س</span></label>`}).join('')}</div>`;
+  else if(i<steps.length-1){const R=on[i-1],p=r.pricing[R.id]; body=`<div data-r="${R.id}" class="stack"><div class="row between"><div><h3>سعر ${R.name}</h3><div class="sm muted">${R.promise} · ${R.cover} · تكلفتك ${R.cost} ر.س</div></div><span class="chip">${i} من ${on.length}</span></div>
+     ${serviceFields(R,p)}<div class="summary-box" ${live('sum',R.id)}>${priceSummary(p,R)}</div></div>`;}
+  else body=`<p class="ink2">راجع أسعار الخدمات قبل الحفظ.</p><div class="stack" style="gap:8px">${on.map(R=>`<div class="zone-card"><div style="flex:1"><b>${R.name}</b><div class="sm">${priceLine(r.pricing[R.id],R)}</div></div><button class="btn btn-sm btn-ghost" type="button" data-act="wiz-go" data-v="${on.indexOf(R)+1}">تعديل</button></div>`).join('')}</div><div class="checkout-prev">${checkoutPrev(r)}</div>`;
+  return head+`<div class="wiz-body stack">${body}</div><div class="row between"><button class="btn" type="button" data-act="wiz-prev" ${i===0?'disabled':''}>السابق</button>${i<steps.length-1?`<button class="btn btn-d" type="button" data-act="wiz-next">التالي: ${steps[i+1]}</button>`:'<span class="sm qty-ok">جاهز للحفظ</span>'}</div>`;
+}
+
+// 4) base + difference
+function relOf(r){ r.rel=r.rel||{exp:{mode:'plus',val:'10'},eco:{mode:'minus',val:'8'}}; return r.rel; }
+function relResult(r,rid){ const b=r.pricing.std, R=ROUTES.find(x=>x.id===rid), base=custPrice(b,ROUTES[0]), m=relOf(r)[rid];
+  const v=m.mode==='same'?base:m.mode==='plus'?base+(+m.val||0):m.mode==='minus'?Math.max(0,base-(+m.val||0)):(+m.val||0);
+  return `<b class="num">${v} ر.س</b> <span class="muted sm">${b.type==='weight'&&m.mode!=='custom'?`لأول ${b.baseW||'—'} كجم، والزيادة كالعادي`:'للطلب'}</span>`; }
+function syncRel(r){ const b=r.pricing.std, base=custPrice(b,ROUTES[0]); ['exp','eco'].forEach(id=>{const m=relOf(r)[id], p=r.pricing[id];
+  const v=m.mode==='same'?base:m.mode==='plus'?base+(+m.val||0):m.mode==='minus'?Math.max(0,base-(+m.val||0)):(+m.val||0);
+  Object.assign(p,{unify:true,fee:String(v),type:m.mode==='custom'?'fixed':b.type,baseW:b.baseW,extra:b.extra,per:b.per});}); }
+function pvRel(r){
+  const b=r.pricing.std, R0=ROUTES[0]; relOf(r);
+  return `<p class="sm ink2">حدّد سعر الشحن العادي مرة واحدة، والسريع والاقتصادي يُحسبان منه تلقائياً. غيّر السعر الأساسي فتتحدث كل الخدمات.</p>
+   <div class="rel-base" data-r="std"><div class="row between"><div><b>السعر الأساسي · ${R0.name}</b><div class="sm muted">${R0.promise} · تكلفتك ${R0.cost} ر.س</div></div><span class="lock">${I.lock}إلزامي</span></div>
+     ${serviceFields(R0,b)}</div>
+   <div class="stack" style="gap:8px">${ROUTES.slice(1).map(R=>{const p=r.pricing[R.id],m=r.rel[R.id];return `<div class="rel-row ${p.on?'':'off'}" data-r="${R.id}">
+     <label class="toggle"><input type="checkbox" data-pf="on" ${p.on?'checked':''} aria-label="تفعيل ${R.name}"><span></span></label>
+     <div class="rel-name"><b>${R.name}</b><div class="sm muted">${R.promise} · تكلفتك ${R.cost} ر.س</div></div>
+     <select class="inp sm-inp" data-rel="mode" ${p.on?'':'disabled'} aria-label="طريقة تسعير ${R.name}"><option value="same" ${m.mode==='same'?'selected':''}>نفس سعر العادي</option><option value="plus" ${m.mode==='plus'?'selected':''}>أعلى من العادي بـ</option><option value="minus" ${m.mode==='minus'?'selected':''}>أقل من العادي بـ</option><option value="custom" ${m.mode==='custom'?'selected':''}>سعر ثابت مخصص</option></select>
+     ${m.mode==='same'?'<span></span>':`<div class="field"><input type="number" min="0" data-rel="val" value="${esc(m.val)}" ${p.on?'':'disabled'} aria-label="القيمة"><em>ر.س</em></div>`}
+     <div class="rel-out">= <span ${live('rel',R.id)}>${relResult(r,R.id)}</span></div></div>`}).join('')}</div>
+   <div class="checkout-prev" ${live('co')}>${checkoutPrev(r)}</div>`;
+}
+
+// 5) edit on checkout preview
+function pvCheckout(r){
+  return `<p class="sm ink2">هذه خيارات الشحن كما يراها عميلك في صفحة الدفع. اضغط «تعديل السعر» على أي خيار لتغييره.</p>
+   <div class="co-mock"><div class="co-mock-h"><b>خيارات الشحن</b><span class="sm muted">التوصيل إلى: الرياض، حي النرجس</span></div>
+   ${ROUTES.map((R,i)=>{const p=r.pricing[R.id], ed=S.coEdit===R.id;return `<div class="co-opt ${p.on?'':'hidden-opt'} ${ed?'editing':''}" data-r="${R.id}">
+     <div class="co-opt-row"><span class="co-radio ${i===0&&p.on?'selx':''}"></span><div style="flex:1"><b>${R.name}</b><div class="sm muted">${R.promise}${p.cod?' · الدفع عند الاستلام متاح':''}</div></div>
+       <b class="num co-price" ${live('final',R.id)}>${custPrice(p,R)} ر.س</b>
+       ${p.on?`<button class="btn btn-sm ${ed?'btn-d':''}" type="button" data-act="co-edit" data-v="${R.id}">${ed?'تم':'تعديل السعر'}</button>`:''}
+       ${R.locked?'':`<button class="btn btn-sm btn-ghost" type="button" data-act="co-vis" data-v="${R.id}">${p.on?'إخفاء':'إظهار للعميل'}</button>`}</div>
+     ${!p.on?'<div class="sm muted co-note">مخفي عن عملائك</div>':''}
+     ${ed&&p.on?`<div class="co-editor"><div class="sm muted" style="margin-bottom:8px">تكلفتك من سلة ${R.cost} ر.س · ربحك <span ${live('profit',R.id)}>${profitHTML(p,R)}</span></div>${serviceFields(R,p)}<div class="summary-box" ${live('sum',R.id)}>${priceSummary(p,R)}</div></div>`:''}</div>`}).join('')}</div>`;
+}
+
+function pricingSwitch(){ return `<div class="proto-bar" style="margin-bottom:0"><b>طريقة التسعير:</b><div class="seg seg-wrap">${PRICE_UIS.map(([k,l],i)=>`<button type="button" class="${S.priceUI===k?'on':''}" data-act="price-ui" data-v="${k}">${i+1}. ${l}</button>`).join('')}</div><span class="muted sm">للمقارنة في النموذج فقط.</span></div>`; }
+
 function pricingBody(r){
+  const v=S.priceUI;
+  return pricingSwitch()+(v==='matrix'?pvMatrix(r):v==='cols'?pvCols(r):v==='wizard'?pvWizard(r):v==='rel'?pvRel(r):v==='checkout'?pvCheckout(r):pvList(r));
+}
+function pvList(r){
   const open=S.priceOpen;
   return `<p class="sm ink2">لكل خدمة شحن تسعيرة مستقلة. يرى عميلك في صفحة الدفع كل الخدمات المفعّلة بأسعارها.</p>
    <div class="svc-list">${ROUTES.map(R=>{const p=r.pricing[R.id], isOpen=open.includes(R.id), id=R.id;
@@ -937,12 +1082,18 @@ document.addEventListener('click',e=>{
   const cur=()=>rowBy(document.getElementById('setRoot')?.dataset.k);
   if(act==='menu'){S.menu=S.menu===k?null:k; route(); document.querySelector('.menu button')?.focus();}
   if(act==='setmode'){S.setMode=a.dataset.v; route();}
-  if(act==='open-settings'){e.preventDefault(); S.menu=null; S.zoneEdit=null; S.priceOpen=['std']; document.getElementById('notes').hidden=true;
+  if(act==='open-settings'){e.preventDefault(); S.menu=null; S.zoneEdit=null; S.priceOpen=['std']; S.wiz=0; S.coEdit=null; document.getElementById('notes').hidden=true;
     if(S.setMode==='page'){closeDrawer(); go('settings-'+k);} else {if(!location.hash.startsWith('#mine')) go('mine'); else route(); openDrawer(k);} }
   if(act==='delete'){S.menu=null; route(); deleteModal(k);}
   if(act==='drawer-close') closeDrawer();
   if(act==='drawer-expand'){const kk=S.drawer; closeDrawer(); go('settings-'+kk);}
   if(act==='save-settings'){ if(document.querySelector('.drawer-wrap')) closeDrawer(); else go('mine'); toast('تم حفظ إعدادات المستودع'); }
+  if(act==='price-ui'){S.priceUI=a.dataset.v; S.wiz=0; S.coEdit=null; if(S.priceUI==='rel'){const r=cur(); relOf(r); syncRel(r);} rerenderSettings(); document.getElementById('sec-pricing')?.scrollIntoView({block:'start'});}
+  if(act==='wiz-next'){S.wiz++; rerenderSettings();}
+  if(act==='wiz-prev'){S.wiz=Math.max(0,S.wiz-1); rerenderSettings();}
+  if(act==='wiz-go'){S.wiz=+a.dataset.v; rerenderSettings();}
+  if(act==='co-edit'){S.coEdit=S.coEdit===a.dataset.v?null:a.dataset.v; rerenderSettings();}
+  if(act==='co-vis'){const r=cur(), p=r.pricing[a.dataset.v]; p.on=!p.on; if(!p.on&&S.coEdit===a.dataset.v) S.coEdit=null; rerenderSettings();}
   if(act==='svc-toggle'){const v=a.dataset.v; S.priceOpen=S.priceOpen.includes(v)?S.priceOpen.filter(x=>x!==v):[...S.priceOpen,v]; rerenderSettings();}
   if(act==='zone-add'){S.zoneEdit={idx:-1,draft:{name:'',method:'city',country:'السعودية',city:cityOf(cur()),districts:'',hours:'all',from:'08:00',to:'22:00',radius:5}}; rerenderSettings(); document.getElementById('zf-name')?.focus();}
   if(act==='zone-edit'){const i=+a.dataset.i; S.zoneEdit={idx:i,draft:{...cur().zones[i]}}; rerenderSettings();}
@@ -956,13 +1107,19 @@ document.addEventListener('input',e=>{
   if(e.target.dataset.zfi&&S.zoneEdit){S.zoneEdit.draft[e.target.dataset.zfi]=e.target.value; if(e.target.dataset.zfi==='radius'){rerenderSettings(); document.getElementById('zf-rad')?.focus();}}
   const f=e.target.dataset.pf;
   if(f&&e.target.type==='number'){const box=e.target.closest('[data-r]'), rid=box.dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[rid], R=ROUTES.find(x=>x.id===rid); p[f]=e.target.value;
-    const sm=box.querySelector('[data-sum]'); if(sm) sm.innerHTML=priceSummary(p,R); const pr=box.querySelector('.svc-price'); if(pr) pr.innerHTML=priceLine(p,R)+(p.cod?'<span class="chip gray">دفع عند الاستلام</span>':''); const cp=document.getElementById('coPrev'); if(cp) cp.innerHTML=checkoutPrev(r);}
+    if(S.priceUI!=='list'&&f==='fee') p.unify=p.fee!=='';
+    if(S.priceUI==='rel') syncRel(r);
+    const sm=box.querySelector('[data-sum]'); if(sm) sm.innerHTML=priceSummary(p,R); const pr=box.querySelector('.svc-price'); if(pr) pr.innerHTML=priceLine(p,R)+(p.cod?'<span class="chip gray">دفع عند الاستلام</span>':''); const cp=document.getElementById('coPrev'); if(cp) cp.innerHTML=checkoutPrev(r);
+    refreshLive(r);}
+  if(e.target.dataset.rel==='val'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); relOf(r)[rid].val=e.target.value; syncRel(r); refreshLive(r);}
 });
 document.addEventListener('change',e=>{
   if(e.target.id==='city'){S.city=e.target.value;route();}
   if(e.target.dataset.rowon){const r=rowBy(e.target.dataset.rowon); r.on=e.target.checked; toast(r.on?'تم تفعيل '+r.name:'تم إيقاف '+r.name);}
   const f=e.target.dataset.pf;
+  if(e.target.dataset.rel==='mode'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); relOf(r)[rid].mode=e.target.value; syncRel(r); rerenderSettings(); return;}
   if(f&&e.target.type!=='number'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); const p=r.pricing[rid]; p[f]=e.target.type==='checkbox'?e.target.checked:e.target.value;
+    if(S.priceUI==='rel') syncRel(r);
     if(f==='on'&&p.on&&!S.priceOpen.includes(rid)) S.priceOpen=[...S.priceOpen,rid]; rerenderSettings();}
 });
 document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(document.querySelector('.overlay')) document.querySelector('.overlay').remove(); else if(document.querySelector('.drawer-wrap')) closeDrawer(); else if(S.menu){S.menu=null; route();} });
