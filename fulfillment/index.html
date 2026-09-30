@@ -265,6 +265,10 @@ th[rowspan]{vertical-align:bottom}
 .mapmock svg{width:100%;height:100%;display:block}
 .map-hint{position:absolute;bottom:8px;inset-inline-start:8px;background:rgba(255,255,255,.92);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--ink-2)}
 .btn-block{width:100%;padding-block:13px;font-size:15px}
+.cap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cap-bar{width:64px;height:6px;border-radius:6px;background:var(--line);overflow:hidden;flex:none}
+.cap-bar i{display:block;height:100%;border-radius:6px}
+.cap-ok .cap-bar i{background:var(--ok)}.cap-low .cap-bar i{background:#e0a23b}.cap-full .cap-bar i{background:var(--bad)}
 .op-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
 .op-badge i{width:8px;height:8px;border-radius:50%}
 .op-badge b{color:var(--ink)}
@@ -578,11 +582,12 @@ function browseCard(w){
         <div class="sm muted">${w.provider}</div>
       </div>
     </div>
-    <div>${opBadge(w.id)}</div>
+    <div class="row" style="gap:8px">${opBadge(w.id)}</div>
+    ${capBadge(w.id)}
     <div class="chips">${svcChips(w)}</div>
     <div class="price"><span class="sm muted">يبدأ من</span><strong class="num">${w.price} ر.س</strong><span class="ink2">/ طلب</span><span class="sm muted" style="margin-inline-start:auto">شامل التخزين والتجهيز والتوصيل</span></div>
     <div class="cta">
-      ${booked?`<button class="btn" data-go="mine" type="button">عرض في مستودعاتي</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز</button>`}
+      ${booked?`<button class="btn" data-go="mine" type="button">عرض في مستودعاتي</button>`:capState(w.id).k==='full'?`<button class="btn" data-act="toast" data-msg="سنبلغك عند توفر مساحة في مستودع ${w.city}" type="button">أبلغني عند التوفر</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز</button>`}
       <button class="btn" data-go="detail-${w.id}" type="button">التفاصيل</button>
     </div>
   </article>`;
@@ -597,7 +602,7 @@ function screenDetail(id){
       <section class="panel pad stack">
         <div class="wcard-head"><div class="wimg" style="width:80px;height:80px">${whImg(w)}</div>
           <div style="flex:1"><h1 class="city" style="font-size:20px">${I.pin}${w.city}</h1><div class="ink2">${w.name}</div>
-          <div class="sm muted">${w.provider} · <span class="num">★ ${w.rating}</span> (${w.reviews} تقييم)<div style="margin-top:6px">${opBadge(w.id,{lg:true})}</div></div></div></div>
+          <div class="sm muted">${w.provider} · <span class="num">★ ${w.rating}</span> (${w.reviews} تقييم)<div style="margin-top:6px">${opBadge(w.id,{lg:true})}</div><div style="margin-top:8px">${capBadge(w.id)}</div></div></div></div>
         <p class="ink2">${w.desc}</p>
         <div class="chips">${w.svc.map(k=>`<span class="chip">${SVC[k]}</span>`).join('')}</div>
       </section>
@@ -616,7 +621,7 @@ function screenDetail(id){
     <aside class="stack sticky">
       <section class="panel pad stack" style="background:var(--mint-50);border-color:var(--mint)">
         <div class="row"><span class="sm muted">يبدأ من</span><strong class="num" style="font-size:24px">${w.price} ر.س</strong><span>/ طلب</span></div>
-        ${booked?`<button class="btn" data-go="mine" type="button">محجوز · عرض في مستودعاتي</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز المستودع</button>`}
+        ${booked?`<button class="btn" data-go="mine" type="button">محجوز · عرض في مستودعاتي</button>`:`${capState(w.id).k==='full'?`<button class="btn" data-act="toast" data-msg="سنبلغك عند توفر مساحة في مستودع ${w.city}" type="button">ممتلئ حالياً · أبلغني عند التوفر</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز المستودع</button>`}`}
         <p class="sm ink2">الحجز لا يفعّل المستودع. يتفعّل بعد نقل مخزونك واستلامه وفحصه.</p>
       </section>
       <section class="panel pad stack"><h2>ساعات العمل</h2>
@@ -1107,6 +1112,11 @@ function logSection(t){
 
 /* ============ router & events ============ */
 /* ============ booking setup page (after "احجز") ============ */
+// storage capacity used (%) per warehouse
+const CAP = {ruh:72,jed:35,dmm:48,mak:88,med:20,khb:100};
+function capState(id){const u=CAP[id]??0; return u>=100?{k:'full',label:'ممتلئ حالياً',cls:'bad',note:'لا توجد مساحة للحجز الآن'}:u>=80?{k:'low',label:'مساحة محدودة',cls:'warn',note:`متبقي ${100-u}% من السعة`}:{k:'ok',label:'مساحة متاحة',cls:'ok',note:`متبقي ${100-u}% من السعة`};}
+function capBadge(id){const c=capState(id), u=Math.min(100,CAP[id]??0);
+  return `<div class="cap cap-${c.k}" title="${c.note}"><span class="pill ${c.cls}">${c.label}</span><span class="cap-bar" role="img" aria-label="السعة المستخدمة ${u}%"><i style="width:${u}%"></i></span><span class="sm muted num">${c.note}</span></div>`;}
 const OPERATOR = {ruh:'أرامكس',jed:'سمسا',dmm:'أرامكس',mak:'سمسا',med:'ناقل',khb:'سمسا'};
 const OP_TONE = {'أرامكس':'#d14343','سمسا':'#2563a8','ناقل':'#0f9f6e'};
 const opBadge = (id,{lg=false}={}) => { const op=OPERATOR[id]||'أرامكس'; return `<span class="op-badge ${lg?'lg':''}"><i style="background:${OP_TONE[op]}"></i>تشغيل: <b>${op}</b></span>`; };
