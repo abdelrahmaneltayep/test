@@ -297,6 +297,63 @@ th[rowspan]{vertical-align:bottom}
 .su-sumrow{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-top:1px solid var(--line-2);padding-top:8px}
 .su-sumrow b{font-size:17px}
 .su-arrow{width:34px;height:34px;border-radius:50%;background:var(--mint-50);display:grid;place-items:center;color:var(--brand)}
+.su-hero{overflow:hidden}.su-hero-map{position:relative}.su-hero-map .mapmock{border:0;border-radius:0}
+.su-float{position:absolute;top:14px;inset-inline-start:14px;width:min(300px,calc(100% - 28px));background:var(--surface);border-radius:var(--r-lg);box-shadow:0 10px 30px rgba(0,40,50,.18);padding:14px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.wk-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wk-d{border:1px solid var(--line);border-radius:var(--r);padding:8px 4px;text-align:center;display:flex;flex-direction:column;gap:2px;font-size:12px;min-width:0}
+.wk-d b{font-weight:500}.wk-d span{color:var(--ink-2);font-size:11px;overflow-wrap:anywhere}
+.wk-d.off{background:#fafafa}.wk-d.off span{color:var(--bad)}.wk-d.today{border-color:var(--brand);box-shadow:0 0 0 2px var(--mint-50)}
+.su-cmp{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.su-acc{border:1px solid var(--line);border-radius:var(--r);padding:10px 14px}
+.su-acc summary{display:flex;justify-content:space-between;gap:10px;cursor:pointer;list-style:none;align-items:center;flex-wrap:wrap}.su-acc summary::-webkit-details-marker{display:none}
+.su-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.su-tiles>div{border:1px solid var(--line);border-radius:var(--r-lg);padding:12px;display:flex;flex-direction:column;gap:4px}
+.su-tiles span:not(.t-ic){font-size:12px;color:var(--muted)}.su-tiles b{font-size:15px}
+.t-ic{width:30px;height:30px;border-radius:8px;background:var(--brand-50);color:var(--brand);display:grid;place-items:center;margin-bottom:4px}
+.t-ok .t-ic{background:#e6f7ef;color:var(--ok)}.t-warn .t-ic{background:#fff4e0;color:var(--warn)}
+.su-strip{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:14px;align-items:center}
+.su-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0}
+.su-step{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--line-2)}
+.su-sn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:13px;flex:none}
+.su-step.done .su-sn{background:var(--brand);border-color:var(--brand);color:#fff}
+.wk-chart{display:flex;flex-direction:column;gap:6px}
+.wk-axis,.wk-row{display:grid;grid-template-columns:64px minmax(0,1fr) 110px;gap:8px;align-items:center;font-size:12px}
+.wk-axis div{position:relative;height:14px;color:var(--muted)}.wk-axis i{position:absolute;font-style:normal;transform:translateX(50%);font-size:10px;white-space:nowrap}
+.wk-track{position:relative;height:14px;background:#f2f4f4;border-radius:7px}
+.wk-track i{position:absolute;top:0;bottom:0;background:var(--mint-strong);border-radius:7px}
+.wk-track em{position:absolute;inset:0;font-style:normal;font-size:11px;color:var(--bad);display:grid;place-items:center}
+.wk-row.today span{font-weight:600;color:var(--brand)}.wk-row small{color:var(--muted);font-size:11px}
+.wk-now{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--bad)}
+.su-tbl td{vertical-align:middle}.su-tbl tr.off td{opacity:.6}
+.su-tbl-ed td{background:#f8fafa}.su-ed-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:20px;padding:6px 0}
+.mg{font-weight:600;white-space:nowrap}.mg-ok{color:var(--ok)}.mg-bad{color:var(--bad)}.mg-na{color:var(--muted)}
+.su-mini{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.su-mini .fld{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--ink-2);min-width:0}
+.su-mini .field input{width:100%;min-width:0}
+.opts-sm .opt{padding:6px 10px;font-size:12px}
+.su-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.su-col{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.su-col.off{opacity:.65}.su-col .su-mini{grid-template-columns:1fr 1fr}
+.su-col-sec{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line-2);padding-top:10px}
+.su-col-foot{background:#f8fafa;border-radius:var(--r);padding:10px;display:flex;flex-direction:column;gap:6px}
+.su-md{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:16px}
+.su-md-list{display:flex;flex-direction:column;gap:8px}
+.su-md-i{display:flex;gap:10px;align-items:center;text-align:start;border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface);padding:10px 12px;cursor:pointer;font:inherit;color:inherit}
+.su-md-i small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.su-md-i.on{border-color:var(--brand);box-shadow:0 0 0 3px var(--mint-50)}.su-md-i.off{opacity:.65}
+.su-md-i .st-ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex:none}.su-md-i .st-ic.ok{background:#e6f7ef;color:var(--ok)}.su-md-i .st-ic.warn{background:#fff4e0;color:var(--warn)}
+.su-md-body{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.su-shared{background:var(--mint-50);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:10px}
+.su-trow{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:12px}.su-trow.off{opacity:.65}
+.su-ovr{border-top:1px dashed var(--line);padding-top:10px;display:flex;flex-direction:column;gap:8px}
+.su-co{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:16px}
+.su-co-prev{display:flex;flex-direction:column;gap:10px}
+.co-phone{border:8px solid #1f2a2e;border-radius:26px;padding:16px 12px;display:flex;flex-direction:column;gap:8px;background:#fff}
+.co-opt{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:var(--r);padding:10px;background:#fff;font:inherit;color:inherit;text-align:start;cursor:pointer}
+.co-opt small{display:block;color:var(--muted);font-size:12px}.co-opt.on{border-color:var(--brand);background:var(--mint-50)}
+.co-opt.hid{border-style:dashed;opacity:.55}
+.co-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none}.co-opt.on .co-radio{border:5px solid var(--brand)}
+@media (max-width:760px){.su-tiles{grid-template-columns:1fr 1fr}.su-strip,.su-ed-grid,.su-cols,.su-md,.su-co{grid-template-columns:minmax(0,1fr)}.wk-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.wk-axis,.wk-row{grid-template-columns:52px minmax(0,1fr)}.wk-row small{display:none}.wk-axis{display:none}.su-float{position:static;width:auto;box-shadow:none;border-bottom:1px solid var(--line);border-radius:0}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1227,19 +1284,9 @@ function suPriceBoxes(rid,p){
        ${p.type==='weight'?`<div class="su-sumrow"><b class="num">+${p.extra===''?'—':p.extra} ر.س</b><span class="muted">لكل ${p.per||'—'} كجم إضافي</span></div>`:''}</div></div>
    <div class="alert ${df.cls}">${I.info}<span class="grow">${df.txt}</span></div>`;
 }
-function suRoute(rid,r,su,w){
-  const R=ROUTES.find(x=>x.id===rid), c=RCOST[rid], p=r.p, open=su.open.includes(rid)&&r.on, wgt=p.type==='weight';
-  return `<div class="su-route ${open?'open':''} ${r.on?'':'off'}" data-sr="${rid}">
-   <div class="su-rhead">
-     <span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span>
-     <div style="flex:1;min-width:0"><div class="row" style="gap:8px"><b>${R.name}</b><span class="chip gray">${c.dur}</span>${R.locked?`<span class="lock">${I.lock}إلزامي</span>`:''}</div>
-       <div class="sm muted">مسار شحن أُنشئ تلقائياً · ينفّذه ${R.carrier}</div>
-       <div class="sm su-rsum" data-sl="sum">${suSummary(rid,r,w.city)}</div></div>
-     <label class="toggle"><input type="checkbox" data-su="on" ${r.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label>
-     <button class="btn btn-sm" type="button" data-act="su-open" data-v="${rid}" ${r.on?'':'disabled'} aria-expanded="${open}">${open?'إغلاق':'تعديل'}</button>
-   </div>
-   ${open?`<div class="su-rbody">
-     <section class="su-block"><h3>نطاق التغطية</h3><p class="sm muted">المناطق التي يظهر فيها «${R.name}» لعملائك في صفحة الدفع.</p>
+function suRouteBody(rid,r,w){
+  const R=ROUTES.find(x=>x.id===rid), c=RCOST[rid], p=r.p, wgt=p.type==='weight';
+  return `     <section class="su-block"><h3>نطاق التغطية</h3><p class="sm muted">المناطق التي يظهر فيها «${R.name}» لعملائك في صفحة الدفع.</p>
        <div class="opts">${[['all','كل مدن المملكة'],['cities','مدن محددة'],['radius','نطاق حول الفرع']].map(([k,l])=>`<button type="button" class="opt ${r.cov.mode===k?'on':''}" data-act="su-cov" data-v="${k}" aria-pressed="${r.cov.mode===k}">${l}</button>`).join('')}</div>
        ${r.cov.mode==='cities'?`<div class="zones">${r.cov.cities.map(ci=>`<span class="zone">${ci}<button type="button" data-act="su-city-rm" data-v="${ci}" aria-label="إزالة ${ci}">${I.x}</button></span>`).join('')}</div>
          <select class="select" data-su="addcity" aria-label="إضافة مدينة"><option value="">أضف مدينة…</option>${CITIES.filter(ci=>!r.cov.cities.includes(ci)).map(ci=>`<option>${ci}</option>`).join('')}</select>`:''}
@@ -1259,8 +1306,20 @@ function suRoute(rid,r,su,w){
          <div class="fld"><label for="su-dur-${rid}">مدة الشحن <i>*</i></label><input class="inp" id="su-dur-${rid}" data-su="dur" value="${esc(p.dur)}"><small class="muted">مدة التوصيل التي تظهر لعميلك في صفحة الدفع.</small></div>
        </div></section>
      <section class="su-block"><h3>ملخص التسعير</h3><div data-sl="boxes">${suPriceBoxes(rid,p)}</div></section>
-     <section class="su-block"><h3>خيارات إضافية</h3><label class="chk"><input type="checkbox" data-su="cod" ${p.cod?'checked':''}><span><b>تفعيل الدفع عند الاستلام</b><small>يظهر خيار الدفع عند الاستلام مع «${R.name}».</small></span></label></section>
-   </div>`:''}
+     <section class="su-block"><h3>خيارات إضافية</h3><label class="chk"><input type="checkbox" data-su="cod" ${p.cod?'checked':''}><span><b>تفعيل الدفع عند الاستلام</b><small>يظهر خيار الدفع عند الاستلام مع «${R.name}».</small></span></label></section>`;
+}
+function suRoute(rid,r,su,w){
+  const R=ROUTES.find(x=>x.id===rid), c=RCOST[rid], p=r.p, open=su.open.includes(rid)&&r.on, wgt=p.type==='weight';
+  return `<div class="su-route ${open?'open':''} ${r.on?'':'off'}" data-sr="${rid}">
+   <div class="su-rhead">
+     <span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span>
+     <div style="flex:1;min-width:0"><div class="row" style="gap:8px"><b>${R.name}</b><span class="chip gray">${c.dur}</span>${R.locked?`<span class="lock">${I.lock}إلزامي</span>`:''}</div>
+       <div class="sm muted">مسار شحن أُنشئ تلقائياً · ينفّذه ${R.carrier}</div>
+       <div class="sm su-rsum" data-sl="sum">${suSummary(rid,r,w.city)}</div></div>
+     <label class="toggle"><input type="checkbox" data-su="on" ${r.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label>
+     <button class="btn btn-sm" type="button" data-act="su-open" data-v="${rid}" ${r.on?'':'disabled'} aria-expanded="${open}">${open?'إغلاق':'تعديل'}</button>
+   </div>
+   ${open?`<div class="su-rbody">${suRouteBody(rid,r,w)}   </div>`:''}
   </div>`;
 }
 function screenSetup(id){
@@ -1268,33 +1327,148 @@ function screenSetup(id){
   if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
   const su=S.setup;
   return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack" id="suRoot">
-   <section class="panel pad stack">
-     <div class="row between"><div class="row"><div class="wimg" style="width:56px;height:56px">${whImg(w)}</div><div><h2>بيانات الفرع</h2><div class="sm muted">سيُضاف هذا المستودع كفرع في متجرك. بياناته الأساسية يديرها المستودع.</div></div></div>${opBadge(id,{lg:true})}</div>
-     <div class="ro"><div><span>اسم الفرع</span>${w.name}</div><div><span>المدينة</span>${w.city}</div><div><span>الشركة المشغّلة</span>${OPERATOR[id]}</div><div><span>وقت التجهيز</span>حتى 24 ساعة</div></div>
-     <div class="su-two">
-       <div class="stack" style="gap:10px"><div class="row between"><b>موقع الفرع على الخريطة</b><button class="btn btn-sm" type="button" data-act="su-pin">${su.pinMoved?'إعادة للموقع الأصلي':'تعديل الموقع'}</button></div>
-         <div class="mapmock" style="height:200px"><svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice"><rect width="400" height="200" fill="#e8efe9"/><path d="M0 55 L400 35 M0 140 L400 160 M90 0 L120 200 M250 0 L230 200 M330 0 L360 200" stroke="#fff" stroke-width="10"/><path d="M0 55 L400 35 M0 140 L400 160 M90 0 L120 200 M250 0 L230 200" stroke="#f6d77c" stroke-width="3"/><rect x="20" y="160" width="60" height="36" fill="#cfe6d4"/><rect x="280" y="60" width="70" height="50" fill="#cfe6d4"/>
-           <g transform="translate(${su.pinMoved?235:180} ${su.pinMoved?120:95})"><circle r="26" fill="#004956" opacity=".12"/><path d="M0 0 c-9 -11 -14 -17 -14 -24 a14 14 0 0 1 28 0 c0 7 -5 13 -14 24z" fill="#d14343"/><circle cy="-24" r="5" fill="#fff"/></g></svg>
-           <span class="map-hint">${su.pinMoved?'تم تحديث الموقع · اسحب الدبوس للتعديل':'اسحب الدبوس لتحديد مدخل الاستلام بدقة'}</span></div>
-         <div class="sm ink2">${w.name}، ${w.city}${su.pinMoved?' · <b>موقع معدّل</b>':''}</div></div>
-       <div class="stack" style="gap:10px"><b>ساعات العمل</b><div class="dl">${w.hours.map(h=>`<dt>${h[0]}</dt><dd class="num" style="${h[1]==='مغلق'?'color:var(--bad)':''}">${h[1]}</dd>`).join('')}</div>
-         <p class="sm muted">ساعات العمل يحددها المستودع، وتُستخدم لحساب مواعيد التجهيز والتوصيل.</p></div>
-     </div>
-   </section>
-   <section class="panel pad stack">
-     <div><h2>مسارات الشحن</h2><p class="sm muted">أنشأنا 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به، ويظهر لعميلك بسعره في صفحة الدفع.</p></div>
-     <div class="stack" style="gap:12px">${ROUTES.map(R=>suRoute(R.id,su.routes[R.id],su,w)).join('')}</div>
-   </section>
+   ${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
+   ${suBranchArea(w,su,id)}
+   ${suSw('مسارات الشحن:',SU_RT,S.suRtUI,'su-rt-ui')}
+   ${suRoutesArea(w,su)}
    <section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>
   </div>`;
 }
 function suRefreshRoute(rid){
-  const su=S.setup, box=document.querySelector(`[data-sr="${rid}"]`); if(!box) return; const w=wh(su.wh), r=su.routes[rid];
+  const su=S.setup, w=wh(su.wh), r=su.routes[rid]; if(!r) return;
+  document.querySelectorAll(`[data-sr="${rid}"]`).forEach(box=>{
   const s=box.querySelector('[data-sl=sum]'); if(s) s.innerHTML=suSummary(rid,r,w.city);
   const b=box.querySelector('[data-sl=boxes]'); if(b) b.innerHTML=suPriceBoxes(rid,r.p);
   const rd=box.querySelector('[data-sl=rad]'); if(rd) rd.textContent=r.cov.radius||'—';
+  box.querySelectorAll('[data-sl=mg]').forEach(m=>m.innerHTML=suMargin(rid,r.p));});
+  const co=document.querySelector(`[data-sl-co="${rid}"]`); if(co&&co.textContent) co.textContent=r.p.fee===''?'—':r.p.fee+' ر.س';
+  const li=document.querySelector(`[data-sl-list="${rid}"]`); if(li) li.textContent=r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف';
 }
+const suT=rid=>rid==='__all'?ROUTES.filter(R=>!(S.setup.ovr||[]).includes(R.id)).map(R=>S.setup.routes[R.id]):[S.setup.routes[rid]];
 function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; }
+
+/* ---------- booking page layout variants (prototype switch) ---------- */
+S.suBrUI='current'; S.suRtUI='current';
+const SU_BR=[['current','الحالي'],['hero','خريطة كبيرة + بطاقة عائمة'],['compact','ملخص مضغوط'],['tiles','بطاقات + شريط الأسبوع'],['confirm','خطوات تأكيد'],['week','جدول أسبوعي مرئي']];
+const SU_RT=[['current','الحالي'],['table','جدول مقارنة'],['cols','أعمدة متجاورة'],['master','قائمة + تفاصيل'],['template','إعداد موحد + استثناءات'],['checkout','من معاينة صفحة الدفع']];
+const suSw=(lbl,list,cur,act)=>`<div class="proto-bar" style="margin-bottom:0"><b>${lbl}</b><div class="seg seg-wrap">${list.map(([k,l],i)=>`<button type="button" class="${cur===k?'on':''}" data-act="${act}" data-v="${k}">${i}. ${l}</button>`).join('')}</div><span class="muted sm">للمقارنة في النموذج فقط.</span></div>`;
+const DAYS=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function whDays(w){const m={}; w.hours.forEach(([d,v])=>{ if(d.includes('–')){const [a,b]=d.split('–').map(s=>s.trim()); let i=DAYS.indexOf(a); const j=DAYS.indexOf(b); for(;i<=j;i++) m[DAYS[i]]=v;} else m[d]=v; }); return DAYS.map(d=>[d,m[d]||'مغلق']);}
+const hNum=s=>{const x=s.trim().match(/(\d+):(\d+)\s*(ص|م)/); if(!x) return null; let h=+x[1]%12; if(x[3]==='م') h+=12; return h+ +x[2]/60;};
+const hSpan=v=>v==='مغلق'?null:v.split('–').map(hNum);
+function todayInfo(w){const d=new Date(), days=whDays(w), [n,v]=days[d.getDay()], sp=hSpan(v), now=d.getHours()+d.getMinutes()/60;
+  if(!sp) return {open:false,txt:`مغلق اليوم (${n})`};
+  return now>=sp[0]&&now<sp[1]?{open:true,txt:`مفتوح الآن · يغلق ${v.split('–')[1].trim()}`}:{open:false,txt:`مغلق الآن · ساعات اليوم ${v}`};}
+function suMap(su,h=200){return `<div class="mapmock" style="height:${h}px"><svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice"><rect width="400" height="200" fill="#e8efe9"/><path d="M0 55 L400 35 M0 140 L400 160 M90 0 L120 200 M250 0 L230 200 M330 0 L360 200" stroke="#fff" stroke-width="10"/><path d="M0 55 L400 35 M0 140 L400 160 M90 0 L120 200 M250 0 L230 200" stroke="#f6d77c" stroke-width="3"/><rect x="20" y="160" width="60" height="36" fill="#cfe6d4"/><rect x="280" y="60" width="70" height="50" fill="#cfe6d4"/>
+  <g transform="translate(${su.pinMoved?235:180} ${su.pinMoved?120:95})"><circle r="26" fill="#004956" opacity=".12"/><path d="M0 0 c-9 -11 -14 -17 -14 -24 a14 14 0 0 1 28 0 c0 7 -5 13 -14 24z" fill="#d14343"/><circle cy="-24" r="5" fill="#fff"/></g></svg>
+  <span class="map-hint">${su.pinMoved?'تم تحديث الموقع · اسحب الدبوس للتعديل':'اسحب الدبوس لتحديد مدخل الاستلام بدقة'}</span></div>`;}
+const pinBtn=su=>`<button class="btn btn-sm" type="button" data-act="su-pin">${I.pin}${su.pinMoved?'إعادة للموقع الأصلي':'تعديل الموقع'}</button>`;
+const hoursDl=w=>`<div class="dl">${w.hours.map(h=>`<dt>${h[0]}</dt><dd class="num" style="${h[1]==='مغلق'?'color:var(--bad)':''}">${h[1]}</dd>`).join('')}</div>`;
+function weekStrip(w){const t=new Date().getDay(); return `<div class="wk-strip">${whDays(w).map(([d,v],i)=>`<div class="wk-d ${v==='مغلق'?'off':''} ${i===t?'today':''}"><b>${d}</b><span class="num">${v==='مغلق'?'مغلق':v.replace(/:00/g,'').replace(' – ','–')}</span></div>`).join('')}</div>`;}
+function weekChart(w){const t=new Date(), now=t.getHours()+t.getMinutes()/60, S0=6,S1=22, pct=x=>((Math.min(S1,Math.max(S0,x))-S0)/(S1-S0)*100).toFixed(1);
+  return `<div class="wk-chart"><div class="wk-axis"><span></span><div>${[6,10,14,18,22].map(h=>`<i style="inset-inline-start:${pct(h)}%">${h>12?h-12+' م':h===12?'12 م':h+' ص'}</i>`).join('')}</div></div>
+   ${whDays(w).map(([d,v],i)=>{const sp=hSpan(v); return `<div class="wk-row ${i===t.getDay()?'today':''}"><span>${d}</span><div class="wk-track">${sp?`<i style="inset-inline-start:${pct(sp[0])}%;width:${(pct(sp[1])-pct(sp[0])).toFixed(1)}%" title="${v}"></i>`:'<em>مغلق</em>'}${i===t.getDay()?`<b class="wk-now" style="inset-inline-start:${pct(now)}%" aria-label="الآن"></b>`:''}</div><small class="num">${sp?v:''}</small></div>`;}).join('')}</div>`;}
+
+function suBranchArea(w,su,id){
+  const v=S.suBrUI, head=`<div class="row"><div class="wimg" style="width:56px;height:56px">${whImg(w)}</div><div><h2>بيانات الفرع</h2><div class="sm muted">سيُضاف هذا المستودع كفرع في متجرك. بياناته الأساسية يديرها المستودع.</div></div></div>`;
+  const ti=todayInfo(w), todayPill=`<span class="pill ${ti.open?'ok':'warn'}">${I.clock}${ti.txt}</span>`;
+  if(v==='hero') return `<section class="panel stack su-hero" style="gap:0">
+     <div class="su-hero-map">${suMap(su,300)}
+       <div class="su-float"><div class="row" style="gap:10px"><div class="wimg" style="width:44px;height:44px">${whImg(w)}</div><div style="min-width:0"><b>${w.name}</b><div class="sm muted">${w.city} · وقت التجهيز حتى 24 ساعة</div></div></div>
+         ${opBadge(id)}${todayPill}${pinBtn(su)}</div></div>
+     <div class="pad stack"><div class="row between"><b>ساعات العمل</b><span class="sm muted">يحددها المستودع</span></div>${weekStrip(w)}</div></section>`;
+  if(v==='compact') return `<section class="panel pad stack">
+     <div class="su-cmp"><div class="wimg" style="width:48px;height:48px">${whImg(w)}</div><div style="flex:1;min-width:0"><b>${w.name}</b><div class="sm muted">${w.city} · وقت التجهيز حتى 24 ساعة</div></div>${opBadge(id)}${todayPill}</div>
+     <details class="su-acc"${su.pinMoved?' open':''}><summary><span class="row" style="gap:8px">${I.pin}<b>موقع الاستلام</b></span><span class="sm muted">${su.pinMoved?'موقع معدّل':w.city+'، الموقع الافتراضي'}</span></summary><div class="stack" style="gap:10px;padding-top:10px">${suMap(su,180)}<div>${pinBtn(su)}</div></div></details>
+     <details class="su-acc"><summary><span class="row" style="gap:8px">${I.clock}<b>ساعات العمل</b></span><span class="sm muted">${w.hours[0][0]} ${w.hours[0][1]}</span></summary><div style="padding-top:10px">${hoursDl(w)}</div></details></section>`;
+  if(v==='tiles') return `<section class="panel pad stack">${head}
+     <div class="su-tiles"><div><span class="t-ic">${I.pin}</span><span>المدينة</span><b>${w.city}</b></div><div><span class="t-ic">${I.truckS}</span><span>الشركة المشغّلة</span><b>${OPERATOR[id]}</b></div><div><span class="t-ic">${I.box}</span><span>وقت التجهيز</span><b>حتى 24 ساعة</b></div><div class="${ti.open?'t-ok':'t-warn'}"><span class="t-ic">${I.clock}</span><span>اليوم</span><b>${ti.open?'مفتوح الآن':'مغلق الآن'}</b></div></div>
+     <div class="su-strip">${suMap(su,120)}<div class="stack" style="gap:6px"><b>موقع الاستلام</b><span class="sm muted">${w.name}، ${w.city}${su.pinMoved?' · <b>موقع معدّل</b>':''}</span><div>${pinBtn(su)}</div></div></div>
+     <div class="stack" style="gap:8px"><b>ساعات العمل هذا الأسبوع</b>${weekStrip(w)}</div></section>`;
+  if(v==='confirm'){ const ok=[true,!!su.locOk,true], n=ok.filter(Boolean).length;
+    const step=(i,t,sub,body,act)=>`<li class="su-step ${ok[i]?'done':''}"><span class="su-sn">${ok[i]?I.check:i+1}</span><div class="stack" style="gap:8px;flex:1;min-width:0"><div class="row between"><div><b>${t}</b><div class="sm muted">${sub}</div></div>${act||''}</div>${body}</div></li>`;
+    return `<section class="panel pad stack"><div class="row between"><div><h2>راجع بيانات الفرع</h2><div class="sm muted">تأكد من موقع الاستلام قبل الحجز، باقي البيانات يديرها المستودع.</div></div><span class="pill ${n===3?'ok':'warn'}">${n} من 3 مؤكدة</span></div>
+     <ol class="su-steps">
+      ${step(0,'بيانات المستودع','من المستودع · لا تحتاج إجراء',`<div class="ro"><div><span>اسم الفرع</span>${w.name}</div><div><span>المدينة</span>${w.city}</div><div><span>الشركة المشغّلة</span>${OPERATOR[id]}</div><div><span>وقت التجهيز</span>حتى 24 ساعة</div></div>`)}
+      ${step(1,'موقع الاستلام','يصل المندوب إلى هذا الموقع لاستلام الشحنات',su.locOk?`<div class="sm ink2">${I.pin} ${w.name}، ${w.city}${su.pinMoved?' · موقع معدّل':''}</div>`:`${suMap(su,180)}<div class="row">${pinBtn(su)}</div>`,su.locOk?`<button class="btn btn-sm" type="button" data-act="su-locok">تعديل</button>`:`<button class="btn btn-sm btn-p" type="button" data-act="su-locok">${I.check}تأكيد الموقع</button>`)}
+      ${step(2,'ساعات العمل','يحددها المستودع وتُستخدم لحساب مواعيد التوصيل',hoursDl(w))}
+     </ol></section>`;}
+  if(v==='week') return `<section class="panel pad stack"><div class="row between">${head}${opBadge(id,{lg:true})}</div>
+     <div class="su-two"><div class="stack" style="gap:10px"><div class="row between"><b>ساعات العمل</b>${todayPill}</div>${weekChart(w)}<p class="sm muted">الشريط الأخضر ساعات الاستلام والتجهيز. الطلبات بعد الإغلاق تُجهّز في يوم العمل التالي.</p></div>
+       <div class="stack" style="gap:10px"><div class="row between"><b>موقع الفرع</b>${pinBtn(su)}</div>${suMap(su,170)}<div class="ro" style="grid-template-columns:1fr 1fr"><div><span>المدينة</span>${w.city}</div><div><span>وقت التجهيز</span>حتى 24 ساعة</div></div></div></div></section>`;
+  // current
+  return `<section class="panel pad stack">
+     <div class="row between">${head}${opBadge(id,{lg:true})}</div>
+     <div class="ro"><div><span>اسم الفرع</span>${w.name}</div><div><span>المدينة</span>${w.city}</div><div><span>الشركة المشغّلة</span>${OPERATOR[id]}</div><div><span>وقت التجهيز</span>حتى 24 ساعة</div></div>
+     <div class="su-two">
+       <div class="stack" style="gap:10px"><div class="row between"><b>موقع الفرع على الخريطة</b><button class="btn btn-sm" type="button" data-act="su-pin">${su.pinMoved?'إعادة للموقع الأصلي':'تعديل الموقع'}</button></div>
+         ${suMap(su)}<div class="sm ink2">${w.name}، ${w.city}${su.pinMoved?' · <b>موقع معدّل</b>':''}</div></div>
+       <div class="stack" style="gap:10px"><b>ساعات العمل</b>${hoursDl(w)}<p class="sm muted">ساعات العمل يحددها المستودع، وتُستخدم لحساب مواعيد التجهيز والتوصيل.</p></div>
+     </div></section>`;
+}
+
+/* shared route pieces */
+function suCovOpts(rid,r,w,{sm=false}={}){
+  return `<div class="opts ${sm?'opts-sm':''}">${[['all','كل المملكة'],['cities','مدن محددة'],['radius','نطاق حول الفرع']].map(([k,l])=>`<button type="button" class="opt ${r.cov.mode===k?'on':''}" data-act="su-cov" data-v="${k}" aria-pressed="${r.cov.mode===k}">${l}</button>`).join('')}</div>
+   ${r.cov.mode==='cities'?`<div class="zones">${r.cov.cities.map(ci=>`<span class="zone">${ci}<button type="button" data-act="su-city-rm" data-v="${ci}" aria-label="إزالة ${ci}">${I.x}</button></span>`).join('')}</div>
+     <select class="select" data-su="addcity" aria-label="إضافة مدينة"><option value="">أضف مدينة…</option>${CITIES.filter(ci=>!r.cov.cities.includes(ci)).map(ci=>`<option>${ci}</option>`).join('')}</select>`:''}
+   ${r.cov.mode==='radius'?`<div class="row" style="gap:8px"><div class="field"><input type="number" min="1" data-su="radius" value="${esc(r.cov.radius)}" aria-label="نصف القطر" style="width:70px"><em>كم</em></div><span class="sm muted">حول الفرع في ${w.city}</span></div>`:''}`;
+}
+function suMargin(rid,p){const c=RCOST[rid]; if(p.fee==='') return `<span class="mg mg-na">—</span>`; const d=+p.fee-c.base; return `<span class="mg ${d<0?'mg-bad':d>0?'mg-ok':''}"><bdi dir="ltr">${d>0?'+':''}${d.toFixed(2)}</bdi> ر.س</span>`;}
+function suFeeFields(rid,p,{dur=true}={}){const wgt=p.type==='weight';
+  return `<div class="su-mini">
+    <label class="fld"><span>نوع التسعير</span><select class="inp" data-su="type"><option value="weight" ${wgt?'selected':''}>حسب الوزن</option><option value="fixed" ${!wgt?'selected':''}>ثابت</option></select></label>
+    <label class="fld"><span>يدفع العميل${wgt?' لأول':''}</span><div class="field wide"><input type="number" min="0" data-su="fee" value="${esc(p.fee)}"><em>ر.س</em></div></label>
+    ${wgt?`<label class="fld"><span>حد الوزن</span><div class="field wide"><input type="number" min="0" data-su="baseW" value="${esc(p.baseW)}"><em>كجم</em></div></label>
+    <label class="fld"><span>كل كجم إضافي</span><div class="field wide"><input type="number" min="0" data-su="extra" value="${esc(p.extra)}"><em>ر.س</em></div></label>`:''}
+    ${dur?`<label class="fld"><span>مدة الشحن للعميل</span><input class="inp" data-su="dur" value="${esc(p.dur)}"></label>`:''}</div>`;}
+const suCodChk=(R,p)=>`<label class="chk"><input type="checkbox" data-su="cod" ${p.cod?'checked':''}><span><b>الدفع عند الاستلام</b><small>يظهر مع «${R.name}».</small></span></label>`;
+const suToggle=(R,r)=>`<label class="toggle"><input type="checkbox" data-su="on" ${r.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label>`;
+const covers=(r,w,city)=>r.on&&(r.cov.mode==='all'||(r.cov.mode==='cities'&&r.cov.cities.includes(city))||(r.cov.mode==='radius'&&city===w.city));
+
+function suRoutesArea(w,su){
+  const v=S.suRtUI, intro=`<div><h2>مسارات الشحن</h2><p class="sm muted">أنشأنا 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به، ويظهر لعميلك بسعره في صفحة الدفع.</p></div>`;
+  const RR=ROUTES.map(R=>({R,r:su.routes[R.id],c:RCOST[R.id],rid:R.id}));
+  const sel=su.sel||'std';
+  if(v==='table') return `<section class="panel pad stack">${intro}
+    <div class="tbl-wrap"><table class="tbl su-tbl"><thead><tr><th>المسار</th><th>التغطية</th><th class="n">تكلفتك</th><th class="n">يدفع العميل</th><th class="n">ربحك / شحنة</th><th>المدة للعميل</th><th></th></tr></thead><tbody>
+    ${RR.map(({R,r,c,rid})=>{const op=su.open.includes(rid)&&r.on; return `<tr data-sr="${rid}" class="${r.on?'':'off'}"><td><div class="row" style="gap:8px;flex-wrap:nowrap">${suToggle(R,r)}<span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span><div><b>${R.name}</b><div class="sm muted">${R.carrier}</div></div></div></td>
+      <td class="sm">${covLabel(r.cov,w.city)}</td><td class="n num">${c.base} ر.س<div class="sm muted">لأول ${c.w} كجم</div></td>
+      <td class="n"><div class="field"><input type="number" min="0" data-su="fee" value="${esc(r.p.fee)}" aria-label="سعر ${R.name}" style="width:64px" ${r.on?'':'disabled'}><em>ر.س</em></div></td>
+      <td class="n" data-sl="mg">${suMargin(rid,r.p)}</td><td class="sm">${esc(r.p.dur)}</td>
+      <td><button class="btn btn-sm" type="button" data-act="su-open" data-v="${rid}" ${r.on?'':'disabled'} aria-expanded="${op}">${op?'إغلاق':'تفاصيل'}</button></td></tr>
+      ${op?`<tr class="su-tbl-ed"><td colspan="7"><div data-sr="${rid}" class="su-ed-grid"><div class="stack" style="gap:8px"><b>التغطية</b>${suCovOpts(rid,r,w,{sm:true})}</div><div class="stack" style="gap:8px"><b>التسعير</b>${suFeeFields(rid,r.p)}${suCodChk(R,r.p)}</div></div></td></tr>`:''}`;}).join('')}
+    </tbody></table></div><p class="sm muted">«ربحك / شحنة» = ما يدفعه العميل ناقص تكلفة ${'الناقل'} لأول ${RCOST.std.w} كجم. الأحمر يعني أنك تتحمل الفارق.</p></section>`;
+  if(v==='cols') return `<section class="panel pad stack">${intro}<div class="su-cols">
+    ${RR.map(({R,r,c,rid})=>`<div class="su-col ${r.on?'':'off'}" data-sr="${rid}"><div class="row between"><div class="row" style="gap:8px"><span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span><div><b>${R.name}</b><div class="sm muted">${R.carrier} · ${c.dur}</div></div></div>${suToggle(R,r)}</div>
+      ${R.locked?`<span class="lock">${I.lock}إلزامي لكل الطلبات</span>`:''}
+      <div class="su-col-sec"><b class="sm">التغطية</b>${suCovOpts(rid,r,w,{sm:true})}</div>
+      <div class="su-col-sec"><b class="sm">سعر العميل</b>${suFeeFields(rid,r.p)}</div>
+      <div class="su-col-foot"><div class="row between sm"><span class="muted">تكلفتك</span><b class="num">${c.base} ر.س</b></div><div class="row between sm"><span class="muted">ربحك / شحنة</span><b data-sl="mg">${suMargin(rid,r.p)}</b></div></div>
+      ${suCodChk(R,r.p)}</div>`).join('')}</div></section>`;
+  if(v==='master'){const s=RR.find(x=>x.rid===sel); return `<section class="panel pad stack">${intro}<div class="su-md">
+    <div class="su-md-list" role="tablist" aria-label="المسارات">${RR.map(({R,r,c,rid})=>`<button type="button" role="tab" aria-selected="${rid===sel}" class="su-md-i ${rid===sel?'on':''} ${r.on?'':'off'}" data-act="su-sel" data-v="${rid}"><span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span><span class="grow" style="min-width:0"><b>${R.name}</b><small data-sl-list="${rid}">${r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف'}</small></span>${r.on&&r.p.fee!==''?`<span class="st-ic ok">${I.check}</span>`:`<span class="st-ic warn">${I.info}</span>`}</button>`).join('')}
+      <p class="sm muted">المسار المكتمل له تغطية وسعر. يمكنك إيقاف السريع والاقتصادي.</p></div>
+    <div class="su-md-body" data-sr="${sel}"><div class="row between"><div class="row" style="gap:8px"><b style="font-size:17px">${s.R.name}</b><span class="chip gray">${s.c.dur}</span>${s.R.locked?`<span class="lock">${I.lock}إلزامي</span>`:''}</div>${suToggle(s.R,s.r)}</div>
+      ${s.r.on?suRouteBody(sel,s.r,w):'<div class="alert info">'+I.info+'<span class="grow">المسار موقوف ولا يظهر لعملائك. فعّله لتعديل التغطية والسعر.</span></div>'}</div></div></section>`;}
+  if(v==='template'){const ovr=su.ovr||[], sh=RR.find(x=>!ovr.includes(x.rid))?.r||RR[0].r;
+    return `<section class="panel pad stack">${intro}
+    <div class="su-shared" data-sr="__all"><div class="row between"><div><b>التغطية لكل المسارات</b><div class="sm muted">تُطبّق على المسارات الثلاثة، ويمكنك تخصيص مسار بعينه.</div></div><span class="chip">${I.check}إعداد موحد</span></div>
+      ${suCovOpts('__all',sh,w)}</div>
+    <div class="stack" style="gap:10px">${RR.map(({R,r,c,rid})=>{const o=ovr.includes(rid); return `<div class="su-trow ${r.on?'':'off'}" data-sr="${rid}"><div class="row between"><div class="row" style="gap:8px"><span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span><b>${R.name}</b><span class="chip gray">${c.dur}</span></div><div class="row">${suToggle(R,r)}</div></div>
+       ${r.on?`${suFeeFields(rid,r.p)}<div class="row between sm"><span>${o?'<b>تغطية مخصصة</b>':`<span class="muted">التغطية:</span> ${covLabel(r.cov,w.city)} <span class="chip gray">موحدة</span>`}</span><span class="row" style="gap:10px"><span><span class="muted">ربحك / شحنة:</span> <b data-sl="mg">${suMargin(rid,r.p)}</b></span><button class="btn btn-sm btn-ghost" type="button" data-act="su-ovr" data-v="${rid}">${o?'العودة للموحد':'تخصيص التغطية'}</button></span></div>
+       ${o?`<div class="su-ovr">${suCovOpts(rid,r,w,{sm:true})}</div>`:''}`:''}</div>`;}).join('')}</div></section>`;}
+  if(v==='checkout'){const city=su.pvCity||w.city, s=RR.find(x=>x.rid===sel), vis=RR.filter(x=>covers(x.r,w,city));
+    return `<section class="panel pad stack">${intro}<div class="su-co">
+     <div class="su-co-prev"><div class="row between"><b>معاينة صفحة الدفع</b><select class="select" data-act-sel="su-pvcity" aria-label="مدينة العميل">${CITIES.map(ci=>`<option ${ci===city?'selected':''}>${ci}</option>`).join('')}</select></div>
+       <div class="co-phone"><div class="sm muted">عميل من ${city} · طريقة الشحن</div>
+        ${RR.map(({R,r,rid})=>{const on=covers(r,w,city); return `<button type="button" class="co-opt ${rid===sel?'on':''} ${on?'':'hid'}" data-act="su-sel" data-v="${rid}"><span class="co-radio"></span><span class="grow"><b>${R.name}</b><small>${on?esc(r.p.dur):(r.on?`لا يظهر: خارج التغطية`:'لا يظهر: المسار موقوف')}</small></span><b class="num" data-sl-co="${rid}">${on?(r.p.fee===''?'—':r.p.fee+' ر.س'):''}</b>${on&&r.p.cod?'<span class="chip gray">عند الاستلام</span>':''}</button>`;}).join('')}
+        ${vis.length?'':'<div class="alert warn">'+I.warn+'<span class="grow">لا تظهر أي طريقة شحن لعملاء هذه المدينة.</span></div>'}</div>
+       <p class="sm muted">اضغط على طريقة شحن لتعديلها. غيّر المدينة لترى ما يظهر لكل عميل.</p></div>
+     <div class="su-md-body" data-sr="${sel}"><div class="row between"><div class="row" style="gap:8px"><span class="cp-ic ${RCOLOR[sel]}" aria-hidden="true">${I.truckS}</span><b style="font-size:17px">${s.R.name}</b></div>${suToggle(s.R,s.r)}</div>
+       ${s.r.on?`<div class="su-block"><h3>أين يظهر؟</h3>${suCovOpts(sel,s.r,w,{sm:true})}</div><div class="su-block"><h3>بكم يظهر؟</h3>${suFeeFields(sel,s.r.p)}<div class="row between sm"><span class="muted">تكلفتك ${s.c.base} ر.س لأول ${s.c.w} كجم</span><span><span class="muted">ربحك:</span> <b data-sl="mg">${suMargin(sel,s.r.p)}</b></span></div></div>${suCodChk(s.R,s.r.p)}`:'<div class="alert info">'+I.info+'<span class="grow">المسار موقوف ولا يظهر لعملائك.</span></div>'}</div></div></section>`;}
+  return `<section class="panel pad stack">${intro}<div class="stack" style="gap:12px">${ROUTES.map(R=>suRoute(R.id,su.routes[R.id],su,w)).join('')}</div></section>`;
+}
 
 /* ============ new transfer request (create) ============ */
 const TN_RULES = {maxUnits:500, maxPieceKg:25, maxTotalKg:400, cold:false};
@@ -1548,8 +1722,13 @@ document.addEventListener('click',e=>{
   if(act==='co-vis'){const r=cur(), p=r.pricing[a.dataset.v]; p.on=!p.on; if(!p.on&&S.coEdit===a.dataset.v) S.coEdit=null; rerenderSettings();}
   if(act==='copy-std'){const r=cur(), b=r.pricing.std, t=r.pricing[a.dataset.v]; Object.assign(t,{unify:b.unify,type:b.type,fee:b.fee,baseW:b.baseW,extra:b.extra,per:b.per}); rerenderSettings(); toast('تم نسخ تسعيرة الشحن العادي');}
   if(act==='su-open'){const v=a.dataset.v, su=S.setup; su.open=su.open.includes(v)?su.open.filter(x=>x!==v):[...su.open,v]; rerenderSetup();}
-  if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; S.setup.routes[rid].cov.mode=a.dataset.v; rerenderSetup();}
-  if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; const c=S.setup.routes[rid].cov; c.cities=c.cities.filter(x=>x!==a.dataset.v); rerenderSetup();}
+  if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>r.cov.mode=a.dataset.v); rerenderSetup();}
+  if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>{r.cov.cities=r.cov.cities.filter(x=>x!==a.dataset.v);}); rerenderSetup();}
+  if(act==='su-br-ui'){S.suBrUI=a.dataset.v; rerenderSetup();}
+  if(act==='su-rt-ui'){S.suRtUI=a.dataset.v; rerenderSetup();}
+  if(act==='su-sel'){S.setup.sel=a.dataset.v; rerenderSetup();}
+  if(act==='su-locok'){S.setup.locOk=!S.setup.locOk; rerenderSetup();}
+  if(act==='su-ovr'){const su=S.setup, v=a.dataset.v; su.ovr=su.ovr||[]; if(su.ovr.includes(v)){su.ovr=su.ovr.filter(x=>x!==v); const sh=ROUTES.find(R=>!su.ovr.includes(R.id)&&R.id!==v); if(sh) su.routes[v].cov=JSON.parse(JSON.stringify(su.routes[sh.id].cov));} else su.ovr.push(v); rerenderSetup();}
   if(act==='su-pin'){S.setup.pinMoved=!S.setup.pinMoved; rerenderSetup(); if(S.setup.pinMoved) toast('تم تحديث موقع الفرع');}
   if(act==='su-confirm'){const su=S.setup, w=wh(su.wh), pr={};
     for(const [rid,r] of Object.entries(su.routes)) pr[rid]={on:r.on,unify:r.p.fee!=='',type:r.p.type,fee:r.p.fee,baseW:r.p.baseW,extra:r.p.extra,per:r.p.per,cod:r.p.cod};
@@ -1577,8 +1756,8 @@ document.addEventListener('input',e=>{
   if(e.target.dataset.tnq&&S.tn){const it=S.tn.items.find(x=>x.id===e.target.dataset.tnq); it.qty=e.target.value; tnRefresh(e.target.id); return;}
   if(e.target.dataset.tn&&S.tn&&['date','notes'].includes(e.target.dataset.tn)){S.tn[e.target.dataset.tn]=e.target.value; return;}
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['fee','baseW','extra','per','dur','radius'].includes(e.target.dataset.su)){
-    const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
-    if(f==='radius') r.cov.radius=e.target.value; else r.p[f]=e.target.value; suRefreshRoute(rid); return;}
+    const rid=e.target.closest('[data-sr]').dataset.sr, f=e.target.dataset.su;
+    if(f==='radius'){suT(rid).forEach(r=>r.cov.radius=e.target.value); if(rid==='__all') ROUTES.forEach(R=>suRefreshRoute(R.id));} else S.setup.routes[rid].p[f]=e.target.value; suRefreshRoute(rid); return;}
   if(e.target.id==='mq'){S.mq=e.target.value; const pos=e.target.selectionStart; route(); const q=document.getElementById('mq'); q.focus(); q.setSelectionRange(pos,pos);}
   if(e.target.dataset.zfi&&S.zoneEdit){S.zoneEdit.draft[e.target.dataset.zfi]=e.target.value; if(e.target.dataset.zfi==='radius'){rerenderSettings(); document.getElementById('zf-rad')?.focus();}}
   const f=e.target.dataset.pf;
@@ -1594,11 +1773,13 @@ document.addEventListener('change',e=>{
   if(e.target.dataset.tn&&S.tn&&['from','to'].includes(e.target.dataset.tn)){S.tn[e.target.dataset.tn]=e.target.value; tnRefresh(); return;}
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['on','cod','type','addcity'].includes(e.target.dataset.su)){
     const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
+    if(f==='addcity'&&e.target.value&&rid==='__all'){suT(rid).forEach(x=>{if(!x.cov.cities.includes(e.target.value)) x.cov.cities.push(e.target.value);}); rerenderSetup(); return;}
     if(f==='on'){r.on=e.target.checked; if(r.on&&!S.setup.open.includes(rid)) S.setup.open.push(rid);}
     else if(f==='cod') r.p.cod=e.target.checked;
     else if(f==='type') r.p.type=e.target.value;
     else if(f==='addcity'&&e.target.value) r.cov.cities.push(e.target.value);
     rerenderSetup(); return;}
+  if(e.target.dataset.actSel==='su-pvcity'){S.setup.pvCity=e.target.value; rerenderSetup(); return;}
   if(e.target.id==='city'){S.city=e.target.value;route();}
   if(e.target.dataset.rowon){const r=rowBy(e.target.dataset.rowon); r.on=e.target.checked; toast(r.on?'تم تفعيل '+r.name:'تم إيقاف '+r.name);}
   const f=e.target.dataset.pf;
