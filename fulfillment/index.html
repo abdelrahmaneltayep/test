@@ -299,6 +299,30 @@ th[rowspan]{vertical-align:bottom}
 .su-arrow{width:34px;height:34px;border-radius:50%;background:var(--mint-50);display:grid;place-items:center;color:var(--brand)}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
+.chk-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.chk-list li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line-2)}
+.chk-list li:first-child{border-top:0}
+.chk-list small{display:block;font-size:12px;color:var(--muted)}
+.st-ic{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:700;font-size:13px}
+.st-ok .st-ic{background:var(--ok-bg);color:var(--ok)} .st-bad .st-ic{background:var(--bad-bg);color:var(--bad)} .st-todo .st-ic{background:var(--warn-bg);color:var(--warn)} .st-na .st-ic{background:var(--line-2);color:var(--muted)}
+.st-bad b{color:var(--bad)}
+.st-v{font-size:12px;color:var(--ink-2);max-width:40%;text-align:end}
+.st-bad .st-v{color:var(--bad);font-weight:600}
+.tn-check{border-color:#f1d9b5}
+.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.meter{border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.m-bar{height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.m-bar i{display:block;height:100%;background:var(--ok);border-radius:8px}
+.meter.over{border-color:#f5c7c7;background:#fff7f7} .meter.over .m-bar i{background:var(--bad)} .meter.over b{color:var(--bad)}
+.rule-chip.bad{border-color:#f5c7c7;color:var(--bad);background:#fff7f7}
+.tn-banner{display:flex;gap:10px;align-items:center;background:#fffaf2;border:1px solid #f1d9b5;border-radius:var(--r-lg);padding:10px 14px;font-size:13px;color:#7a5210}
+.tn-banner.bad{background:#fff7f7;border-color:#f5c7c7;color:#9b2c2c}
+.inline-hint{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--ink-2);background:#f8fafa;border-radius:var(--r);padding:8px 12px}
+.th-lim{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.tn-ack summary{cursor:pointer;padding:16px 20px;list-style:none}
+.tn-ack summary::-webkit-details-marker{display:none}
+.tn-ack{background:#fffaf2;border-color:#f1d9b5}
+@media (max-width:760px){.meters{grid-template-columns:1fr}}
 .tn-method{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:var(--surface);cursor:pointer}
 .tn-method span{font-size:12px;color:var(--muted)}
 .tn-method.on{border-color:var(--mint-strong);background:var(--mint-50)}
@@ -1284,13 +1308,15 @@ function tnProducts(tn){
       <td class="n num">${((+it.qty||0)*p.kg).toFixed(1)} كجم</td>
       <td><button class="icon-btn danger" type="button" data-act="tn-rm" data-v="${p.id}" aria-label="إزالة ${p.n}">${I.trash}</button></td></tr>
       ${er||wr?`<tr class="row-msg ${er?'err':''}"><td colspan="6">${(er||[]).map(x=>`<div class="msg err">${I.warn}<span class="grow">${x.t}</span>${x.fix==='remove'?`<button class="btn btn-sm" type="button" data-act="tn-rm" data-v="${p.id}">إزالة المنتج</button>`:x.fix==='max'?`<button class="btn btn-sm" type="button" data-act="tn-max" data-v="${p.id}">استخدام ${p.stock}</button>`:''}</div>`).join('')}${(wr||[]).map(x=>`<div class="msg warn">${I.info}<span class="grow">${x}</span></div>`).join('')}</td></tr>`:''}`;}).join('');
+  const inl=S.tnUI==='inline';
   return `<h2>المنتجات</h2>
-    <select class="select" style="width:100%" data-tnadd aria-label="إضافة منتج"><option value="">اختر من المنتجات</option>${CATALOG.filter(p=>!added.includes(p.id)).map(p=>`<option value="${p.id}">${p.n} · ${p.sku}${p.flag==='cold'?' · مبرد':''}${p.kg>TN_RULES.maxPieceKg?' · '+p.kg+' كجم':''}</option>`).join('')}</select>
+    <select class="select" style="width:100%" data-tnadd aria-label="إضافة منتج"><option value="">اختر من المنتجات</option>${CATALOG.filter(p=>!added.includes(p.id)).map(p=>`<option value="${p.id}">${p.n} · ${p.sku}${p.flag==='cold'?(inl?' · غير مقبول: مبرد':' · مبرد'):''}${p.kg>TN_RULES.maxPieceKg?(inl?` · غير مقبول: ${p.kg} كجم`:' · '+p.kg+' كجم'):''}</option>`).join('')}</select>
+    ${inl?`<div class="inline-hint">${I.info}<span>هذا المستودع لا يقبل المنتجات المبردة، ولا القطع الأثقل من ${TN_RULES.maxPieceKg} كجم. الحد للطلب ${TN_RULES.maxUnits} قطعة و${TN_RULES.maxTotalKg} كجم.</span></div>`:''}
     ${tn.items.length?`
      ${c.nErr?`<div class="alert bad">${I.warn}<span class="grow"><b>${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} يجب تصحيحها قبل الإرسال.</b> المنتجات التي لا تطابق شروط المستودع مظللة بالأحمر.</span></div>`:`<div class="alert ok">${I.check}<span class="grow">كل المنتجات تطابق شروط المستودع.</span></div>`}
      ${c.global.map(g=>`<div class="alert bad">${I.warn}<span class="grow">${g}</span></div>`).join('')}
-     <div class="tbl-wrap"><table class="tn-tbl"><thead><tr><th>المنتج</th><th>SKU</th><th class="n">المتوفر في الفرع</th><th class="n">الكمية</th><th class="n">الوزن</th><th></th></tr></thead><tbody>${rows}</tbody>
-      <tfoot><tr><td colspan="3"><b>الإجمالي</b></td><td class="n num ${c.units>TN_RULES.maxUnits?'qty-bad':''}"><b>${c.units.toLocaleString('en')}</b> / ${TN_RULES.maxUnits} قطعة</td><td class="n num ${c.kg>TN_RULES.maxTotalKg?'qty-bad':''}"><b>${c.kg.toFixed(1)}</b> / ${TN_RULES.maxTotalKg} كجم</td><td></td></tr></tfoot></table></div>`
+     <div class="tbl-wrap"><table class="tn-tbl"><thead><tr><th>المنتج</th><th>SKU</th><th class="n">المتوفر في الفرع</th><th class="n">الكمية${inl?`<small class="th-lim">حد الطلب ${TN_RULES.maxUnits}</small>`:''}</th><th class="n">الوزن${inl?`<small class="th-lim">حد ${TN_RULES.maxTotalKg} كجم</small>`:''}</th><th></th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="3"><b>الإجمالي</b></td><td class="n num ${c.units>TN_RULES.maxUnits?'qty-bad':''}"><b>${c.units.toLocaleString('en')}</b> / ${TN_RULES.maxUnits} قطعة</td><td class="n num ${c.kg>TN_RULES.maxTotalKg?'qty-bad':''}"><b>${c.kg.toFixed(1)}</b> / ${TN_RULES.maxTotalKg} كجم</td><td></td></tr></tfoot></table></div>${inl?`<div class="inline-hint">${I.tag}<span>عند التغليف: ملصق SKU على كل قطعة، وغلّف القابل للكسر بالفقاعات واكتب «قابل للكسر» على الكرتونة.</span></div>`:''}`
     :`<div class="empty"><div class="ill">${I.box}</div><b>لا توجد منتجات بعد</b><p>ابحث عن منتجات لإضافتها لطلب النقل.</p></div>`}`;
 }
 function screenTransferNew(){
@@ -1303,7 +1329,7 @@ function screenTransferNew(){
        <button type="button" class="tn-method ${tn.method==='self'?'on':''}" data-act="tn-method" data-v="self" aria-pressed="${tn.method==='self'}"><b>تسليم التاجر</b><span>قم بتوصيل المنتجات بنفسك إلى المستودع.</span></button>
        <button type="button" class="tn-method ${tn.method==='pickup'?'on':''}" data-act="tn-method" data-v="pickup" aria-pressed="${tn.method==='pickup'}"><b>تسليم لشركة الشحن</b><span>حدد موعداً لاستلام البضائع من متجرك.</span></button></div></div>
    </section>
-   ${tnRules(tn)}
+   ${tnSwitch()}<div id="tnRules">${tnRulesArea(tn)}</div>
    <section class="panel pad stack" id="tnProducts">${tnProducts(tn)}</section>
    <section class="panel pad stack"><h2>تفاصيل الشحن <span class="sm muted" style="font-weight:400">اختياري</span></h2>
      <div class="fld"><label for="tn-date">التاريخ المتوقع للوصول</label><input class="inp" type="date" id="tn-date" data-tn="date" value="${tn.date}"></div>
@@ -1316,10 +1342,63 @@ function screenTransferNew(){
 function tnRefresh(focusId){
   const pos=focusId&&document.getElementById(focusId)?document.getElementById(focusId).selectionStart:null;
   document.getElementById('tnProducts').innerHTML=tnProducts(S.tn);
+  if(['check','meters','banner'].includes(S.tnUI)) document.getElementById('tnRules').innerHTML=tnRulesArea(S.tn);
   const c=tnCheck(S.tn), btn=document.getElementById('tnSend'), note=document.getElementById('tnSendNote'), dest=rowBy(S.tn.to);
   btn.disabled=!!c.nErr||!S.tn.items.length; note.className='sm '+(c.nErr?'qty-bad':'muted');
   note.textContent=c.nErr?`صحّح ${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} لتفعيل الإرسال`:`${c.units} قطعة إلى ${dest?dest.name:''}`;
   if(focusId){const el=document.getElementById(focusId); if(el){el.focus(); try{el.setSelectionRange(pos,pos)}catch(_){}}}
+}
+
+/* ---------- rules display variants (prototype switch) ---------- */
+S.tnUI = 'chips';
+const TN_UIS=[['chips','الشريط الحالي'],['check','قائمة تحقق حيّة'],['meters','مؤشرات الحدود'],['banner','سطر + درج جانبي'],['inline','داخل المنتجات'],['ack','إقرار قبل الإرسال']];
+function tnRuleStatus(tn){
+  const c=tnCheck(tn), items=tn.items.map(i=>({...cat(i.id),qty:+i.qty||0}));
+  const cold=items.filter(p=>p.flag==='cold'), heavy=items.filter(p=>p.kg>TN_RULES.maxPieceKg), fragile=items.filter(p=>p.flag==='fragile');
+  const maxPiece=items.reduce((m,p)=>Math.max(m,p.kg),0);
+  return [
+    {k:'snow',t:'لا يقبل المنتجات المبردة',st:cold.length?'bad':'ok',v:cold.length?`${cold.map(p=>p.n).join('، ')}`:'لا توجد منتجات مبردة',d:'المنتجات المبردة تُرفض عند الاستلام لأن المستودع لا يدعم التخزين المبرد.'},
+    {k:'box',t:`حتى ${TN_RULES.maxUnits} قطعة للطلب`,st:c.units>TN_RULES.maxUnits?'bad':'ok',v:`${c.units.toLocaleString('en')} / ${TN_RULES.maxUnits} قطعة`,d:'للكميات الأكبر أنشئ أكثر من طلب نقل.',pct:c.units/TN_RULES.maxUnits},
+    {k:'scale',t:`الوزن الإجمالي حتى ${TN_RULES.maxTotalKg} كجم`,st:c.kg>TN_RULES.maxTotalKg?'bad':'ok',v:`${c.kg.toFixed(1)} / ${TN_RULES.maxTotalKg} كجم`,d:'يشمل وزن كل القطع في الطلب.',pct:c.kg/TN_RULES.maxTotalKg},
+    {k:'scale',t:`القطعة الواحدة حتى ${TN_RULES.maxPieceKg} كجم`,st:heavy.length?'bad':'ok',v:heavy.length?`${heavy.map(p=>`${p.n} ${p.kg} كجم`).join('، ')}`:`أثقل قطعة ${maxPiece} كجم`,d:'القطع الأثقل لا تدخل الكرتونة القياسية ولا تُقبل.',pct:maxPiece/TN_RULES.maxPieceKg},
+    {k:'tag',t:'ملصق SKU على كل قطعة',st:'todo',v:'تذكير عند التغليف',d:'القطع بلا ملصق تُعاد أو تُحتسب عليها رسوم ملصقات.'},
+    {k:'glass',t:'غلّف القابل للكسر بالفقاعات',st:fragile.length?'todo':'na',v:fragile.length?`ينطبق على ${fragile.map(p=>p.n).join('، ')}`:'لا ينطبق على منتجاتك',d:'واكتب «قابل للكسر» على الكرتونة.'},
+  ];
+}
+const IC=k=>({snow:I.snow,box:I.box,scale:I.scale,tag:I.tag,glass:I.glass}[k]);
+const STI={ok:I.check,bad:I.x,todo:I.info,na:'–'};
+function tnSwitch(){return `<div class="proto-bar" style="margin-bottom:0"><b>عرض الشروط:</b><div class="seg seg-wrap">${TN_UIS.map(([k,l],i)=>`<button type="button" class="${S.tnUI===k?'on':''}" data-act="tn-ui" data-v="${k}">${i}. ${l}</button>`).join('')}</div><span class="muted sm">للمقارنة في النموذج فقط.</span></div>`;}
+function tnRulesArea(tn){
+  const v=S.tnUI, R=tnRuleStatus(tn), bad=R.filter(r=>r.st==='bad').length;
+  if(v==='chips') return tnRules(tn);
+  if(v==='check') return `<section class="panel pad stack tn-check"><div class="row between"><b class="row" style="gap:6px">${I.info}شروط الاستلام في المستودع</b><span class="pill ${bad?'bad':'ok'}">${bad?`${bad} غير مستوفاة`:'كل الشروط مستوفاة'}</span></div>
+     <ul class="chk-list">${R.map(r=>`<li class="st-${r.st}"><span class="st-ic">${STI[r.st]}</span><span class="grow"><b>${r.t}</b><small>${r.d}</small></span><span class="st-v num">${r.v}</span></li>`).join('')}</ul></section>`;
+  if(v==='meters'){const m=R.filter(r=>r.pct!=null); return `<section class="panel pad stack"><div class="row between"><b>حدود المستودع لهذا الطلب</b><span class="sm muted">تتحدث مع كل منتج تضيفه</span></div>
+     <div class="meters">${m.map(r=>{const p=Math.min(1,r.pct), over=r.pct>1;return `<div class="meter ${over?'over':''}"><div class="row between"><span class="row" style="gap:6px">${IC(r.k)}${r.t}</span><b class="num">${r.v}</b></div><div class="m-bar"><i style="width:${(p*100).toFixed(0)}%"></i></div>${over?`<small class="qty-bad">${r.st==='bad'?'تجاوزت الحد':''}</small>`:''}</div>`}).join('')}</div>
+     <div class="rule-chips">${R.filter(r=>r.pct==null).map(r=>`<span class="rule-chip ${r.st==='bad'?'bad':''}">${IC(r.k)}${r.t}</span>`).join('')}</div></section>`;}
+  if(v==='banner') return `<div class="tn-banner ${bad?'bad':''}">${I.info}<span class="grow">لهذا المستودع <b>${R.length} شروط</b> للاستلام${bad?` · <b>${bad} منها غير مستوفاة</b> في طلبك`:' · طلبك يطابقها'}.</span><button class="btn btn-sm" type="button" data-act="tn-rules-drawer">عرض الشروط</button></div>`;
+  if(v==='inline') return '';
+  if(v==='ack') return `<details class="panel tn-ack"><summary class="row between"><b class="row" style="gap:6px">${I.info}شروط الاستلام (${R.length})</b><span class="sm muted">ستؤكدها قبل الإرسال</span></summary><ul class="rule-more" style="padding:0 20px 16px 20px">${R.map(r=>`<li><b>${r.t}.</b> ${r.d}</li>`).join('')}</ul></details>`;
+  return '';
+}
+function tnRulesDrawer(){
+  const R=tnRuleStatus(S.tn); closeDrawer();
+  const d=document.createElement('div'); d.className='drawer-wrap'; d.innerHTML=`<div class="drawer-bg" data-act="drawer-close"></div>
+   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="rT" style="width:min(460px,100vw)"><header class="drawer-h"><h2 id="rT">شروط الاستلام في المستودع</h2><button class="btn btn-sm btn-ghost" type="button" data-act="drawer-close" aria-label="إغلاق">${I.x}</button></header>
+   <div class="drawer-b"><ul class="chk-list">${R.map(r=>`<li class="st-${r.st}"><span class="st-ic">${STI[r.st]}</span><span class="grow"><b>${r.t}</b><small>${r.d}</small><small class="num">${r.v}</small></span></li>`).join('')}</ul></div>
+   <footer class="drawer-f"><button class="btn btn-p btn-block" type="button" data-act="drawer-close">فهمت</button></footer></aside>`;
+  document.body.appendChild(d); requestAnimationFrame(()=>d.classList.add('open'));
+}
+function tnAckModal(){
+  const items=[['تم وضع ملصق SKU على كل قطعة'],['غُلّفت المنتجات القابلة للكسر بالفقاعات وكُتب «قابل للكسر» على الكرتونة'],[`وزن كل كرتونة لا يتجاوز ${TN_RULES.maxPieceKg} كجم`],['وُضعت قائمة المحتويات داخل كل كرتونة']];
+  const o=document.createElement('div'); o.className='overlay';
+  o.innerHTML=`<div class="modal stack" role="dialog" aria-modal="true" aria-labelledby="ackT"><h2 id="ackT">قبل إرسال طلب النقل</h2><p class="ink2 sm">أكّد تجهيز الشحنة حسب شروط المستودع لتجنّب رفض أي قطعة عند الاستلام.</p>
+    <div class="stack" style="gap:8px">${items.map((x,i)=>`<label class="chk"><input type="checkbox" data-ack="${i}"><span>${x[0]}</span></label>`).join('')}</div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-x type="button">رجوع</button><button class="btn btn-p" data-ok type="button" disabled>تأكيد وإرسال</button></div></div>`;
+  document.body.appendChild(o);
+  o.addEventListener('change',()=>{o.querySelector('[data-ok]').disabled=[...o.querySelectorAll('[data-ack]')].some(x=>!x.checked);});
+  o.addEventListener('click',e=>{ if(e.target===o||e.target.closest('[data-x]')) o.remove();
+    if(e.target.closest('[data-ok]')&&!e.target.closest('[data-ok]').disabled){o.remove(); S.tn=null; S.tstate=1; go('transfer'); toast('تم إنشاء طلب نقل المخزون بنجاح');}});
 }
 
 const app=document.getElementById('app');
@@ -1408,7 +1487,9 @@ document.addEventListener('click',e=>{
   if(act==='tn-rm'){S.tn.items=S.tn.items.filter(x=>x.id!==a.dataset.v); tnRefresh();}
   if(act==='tn-max'){const it=S.tn.items.find(x=>x.id===a.dataset.v); it.qty=String(cat(it.id).stock); tnRefresh();}
   if(act==='tn-method'){S.tn.method=a.dataset.v; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
-  if(act==='tn-send'){ if(tnCheck(S.tn).nErr) return; S.tn=null; S.tstate=1; go('transfer'); toast('تم إنشاء طلب نقل المخزون بنجاح');}
+  if(act==='tn-ui'){S.tnUI=a.dataset.v; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
+  if(act==='tn-rules-drawer') tnRulesDrawer();
+  if(act==='tn-send'){ if(tnCheck(S.tn).nErr) return; if(S.tnUI==='ack'){tnAckModal(); return;} S.tn=null; S.tstate=1; go('transfer'); toast('تم إنشاء طلب نقل المخزون بنجاح');}
   if(act==='svc-toggle'){const v=a.dataset.v; S.priceOpen=S.priceOpen.includes(v)?S.priceOpen.filter(x=>x!==v):[...S.priceOpen,v]; rerenderSettings();}
   if(act==='zone-add'){S.zoneEdit={idx:-1,draft:{name:'',method:'city',country:'السعودية',city:cityOf(cur()),districts:'',hours:'all',from:'08:00',to:'22:00',radius:5}}; rerenderSettings(); document.getElementById('zf-name')?.focus();}
   if(act==='zone-edit'){const i=+a.dataset.i; S.zoneEdit={idx:i,draft:{...cur().zones[i]}}; rerenderSettings();}
