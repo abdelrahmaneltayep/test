@@ -265,6 +265,36 @@ th[rowspan]{vertical-align:bottom}
 .mapmock svg{width:100%;height:100%;display:block}
 .map-hint{position:absolute;bottom:8px;inset-inline-start:8px;background:rgba(255,255,255,.92);border-radius:6px;padding:2px 8px;font-size:12px;color:var(--ink-2)}
 .btn-block{width:100%;padding-block:13px;font-size:15px}
+.op-badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:2px 10px;font-size:12px;color:var(--ink-2);background:var(--surface);white-space:nowrap}
+.op-badge i{width:8px;height:8px;border-radius:50%}
+.op-badge b{color:var(--ink)}
+.op-badge.lg{font-size:13px;padding:4px 12px}
+.su-wrap{max-width:960px;margin-inline:auto}
+.su-two{display:grid;grid-template-columns:1.3fr 1fr;gap:20px}
+.su-route{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--surface)}
+.su-route.open{border-color:var(--mint-strong);box-shadow:0 0 0 3px var(--mint-50)}
+.su-route.off{opacity:.7}
+.su-rhead{display:flex;gap:12px;align-items:center;padding:14px 16px}
+.su-rsum{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.dot-sep{color:var(--muted)}
+.su-rbody{border-top:1px solid var(--line-2);padding:16px;display:flex;flex-direction:column;gap:20px}
+.su-block{display:flex;flex-direction:column;gap:10px}
+.su-block h3{font-size:15px}
+.su-radius{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.su-radius .field input{width:80px}
+.su-cost{background:#f8fafa;border-radius:var(--r-lg);padding:14px}
+.su-cost-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.su-cost-grid div{background:var(--surface);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column}
+.su-cost-grid span{font-size:12px;color:var(--ink-2)} .su-cost-grid b{font-size:20px} .su-cost-grid small{font-size:11px;color:var(--muted)}
+.tax-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--ok);background:var(--ok-bg);border-radius:20px;padding:1px 8px;white-space:nowrap}
+.su-form{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;display:flex;flex-direction:column;gap:14px}
+.su-sum-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-bottom:10px}
+.su-sumbox{border:1px dashed var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:8px}
+.su-sumrow{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-top:1px solid var(--line-2);padding-top:8px}
+.su-sumrow b{font-size:17px}
+.su-arrow{width:34px;height:34px;border-radius:50%;background:var(--mint-50);display:grid;place-items:center;color:var(--brand)}
+.su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
+@media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .icon-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink-2);flex:none}
 .icon-btn:hover{border-color:#cfd8da}
 .icon-btn.danger{color:var(--bad);border-color:#f0b8b8}
@@ -548,6 +578,7 @@ function browseCard(w){
         <div class="sm muted">${w.provider}</div>
       </div>
     </div>
+    <div>${opBadge(w.id)}</div>
     <div class="chips">${svcChips(w)}</div>
     <div class="price"><span class="sm muted">يبدأ من</span><strong class="num">${w.price} ر.س</strong><span class="ink2">/ طلب</span><span class="sm muted" style="margin-inline-start:auto">شامل التخزين والتجهيز والتوصيل</span></div>
     <div class="cta">
@@ -566,7 +597,7 @@ function screenDetail(id){
       <section class="panel pad stack">
         <div class="wcard-head"><div class="wimg" style="width:80px;height:80px">${whImg(w)}</div>
           <div style="flex:1"><h1 class="city" style="font-size:20px">${I.pin}${w.city}</h1><div class="ink2">${w.name}</div>
-          <div class="sm muted">${w.provider} · <span class="num">★ ${w.rating}</span> (${w.reviews} تقييم)</div></div></div>
+          <div class="sm muted">${w.provider} · <span class="num">★ ${w.rating}</span> (${w.reviews} تقييم)<div style="margin-top:6px">${opBadge(w.id,{lg:true})}</div></div></div></div>
         <p class="ink2">${w.desc}</p>
         <div class="chips">${w.svc.map(k=>`<span class="chip">${SVC[k]}</span>`).join('')}</div>
       </section>
@@ -1075,6 +1106,112 @@ function logSection(t){
 }
 
 /* ============ router & events ============ */
+/* ============ booking setup page (after "احجز") ============ */
+const OPERATOR = {ruh:'أرامكس',jed:'سمسا',dmm:'أرامكس',mak:'سمسا',med:'ناقل',khb:'سمسا'};
+const OP_TONE = {'أرامكس':'#d14343','سمسا':'#2563a8','ناقل':'#0f9f6e'};
+const opBadge = (id,{lg=false}={}) => { const op=OPERATOR[id]||'أرامكس'; return `<span class="op-badge ${lg?'lg':''}"><i style="background:${OP_TONE[op]}"></i>تشغيل: <b>${op}</b></span>`; };
+// merchant cost per route (tax inclusive), set by Salla
+const RCOST = {std:{base:24,w:15,extra:2.2,per:1,dur:'2 – 5 أيام'},exp:{base:32,w:15,extra:3,per:1,dur:'2 – 4 ساعات'},eco:{base:18,w:15,extra:2,per:1,dur:'5 – 7 أيام'}};
+const RCOLOR = {std:'cp-std',exp:'cp-exp',eco:'cp-eco'};
+function newSetup(id){
+  const w=wh(id);
+  return {wh:id, open:['std'], pinMoved:false,
+    routes:{
+      std:{on:true,cov:{mode:'all',cities:[],radius:25},p:{type:'weight',fee:'20',baseW:'15',extra:'2',per:'1',dur:'2 – 3 أيام',cod:false}},
+      exp:{on:true,cov:{mode:'radius',cities:[],radius:25},p:{type:'fixed',fee:'35',baseW:'',extra:'',per:'',dur:'خلال 4 ساعات',cod:true}},
+      eco:{on:true,cov:{mode:'cities',cities:[w.city],radius:25},p:{type:'weight',fee:'',baseW:'15',extra:'',per:'1',dur:'5 – 7 أيام',cod:false}},
+    }};
+}
+function suDiff(rid,p){
+  const c=RCOST[rid]; if(p.fee==='') return {cls:'info',txt:`أدخل تكلفة الشحن للعميل. تكلفتك لهذا المسار ${c.base} ر.س لأول ${c.w} كجم.`};
+  const d=+p.fee-c.base, w=p.type==='weight'?(p.baseW||c.w):c.w;
+  if(d<0) return {cls:'warn',txt:`ستتحمل فارق <b class="num">${Math.abs(d).toFixed(2)} ر.س</b> على كل شحنة حتى ${w} كجم، لأن السعر الظاهر لعميلك أقل من تكلفة شركة الشحن.`};
+  if(d>0) return {cls:'ok',txt:`تربح <b class="num">${d.toFixed(2)} ر.س</b> على كل شحنة حتى ${w} كجم فوق تكلفة شركة الشحن.`};
+  return {cls:'info',txt:'السعر الظاهر لعميلك مطابق لتكلفة شركة الشحن.'};
+}
+const covLabel = (c,city) => c.mode==='all'?'كل مدن المملكة':c.mode==='radius'?`${c.radius||'—'} كم حول الفرع (${city})`:(c.cities.length?c.cities.join('، '):'لم تُحدد مدن');
+function suSummary(rid,r,city){ const p=r.p; if(!r.on) return '<span class="muted">المسار موقوف ولا يظهر لعملائك</span>';
+  return `<span><span class="muted">التغطية:</span> ${covLabel(r.cov,city)}</span><span class="dot-sep">·</span><span><span class="muted">يدفع العميل:</span> <b class="num">${p.fee===''?'—':p.fee+' ر.س'}</b>${p.type==='weight'&&p.fee!==''?` <span class="muted">لأول ${p.baseW||'—'} كجم</span>`:''}</span>`; }
+function suPriceBoxes(rid,p){
+  const c=RCOST[rid], df=suDiff(rid,p);
+  return `<div class="su-sum-grid">
+     <div class="su-sumbox"><div class="row between"><b>تكلفتك للناقل</b><span class="tax-chip">${I.check}شامل الضريبة</span></div>
+       <div class="su-sumrow"><b class="num">${c.base} ر.س</b><span class="muted">لأول ${c.w} كجم</span></div><div class="su-sumrow"><b class="num">+${c.extra} ر.س</b><span class="muted">لكل ${c.per} كجم إضافي</span></div></div>
+     <div class="su-arrow" aria-hidden="true">←</div>
+     <div class="su-sumbox"><div class="row between"><b>يدفع العميل لك</b><span class="tax-chip">${I.check}شامل الضريبة</span></div>
+       <div class="su-sumrow"><b class="num">${p.fee===''?'—':p.fee+' ر.س'}</b><span class="muted">${p.type==='weight'?`لأول ${p.baseW||'—'} كجم`:'لأي وزن'}</span></div>
+       ${p.type==='weight'?`<div class="su-sumrow"><b class="num">+${p.extra===''?'—':p.extra} ر.س</b><span class="muted">لكل ${p.per||'—'} كجم إضافي</span></div>`:''}</div></div>
+   <div class="alert ${df.cls}">${I.info}<span class="grow">${df.txt}</span></div>`;
+}
+function suRoute(rid,r,su,w){
+  const R=ROUTES.find(x=>x.id===rid), c=RCOST[rid], p=r.p, open=su.open.includes(rid)&&r.on, wgt=p.type==='weight';
+  return `<div class="su-route ${open?'open':''} ${r.on?'':'off'}" data-sr="${rid}">
+   <div class="su-rhead">
+     <span class="cp-ic ${RCOLOR[rid]}" aria-hidden="true">${I.truckS}</span>
+     <div style="flex:1;min-width:0"><div class="row" style="gap:8px"><b>${R.name}</b><span class="chip gray">${c.dur}</span>${R.locked?`<span class="lock">${I.lock}إلزامي</span>`:''}</div>
+       <div class="sm muted">مسار شحن أُنشئ تلقائياً · ينفّذه ${R.carrier}</div>
+       <div class="sm su-rsum" data-sl="sum">${suSummary(rid,r,w.city)}</div></div>
+     <label class="toggle"><input type="checkbox" data-su="on" ${r.on?'checked':''} ${R.locked?'disabled':''} aria-label="تفعيل ${R.name}"><span></span></label>
+     <button class="btn btn-sm" type="button" data-act="su-open" data-v="${rid}" ${r.on?'':'disabled'} aria-expanded="${open}">${open?'إغلاق':'تعديل'}</button>
+   </div>
+   ${open?`<div class="su-rbody">
+     <section class="su-block"><h3>نطاق التغطية</h3><p class="sm muted">المناطق التي يظهر فيها «${R.name}» لعملائك في صفحة الدفع.</p>
+       <div class="opts">${[['all','كل مدن المملكة'],['cities','مدن محددة'],['radius','نطاق حول الفرع']].map(([k,l])=>`<button type="button" class="opt ${r.cov.mode===k?'on':''}" data-act="su-cov" data-v="${k}" aria-pressed="${r.cov.mode===k}">${l}</button>`).join('')}</div>
+       ${r.cov.mode==='cities'?`<div class="zones">${r.cov.cities.map(ci=>`<span class="zone">${ci}<button type="button" data-act="su-city-rm" data-v="${ci}" aria-label="إزالة ${ci}">${I.x}</button></span>`).join('')}</div>
+         <select class="select" data-su="addcity" aria-label="إضافة مدينة"><option value="">أضف مدينة…</option>${CITIES.filter(ci=>!r.cov.cities.includes(ci)).map(ci=>`<option>${ci}</option>`).join('')}</select>`:''}
+       ${r.cov.mode==='radius'?`<div class="su-radius"><span class="cp-ic" style="background:var(--line-2);color:var(--ink-2)">${I.map}</span><div style="flex:1"><b>النطاق الحالي: <span data-sl="rad">${r.cov.radius||'—'}</span> كم</b> <span class="chip">${I.check}موصى به 25 كم</span><div class="sm muted">حول موقع الفرع في ${w.city}.</div></div>
+         <div class="field"><input type="number" min="1" data-su="radius" value="${esc(r.cov.radius)}" aria-label="نصف القطر"><em>كم</em></div></div>`:''}
+     </section>
+     <section class="su-block"><div class="su-cost"><div class="row between"><div><h3>التكلفة عليك كتاجر</h3><p class="sm muted">ما يُخصم منك عند إنشاء بوليصة الشحن مع ${R.carrier}. جميع المبالغ شاملة ضريبة القيمة المضافة.</p></div><span class="tax-chip">${I.check}شامل الضريبة</span></div>
+       <div class="su-cost-grid"><div><span>التكلفة الأساسية</span><b class="num">${c.base} ر.س</b><small>لأول ${c.w} كجم</small></div><div><span>الوزن الإضافي</span><b class="num">${c.extra} ر.س</b><small>لكل ${c.per} كجم إضافي</small></div><div><span>مدة التوصيل من شركة الشحن</span><b>${c.dur}</b><small>${rid==='exp'?'داخل المدينة':'أيام عمل'}</small></div></div></div></section>
+     <section class="su-block"><h3>تكلفة الشحن على العميل</h3><p class="sm muted">هذه تسعيرة الشحن التي ستحددها لعميلك في صفحة الدفع.</p>
+       <div class="su-form">
+         <div class="fld"><label for="su-type-${rid}">نوع التسعير <i>*</i></label><select class="inp" id="su-type-${rid}" data-su="type"><option value="weight" ${wgt?'selected':''}>حسب الوزن</option><option value="fixed" ${!wgt?'selected':''}>ثابت</option></select></div>
+         <div class="grid2"><div class="fld"><label for="su-fee-${rid}">تكلفة الشحن <i>*</i></label><div class="field wide"><input id="su-fee-${rid}" type="number" min="0" data-su="fee" value="${esc(p.fee)}"><em>ر.س</em></div><small class="muted">لمعرفة إن كانت الرسوم شاملة الضريبة، راجع إعدادات الضريبة.</small></div>
+           ${wgt?`<div class="fld"><label for="su-w-${rid}">حد وزن الشحنة <i>*</i></label><div class="field wide"><input id="su-w-${rid}" type="number" min="0" data-su="baseW" value="${esc(p.baseW)}"><em>كجم</em></div></div>`:''}</div>
+         <div class="alert warn">${I.info}<span class="grow">أُدخلت تكلفة الشحن بدون ضريبة القيمة المضافة (15%)، لأن الضريبة غير مفعّلة في متجرك. عدّل الأسعار لتشمل الضريبة إن أردت ألا تتحمل فارقها. <a href="#" data-act="toast" data-msg="تُفتح إعدادات الضريبة">إعدادات الضريبة</a></span></div>
+         ${wgt?`<div class="grid2"><div class="fld"><label for="su-x-${rid}">تكلفة الوزن الإضافي <i>*</i></label><div class="field wide"><input id="su-x-${rid}" type="number" min="0" data-su="extra" value="${esc(p.extra)}"><em>ر.س</em></div></div>
+           <div class="fld"><label for="su-per-${rid}">لكل <i>*</i></label><div class="field wide"><input id="su-per-${rid}" type="number" min="0" data-su="per" value="${esc(p.per)}"><em>كجم</em></div></div></div>`:''}
+         <div class="fld"><label for="su-dur-${rid}">مدة الشحن <i>*</i></label><input class="inp" id="su-dur-${rid}" data-su="dur" value="${esc(p.dur)}"><small class="muted">مدة التوصيل التي تظهر لعميلك في صفحة الدفع.</small></div>
+       </div></section>
+     <section class="su-block"><h3>ملخص التسعير</h3><div data-sl="boxes">${suPriceBoxes(rid,p)}</div></section>
+     <section class="su-block"><h3>خيارات إضافية</h3><label class="chk"><input type="checkbox" data-su="cod" ${p.cod?'checked':''}><span><b>تفعيل الدفع عند الاستلام</b><small>يظهر خيار الدفع عند الاستلام مع «${R.name}».</small></span></label></section>
+   </div>`:''}
+  </div>`;
+}
+function screenSetup(id){
+  const w=wh(id); if(!w) return screenList('browse');
+  if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
+  const su=S.setup;
+  return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack" id="suRoot">
+   <section class="panel pad stack">
+     <div class="row between"><div class="row"><div class="wimg" style="width:56px;height:56px">${whImg(w)}</div><div><h2>بيانات الفرع</h2><div class="sm muted">سيُضاف هذا المستودع كفرع في متجرك. بياناته الأساسية يديرها المستودع.</div></div></div>${opBadge(id,{lg:true})}</div>
+     <div class="ro"><div><span>اسم الفرع</span>${w.name}</div><div><span>المدينة</span>${w.city}</div><div><span>الشركة المشغّلة</span>${OPERATOR[id]}</div><div><span>وقت التجهيز</span>حتى 24 ساعة</div></div>
+     <div class="su-two">
+       <div class="stack" style="gap:10px"><div class="row between"><b>موقع الفرع على الخريطة</b><button class="btn btn-sm" type="button" data-act="su-pin">${su.pinMoved?'إعادة للموقع الأصلي':'تعديل الموقع'}</button></div>
+         <div class="mapmock" style="height:200px"><svg viewBox="0 0 400 200" preserveAspectRatio="xMidYMid slice"><rect width="400" height="200" fill="#e8efe9"/><path d="M0 55 L400 35 M0 140 L400 160 M90 0 L120 200 M250 0 L230 200 M330 0 L360 200" stroke="#fff" stroke-width="10"/><path d="M0 55 L400 35 M0 140 L400 160 M90 0 L120 200 M250 0 L230 200" stroke="#f6d77c" stroke-width="3"/><rect x="20" y="160" width="60" height="36" fill="#cfe6d4"/><rect x="280" y="60" width="70" height="50" fill="#cfe6d4"/>
+           <g transform="translate(${su.pinMoved?235:180} ${su.pinMoved?120:95})"><circle r="26" fill="#004956" opacity=".12"/><path d="M0 0 c-9 -11 -14 -17 -14 -24 a14 14 0 0 1 28 0 c0 7 -5 13 -14 24z" fill="#d14343"/><circle cy="-24" r="5" fill="#fff"/></g></svg>
+           <span class="map-hint">${su.pinMoved?'تم تحديث الموقع · اسحب الدبوس للتعديل':'اسحب الدبوس لتحديد مدخل الاستلام بدقة'}</span></div>
+         <div class="sm ink2">${w.name}، ${w.city}${su.pinMoved?' · <b>موقع معدّل</b>':''}</div></div>
+       <div class="stack" style="gap:10px"><b>ساعات العمل</b><div class="dl">${w.hours.map(h=>`<dt>${h[0]}</dt><dd class="num" style="${h[1]==='مغلق'?'color:var(--bad)':''}">${h[1]}</dd>`).join('')}</div>
+         <p class="sm muted">ساعات العمل يحددها المستودع، وتُستخدم لحساب مواعيد التجهيز والتوصيل.</p></div>
+     </div>
+   </section>
+   <section class="panel pad stack">
+     <div><h2>مسارات الشحن</h2><p class="sm muted">أنشأنا 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به، ويظهر لعميلك بسعره في صفحة الدفع.</p></div>
+     <div class="stack" style="gap:12px">${ROUTES.map(R=>suRoute(R.id,su.routes[R.id],su,w)).join('')}</div>
+   </section>
+   <section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>
+  </div>`;
+}
+function suRefreshRoute(rid){
+  const su=S.setup, box=document.querySelector(`[data-sr="${rid}"]`); if(!box) return; const w=wh(su.wh), r=su.routes[rid];
+  const s=box.querySelector('[data-sl=sum]'); if(s) s.innerHTML=suSummary(rid,r,w.city);
+  const b=box.querySelector('[data-sl=boxes]'); if(b) b.innerHTML=suPriceBoxes(rid,r.p);
+  const rd=box.querySelector('[data-sl=rad]'); if(rd) rd.textContent=r.cov.radius||'—';
+}
+function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; }
+
 const app=document.getElementById('app');
 function route(){
   const h=(location.hash||'#browse').slice(1);
@@ -1083,6 +1220,7 @@ function route(){
   else if(h.startsWith('detail-')) html=screenDetail(h.slice(7));
   else if(h.startsWith('settings-')) html=screenSettings(h.slice(9));
   else if(h==='transfer') html=screenTransfer();
+  else if(h.startsWith('setup-')) html=screenSetup(h.slice(6));
   else html=screenList('browse');
   app.innerHTML=html;
 }
@@ -1114,7 +1252,7 @@ document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]'); if(g){e.preventDefault(); go(g.dataset.go); document.getElementById('notes').hidden=true; return;}
   const a=e.target.closest('[data-act]'); if(!a) return;
   const act=a.dataset.act;
-  if(act==='book') bookModal(a.dataset.id);
+  if(act==='book'){S.setup=null; go('setup-'+a.dataset.id);}
   if(act==='hero-close'){S.hero='closed';save('fm-hero','closed');route();}
   if(act==='hero-open'){S.hero='open';save('fm-hero','open');route();}
   if(act==='scroll-cards') document.getElementById('cards')?.scrollIntoView({behavior:'smooth'});
@@ -1145,6 +1283,15 @@ document.addEventListener('click',e=>{
   if(act==='co-edit'){S.coEdit=S.coEdit===a.dataset.v?null:a.dataset.v; rerenderSettings();}
   if(act==='co-vis'){const r=cur(), p=r.pricing[a.dataset.v]; p.on=!p.on; if(!p.on&&S.coEdit===a.dataset.v) S.coEdit=null; rerenderSettings();}
   if(act==='copy-std'){const r=cur(), b=r.pricing.std, t=r.pricing[a.dataset.v]; Object.assign(t,{unify:b.unify,type:b.type,fee:b.fee,baseW:b.baseW,extra:b.extra,per:b.per}); rerenderSettings(); toast('تم نسخ تسعيرة الشحن العادي');}
+  if(act==='su-open'){const v=a.dataset.v, su=S.setup; su.open=su.open.includes(v)?su.open.filter(x=>x!==v):[...su.open,v]; rerenderSetup();}
+  if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; S.setup.routes[rid].cov.mode=a.dataset.v; rerenderSetup();}
+  if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; const c=S.setup.routes[rid].cov; c.cities=c.cities.filter(x=>x!==a.dataset.v); rerenderSetup();}
+  if(act==='su-pin'){S.setup.pinMoved=!S.setup.pinMoved; rerenderSetup(); if(S.setup.pinMoved) toast('تم تحديث موقع الفرع');}
+  if(act==='su-confirm'){const su=S.setup, w=wh(su.wh), pr={};
+    for(const [rid,r] of Object.entries(su.routes)) pr[rid]={on:r.on,unify:r.p.fee!=='',type:r.p.type,fee:r.p.fee,baseW:r.p.baseW,extra:r.p.extra,per:r.p.per,cod:r.p.cod};
+    S.mine[su.wh]={status:'awaiting'}; S.rows=S.rows.filter(x=>x.key!=='new-'+su.wh);
+    S.rows.unshift(row('new-'+su.wh,'مستودعات سلة – '+w.city,su.wh,w.name.split('– ')[1]||'','awaiting',true,[],pr));
+    S.setup=null; go('mine'); toast('تم حجز المستودع بنجاح');}
   if(act==='svc-toggle'){const v=a.dataset.v; S.priceOpen=S.priceOpen.includes(v)?S.priceOpen.filter(x=>x!==v):[...S.priceOpen,v]; rerenderSettings();}
   if(act==='zone-add'){S.zoneEdit={idx:-1,draft:{name:'',method:'city',country:'السعودية',city:cityOf(cur()),districts:'',hours:'all',from:'08:00',to:'22:00',radius:5}}; rerenderSettings(); document.getElementById('zf-name')?.focus();}
   if(act==='zone-edit'){const i=+a.dataset.i; S.zoneEdit={idx:i,draft:{...cur().zones[i]}}; rerenderSettings();}
@@ -1154,6 +1301,9 @@ document.addEventListener('click',e=>{
     const r=cur(); if(S.zoneEdit.idx<0) r.zones.push(d); else r.zones[S.zoneEdit.idx]=d; S.zoneEdit=null; rerenderSettings(); toast('تم حفظ نطاق التغطية');}
 });
 document.addEventListener('input',e=>{
+  if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['fee','baseW','extra','per','dur','radius'].includes(e.target.dataset.su)){
+    const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
+    if(f==='radius') r.cov.radius=e.target.value; else r.p[f]=e.target.value; suRefreshRoute(rid); return;}
   if(e.target.id==='mq'){S.mq=e.target.value; const pos=e.target.selectionStart; route(); const q=document.getElementById('mq'); q.focus(); q.setSelectionRange(pos,pos);}
   if(e.target.dataset.zfi&&S.zoneEdit){S.zoneEdit.draft[e.target.dataset.zfi]=e.target.value; if(e.target.dataset.zfi==='radius'){rerenderSettings(); document.getElementById('zf-rad')?.focus();}}
   const f=e.target.dataset.pf;
@@ -1165,6 +1315,13 @@ document.addEventListener('input',e=>{
   if(e.target.dataset.rel==='val'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); relOf(r)[rid].val=e.target.value; syncRel(r); refreshLive(r);}
 });
 document.addEventListener('change',e=>{
+  if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['on','cod','type','addcity'].includes(e.target.dataset.su)){
+    const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
+    if(f==='on'){r.on=e.target.checked; if(r.on&&!S.setup.open.includes(rid)) S.setup.open.push(rid);}
+    else if(f==='cod') r.p.cod=e.target.checked;
+    else if(f==='type') r.p.type=e.target.value;
+    else if(f==='addcity'&&e.target.value) r.cov.cities.push(e.target.value);
+    rerenderSetup(); return;}
   if(e.target.id==='city'){S.city=e.target.value;route();}
   if(e.target.dataset.rowon){const r=rowBy(e.target.dataset.rowon); r.on=e.target.checked; toast(r.on?'تم تفعيل '+r.name:'تم إيقاف '+r.name);}
   const f=e.target.dataset.pf;
