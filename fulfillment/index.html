@@ -354,6 +354,18 @@ th[rowspan]{vertical-align:bottom}
 .co-opt.hid{border-style:dashed;opacity:.55}
 .co-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none}.co-opt.on .co-radio{border:5px solid var(--brand)}
 @media (max-width:760px){.su-tiles{grid-template-columns:1fr 1fr}.su-strip,.su-ed-grid,.su-cols,.su-md,.su-co{grid-template-columns:minmax(0,1fr)}.wk-strip{grid-template-columns:repeat(4,minmax(0,1fr))}.wk-axis,.wk-row{grid-template-columns:52px minmax(0,1fr)}.wk-row small{display:none}.wk-axis{display:none}.su-float{position:static;width:auto;box-shadow:none;border-bottom:1px solid var(--line);border-radius:0}}
+.pr-chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.pr-chip{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-lg);padding:10px 12px;min-width:0}
+.pr-chip .grow{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:13px}.pr-chip .grow>span{color:var(--ink-2);font-size:12px}
+.pr-chip b{font-size:15px}.pr-chip small{color:var(--bad);font-size:12px}
+.pr-chip.bad{border-color:#f0b8b8;background:#fff6f6}
+.pr-ic{width:34px;height:34px;border-radius:8px;background:var(--brand-50);color:var(--brand);display:grid;place-items:center;flex:none}
+.pr-chip.bad .pr-ic,.pr-list li.bad .pr-ic{background:#fde8e8;color:var(--bad)}
+.pr-list{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:var(--r-lg)}
+.pr-list li{display:flex;gap:10px;align-items:center;padding:10px 12px;font-size:13px}.pr-list li+li{border-top:1px solid var(--line-2)}
+.pr-list .pr-ic{width:30px;height:30px}.pr-list small{display:block;color:var(--bad);font-size:12px}.pr-list b{white-space:nowrap}
+.pr-st{width:20px;height:20px;display:grid;place-items:center;color:var(--ok)}.pr-list li.bad .pr-st{color:var(--bad)}
+@media (max-width:760px){.pr-chips{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1473,24 +1485,90 @@ function suRoutesArea(w,su){
 /* ============ new transfer request (create) ============ */
 const TN_RULES = {maxUnits:500, maxPieceKg:25, maxTotalKg:400, cold:false};
 const CATALOG = [
-  {id:'p1',n:'تيشيرت قطني',v:'XL',sku:'TS-1042',kg:0.3,stock:120,thumb:'👕'},
-  {id:'p2',n:'عطر عود 100 مل',v:'زجاج',sku:'PF-2210',kg:0.5,stock:40,flag:'fragile',thumb:'🧴'},
-  {id:'p3',n:'شوكولاتة داكنة',v:'علبة 12',sku:'CH-0331',kg:0.4,stock:60,flag:'cold',thumb:'🍫'},
-  {id:'p4',n:'كوب سيراميك',v:'أبيض',sku:'MG-0907',kg:0.4,stock:30,flag:'fragile',thumb:'☕'},
-  {id:'p5',n:'مكيف متنقل',v:'12000 وحدة',sku:'AC-7710',kg:32,stock:10,thumb:'❄️'},
-  {id:'p6',n:'قميص كتان',v:'L',sku:'SH-5530',kg:0.35,stock:600,thumb:'👔'},
-  {id:'p7',n:'سجادة صلاة',v:'مخمل',sku:'PR-1200',kg:1.2,stock:500,thumb:'🧶'},
+  {id:'p1',n:'تيشيرت قطني',v:'XL',sku:'TS-1042',kg:0.3,dim:[30,25,3],stock:120,thumb:'👕'},
+  {id:'p2',n:'عطر عود 100 مل',v:'زجاج',sku:'PF-2210',kg:0.5,dim:[12,8,6],stock:40,flag:'fragile',thumb:'🧴'},
+  {id:'p3',n:'شوكولاتة داكنة',v:'علبة 12',sku:'CH-0331',kg:0.4,dim:[20,15,4],stock:60,flag:'cold',expM:9,thumb:'🍫'},
+  {id:'p4',n:'كوب سيراميك',v:'أبيض',sku:'MG-0907',kg:0.4,dim:[12,10,10],stock:30,flag:'fragile',thumb:'☕'},
+  {id:'p5',n:'مكيف متنقل',v:'12000 وحدة',sku:'AC-7710',kg:32,dim:[80,45,40],stock:10,thumb:'❄️'},
+  {id:'p6',n:'قميص كتان',v:'L',sku:'SH-5530',kg:0.35,dim:[30,25,3],stock:600,thumb:'👔'},
+  {id:'p7',n:'سجادة صلاة',v:'مخمل',sku:'PR-1200',kg:1.2,dim:[40,20,20],stock:500,thumb:'🧶'},
+  {id:'p8',n:'خزانة ملابس',v:'خشب',sku:'WR-3300',kg:22,dim:[100,80,70],stock:8,thumb:'🚪'},
+  {id:'p9',n:'سجاد ممر',v:'150 سم',sku:'RG-1510',kg:6,dim:[150,40,10],stock:25,thumb:'🟫'},
+  {id:'p10',n:'حقيبة يد جلد',v:'بني',sku:'BG-4410',kg:null,dim:null,stock:35,thumb:'👜'},
+  {id:'p11',n:'معطر جو بخاخ',v:'300 مل',sku:'AF-0300',kg:0.35,dim:[20,6,6],stock:90,haz:true,thumb:'🧯'},
+  {id:'p12',n:'بطارية احتياطية',v:'20000mAh',sku:'PB-2000',kg:0.45,dim:[15,7,3],stock:70,bat:true,thumb:'🔋'},
+  {id:'p13',n:'زيت زيتون',v:'10 لتر',sku:'OL-1000',kg:9.5,dim:[30,20,20],stock:40,liters:10,expM:14,thumb:'🫒'},
+  {id:'p14',n:'فيتامين د',v:'60 كبسولة',sku:'VD-0060',kg:0.1,dim:[10,5,5],stock:80,med:true,expM:18,thumb:'💊'},
+  {id:'p15',n:'كريم مرطب',v:'50 مل',sku:'CR-0050',kg:0.1,dim:[8,5,5],stock:100,expM:3,thumb:'🧴'},
+  {id:'p16',n:'عسل سدر',v:'1 كجم',sku:'HN-1000',kg:1.1,dim:[12,10,10],stock:50,perish:true,thumb:'🍯'},
+  {id:'p17',n:'ساعة ذهبية',v:'عيار 18',sku:'WT-1800',kg:0.2,dim:[10,10,8],stock:6,price:8200,thumb:'⌚'},
+  {id:'p18',n:'مبخرة نحاس',v:'متوسطة',sku:'',kg:0.8,dim:[20,15,15],stock:45,thumb:'🏺'},
+  {id:'p19',n:'نظارة شمسية',v:'أسود',sku:'SG-0420',kg:0.1,dim:[16,6,5],stock:60,noBc:true,thumb:'🕶️'},
+  {id:'p20',n:'بطاقة هدية',v:'100 ر.س',sku:'GC-0100',kg:0,dim:[0,0,0],stock:999,digital:true,thumb:'🎁'},
+  {id:'p21',n:'حذاء رياضي',v:'بدون خيار',sku:'SN-7700',kg:0.9,dim:[32,20,12],stock:80,needVar:true,thumb:'👟'},
+  {id:'p22',n:'قلم محفور بالاسم',v:'حسب الطلب',sku:'PN-0101',kg:0.05,dim:[15,3,3],stock:30,custom:true,thumb:'🖊️'},
 ];
 const cat = id => CATALOG.find(p=>p.id===id);
+/* product-level warehouse rules: checked for every product the merchant adds */
+const PR_LIM={maxKg:25,maxQty:200,minQty:5,maxW:60,maxLen:120,maxL:5,minExp:6,maxVal:5000};
+const RI={
+  ruler:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 15 15 3l6 6L9 21z"/><path d="m7 11 2 2M10 8l2 2M13 5l2 2"/></svg>',
+  len:'<svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18M3 8v8M21 8v8M7 12l-2-2M7 12l-2 2M17 12l2-2M17 12l2 2"/></svg>',
+  flame:'<svg class="icon" viewBox="0 0 24 24"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 3"/></svg>',
+  bat:'<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="7" width="16" height="10" rx="2"/><path d="M21 10v4M7 10v4M10 10v4"/></svg>',
+  drop:'<svg class="icon" viewBox="0 0 24 24"><path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg>',
+  pill:'<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="m9.5 8.5 5 7"/></svg>',
+  cal:'<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  coin:'<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M9.5 10c0-1 1-1.8 2.5-1.8s2.5.8 2.5 1.8-1 1.5-2.5 1.8-2.5.8-2.5 1.8 1 1.8 2.5 1.8 2.5-.8 2.5-1.8M12 7v1.2M12 15.8V17"/></svg>',
+  bar:'<svg class="icon" viewBox="0 0 24 24"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M16 6v12M20 6v12"/></svg>',
+  cloud:'<svg class="icon" viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.5-8 6 6 0 0 1 11.5 1.5A3.5 3.5 0 0 1 17.5 18z"/></svg>',
+  layers:'<svg class="icon" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>',
+  wand:'<svg class="icon" viewBox="0 0 24 24"><path d="m4 20 12-12M14 4v3M18 8h3M17 3l-1.5 1.5M20 11l-1.5-1.5"/></svg>',
+  hash:'<svg class="icon" viewBox="0 0 24 24"><path d="M5 9h15M4 15h15M10 3 8 21M16 3l-2 18"/></svg>',
+  list:'<svg class="icon" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>',
+};
+const L=PR_LIM, srt=d=>[...d].sort((a,b)=>b-a);
+const PRULES=[
+ {id:'kg',g:'size',ic:()=>I.scale,t:'الحد الأقصى لوزن المنتج',v:`${L.maxKg} كجم`,fix:'remove',chk:p=>p.kg!=null&&p.kg>L.maxKg&&`وزن المنتج ${p.kg} كجم، والحد الأقصى ${L.maxKg} كجم.`},
+ {id:'qmax',g:'qty',ic:()=>I.box,t:'الحد الأقصى للعدد من المنتج',v:`${L.maxQty} قطعة`,fix:'cap',chk:(p,q)=>q>L.maxQty&&`الكمية ${q} أكبر من الحد المسموح (${L.maxQty} قطعة للمنتج).`},
+ {id:'qmin',g:'qty',ic:()=>I.box,t:'الحد الأدنى للعدد من المنتج',v:`${L.minQty} قطع`,fix:'min',chk:(p,q)=>q>0&&q<L.minQty&&`أقل كمية يستقبلها المستودع للمنتج ${L.minQty} قطع.`},
+ {id:'stock',g:'qty',ic:()=>RI.layers,t:'الكمية ضمن مخزون الفرع',v:'حسب المخزون',fix:'max',chk:(p,q)=>q>p.stock&&`الكمية أكبر من المتاح في فرع الإرسال (المتاح ${p.stock}).`},
+ {id:'dim',g:'size',ic:()=>RI.ruler,t:'الحد الأقصى لأبعاد المنتج',v:`${L.maxLen}×${L.maxW}×${L.maxW} سم`,fix:'remove',chk:p=>p.dim&&srt(p.dim)[1]>L.maxW&&`أبعاد المنتج ${p.dim.join('×')} سم أكبر من المسموح (${L.maxLen}×${L.maxW}×${L.maxW}).`},
+ {id:'len',g:'size',ic:()=>RI.len,t:'الحد الأقصى لطول المنتج',v:`${L.maxLen} سم`,fix:'remove',chk:p=>p.dim&&srt(p.dim)[0]>L.maxLen&&`طول المنتج ${srt(p.dim)[0]} سم، والحد الأقصى ${L.maxLen} سم.`},
+ {id:'data',g:'size',ic:()=>RI.ruler,t:'الوزن والأبعاد مطلوبة',v:'إلزامي',fix:'edit',chk:p=>(p.kg==null||!p.dim)&&'أضف وزن المنتج وأبعاده لإضافته للطلب.'},
+ {id:'cold',g:'type',ic:()=>I.snow,t:'المنتجات المبردة',v:'غير مسموح',fix:'remove',chk:p=>p.flag==='cold'&&'المستودع لا يدعم المنتجات المبردة.'},
+ {id:'haz',g:'type',ic:()=>RI.flame,t:'المواد الخطرة والقابلة للاشتعال',v:'غير مسموح',fix:'remove',chk:p=>p.haz&&'المنتج مصنّف كمادة خطرة ولا يُقبل.'},
+ {id:'bat',g:'type',ic:()=>RI.bat,t:'البطاريات المنفصلة',v:'غير مسموح',fix:'remove',chk:p=>p.bat&&'البطاريات المنفصلة لا تُقبل، والمركّبة داخل الجهاز مقبولة.'},
+ {id:'liq',g:'type',ic:()=>RI.drop,t:'الحد الأقصى لحجم السوائل',v:`${L.maxL} لتر للعبوة`,fix:'remove',chk:p=>p.liters>L.maxL&&`حجم العبوة ${p.liters} لتر أكبر من ${L.maxL} لتر.`},
+ {id:'med',g:'type',ic:()=>RI.pill,t:'الأدوية والمكملات المنظّمة',v:'غير مسموح',fix:'remove',chk:p=>p.med&&'المنتج يحتاج ترخيص تخزين غير متوفر في المستودع.'},
+ {id:'exp',g:'exp',ic:()=>RI.cal,t:'الحد الأدنى لمدة الصلاحية',v:`${L.minExp} أشهر`,fix:'remove',chk:p=>p.expM!=null&&p.expM<L.minExp&&`صلاحية المنتج ${p.expM} أشهر، وأقل مدة مقبولة ${L.minExp} أشهر.`},
+ {id:'expreq',g:'exp',ic:()=>RI.cal,t:'تاريخ الصلاحية للأغذية والتجميل',v:'إلزامي',fix:'edit',chk:p=>p.perish&&p.expM==null&&'أضف تاريخ الصلاحية لهذا المنتج.'},
+ {id:'val',g:'exp',ic:()=>RI.coin,t:'الحد الأقصى لقيمة المنتج',v:`${L.maxVal.toLocaleString('en')} ر.س`,fix:'remove',chk:p=>p.price>L.maxVal&&`قيمة المنتج ${p.price.toLocaleString('en')} ر.س أعلى من الحد المؤمَّن عليه في المستودع.`},
+ {id:'sku',g:'data',ic:()=>I.tag,t:'رمز SKU',v:'إلزامي',fix:'edit',chk:p=>!p.sku&&'أضف رمز SKU للمنتج لتتبعه في المستودع.'},
+ {id:'bc',g:'data',ic:()=>RI.bar,t:'الباركود',v:'إلزامي',fix:'edit',chk:p=>p.noBc&&'أضف الباركود للمنتج أو فعّل طباعة الملصق.'},
+ {id:'digi',g:'type',ic:()=>RI.cloud,t:'نوع المنتج',v:'منتج ملموس فقط',fix:'remove',chk:p=>p.digital&&'المنتجات الرقمية والخدمات لا تُنقل للمستودع.'},
+ {id:'var',g:'data',ic:()=>RI.list,t:'المنتجات ذات الخيارات',v:'خيار محدد',fix:'var',chk:p=>p.needVar&&'اختر المقاس أو اللون، لأن النقل يكون لكل خيار منفصل.'},
+ {id:'cust',g:'type',ic:()=>RI.wand,t:'المنتجات المخصصة حسب الطلب',v:'غير مسموح',fix:'remove',chk:p=>p.custom&&'المنتجات اللي تُصنع حسب طلب العميل لا تُخزّن.'},
+];
+const PR_GROUPS=[['size','الوزن والأبعاد'],['qty','الكمية'],['type','نوع المنتج'],['exp','الصلاحية والقيمة'],['data','بيانات المنتج']];
+const PR_TOP=['kg','qmax','cold','haz'];
+function prViol(tn){const m={}; for(const it of tn.items){const p=cat(it.id), q=+it.qty||0; for(const r of PRULES) if(r.chk(p,q)) (m[r.id]=m[r.id]||[]).push(p.n);} return m;}
+function tnAllRulesDrawer(){
+  const V=prViol(S.tn); closeDrawer();
+  const d=document.createElement('div'); d.className='drawer-wrap'; d.innerHTML=`<div class="drawer-bg" data-act="drawer-close"></div>
+   <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="prT" style="width:min(480px,100vw)"><header class="drawer-h"><div><h2 id="prT">تعليمات المستودع للمنتجات</h2><div class="sm muted">${PRULES.length} تعليمة يتحقق منها النظام عند إضافة كل منتج</div></div><button class="btn btn-sm btn-ghost" type="button" data-act="drawer-close" aria-label="إغلاق">${I.x}</button></header>
+   <div class="drawer-b stack">${PR_GROUPS.map(([g,gl])=>`<div class="stack" style="gap:6px"><b class="sm muted">${gl}</b><ul class="pr-list">${PRULES.filter(r=>r.g===g).map(r=>{const v=V[r.id]; return `<li class="${v?'bad':''}"><span class="pr-ic">${r.ic()}</span><span class="grow"><span>${r.t}</span>${v?`<small>في طلبك: ${v.join('، ')}</small>`:''}</span><b class="num">${r.v}</b><span class="pr-st">${v?I.x:I.check}</span></li>`;}).join('')}</ul></div>`).join('')}</div>
+   <footer class="drawer-f"><button class="btn btn-p btn-block" type="button" data-act="drawer-close">فهمت</button></footer></aside>`;
+  document.body.appendChild(d); requestAnimationFrame(()=>d.classList.add('open'));
+}
+
 function tnInit(){ S.tn = S.tn || {from:'main-jed',to:'nokhba',method:'self',date:'',notes:'',rulesOpen:false,
-  items:[{id:'p1',qty:40},{id:'p2',qty:50},{id:'p3',qty:30},{id:'p5',qty:2},{id:'p6',qty:450}]}; return S.tn; }
+  items:[{id:'p1',qty:40},{id:'p2',qty:50},{id:'p3',qty:30},{id:'p5',qty:5},{id:'p6',qty:450}]}; return S.tn; }
 function tnCheck(tn){
   const rowErr={}, rowWarn={}, global=[]; let units=0, kg=0;
   for(const it of tn.items){ const p=cat(it.id), q=+it.qty||0, e=[], w=[];
-    units+=q; kg+=q*p.kg;
-    if(p.flag==='cold'&&!TN_RULES.cold) e.push({t:'المستودع لا يقبل المنتجات المبردة. أزل المنتج أو انقله لمستودع يدعم التبريد.',fix:'remove'});
-    if(p.kg>TN_RULES.maxPieceKg) e.push({t:`وزن القطعة ${p.kg} كجم يتجاوز الحد الأقصى ${TN_RULES.maxPieceKg} كجم للكرتونة.`,fix:'remove'});
-    if(q>p.stock) e.push({t:`الكمية أكبر من المتوفر في فرع الإرسال (${p.stock}).`,fix:'max'});
+    units+=q; kg+=q*(p.kg||0);
+    for(const r of PRULES){const m=r.chk(p,q); if(m) e.push({t:m,fix:r.fix,r:r.id});}
     if(q<1) e.push({t:'أدخل كمية أكبر من صفر.'});
     if(p.flag==='fragile') w.push('قابل للكسر: غلّف كل قطعة بالفقاعات.');
     if(e.length) rowErr[it.id]=e; if(w.length) rowWarn[it.id]=w; }
@@ -1500,28 +1578,26 @@ function tnCheck(tn){
   return {rowErr,rowWarn,global,units,kg,nErr};
 }
 function tnRules(tn){
-  const R=[['snow','لا يقبل المنتجات المبردة'],['box',`حتى ${TN_RULES.maxUnits} قطعة للطلب`],['scale',`الكرتونة ${TN_RULES.maxPieceKg} كجم كحد أقصى`],['tag','ملصق SKU على كل قطعة'],['glass','غلّف القابل للكسر بالفقاعات']];
-  const ic={snow:I.snow,box:I.box,scale:I.scale,tag:I.tag,glass:I.glass};
-  return `<section class="panel pad tn-rules"><div class="row between"><b class="row" style="gap:6px">${I.info}شروط الاستلام في المستودع</b>
-     <button class="btn btn-ghost btn-sm" type="button" data-act="tn-rules" aria-expanded="${tn.rulesOpen}">${tn.rulesOpen?'إخفاء التفاصيل':'عرض التفاصيل'}</button></div>
-    <div class="rule-chips">${R.map(([k,t])=>`<span class="rule-chip">${ic[k]}${t}</span>`).join('')}</div>
-    ${tn.rulesOpen?`<ul class="rule-more"><li>المنتجات المبردة تُرفض عند الاستلام لأن هذا المستودع لا يدعم التخزين المبرد.</li><li>ضع قائمة المحتويات داخل كل كرتونة، وأي قطعة أثقل من ${TN_RULES.maxPieceKg} كجم لا تُقبل.</li><li>الحد الأقصى للطلب الواحد ${TN_RULES.maxUnits} قطعة و${TN_RULES.maxTotalKg} كجم. للكميات الأكبر أنشئ أكثر من طلب.</li><li>القطع بلا ملصق SKU تُعاد أو تُحتسب عليها رسوم ملصقات.</li></ul>`:''}</section>`;
+  const V=prViol(tn), nb=Object.keys(V).length;
+  return `<section class="panel pad stack tn-rules"><div class="row between"><b class="row" style="gap:6px">${I.warn}تعليمات المستودع للمنتجات</b>${nb?`<span class="pill bad">${nb} ${nb===1?'تعليمة غير مستوفاة':'تعليمات غير مستوفاة'}</span>`:''}</div>
+    <div class="pr-chips">${PR_TOP.map(id=>PRULES.find(r=>r.id===id)).map(r=>{const v=V[r.id]; return `<div class="pr-chip ${v?'bad':''}"><span class="pr-ic">${r.ic()}</span><span class="grow"><span>${r.t}</span><b class="num">${r.v}</b>${v?`<small>في طلبك: ${v.join('، ')}</small>`:''}</span></div>`;}).join('')}</div>
+    <div><button class="btn btn-sm btn-ghost" type="button" data-act="tn-all-rules">عرض كل التعليمات (${PRULES.length})${nb&&Object.keys(V).some(k=>!PR_TOP.includes(k))?` · ${Object.keys(V).filter(k=>!PR_TOP.includes(k)).length} أخرى غير مستوفاة`:''}</button></div></section>`;
 }
 function tnProducts(tn){
   const c=tnCheck(tn), added=tn.items.map(i=>i.id);
   const rows=tn.items.map(it=>{const p=cat(it.id), er=c.rowErr[it.id], wr=c.rowWarn[it.id];
     return `<tr class="${er?'row-err':''}"><td>${prodCell(p)}</td><td class="num">${p.sku}</td><td class="n">${p.stock}</td>
       <td class="n"><input class="inp sm-inp num-inp ${er&&er.some(x=>x.fix==='max'||!x.fix)?'inp-err':''}" type="number" min="0" id="tnq-${p.id}" data-tnq="${p.id}" value="${esc(it.qty)}" aria-label="كمية ${p.n}" aria-invalid="${!!er}"></td>
-      <td class="n num">${((+it.qty||0)*p.kg).toFixed(1)} كجم</td>
+      <td class="n num">${p.kg==null?'—':((+it.qty||0)*p.kg).toFixed(1)+' كجم'}</td>
       ${S.tnUI==='matrix'?[p.flag!=='cold',p.kg<=TN_RULES.maxPieceKg,(+it.qty||0)<=p.stock].map(ok=>`<td class="n"><span class="mx ${ok?'ok':'bad'}" aria-label="${ok?'مطابق':'مخالف'}">${ok?I.check:I.x}</span></td>`).join(''):''}
       <td><button class="icon-btn danger" type="button" data-act="tn-rm" data-v="${p.id}" aria-label="إزالة ${p.n}">${I.trash}</button></td></tr>
-      ${er||wr?`<tr class="row-msg ${er?'err':''}"><td colspan="${S.tnUI==='matrix'?9:6}">${(er||[]).map(x=>`<div class="msg err">${I.warn}<span class="grow">${x.t}</span>${x.fix==='remove'?`<button class="btn btn-sm" type="button" data-act="tn-rm" data-v="${p.id}">إزالة المنتج</button>`:x.fix==='max'?`<button class="btn btn-sm" type="button" data-act="tn-max" data-v="${p.id}">استخدام ${p.stock}</button>`:''}</div>`).join('')}${(wr||[]).map(x=>`<div class="msg warn">${I.info}<span class="grow">${x}</span></div>`).join('')}</td></tr>`:''}`;}).join('');
+      ${er||wr?`<tr class="row-msg ${er?'err':''}"><td colspan="${S.tnUI==='matrix'?9:6}">${(er||[]).map(x=>`<div class="msg err">${I.warn}<span class="grow">${x.t}</span>${x.fix==='remove'?`<button class="btn btn-sm" type="button" data-act="tn-rm" data-v="${p.id}">إزالة المنتج</button>`:x.fix==='max'?`<button class="btn btn-sm" type="button" data-act="tn-max" data-v="${p.id}">استخدام ${p.stock}</button>`:x.fix==='cap'?`<button class="btn btn-sm" type="button" data-act="tn-setq" data-v="${p.id}" data-q="${PR_LIM.maxQty}">تعديل إلى ${PR_LIM.maxQty}</button>`:x.fix==='min'?`<button class="btn btn-sm" type="button" data-act="tn-setq" data-v="${p.id}" data-q="${PR_LIM.minQty}">تعديل إلى ${PR_LIM.minQty}</button>`:x.fix==='edit'?`<button class="btn btn-sm" type="button" data-act="toast" data-msg="تُفتح صفحة المنتج «${p.n}» للتعديل">تعديل المنتج</button>`:x.fix==='var'?`<button class="btn btn-sm" type="button" data-act="toast" data-msg="اختر مقاس أو لون «${p.n}»">اختيار الخيار</button>`:''}</div>`).join('')}${(wr||[]).map(x=>`<div class="msg warn">${I.info}<span class="grow">${x}</span></div>`).join('')}</td></tr>`:''}`;}).join('');
   const inl=S.tnUI==='inline', mx=S.tnUI==='matrix';
   return `<h2>المنتجات</h2>
-    <select class="select" style="width:100%" data-tnadd aria-label="إضافة منتج"><option value="">اختر من المنتجات</option>${CATALOG.filter(p=>!added.includes(p.id)).map(p=>`<option value="${p.id}">${p.n} · ${p.sku}${p.flag==='cold'?(inl?' · غير مقبول: مبرد':' · مبرد'):''}${p.kg>TN_RULES.maxPieceKg?(inl?` · غير مقبول: ${p.kg} كجم`:' · '+p.kg+' كجم'):''}</option>`).join('')}</select>
+    <select class="select" style="width:100%" data-tnadd aria-label="إضافة منتج"><option value="">اختر من المنتجات</option>${CATALOG.filter(p=>!added.includes(p.id)).map(p=>{const bad=PRULES.find(r=>!['qmax','qmin','stock'].includes(r.id)&&r.chk(p,L.minQty)); return `<option value="${p.id}">${p.n}${p.sku?' · '+p.sku:''}${bad?` · لا يطابق: ${bad.t}`:''}</option>`;}).join('')}</select>
     ${inl?`<div class="inline-hint">${I.info}<span>هذا المستودع لا يقبل المنتجات المبردة، ولا القطع الأثقل من ${TN_RULES.maxPieceKg} كجم. الحد للطلب ${TN_RULES.maxUnits} قطعة و${TN_RULES.maxTotalKg} كجم.</span></div>`:''}
     ${tn.items.length?`
-     ${c.nErr?`<div class="alert bad">${I.warn}<span class="grow"><b>${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} يجب تصحيحها قبل الإرسال.</b> المنتجات التي لا تطابق شروط المستودع مظللة بالأحمر.</span></div>`:`<div class="alert ok">${I.check}<span class="grow">كل المنتجات تطابق شروط المستودع.</span></div>`}
+     ${c.nErr?(()=>{const np=Object.keys(c.rowErr).length; return `<div class="alert bad">${I.warn}<span class="grow"><b>${np?`${np} ${np===1?'منتج لا يطابق':np===2?'منتجان لا يطابقان':'منتجات لا تطابق'} تعليمات المستودع.`:`${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} في الطلب.`}</b> صحّح الأخطاء الظاهرة تحت كل منتج لتفعيل الإرسال.</span><button class="btn btn-sm" type="button" data-act="tn-all-rules">كل التعليمات</button></div>`;})():`<div class="alert ok">${I.check}<span class="grow">كل المنتجات تطابق شروط المستودع.</span></div>`}
      ${c.global.map(g=>`<div class="alert bad">${I.warn}<span class="grow">${g}</span></div>`).join('')}
      <div class="tbl-wrap"><table class="tn-tbl"><thead><tr><th>المنتج</th><th>SKU</th><th class="n">المتوفر في الفرع</th><th class="n">الكمية${inl?`<small class="th-lim">حد الطلب ${TN_RULES.maxUnits}</small>`:''}</th><th class="n">الوزن${inl?`<small class="th-lim">حد ${TN_RULES.maxTotalKg} كجم</small>`:''}</th>${mx?'<th class="n mx-h">غير مبرد</th><th class="n mx-h">القطعة ≤ 25 كجم</th><th class="n mx-h">ضمن المخزون</th>':''}<th></th></tr></thead><tbody>${rows}</tbody>
       <tfoot><tr><td colspan="3"><b>الإجمالي</b></td><td class="n num ${c.units>TN_RULES.maxUnits?'qty-bad':''}"><b>${c.units.toLocaleString('en')}</b> / ${TN_RULES.maxUnits} قطعة</td><td class="n num ${c.kg>TN_RULES.maxTotalKg?'qty-bad':''}"><b>${c.kg.toFixed(1)}</b> / ${TN_RULES.maxTotalKg} كجم</td>${mx?'<td></td><td></td><td></td>':''}<td></td></tr></tfoot></table></div>${inl?`<div class="inline-hint">${I.tag}<span>عند التغليف: ملصق SKU على كل قطعة، وغلّف القابل للكسر بالفقاعات واكتب «قابل للكسر» على الكرتونة.</span></div>`:''}`
@@ -1550,7 +1626,7 @@ function screenTransferNew(){
 function tnRefresh(focusId){
   const pos=focusId&&document.getElementById(focusId)?document.getElementById(focusId).selectionStart:null;
   document.getElementById('tnProducts').innerHTML=tnProducts(S.tn);
-  if(['check','meters','banner','dodont','guide'].includes(S.tnUI)) document.getElementById('tnRules').innerHTML=tnRulesArea(S.tn);
+  if(['chips','check','meters','banner','dodont','guide'].includes(S.tnUI)) document.getElementById('tnRules').innerHTML=tnRulesArea(S.tn);
   if(S.tnUI==='side'){const sd=document.getElementById('tnSide'); if(sd) sd.innerHTML=tnSide(S.tn);}
   if(S.tnUI==='bar'){const br=document.querySelector('.bar-rules'); if(br) br.outerHTML=tnBarPop(S.tn);}
   const c=tnCheck(S.tn), btn=document.getElementById('tnSend'), note=document.getElementById('tnSendNote'), dest=rowBy(S.tn.to);
@@ -1738,6 +1814,8 @@ document.addEventListener('click',e=>{
   if(act==='tn-start'){S.tn=null; tnInit(); S.tn.to=k; go('transfer-new');}
   if(act==='tn-rules'){S.tn.rulesOpen=!S.tn.rulesOpen; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
   if(act==='tn-rm'){S.tn.items=S.tn.items.filter(x=>x.id!==a.dataset.v); tnRefresh();}
+  if(act==='tn-all-rules'){tnAllRulesDrawer(); return;}
+  if(act==='tn-setq'){const it=S.tn.items.find(x=>x.id===a.dataset.v); it.qty=a.dataset.q; tnRefresh();}
   if(act==='tn-max'){const it=S.tn.items.find(x=>x.id===a.dataset.v); it.qty=String(cat(it.id).stock); tnRefresh();}
   if(act==='tn-method'){S.tn.method=a.dataset.v; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
   if(act==='tn-ui'){S.tnUI=a.dataset.v; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
@@ -1769,7 +1847,7 @@ document.addEventListener('input',e=>{
   if(e.target.dataset.rel==='val'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); relOf(r)[rid].val=e.target.value; syncRel(r); refreshLive(r);}
 });
 document.addEventListener('change',e=>{
-  if(e.target.dataset.tnadd!==undefined&&S.tn&&e.target.value){S.tn.items.push({id:e.target.value,qty:'1'}); tnRefresh(); return;}
+  if(e.target.dataset.tnadd!==undefined&&S.tn&&e.target.value){S.tn.items.push({id:e.target.value,qty:String(Math.min(PR_LIM.minQty,cat(e.target.value).stock))}); tnRefresh(); return;}
   if(e.target.dataset.tn&&S.tn&&['from','to'].includes(e.target.dataset.tn)){S.tn[e.target.dataset.tn]=e.target.value; tnRefresh(); return;}
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['on','cod','type','addcity'].includes(e.target.dataset.su)){
     const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
