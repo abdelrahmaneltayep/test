@@ -299,6 +299,23 @@ th[rowspan]{vertical-align:bottom}
 .su-arrow{width:34px;height:34px;border-radius:50%;background:var(--mint-50);display:grid;place-items:center;color:var(--brand)}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
+.tn-method{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:start;border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:var(--surface);cursor:pointer}
+.tn-method span{font-size:12px;color:var(--muted)}
+.tn-method.on{border-color:var(--mint-strong);background:var(--mint-50)}
+.tn-method.on span{color:var(--brand)}
+.tn-rules{background:#fffaf2;border-color:#f1d9b5;gap:12px}
+.rule-chips{display:flex;flex-wrap:wrap;gap:8px}
+.rule-chip{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid #f1d9b5;border-radius:20px;padding:4px 12px;font-size:13px;color:var(--ink-2)}
+.rule-more{margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+.tn-tbl tr.row-err td{background:#fff7f7}
+.tn-tbl tr.row-err td:first-child{box-shadow:inset -3px 0 0 var(--bad)}
+.tn-tbl tr.row-msg td{padding-top:0;border-top:0}
+.tn-tbl tr.row-msg.err td{background:#fff7f7}
+.tn-tbl tr.row-msg.err td:first-child{box-shadow:inset -3px 0 0 var(--bad)}
+.msg{display:flex;gap:8px;align-items:center;font-size:13px;padding:4px 0}
+.msg.err{color:var(--bad)} .msg.warn{color:#7a5210}
+.inp-err{border-color:var(--bad);background:#fff7f7}
+.tn-tbl tfoot td{background:#f8fafa;border-top:1px solid var(--line)}
 .icon-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);display:grid;place-items:center;cursor:pointer;color:var(--ink-2);flex:none}
 .icon-btn:hover{border-color:#cfd8da}
 .icon-btn.danger{color:var(--bad);border-color:#f0b8b8}
@@ -439,7 +456,7 @@ th[rowspan]{vertical-align:bottom}
     <li>كارد المستودع: صورة، مدينة، اسم المستودع، الخدمات، السعر، الأزرار ← <a data-go="browse">تصفح المستودعات</a></li>
     <li>إعدادات المستودع بعد الحجز: نطاق التغطية وتسعيرة (عادي، سريع، اقتصادي) ← <a data-act="open-settings" data-k="nokhba">إعدادات مستودعات النخبة</a> (درج أو صفحة)</li>
     <li>مستودعاتي كجدول، وقائمة ⋯ فيها الإعدادات وحذف المستودع ← <a data-go="mine">مستودعاتي</a></li>
-    <li>تعليمات المستودع ومنتجات تحتاج معاملة خاصة ← <a data-go="transfer">صفحة نقل المخزون</a></li>
+    <li>تعليمات المستودع ومنتجات تحتاج معاملة خاصة ← <a data-go="transfer">صفحة نقل المخزون</a>، وأخطاء المنتجات المخالفة ← <a data-go="transfer-new">طلب نقل جديد</a></li>
     <li>حالات نقل المخزون: بانتظار التأكيد، نتيجة المراجعة، بعد فحص الجودة ← <a data-go="transfer">صفحة نقل المخزون</a> (بدّل الحالة من الشريط الأصفر)</li>
   </ol>
 </aside>
@@ -669,7 +686,7 @@ function mineBody(){
       <td><a href="#" class="wlink" data-act="open-settings" data-k="${r.key}">${r.name}</a></td>
       <td>${cityOf(r)}</td><td>${r.dist}</td><td>${r.zones.length?'مخصص':'كامل الدولة'}</td>
       <td><span class="pill ${st.cls}">${st.label}</span></td>
-      <td><div class="acts">${r.status==='awaiting'?`<button class="btn btn-sm" data-go="transfer" type="button">نقل المخزون</button>`:''}
+      <td><div class="acts">${r.status==='awaiting'?`<button class="btn btn-sm" data-act="tn-start" data-k="${r.key}" type="button">نقل المخزون</button>`:''}
         <label class="toggle" title="تفعيل المستودع"><input type="checkbox" data-rowon="${r.key}" ${r.on?'checked':''} aria-label="تفعيل ${r.name}"><span></span></label>
         <div class="more"><button class="btn btn-sm more-btn" type="button" data-act="menu" data-k="${r.key}" aria-haspopup="menu" aria-expanded="${S.menu===r.key}" aria-label="المزيد">⋯</button>
         ${S.menu===r.key?`<div class="menu" role="menu"><button role="menuitem" type="button" data-act="open-settings" data-k="${r.key}">${I.gear}الإعدادات</button><button role="menuitem" type="button" class="danger" data-act="delete" data-k="${r.key}">${I.trash}حذف المستودع</button></div>`:''}</div></div></td></tr>`}).join('')}</tbody></table></div>`
@@ -1222,6 +1239,89 @@ function suRefreshRoute(rid){
 }
 function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; }
 
+/* ============ new transfer request (create) ============ */
+const TN_RULES = {maxUnits:500, maxPieceKg:25, maxTotalKg:400, cold:false};
+const CATALOG = [
+  {id:'p1',n:'تيشيرت قطني',v:'XL',sku:'TS-1042',kg:0.3,stock:120,thumb:'👕'},
+  {id:'p2',n:'عطر عود 100 مل',v:'زجاج',sku:'PF-2210',kg:0.5,stock:40,flag:'fragile',thumb:'🧴'},
+  {id:'p3',n:'شوكولاتة داكنة',v:'علبة 12',sku:'CH-0331',kg:0.4,stock:60,flag:'cold',thumb:'🍫'},
+  {id:'p4',n:'كوب سيراميك',v:'أبيض',sku:'MG-0907',kg:0.4,stock:30,flag:'fragile',thumb:'☕'},
+  {id:'p5',n:'مكيف متنقل',v:'12000 وحدة',sku:'AC-7710',kg:32,stock:10,thumb:'❄️'},
+  {id:'p6',n:'قميص كتان',v:'L',sku:'SH-5530',kg:0.35,stock:600,thumb:'👔'},
+  {id:'p7',n:'سجادة صلاة',v:'مخمل',sku:'PR-1200',kg:1.2,stock:500,thumb:'🧶'},
+];
+const cat = id => CATALOG.find(p=>p.id===id);
+function tnInit(){ S.tn = S.tn || {from:'main-jed',to:'nokhba',method:'self',date:'',notes:'',rulesOpen:false,
+  items:[{id:'p1',qty:40},{id:'p2',qty:50},{id:'p3',qty:30},{id:'p5',qty:2},{id:'p6',qty:450}]}; return S.tn; }
+function tnCheck(tn){
+  const rowErr={}, rowWarn={}, global=[]; let units=0, kg=0;
+  for(const it of tn.items){ const p=cat(it.id), q=+it.qty||0, e=[], w=[];
+    units+=q; kg+=q*p.kg;
+    if(p.flag==='cold'&&!TN_RULES.cold) e.push({t:'المستودع لا يقبل المنتجات المبردة. أزل المنتج أو انقله لمستودع يدعم التبريد.',fix:'remove'});
+    if(p.kg>TN_RULES.maxPieceKg) e.push({t:`وزن القطعة ${p.kg} كجم يتجاوز الحد الأقصى ${TN_RULES.maxPieceKg} كجم للكرتونة.`,fix:'remove'});
+    if(q>p.stock) e.push({t:`الكمية أكبر من المتوفر في فرع الإرسال (${p.stock}).`,fix:'max'});
+    if(q<1) e.push({t:'أدخل كمية أكبر من صفر.'});
+    if(p.flag==='fragile') w.push('قابل للكسر: غلّف كل قطعة بالفقاعات.');
+    if(e.length) rowErr[it.id]=e; if(w.length) rowWarn[it.id]=w; }
+  if(units>TN_RULES.maxUnits) global.push(`إجمالي القطع ${units.toLocaleString('en')} يتجاوز الحد الأقصى ${TN_RULES.maxUnits} قطعة للطلب الواحد. قلّل الكميات أو قسّم النقل إلى طلبين.`);
+  if(kg>TN_RULES.maxTotalKg) global.push(`الوزن الإجمالي ${kg.toFixed(1)} كجم يتجاوز الحد الأقصى ${TN_RULES.maxTotalKg} كجم للطلب.`);
+  const nErr=Object.values(rowErr).reduce((a,x)=>a+x.length,0)+global.length;
+  return {rowErr,rowWarn,global,units,kg,nErr};
+}
+function tnRules(tn){
+  const R=[['snow','لا يقبل المنتجات المبردة'],['box',`حتى ${TN_RULES.maxUnits} قطعة للطلب`],['scale',`الكرتونة ${TN_RULES.maxPieceKg} كجم كحد أقصى`],['tag','ملصق SKU على كل قطعة'],['glass','غلّف القابل للكسر بالفقاعات']];
+  const ic={snow:I.snow,box:I.box,scale:I.scale,tag:I.tag,glass:I.glass};
+  return `<section class="panel pad tn-rules"><div class="row between"><b class="row" style="gap:6px">${I.info}شروط الاستلام في المستودع</b>
+     <button class="btn btn-ghost btn-sm" type="button" data-act="tn-rules" aria-expanded="${tn.rulesOpen}">${tn.rulesOpen?'إخفاء التفاصيل':'عرض التفاصيل'}</button></div>
+    <div class="rule-chips">${R.map(([k,t])=>`<span class="rule-chip">${ic[k]}${t}</span>`).join('')}</div>
+    ${tn.rulesOpen?`<ul class="rule-more"><li>المنتجات المبردة تُرفض عند الاستلام لأن هذا المستودع لا يدعم التخزين المبرد.</li><li>ضع قائمة المحتويات داخل كل كرتونة، وأي قطعة أثقل من ${TN_RULES.maxPieceKg} كجم لا تُقبل.</li><li>الحد الأقصى للطلب الواحد ${TN_RULES.maxUnits} قطعة و${TN_RULES.maxTotalKg} كجم. للكميات الأكبر أنشئ أكثر من طلب.</li><li>القطع بلا ملصق SKU تُعاد أو تُحتسب عليها رسوم ملصقات.</li></ul>`:''}</section>`;
+}
+function tnProducts(tn){
+  const c=tnCheck(tn), added=tn.items.map(i=>i.id);
+  const rows=tn.items.map(it=>{const p=cat(it.id), er=c.rowErr[it.id], wr=c.rowWarn[it.id];
+    return `<tr class="${er?'row-err':''}"><td>${prodCell(p)}</td><td class="num">${p.sku}</td><td class="n">${p.stock}</td>
+      <td class="n"><input class="inp sm-inp num-inp ${er&&er.some(x=>x.fix==='max'||!x.fix)?'inp-err':''}" type="number" min="0" id="tnq-${p.id}" data-tnq="${p.id}" value="${esc(it.qty)}" aria-label="كمية ${p.n}" aria-invalid="${!!er}"></td>
+      <td class="n num">${((+it.qty||0)*p.kg).toFixed(1)} كجم</td>
+      <td><button class="icon-btn danger" type="button" data-act="tn-rm" data-v="${p.id}" aria-label="إزالة ${p.n}">${I.trash}</button></td></tr>
+      ${er||wr?`<tr class="row-msg ${er?'err':''}"><td colspan="6">${(er||[]).map(x=>`<div class="msg err">${I.warn}<span class="grow">${x.t}</span>${x.fix==='remove'?`<button class="btn btn-sm" type="button" data-act="tn-rm" data-v="${p.id}">إزالة المنتج</button>`:x.fix==='max'?`<button class="btn btn-sm" type="button" data-act="tn-max" data-v="${p.id}">استخدام ${p.stock}</button>`:''}</div>`).join('')}${(wr||[]).map(x=>`<div class="msg warn">${I.info}<span class="grow">${x}</span></div>`).join('')}</td></tr>`:''}`;}).join('');
+  return `<h2>المنتجات</h2>
+    <select class="select" style="width:100%" data-tnadd aria-label="إضافة منتج"><option value="">اختر من المنتجات</option>${CATALOG.filter(p=>!added.includes(p.id)).map(p=>`<option value="${p.id}">${p.n} · ${p.sku}${p.flag==='cold'?' · مبرد':''}${p.kg>TN_RULES.maxPieceKg?' · '+p.kg+' كجم':''}</option>`).join('')}</select>
+    ${tn.items.length?`
+     ${c.nErr?`<div class="alert bad">${I.warn}<span class="grow"><b>${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} يجب تصحيحها قبل الإرسال.</b> المنتجات التي لا تطابق شروط المستودع مظللة بالأحمر.</span></div>`:`<div class="alert ok">${I.check}<span class="grow">كل المنتجات تطابق شروط المستودع.</span></div>`}
+     ${c.global.map(g=>`<div class="alert bad">${I.warn}<span class="grow">${g}</span></div>`).join('')}
+     <div class="tbl-wrap"><table class="tn-tbl"><thead><tr><th>المنتج</th><th>SKU</th><th class="n">المتوفر في الفرع</th><th class="n">الكمية</th><th class="n">الوزن</th><th></th></tr></thead><tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="3"><b>الإجمالي</b></td><td class="n num ${c.units>TN_RULES.maxUnits?'qty-bad':''}"><b>${c.units.toLocaleString('en')}</b> / ${TN_RULES.maxUnits} قطعة</td><td class="n num ${c.kg>TN_RULES.maxTotalKg?'qty-bad':''}"><b>${c.kg.toFixed(1)}</b> / ${TN_RULES.maxTotalKg} كجم</td><td></td></tr></tfoot></table></div>`
+    :`<div class="empty"><div class="ill">${I.box}</div><b>لا توجد منتجات بعد</b><p>ابحث عن منتجات لإضافتها لطلب النقل.</p></div>`}`;
+}
+function screenTransferNew(){
+  const tn=tnInit(), c=tnCheck(tn), dest=rowBy(tn.to);
+  return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','mine'],['طلب نقل جديد',''])+`<div class="stack">
+   <section class="panel pad stack"><h2>نقل المخزون</h2>
+     <div class="grid2"><div class="fld"><label for="tn-from">فرع الإرسال <i>*</i></label><select class="inp" id="tn-from" data-tn="from"><option value="main-jed" ${tn.from==='main-jed'?'selected':''}>المستودع الرئيسي – جدة</option><option value="br-ruh" ${tn.from==='br-ruh'?'selected':''}>فرع الرياض – حي النخيل</option></select></div>
+       <div class="fld"><label for="tn-to">فرع الاستلام <i>*</i></label><select class="inp" id="tn-to" data-tn="to">${S.rows.map(r=>`<option value="${r.key}" ${tn.to===r.key?'selected':''}>${r.name}</option>`).join('')}</select></div></div>
+     <div class="fld"><span class="lbl">طريقة التسليم <i>*</i></span><div class="grid2">
+       <button type="button" class="tn-method ${tn.method==='self'?'on':''}" data-act="tn-method" data-v="self" aria-pressed="${tn.method==='self'}"><b>تسليم التاجر</b><span>قم بتوصيل المنتجات بنفسك إلى المستودع.</span></button>
+       <button type="button" class="tn-method ${tn.method==='pickup'?'on':''}" data-act="tn-method" data-v="pickup" aria-pressed="${tn.method==='pickup'}"><b>تسليم لشركة الشحن</b><span>حدد موعداً لاستلام البضائع من متجرك.</span></button></div></div>
+   </section>
+   ${tnRules(tn)}
+   <section class="panel pad stack" id="tnProducts">${tnProducts(tn)}</section>
+   <section class="panel pad stack"><h2>تفاصيل الشحن <span class="sm muted" style="font-weight:400">اختياري</span></h2>
+     <div class="fld"><label for="tn-date">التاريخ المتوقع للوصول</label><input class="inp" type="date" id="tn-date" data-tn="date" value="${tn.date}"></div>
+     <div class="fld"><label for="tn-notes">ملاحظات</label><textarea class="inp" id="tn-notes" rows="3" data-tn="notes" placeholder="اكتب ملاحظاتك">${esc(tn.notes)}</textarea></div></section>
+   <section class="panel pad row between su-bar"><button class="btn" style="color:var(--bad);border-color:#f0b8b8" type="button" data-go="mine">إلغاء</button>
+     <div class="row"><span class="sm ${c.nErr?'qty-bad':'muted'}" id="tnSendNote">${c.nErr?`صحّح ${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} لتفعيل الإرسال`:`${c.units} قطعة إلى ${dest?dest.name:''}`}</span>
+     <button class="btn btn-p" type="button" data-act="tn-send" id="tnSend" ${c.nErr||!tn.items.length?'disabled':''}>إرسال</button></div></section>
+  </div>`;
+}
+function tnRefresh(focusId){
+  const pos=focusId&&document.getElementById(focusId)?document.getElementById(focusId).selectionStart:null;
+  document.getElementById('tnProducts').innerHTML=tnProducts(S.tn);
+  const c=tnCheck(S.tn), btn=document.getElementById('tnSend'), note=document.getElementById('tnSendNote'), dest=rowBy(S.tn.to);
+  btn.disabled=!!c.nErr||!S.tn.items.length; note.className='sm '+(c.nErr?'qty-bad':'muted');
+  note.textContent=c.nErr?`صحّح ${c.nErr} ${c.nErr===1?'مشكلة':'مشكلات'} لتفعيل الإرسال`:`${c.units} قطعة إلى ${dest?dest.name:''}`;
+  if(focusId){const el=document.getElementById(focusId); if(el){el.focus(); try{el.setSelectionRange(pos,pos)}catch(_){}}}
+}
+
 const app=document.getElementById('app');
 function route(){
   const h=(location.hash||'#browse').slice(1);
@@ -1230,6 +1330,7 @@ function route(){
   else if(h.startsWith('detail-')) html=screenDetail(h.slice(7));
   else if(h.startsWith('settings-')) html=screenSettings(h.slice(9));
   else if(h==='transfer') html=screenTransfer();
+  else if(h==='transfer-new') html=screenTransferNew();
   else if(h.startsWith('setup-')) html=screenSetup(h.slice(6));
   else html=screenList('browse');
   app.innerHTML=html;
@@ -1302,6 +1403,12 @@ document.addEventListener('click',e=>{
     S.mine[su.wh]={status:'awaiting'}; S.rows=S.rows.filter(x=>x.key!=='new-'+su.wh);
     S.rows.unshift(row('new-'+su.wh,'مستودعات سلة – '+w.city,su.wh,w.name.split('– ')[1]||'','awaiting',true,[],pr));
     S.setup=null; go('mine'); toast('تم حجز المستودع بنجاح');}
+  if(act==='tn-start'){S.tn=null; tnInit(); S.tn.to=k; go('transfer-new');}
+  if(act==='tn-rules'){S.tn.rulesOpen=!S.tn.rulesOpen; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
+  if(act==='tn-rm'){S.tn.items=S.tn.items.filter(x=>x.id!==a.dataset.v); tnRefresh();}
+  if(act==='tn-max'){const it=S.tn.items.find(x=>x.id===a.dataset.v); it.qty=String(cat(it.id).stock); tnRefresh();}
+  if(act==='tn-method'){S.tn.method=a.dataset.v; const t=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=t;}
+  if(act==='tn-send'){ if(tnCheck(S.tn).nErr) return; S.tn=null; S.tstate=1; go('transfer'); toast('تم إنشاء طلب نقل المخزون بنجاح');}
   if(act==='svc-toggle'){const v=a.dataset.v; S.priceOpen=S.priceOpen.includes(v)?S.priceOpen.filter(x=>x!==v):[...S.priceOpen,v]; rerenderSettings();}
   if(act==='zone-add'){S.zoneEdit={idx:-1,draft:{name:'',method:'city',country:'السعودية',city:cityOf(cur()),districts:'',hours:'all',from:'08:00',to:'22:00',radius:5}}; rerenderSettings(); document.getElementById('zf-name')?.focus();}
   if(act==='zone-edit'){const i=+a.dataset.i; S.zoneEdit={idx:i,draft:{...cur().zones[i]}}; rerenderSettings();}
@@ -1311,6 +1418,8 @@ document.addEventListener('click',e=>{
     const r=cur(); if(S.zoneEdit.idx<0) r.zones.push(d); else r.zones[S.zoneEdit.idx]=d; S.zoneEdit=null; rerenderSettings(); toast('تم حفظ نطاق التغطية');}
 });
 document.addEventListener('input',e=>{
+  if(e.target.dataset.tnq&&S.tn){const it=S.tn.items.find(x=>x.id===e.target.dataset.tnq); it.qty=e.target.value; tnRefresh(e.target.id); return;}
+  if(e.target.dataset.tn&&S.tn&&['date','notes'].includes(e.target.dataset.tn)){S.tn[e.target.dataset.tn]=e.target.value; return;}
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['fee','baseW','extra','per','dur','radius'].includes(e.target.dataset.su)){
     const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
     if(f==='radius') r.cov.radius=e.target.value; else r.p[f]=e.target.value; suRefreshRoute(rid); return;}
@@ -1325,6 +1434,8 @@ document.addEventListener('input',e=>{
   if(e.target.dataset.rel==='val'){const rid=e.target.closest('[data-r]').dataset.r; const r=rowBy(document.getElementById('setRoot').dataset.k); relOf(r)[rid].val=e.target.value; syncRel(r); refreshLive(r);}
 });
 document.addEventListener('change',e=>{
+  if(e.target.dataset.tnadd!==undefined&&S.tn&&e.target.value){S.tn.items.push({id:e.target.value,qty:'1'}); tnRefresh(); return;}
+  if(e.target.dataset.tn&&S.tn&&['from','to'].includes(e.target.dataset.tn)){S.tn[e.target.dataset.tn]=e.target.value; tnRefresh(); return;}
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['on','cod','type','addcity'].includes(e.target.dataset.su)){
     const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
     if(f==='on'){r.on=e.target.checked; if(r.on&&!S.setup.open.includes(rid)) S.setup.open.push(rid);}
