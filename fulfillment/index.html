@@ -621,7 +621,7 @@ function screenDetail(id){
     <aside class="stack sticky">
       <section class="panel pad stack" style="background:var(--mint-50);border-color:var(--mint)">
         <div class="row"><span class="sm muted">يبدأ من</span><strong class="num" style="font-size:24px">${w.price} ر.س</strong><span>/ طلب</span></div>
-        ${booked?`<button class="btn" data-go="mine" type="button">محجوز · عرض في مستودعاتي</button>`:`${capState(w.id).k==='full'?`<button class="btn" data-act="toast" data-msg="سنبلغك عند توفر مساحة في مستودع ${w.city}" type="button">ممتلئ حالياً · أبلغني عند التوفر</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز المستودع</button>`}`}
+        ${booked?`<button class="btn" data-go="mine" type="button">محجوز · عرض في مستودعاتي</button>`:`${capState(w.id).k==='full'?`<button class="btn" data-act="toast" data-msg="سنبلغك عند توفر مساحة في مستودع ${w.city}" type="button">ممتلئ · أبلغني عند التوفر</button>`:`<button class="btn btn-p" data-act="book" data-id="${w.id}" type="button">احجز المستودع</button>`}`}
         <p class="sm ink2">الحجز لا يفعّل المستودع. يتفعّل بعد نقل مخزونك واستلامه وفحصه.</p>
       </section>
       <section class="panel pad stack"><h2>ساعات العمل</h2>
@@ -1114,7 +1114,7 @@ function logSection(t){
 /* ============ booking setup page (after "احجز") ============ */
 // storage capacity used (%) per warehouse
 const CAP = {ruh:72,jed:35,dmm:48,mak:88,med:20,khb:100};
-function capState(id){const u=CAP[id]??0; return u>=100?{k:'full',label:'ممتلئ حالياً',cls:'bad',note:'لا توجد مساحة للحجز الآن'}:u>=80?{k:'low',label:'مساحة محدودة',cls:'warn',note:`متبقي ${100-u}% من السعة`}:{k:'ok',label:'مساحة متاحة',cls:'ok',note:`متبقي ${100-u}% من السعة`};}
+function capState(id){const u=CAP[id]??0; return u>=100?{k:'full',label:'ممتلئ',cls:'bad',note:'لا توجد مساحة للحجز الآن'}:{k:u>=80?'low':'ok',label:'متاح للحجز',cls:'ok',note:`متبقي ${100-u}% من السعة`};}
 function capBadge(id){const c=capState(id), u=Math.min(100,CAP[id]??0);
   return `<div class="cap cap-${c.k}" title="${c.note}"><span class="pill ${c.cls}">${c.label}</span><span class="cap-bar" role="img" aria-label="السعة المستخدمة ${u}%"><i style="width:${u}%"></i></span><span class="sm muted num">${c.note}</span></div>`;}
 const OPERATOR = {ruh:'أرامكس',jed:'سمسا',dmm:'أرامكس',mak:'سمسا',med:'ناقل',khb:'سمسا'};
