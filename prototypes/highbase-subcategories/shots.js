@@ -10,7 +10,7 @@ const { chromium } = require('playwright'); const path = require('path');
     for (const [k, v] of Object.entries(Object.assign({ view: 'desk', user: 'buyer', lang: 'en' }, set || {}))) { await p.click(`[data-set="${k}"][data-v="${v}"]`); await p.waitForTimeout(120); }
     return { ctx, p };
   };
-  const state = p => p.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, dir: document.documentElement.dir, title: document.querySelector('.page__title')?.textContent.trim(), crumbs: [...document.querySelectorAll('.crumbs li')].map(l => l.textContent.trim()), cards: document.querySelectorAll('.scard').length, pills: document.querySelectorAll('.pill').length, cur: document.querySelector('.pill[aria-current="page"]')?.textContent, products: document.querySelectorAll('.hb-pcard').length, panel: !!document.querySelector('.fpanel') && getComputedStyle(document.querySelector('.fpanel')).display !== 'none', mobile: !!document.querySelector('.app.m'), categoryTreeInFilters: !!document.querySelector('.fpanel [data-slug], [data-sheet] [data-slug]') }));
+  const state = p => p.evaluate(() => ({ sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, dir: document.documentElement.dir, title: document.querySelector('.page__title')?.textContent.trim(), crumbs: [...document.querySelectorAll('.crumbs li')].map(l => l.textContent.trim()), cards: document.querySelectorAll('.scard').length, pills: document.querySelectorAll('.pill').length, cur: document.querySelector('.scard[aria-current="page"]')?.textContent.trim(), products: document.querySelectorAll('.hb-pcard').length, panel: !!document.querySelector('.fpanel') && getComputedStyle(document.querySelector('.fpanel')).display !== 'none', mobile: !!document.querySelector('.app.m'), categoryTreeInFilters: !!document.querySelector('.fpanel [data-slug], [data-sheet] [data-slug]') }));
   const shot = async (w, h, hash, name, set, act) => {
     const { ctx, p } = await open(w, h, hash, name, set); if (act) await act(p);
     await p.screenshot({ path: path.join(out, name + '.png') }); console.log(name, JSON.stringify(await state(p))); await ctx.close();
@@ -37,14 +37,14 @@ const { chromium } = require('playwright'); const path = require('path');
   const t1 = await p.evaluate(() => [location.hash, document.querySelector('.page__title').textContent.trim(), document.activeElement.className]);
   await p.click('.fopt input[data-fk="brand"]'); await p.waitForTimeout(100);
   const filtered = await p.evaluate(() => document.querySelectorAll('.hb-pcard').length);
-  await p.click('.pill:not([aria-current])'); await p.waitForTimeout(200);
+  await p.click('.subs__grid .scard:not([aria-current])'); await p.waitForTimeout(200);
   const afterPill = await p.evaluate(() => [location.hash, document.querySelectorAll('.applied').length, window.scrollY]);
   await p.goBack(); await p.waitForTimeout(200); await p.goBack(); await p.waitForTimeout(200); await p.goBack(); await p.waitForTimeout(200);
   const t2 = await p.evaluate(() => [location.hash, document.querySelector('.page__title').textContent.trim()]);
   await p.goto(url + '#dairy-eggs-cheese'); await p.waitForTimeout(200);
   await p.focus('.scard[data-slug="cheese"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(200);
   const t3 = await p.evaluate(() => [location.hash, document.activeElement.tagName]);
-  const tabs = await p.evaluate(() => [...document.querySelectorAll('.pill, .scard, .mega__item, .hb-crumbs__link')].every(a => a.tagName === 'A' && a.tabIndex >= 0));
+  const tabs = await p.evaluate(() => [...document.querySelectorAll('.scard, .mega__item, .hb-crumbs__link')].every(a => a.tagName === 'A' && a.tabIndex >= 0));
   await p.fill('#hdr-search', 'milk'); await p.waitForTimeout(100);
   const events = await p.evaluate(() => [...document.querySelectorAll('#px-log li')].map(li => li.textContent.replace(/\n.*/, '')).slice(0, 8));
   const detail = await p.evaluate(() => [...document.querySelectorAll('#px-log li')].filter(li => /subcategory_selected/.test(li.textContent)).map(li => li.textContent.split('\n')[1]));

@@ -374,3 +374,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .m .grid[data-mode="list"] .hb-pcard__body{grid-template-columns:minmax(0,1fr);padding:var(--hb-space-12)}
 .m .grid[data-mode="list"] .hb-pcard__title{white-space:normal}
 .m .grid[data-mode="list"] .hb-pcard__actions{grid-column:1;grid-row:auto}
+
+/* current sibling tile on level-2 and childless pages (replaces the pills) */
+.scard[aria-current="page"] .scard__img{box-shadow:0 0 0 2px var(--hb-color-primary)}
+.scard[aria-current="page"] .scard__name{color:var(--hb-color-primary)}

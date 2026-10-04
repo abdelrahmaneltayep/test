@@ -61,7 +61,7 @@ generated fillers so no page is empty.
 | Brief | Where |
 |---|---|
 | Every level is its own page with its own URL; Back works; reload restores | hash routing stands in for Inertia visits; the address bar shows the real URL `/bh-en/storefront/products?filter[category]=<slug>` |
-| Level 0 and level 1 show child tiles; level 2 and childless level 1 show sibling pills "More in <parent>", current one `aria-current="page"` | `HBModel.section()` in `model.js`, tested |
+| Level 0 and level 1 show child tiles; level 2 and childless level 1 show the sibling tiles under "More in <parent>", the current one outlined and `aria-current="page"` (decision 4 Oct: tiles at every level, no pills) | `HBModel.section()` in `model.js`, tested |
 | Breadcrumb Home > ancestors (links) > current (plain text) | `HBModel.breadcrumb()`, tested; the Breadcrumb molecule renders it |
 | Title = category name + product count | `.page__title` |
 | Navigation resets filters, pagination and scroll; focus moves to the title | full re-render on `hashchange`; checked by `shots.js` |
@@ -76,7 +76,7 @@ generated fillers so no page is empty.
 ## Decisions the brief leaves to you `(decision)`
 
 - **Tile background and radius.** The brief says `#F3F4F6` and 14 px. The system has no 14 px radius and its nearest grey is `surface-container-low`. The tile uses the token for the grey and a literal 14 px, marked `BRIEF` in `proto.css`. For Figma, either add `rounded/14px` or round to 12.
-- **Current sibling pill.** The attached prototype paints it dark (`surface-dark`); the earlier revision used `primary/700`. Dark is what ships here.
+- **Current sibling tile.** Level-2 and childless pages show the siblings as tiles (same component as the children) with the current one outlined in primary; the pill row was dropped on 4 Oct.
 - **Discount chip.** The system's Chip has no offer style, so the chip uses the secondary container colours via `data-tone="offer"`; a Chip variant would make it official.
 - **Category images.** Every subcategory tile shows the placeholder icon `(decision)`; real images are content and arrive later. The mega menu keeps its level-0 drawings as the live product has icons there.
 - **Deals filter.** Removed from the panel and the sheet `(decision)`; the promo chip row (Ordered before / Offers / My suppliers) was removed on review; both filters remain as switches in the panel.

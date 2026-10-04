@@ -82,12 +82,12 @@
     var items = M.breadcrumb(cur, S.lang);
     return '<nav class="crumbs" aria-label="Breadcrumb"><ol class="hb-crumbs">' + items.map(function (it, i) { var sep = i ? '<span class="hb-crumbs__sep" aria-hidden="true">•</span>' : ''; return '<li>' + sep + (it.current ? '<span class="hb-crumbs__current" aria-current="page">' + esc(it.name) + '</span>' : '<a class="hb-crumbs__link" href="' + (it.slug ? href(it.slug) : '#fresh-foods-dairy') + '" data-slug="' + (it.slug || '') + '" data-source="breadcrumb">' + esc(it.name) + '</a>') + '</li>'; }).join('') + '</ol></nav>';
   };
-  var card = function (node) { return '<li><a class="scard" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="card"><span class="scard__img" aria-hidden="true">' + PLACEHOLDER + '</span><span class="scard__name">' + esc(n(node)) + '</span></a></li>'; };
+  var card = function (node, cur) { return '<li><a class="scard" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="card"' + (cur && node === cur ? ' aria-current="page"' : '') + '><span class="scard__img" aria-hidden="true">' + PLACEHOLDER + '</span><span class="scard__name">' + esc(n(node)) + '</span></a></li>'; };
   var pill = function (node, cur) { return '<li><a class="pill" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="pill"' + (node === cur ? ' aria-current="page"' : '') + '>' + esc(n(node)) + '</a></li>'; };
   var subsection = function (cur) {
     var sec = M.section(cur);
     if (sec.kind === 'cards') return '<section class="subs" aria-labelledby="subs-h"><h2 class="subs__title" id="subs-h">' + t('subcats') + '</h2><ul class="subs__grid">' + sec.items.map(card).join('') + '</ul></section>';
-    if (sec.kind === 'pills') return '<section class="subs" aria-labelledby="pills-h"><ul class="pills"><li class="pills__label" id="pills-h">' + t('moreIn') + esc(n(sec.parent)) + '</li>' + sec.items.map(function (s) { return pill(s, cur); }).join('') + '</ul></section>';
+    if (sec.kind === 'pills') return '<section class="subs" aria-labelledby="subs-h"><h2 class="subs__title" id="subs-h">' + t('moreIn') + esc(n(sec.parent)) + '</h2><ul class="subs__grid">' + sec.items.map(function (s) { return card(s, cur); }).join('') + '</ul></section>';
     return '';
   };
 
