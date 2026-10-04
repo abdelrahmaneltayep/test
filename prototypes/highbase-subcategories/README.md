@@ -22,6 +22,7 @@ network request; tokens, component CSS, the icon sprite and the product data are
 |---|---|
 | **A · Side filters (new)** | the attached proposal: side filter panel, sort, applied chips, the richer product card, cart bar, sheets |
 | **C · Side filters + search** | Version A with the live search field ("Search among N products…") in the toolbar beside Sort by; the term shows as an applied chip |
+| **M · Mobile, Talabat pattern** | the CEO's suggestion for phones: back arrow + level-0 title (opens the category menu) + search toggle, level-1 tabs, level-2 circles with "All" first and a ring on the current one, Sort / Brand / Supplier / Filters dropdown chips opening the sheets, an "Order again" row, and a compact two-column card with a + button that turns into the stepper, savings and "Best seller" / "Ordered before" tags; bottom bar Home / Brands / Cart / Profile as the live app `(proposal)` |
 | **B · Live + subcategory tiles** | the live page's logic as recorded on 4 Oct 2026 (title, top bar with search / Min Price / Max Price / Categories pop-up, "Only My Vendors", "Showing from … out of …", live card with coupon, Supplier Name, Add to Cart, Match My Price, pagination, the live empty state) plus the subcategory tiles and the Home-rooted breadcrumb |
 
 Both share the tree, the products, the tiles, the sibling pills, the mega menu, routing and tracking. In B the Categories pop-up keeps the live three-column checkbox tree; because every level is now a page, ticking a category opens that page (tracked with `source: "filter_popup"`, outside the brief's four sources) `(decision)`. The breadcrumb sits under the title as the live page places it, with Home added.
@@ -41,6 +42,7 @@ Both share the tree, the products, the tiles, the sibling pills, the mega menu, 
 
 | Source | What it gave |
 |---|---|
+| Mobile screen recording, 30 s, 4 Oct 2026 `(live)` | the live phone page: title + breadcrumb, "All Products" with search and filter icon, "Only My Vendors", one card per row, bottom bar Home / Brands / Cart / Profile |
 | Screen recording, 12 s, 4 Oct 2026 `(live)` | the header, the three-column mega menu, the Fresh Foods & Dairy > Dairy, Eggs & Cheese branch (verbatim), title, dot breadcrumb, the 4-up product grid |
 | The brief | every navigation behaviour and the tile spec |
 | `Highbase_Category_Prototype.html` (attached) | the side filter panel and its groups, promo chips, sort options, applied chips, the product card content (pack line, per-unit price, tier pill, delivery, minimum order, line total), add → stepper, cart bar, toast, guest and not-my-supplier states, Filters/Sort bottom sheets, bottom nav, the 26 illustrative products and the Arabic copy |
@@ -74,7 +76,7 @@ generated fillers so no page is empty.
 - **Discount chip.** The system's Chip has no offer style, so the chip uses the secondary container colours via `data-tone="offer"`; a Chip variant would make it official.
 - **Category images.** Every subcategory tile shows the placeholder icon `(decision)`; real images are content and arrive later. The mega menu keeps its level-0 drawings as the live product has icons there.
 - **Deals filter.** Removed from the panel and the sheet `(decision)`; the promo chip row (Ordered before / Offers / My suppliers) was removed on review; both filters remain as switches in the panel.
-- **Bottom navigation.** The system documents no bottom navigation; the attached prototype has one, so it is here as a `(proposal)`.
+- **Bottom navigation.** The system documents none, but the live phone app has Home / Brands / Cart / Profile, so the prototype uses those `(live)`.
 
 ## Proposals that need a business decision `(proposal)`
 

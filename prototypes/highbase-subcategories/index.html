@@ -1452,6 +1452,73 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .m .tool__search{flex-basis:100%}
 .m .tool--c .mbtns{width:100%}
 
+/* ---------- Version M: mobile in the Talabat pattern (proposal) ---------- */
+.body--m{display:block;padding:0 0 var(--hb-space-104)}
+.m .body--m{padding:0 0 var(--hb-space-104)}
+.page--m{gap:var(--hb-space-16)}
+.page--m>*{padding-inline:var(--hb-space-16)}
+.mtop{display:flex;align-items:center;gap:var(--hb-space-8);padding-block:var(--hb-space-12) 0;position:sticky;top:0;z-index:20;background:var(--hb-color-surface)}
+.mtop .hb-icon-btn{border-radius:var(--hb-radius-full);flex:0 0 auto}
+.mtop__title{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:var(--hb-space-4);border:0;background:none;font-size:var(--hb-font-size-18);line-height:var(--hb-font-line-height-latin-18);font-weight:var(--hb-font-weight-bold);color:var(--hb-color-on-surface-heading);cursor:pointer;padding:var(--hb-space-4)}
+.mtop__title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mtop__title .hb-i{width:20px;height:20px;color:var(--hb-color-on-surface-muted)}
+.msearch .hb-search{width:100%}
+.mtabs{display:flex;align-items:center;gap:var(--hb-space-4);border-bottom:1px solid var(--hb-color-outline-variant);padding-inline:var(--hb-space-8) 0!important}
+.mtabs__menu{flex:0 0 auto}
+.mtabs__row{display:flex;gap:var(--hb-space-4);overflow-x:auto;scrollbar-width:none;min-width:0}
+.mtabs__row::-webkit-scrollbar{display:none}
+.mtab{flex:0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:0 var(--hb-space-12);text-decoration:none;color:var(--hb-color-on-surface-muted);font-weight:var(--hb-font-weight-medium);white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.mtab[aria-current="page"]{color:var(--hb-color-primary);border-color:var(--hb-color-primary);font-weight:var(--hb-font-weight-semibold)}
+.mcircles{display:flex;gap:var(--hb-space-12);overflow-x:auto;scrollbar-width:none;scroll-snap-type:x proximity;padding-block:var(--hb-space-4)}
+.mcircles::-webkit-scrollbar{display:none}
+.mcircle{flex:0 0 72px;display:flex;flex-direction:column;align-items:center;gap:var(--hb-space-6);text-decoration:none;color:var(--hb-color-on-surface);scroll-snap-align:start;border-radius:var(--hb-radius-12)}
+.mcircle__img{width:64px;height:64px;border-radius:var(--hb-radius-full);background:var(--hb-color-surface-container-low);display:grid;place-items:center;border:2px solid transparent;transition:border-color .15s}
+.mcircle__img .ph{width:40%;height:40%;color:var(--hb-color-on-surface-disabled)}
+.mcircle[aria-current="page"] .mcircle__img{border-color:var(--hb-color-primary)}
+.mcircle[aria-current="page"] .mcircle__name{color:var(--hb-color-primary);font-weight:var(--hb-font-weight-semibold)}
+.mcircle__name{font-size:var(--hb-font-size-12);line-height:var(--hb-font-line-height-latin-12);text-align:center;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-weight:var(--hb-font-weight-medium)}
+.page__title--m{font-size:var(--hb-font-size-20);line-height:var(--hb-font-line-height-latin-20)}
+.mchips{display:flex;gap:var(--hb-space-8);overflow-x:auto;scrollbar-width:none}
+.mchips::-webkit-scrollbar{display:none}
+.mchip{flex:0 0 auto;cursor:pointer;border:1px solid var(--hb-color-outline-variant);border-radius:var(--hb-radius-full)}
+.mchip .hb-chip__icon{display:inline-flex}
+.mchip[data-style="tonal"]{border-color:var(--hb-color-primary)}
+.magain{display:flex;flex-direction:column;gap:var(--hb-space-12)}
+.magain__title,.mgrid__title{font-size:var(--hb-font-size-18);line-height:var(--hb-font-line-height-latin-18);font-weight:var(--hb-font-weight-bold);color:var(--hb-color-on-surface-heading)}
+.mgrid__title .page__count{font-size:var(--hb-font-size-12)}
+.magain__row{display:flex;gap:var(--hb-space-12);overflow-x:auto;scrollbar-width:none;margin-inline:calc(-1 * var(--hb-space-16));padding-inline:var(--hb-space-16);scroll-snap-type:x proximity}
+.magain__row::-webkit-scrollbar{display:none}
+.mcard--row{flex:0 0 150px;scroll-snap-align:start}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-16) var(--hb-space-12)}
+.mcard{display:flex;flex-direction:column;gap:var(--hb-space-8);min-width:0}
+.mcard__media{position:relative;aspect-ratio:1/1;border-radius:var(--hb-radius-16);overflow:hidden;background:var(--hb-color-surface-container-low)}
+.mcard__media .pcard-art svg{width:56%;height:56%}
+.mcard__save{position:absolute;inset-inline-start:var(--hb-space-8);top:var(--hb-space-8);z-index:1}
+.hb-chip[data-tone="save"]{background:var(--hb-color-success-container);color:var(--hb-color-on-success-container);font-weight:var(--hb-font-weight-semibold)}
+.hb-chip[data-tone="again"]{background:var(--hb-color-warning-light);color:var(--hb-color-warning-dark)}
+.hb-chip[data-tone="best"]{background:var(--hb-color-accent-yellow-container);color:var(--hb-color-on-accent-yellow)}
+.mcard__add{position:absolute;inset-inline-end:var(--hb-space-8);bottom:var(--hb-space-8);z-index:1;border-radius:var(--hb-radius-full);box-shadow:var(--hb-shadow-md)}
+.mcard__add[data-style="outlined"]{background:var(--hb-color-surface)}
+.mcard__step{position:absolute;inset-inline:var(--hb-space-8);bottom:var(--hb-space-8);z-index:1;width:auto;background:var(--hb-color-surface);box-shadow:var(--hb-shadow-md);height:36px}
+.mcard__step .hb-atc__value{min-width:0}
+.mcard__body{display:flex;flex-direction:column;gap:var(--hb-space-4);align-items:flex-start}
+.mcard__tag{align-self:flex-start}
+.mcard__name{font-size:var(--hb-font-size-14);line-height:var(--hb-font-line-height-latin-14);font-weight:var(--hb-font-weight-semibold);color:var(--hb-color-on-surface-heading);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;unicode-bidi:plaintext}
+[lang="ar"] .mcard__name{line-height:var(--hb-font-line-height-arabic-14)}
+.mcard__pack,.mcard__min{font-size:var(--hb-font-size-12);line-height:var(--hb-font-line-height-latin-12);color:var(--hb-color-on-surface-muted);unicode-bidi:plaintext}
+.mcard__price{font-size:var(--hb-font-size-14);color:var(--hb-color-on-surface);font-variant-numeric:tabular-nums;unicode-bidi:plaintext}
+.mcard__price b{font-size:var(--hb-font-size-16);font-weight:var(--hb-font-weight-bold)}
+.mcard__price s{color:var(--hb-color-on-surface-muted);margin-inline-start:var(--hb-space-4)}
+.ver-m .cartbar{bottom:56px}
+.ver-m .mega{position:fixed;inset:0;top:0;max-height:none;border-radius:0;z-index:70;grid-template-columns:1fr}
+.frame--phone .ver-m .mega{position:absolute}
+.ver-m .scrim{z-index:65}
+
+.mcard__add{width:40px;height:40px;min-width:0;padding:0}
+.ver-m .mega{display:flex;flex-direction:column}
+.ver-m .mega__head{flex:0 0 auto;grid-column:1/-1}
+.ver-m .mega__col[data-active]{flex:1 1 auto;overflow:auto}
+
 </style>
 </head>
 <body>
@@ -1582,9 +1649,9 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 
   /* ---------- copy ---------- */
   var T = {
-    en: { categories: 'Categories', brands: 'Brands', cart: 'Cart', home: 'Home', account: 'Account', search: 'Search by name, category or brand', filters: 'Filters', sortBy: 'Sort by', clearAll: 'Clear all', viewCart: 'View cart', best: 'Best-selling', priceAsc: 'Price: low to high', unitAsc: 'Price per unit: low to high', newest: 'Newest', offers: 'Offers', again: 'Ordered before', mine: 'My suppliers', mineHint: 'Suppliers you already order from', againHint: 'Products on a previous order', supplier: 'Supplier', brand: 'Brand', price: 'Price (BHD)', min: 'Min', max: 'Max', deals: 'Deals', offer: 'On offer', bulk: 'Bulk price', subcats: 'Subcategories', moreIn: 'More in ', allIn: 'All in ', add: 'Add', signIn: 'Sign in to order', addSupplier: 'Add supplier to order', notYours: 'Not your supplier yet. Adding it takes one step.', listPrice: 'List price', bizLock: 'Your business price after sign-in', per: 'per', delTom: 'Delivery tomorrow', del2: 'Delivery in 2 days', loadMore: 'Load more', noRes: 'No products match these filters', noResHint: 'Remove a filter or try another subcategory.', show: 'Show', apply: 'Apply', back: 'Back', remove: 'Remove', signedIn: 'Signed in. Your business prices are now shown.', supplierAdded: 'Supplier added: ', wholesale: 'Wholesale', empty: 'No products in this category yet.', searchAmong: function (n) { return 'Search among ' + n + ' products…'; }, minPrice: 'Min Price', maxPrice: 'Max Price', categoriesBtn: 'Categories', onlyMine: 'Only My Vendors', showing: function (a, b, n) { return 'Showing from ' + a + ' to ' + b + ' products out of '; }, addToCart: 'Add to Cart', matchPrice: 'Match My Price', ribbon: 'Get 5-10% Off EXTRA!', useCoupon: 'Use Coupon', moreCoupons: 'View 2 more coupons', supplierName: 'Supplier Name:', liveEmpty: 'No active products that match your filter', liveEmptyHint: 'Adjust your filters or try again later', searchCats: 'Search..',
+    en: { categories: 'Categories', brands: 'Brands', cart: 'Cart', home: 'Home', account: 'Account', search: 'Search by name, category or brand', filters: 'Filters', sortBy: 'Sort by', clearAll: 'Clear all', viewCart: 'View cart', best: 'Best-selling', priceAsc: 'Price: low to high', unitAsc: 'Price per unit: low to high', newest: 'Newest', offers: 'Offers', again: 'Ordered before', mine: 'My suppliers', mineHint: 'Suppliers you already order from', againHint: 'Products on a previous order', supplier: 'Supplier', brand: 'Brand', price: 'Price (BHD)', min: 'Min', max: 'Max', deals: 'Deals', offer: 'On offer', bulk: 'Bulk price', subcats: 'Subcategories', moreIn: 'More in ', allIn: 'All in ', add: 'Add', signIn: 'Sign in to order', addSupplier: 'Add supplier to order', notYours: 'Not your supplier yet. Adding it takes one step.', listPrice: 'List price', bizLock: 'Your business price after sign-in', per: 'per', delTom: 'Delivery tomorrow', del2: 'Delivery in 2 days', loadMore: 'Load more', noRes: 'No products match these filters', noResHint: 'Remove a filter or try another subcategory.', show: 'Show', apply: 'Apply', back: 'Back', remove: 'Remove', signedIn: 'Signed in. Your business prices are now shown.', supplierAdded: 'Supplier added: ', wholesale: 'Wholesale', empty: 'No products in this category yet.', searchAmong: function (n) { return 'Search among ' + n + ' products…'; }, minPrice: 'Min Price', maxPrice: 'Max Price', categoriesBtn: 'Categories', onlyMine: 'Only My Vendors', showing: function (a, b, n) { return 'Showing from ' + a + ' to ' + b + ' products out of '; }, addToCart: 'Add to Cart', matchPrice: 'Match My Price', ribbon: 'Get 5-10% Off EXTRA!', useCoupon: 'Use Coupon', moreCoupons: 'View 2 more coupons', supplierName: 'Supplier Name:', liveEmpty: 'No active products that match your filter', liveEmptyHint: 'Adjust your filters or try again later', searchCats: 'Search..', all: 'All', orderAgain: 'Order again', bestSeller: 'Best seller', save: function (p) { return 'Save ' + p + '%'; }, brandsNav: 'Brands', profile: 'Profile', allProducts: 'All products', remind: function (n) { return 'Shop now and add BHD ' + n + ' or more to your order!'; },
       products: function (n) { return n + (n === 1 ? ' product' : ' products'); }, minOrder: function (n, u) { return 'Min ' + n + ' ' + u; }, left: function (n) { return 'Only ' + n + ' left'; }, tierHint: function (p, n, u) { return 'BHD ' + p + ' from ' + n + ' ' + u; }, tierReached: function (p) { return 'Tier price BHD ' + p + ' applied'; }, tierMore: function (k, u, p) { return 'Add ' + k + ' more ' + u + ' for BHD ' + p + ' each'; }, line: function (t) { return 'Line total BHD ' + t; }, added: function (q, u, n) { return 'Added ' + q + ' ' + u + ' · ' + n; }, items: function (n, s) { return n + (n === 1 ? ' item' : ' items') + ' from ' + s + (s === 1 ? ' supplier' : ' suppliers'); }, shown: function (a, b) { return 'Showing ' + a + ' of ' + b; }, off: function (p) { return p + '% off'; } },
-    ar: { categories: 'الأقسام', brands: 'العلامات', cart: 'السلة', home: 'الرئيسية', account: 'حسابي', search: 'ابحث بالاسم أو الفئة أو العلامة', filters: 'التصفية', sortBy: 'الترتيب', clearAll: 'مسح الكل', viewCart: 'عرض السلة', best: 'الأكثر مبيعًا', priceAsc: 'السعر: من الأقل', unitAsc: 'سعر الوحدة: من الأقل', newest: 'الأحدث', offers: 'العروض', again: 'طلبته سابقًا', mine: 'مورّديّ', mineHint: 'الموردون الذين تطلب منهم', againHint: 'منتجات في طلب سابق', supplier: 'المورّد', brand: 'العلامة', price: 'السعر (د.ب)', min: 'من', max: 'إلى', deals: 'العروض', offer: 'خصم', bulk: 'سعر الجملة', subcats: 'الأقسام الفرعية', moreIn: 'المزيد في ', allIn: 'الكل في ', add: 'أضف', signIn: 'سجّل الدخول للطلب', addSupplier: 'أضف المورّد للطلب', notYours: 'هذا المورّد غير مضاف بعد. إضافته خطوة واحدة.', listPrice: 'السعر المعلن', bizLock: 'سعرك التجاري بعد تسجيل الدخول', per: 'لكل', delTom: 'التوصيل غدًا', del2: 'التوصيل خلال يومين', loadMore: 'عرض المزيد', noRes: 'لا توجد منتجات بهذه التصفية', noResHint: 'أزل تصفية أو جرّب قسمًا آخر.', show: 'عرض', apply: 'تطبيق', back: 'رجوع', remove: 'إزالة', signedIn: 'تم تسجيل الدخول. تظهر الآن أسعارك التجارية.', supplierAdded: 'تمت إضافة المورّد: ', wholesale: 'جملة', empty: 'لا توجد منتجات في هذه الفئة بعد.', searchAmong: function (n) { return 'ابحث ضمن ' + n + ' منتجًا…'; }, minPrice: 'أقل سعر', maxPrice: 'أعلى سعر', categoriesBtn: 'الفئات', onlyMine: 'موردوني فقط', showing: function (a, b, n) { return 'عرض من ' + a + ' إلى ' + b + ' من أصل '; }, addToCart: 'أضف إلى السلة', matchPrice: 'طابق سعري', ribbon: 'خصم إضافي 5-10%!', useCoupon: 'استخدم الكوبون', moreCoupons: 'عرض كوبونين آخرين', supplierName: 'اسم المورد:', liveEmpty: 'لا توجد منتجات نشطة تطابق التصفية', liveEmptyHint: 'عدّل التصفية أو حاول لاحقًا', searchCats: 'بحث..',
+    ar: { categories: 'الأقسام', brands: 'العلامات', cart: 'السلة', home: 'الرئيسية', account: 'حسابي', search: 'ابحث بالاسم أو الفئة أو العلامة', filters: 'التصفية', sortBy: 'الترتيب', clearAll: 'مسح الكل', viewCart: 'عرض السلة', best: 'الأكثر مبيعًا', priceAsc: 'السعر: من الأقل', unitAsc: 'سعر الوحدة: من الأقل', newest: 'الأحدث', offers: 'العروض', again: 'طلبته سابقًا', mine: 'مورّديّ', mineHint: 'الموردون الذين تطلب منهم', againHint: 'منتجات في طلب سابق', supplier: 'المورّد', brand: 'العلامة', price: 'السعر (د.ب)', min: 'من', max: 'إلى', deals: 'العروض', offer: 'خصم', bulk: 'سعر الجملة', subcats: 'الأقسام الفرعية', moreIn: 'المزيد في ', allIn: 'الكل في ', add: 'أضف', signIn: 'سجّل الدخول للطلب', addSupplier: 'أضف المورّد للطلب', notYours: 'هذا المورّد غير مضاف بعد. إضافته خطوة واحدة.', listPrice: 'السعر المعلن', bizLock: 'سعرك التجاري بعد تسجيل الدخول', per: 'لكل', delTom: 'التوصيل غدًا', del2: 'التوصيل خلال يومين', loadMore: 'عرض المزيد', noRes: 'لا توجد منتجات بهذه التصفية', noResHint: 'أزل تصفية أو جرّب قسمًا آخر.', show: 'عرض', apply: 'تطبيق', back: 'رجوع', remove: 'إزالة', signedIn: 'تم تسجيل الدخول. تظهر الآن أسعارك التجارية.', supplierAdded: 'تمت إضافة المورّد: ', wholesale: 'جملة', empty: 'لا توجد منتجات في هذه الفئة بعد.', searchAmong: function (n) { return 'ابحث ضمن ' + n + ' منتجًا…'; }, minPrice: 'أقل سعر', maxPrice: 'أعلى سعر', categoriesBtn: 'الفئات', onlyMine: 'موردوني فقط', showing: function (a, b, n) { return 'عرض من ' + a + ' إلى ' + b + ' من أصل '; }, addToCart: 'أضف إلى السلة', matchPrice: 'طابق سعري', ribbon: 'خصم إضافي 5-10%!', useCoupon: 'استخدم الكوبون', moreCoupons: 'عرض كوبونين آخرين', supplierName: 'اسم المورد:', liveEmpty: 'لا توجد منتجات نشطة تطابق التصفية', liveEmptyHint: 'عدّل التصفية أو حاول لاحقًا', searchCats: 'بحث..', all: 'الكل', orderAgain: 'اطلب من جديد', bestSeller: 'الأكثر مبيعًا', save: function (p) { return 'وفر ' + p + '%'; }, brandsNav: 'العلامات', profile: 'حسابي', allProducts: 'كل المنتجات', remind: function (n) { return 'تسوّق الآن وأضف ' + n + ' د.ب أو أكثر إلى طلبك!'; },
       products: function (n) { return n + ' منتج'; }, minOrder: function (n, u) { return 'الحد الأدنى ' + n + ' ' + u; }, left: function (n) { return 'بقي ' + n + ' فقط'; }, tierHint: function (p, n, u) { return p + ' د.ب عند ' + n + ' ' + u; }, tierReached: function (p) { return 'تم تطبيق سعر الكمية ' + p + ' د.ب'; }, tierMore: function (k, u, p) { return 'أضف ' + k + ' ' + u + ' ليصبح السعر ' + p + ' د.ب'; }, line: function (t) { return 'الإجمالي ' + t + ' د.ب'; }, added: function (q, u, n) { return 'تمت إضافة ' + q + ' ' + u + ' · ' + n; }, items: function (n, s) { return n + ' منتجات من ' + s + ' مورّدين'; }, shown: function (a, b) { return 'عرض ' + a + ' من ' + b; }, off: function (p) { return 'خصم ' + p + '٪'; } }
   };
 
@@ -1615,7 +1682,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
   var n = function (node) { return M.name(node, S.lang); };
   var href = function (slug) { return '#' + slug; };
   var current = function () { return M.BY[S.slug] || M.TREE[0]; };
-  var isMobile = function () { return S.view === 'mob' || window.innerWidth < 760; };
+  var isMobile = function () { return S.ver === 'm' || S.view === 'mob' || window.innerWidth < 760; };
   var guest = function () { return S.user === 'guest'; };
 
   /* ---------- tracking: PostHog stand-in. One $pageview per navigation, never per keystroke. */
@@ -1624,7 +1691,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 
   /* ---------- routing ---------- */
   var go = function (slug, source, fromNode) { var to = M.BY[slug]; if (!to) return; if (source) track(fromNode || current(), to, source); closeMenu(); if (location.hash !== '#' + slug) location.hash = slug; else render(); };
-  window.addEventListener('hashchange', function () { S.focusTitle = true; S.slug = (location.hash || '#').slice(1) || 'fresh-foods-dairy'; if (!M.BY[S.slug]) S.slug = 'fresh-foods-dairy'; S.f = M.blank(); S.limit = 12; S.pageNo = 1; S.sheet = null; S.catOpen = false; render(); var sc = $('scroller'); if (sc && S.view === 'mob') sc.scrollTo(0, 0); else window.scrollTo({ top: 0, behavior: 'auto' }); });
+  window.addEventListener('hashchange', function () { S.focusTitle = true; S.slug = (location.hash || '#').slice(1) || 'fresh-foods-dairy'; if (!M.BY[S.slug]) S.slug = 'fresh-foods-dairy'; S.f = M.blank(); S.limit = 12; S.pageNo = 1; S.sheet = null; S.catOpen = false; S.msearch = false; render(); var sc = $('scroller'); if (sc && S.view === 'mob') sc.scrollTo(0, 0); else window.scrollTo({ top: 0, behavior: 'auto' }); });
 
   /* ---------- pieces ---------- */
   var LOGO = '<a href="#fresh-foods-dairy" class="logo" aria-label="Highbase home"><svg viewBox="0 0 191 28" width="152" height="22"><text x="0" y="21" font-family="Public Sans" font-size="22" font-weight="700" letter-spacing="2" fill="var(--hb-color-primary-700)">HIGHBASE</text></svg></a>';
@@ -1647,7 +1714,8 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var cols = ['<div class="mega__col"' + (S.menuCol === 0 ? ' data-active' : '') + '>' + M.TREE.map(function (c) { return item(c, 0, c === l0, true); }).join('') + '</div>',
       '<div class="mega__col"' + (S.menuCol === 1 ? ' data-active' : '') + '><button class="mega__back" data-megaback="0">' + ic('arrowLeft') + ' ' + esc(n(l0)) + '</button><a class="mega__all" href="' + href(l0.slug) + '" data-slug="' + l0.slug + '">' + t('allIn') + esc(n(l0)) + '</a>' + l0.children.map(function (c) { return item(c, 1, c === l1); }).join('') + '</div>',
       '<div class="mega__col"' + (S.menuCol === 2 ? ' data-active' : '') + '>' + (l1 ? '<button class="mega__back" data-megaback="1">' + ic('arrowLeft') + ' ' + esc(n(l1)) + '</button><a class="mega__all" href="' + href(l1.slug) + '" data-slug="' + l1.slug + '">' + t('allIn') + esc(n(l1)) + '</a>' + l1.children.map(function (c) { return item(c, 2); }).join('') : '') + '</div>'];
-    return '<nav id="mega" class="mega" aria-label="' + t('categories') + '"' + (S.menuOpen ? '' : ' hidden') + '>' + cols.join('') + '</nav>';
+    var head = S.ver === 'm' ? '<div class="hb-dlg-header mega__head" data-size="compact"><span class="hb-dlg-header__title">' + t('categories') + '</span><button class="hb-btn hb-icon-btn" data-intent="secondary" data-style="ghost" data-size="sm" data-megaclose aria-label="Close"><span class="hb-btn__icon">' + ic('close') + '</span></button></div>' : '';
+    return '<nav id="mega" class="mega" aria-label="' + t('categories') + '"' + (S.menuOpen ? '' : ' hidden') + '>' + head + cols.join('') + '</nav>';
   };
   var crumbs = function (cur) {
     var items = M.breadcrumb(cur, S.lang);
@@ -1665,12 +1733,12 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
   /* ---------- filter panel (shared by the side panel and the mobile sheet) ---------- */
   var check = function (key, value, label, count, on) { return '<label class="hb-check fopt' + (count || on ? '' : ' fopt--dim') + '"><input type="checkbox" class="hb-check__input" data-fk="' + key + '" value="' + esc(value) + '"' + (on ? ' checked' : '') + '><span class="hb-check__box"></span><span class="hb-check__label">' + esc(label) + '</span><span class="fopt__n">' + count + '</span></label>'; };
   var toggle = function (key, label, hint, on) { return '<label class="hb-switch ftgl"><input type="checkbox" role="switch" class="hb-switch__input" data-ft="' + key + '"' + (on ? ' checked' : '') + '><span class="hb-switch__track"></span><span class="hb-switch__label">' + label + (hint ? '<small>' + hint + '</small>' : '') + '</span></label>'; };
-  var group = function (title, body, open) { return '<details class="fgroup"' + (open ? ' open' : '') + '><summary>' + title + '<span data-mirror>' + ic('chevronDown') + '</span></summary><div class="fgroup__body">' + body + '</div></details>'; };
+  var group = function (title, body, open, key) { return '<details class="fgroup" data-key="' + (key || '') + '"' + (open ? ' open' : '') + '><summary>' + title + '<span data-mirror>' + ic('chevronDown') + '</span></summary><div class="fgroup__body">' + body + '</div></details>'; };
   var facets = function (f) {
     var cur = current();
     var opts = function (key, labelOf) { return M.options(cur, f, key).sort(function (a, b) { return b.n - a.n; }).map(function (o) { return check(key, o.value, labelOf ? labelOf(o.value) : o.value, o.n, f[key].indexOf(o.value) >= 0); }).join(''); };
     var price = '<div class="range"><div class="hb-field hb-textfield" data-size="sm"><div class="hb-field__control"><input class="hb-field__input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="' + t('min') + '" data-fr="min" value="' + esc(f.min) + '"></div></div><span class="range__dash">–</span><div class="hb-field hb-textfield" data-size="sm"><div class="hb-field__control"><input class="hb-field__input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="' + t('max') + '" data-fr="max" value="' + esc(f.max) + '"></div></div></div>';
-    return group(t('price'), price, true) + group(t('brand'), opts('brand'), true) + group(t('supplier'), toggle('mine', t('mine'), t('mineHint'), f.mine) + opts('supplier'), true) + '<div class="fgroup fgroup--flat">' + toggle('again', t('again'), t('againHint'), f.again) + '</div>';
+    return group(t('price'), price, true, 'price') + group(t('brand'), opts('brand'), true, 'brand') + group(t('supplier'), toggle('mine', t('mine'), t('mineHint'), f.mine) + opts('supplier'), true, 'supplier') + '<div class="fgroup fgroup--flat">' + toggle('again', t('again'), t('againHint'), f.again) + '</div>';
   };
   var panel = function () { var k = M.activeCount(S.f); return '<aside class="fpanel hb-card" id="fpanel" aria-label="' + t('filters') + '"><div class="fpanel__head"><h2 class="hb-card__title">' + t('filters') + '</h2>' + (k ? '<button class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button>' : '') + '</div>' + facets(S.f) + '</aside>'; };
 
@@ -1743,6 +1811,40 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var pager = pages > 1 ? '<div class="pager"><div class="hb-pagination" data-size="compact"><span class="hb-pagination__controls"><button class="hb-btn hb-icon-btn" data-intent="primary" data-style="filled" data-size="md" data-page="' + (pg - 1) + '"' + (pg === 1 ? ' disabled' : '') + ' aria-label="Previous page"><span class="hb-btn__icon" data-mirror>' + ic('arrowLeft') + '</span></button><span class="hb-pagination__strip">' + Array.apply(null, Array(pages)).map(function (_, i) { return pageBtn(i + 1); }).join('') + '</span><button class="hb-btn hb-icon-btn" data-intent="primary" data-style="filled" data-size="md" data-page="' + (pg + 1) + '"' + (pg === pages ? ' disabled' : '') + ' aria-label="Next page"><span class="hb-btn__icon" data-mirror>' + ic('arrowRight') + '</span></button></span></div></div>' : '';
     return '<div class="body body--live"><main class="page" id="main"><div class="page__head page__head--live">' + back + '<h1 class="page__title">' + esc(n(cur)) + ' <span class="page__count">' + t('products')(total) + '</span></h1>' + crumbs(cur) + '</div>' + subsection(cur) + bar + grid + pager + '</main></div>';
   };
+
+  /* ---------- Version M: mobile in the Talabat pattern (proposal) ---------- */
+  var mcard = function (p, compact) {
+    var q = S.cart[p.id] || 0, old = p.off ? fmt(p.price / (1 - p.off / 100)) : '';
+    var act = guest() ? '<button class="hb-btn hb-icon-btn mcard__add" data-intent="primary" data-style="filled" data-size="md" data-signin aria-label="' + t('signIn') + '"><span class="hb-btn__icon">' + ic('add') + '</span></button>'
+      : !p.mine ? '<button class="hb-btn hb-icon-btn mcard__add" data-intent="primary" data-style="outlined" data-size="md" data-supplier="' + p.id + '" aria-label="' + t('addSupplier') + '"><span class="hb-btn__icon">' + ic('store') + '</span></button>'
+      : !q ? '<button class="hb-btn hb-icon-btn mcard__add" data-intent="primary" data-style="filled" data-size="md" data-add="' + p.id + '" aria-label="' + t('add') + '"><span class="hb-btn__icon">' + ic('add') + '</span></button>'
+      : '<span class="hb-atc mcard__step" data-state="' + (q <= p.moq ? 'stepper-single' : 'stepper') + '"><button class="hb-btn hb-icon-btn hb-atc__step" data-intent="' + (q <= p.moq ? 'danger' : 'secondary') + '" data-style="ghost" data-size="sm" data-dec="' + p.id + '" aria-label="' + t('remove') + '"><span class="hb-btn__icon">' + ic(q <= p.moq ? 'delete' : 'minus') + '</span></button><input class="hb-atc__value" type="number" inputmode="numeric" value="' + q + '" data-q="' + p.id + '" id="q-' + p.id + '" aria-label="Quantity"><button class="hb-btn hb-icon-btn hb-atc__step" data-intent="secondary" data-style="ghost" data-size="sm" data-inc="' + p.id + '" aria-label="Increase"><span class="hb-btn__icon">' + ic('add') + '</span></button></span>';
+    var tag = !guest() && p.again ? '<span class="hb-chip mcard__tag" data-style="tonal" data-size="sm" data-tone="again"><span class="hb-chip__label">' + t('again') + '</span></span>' : p.rank <= 3 ? '<span class="hb-chip mcard__tag" data-style="tonal" data-size="sm" data-tone="best"><span class="hb-chip__label">' + t('bestSeller') + '</span></span>' : '';
+    return '<article class="mcard' + (compact ? ' mcard--row' : '') + '"><div class="mcard__media" style="background-color:' + p.tone + '">' + (p.off ? '<span class="hb-chip mcard__save" data-style="tonal" data-size="sm" data-tone="save"><span class="hb-chip__label">' + t('save')(p.off) + '</span></span>' : '') + '<span class="pcard-art">' + (ART[p.glyph] || PLACEHOLDER) + '</span>' + act + '</div><div class="mcard__body">' + tag + '<span class="mcard__name">' + esc(p.name) + '</span><span class="mcard__pack">' + esc(p.pk) + ' · ' + esc(p.pu) + '</span><span class="mcard__price"><b>' + fmt(guest() ? p.price * 1.08 : p.price) + '</b> ' + (S.lang === 'ar' ? 'د.ب' : 'BHD') + (old && !guest() ? ' <s>' + old + '</s>' : '') + '</span>' + (p.moq > 1 && !guest() ? '<span class="mcard__min">' + t('minOrder')(p.moq, p.pus) + '</span>' : '') + '</div></article>';
+  };
+  var pageM = function () {
+    var cur = current(), l0 = cur; while (l0.parent) l0 = l0.parent;
+    var l1 = cur.level === 2 ? cur.parent : cur.level === 1 ? cur : null;
+    var q = (S.f.q || '').trim().toLowerCase();
+    var list = M.sort(M.apply(cur, S.f), S.sort).filter(function (p) { return !q || (p.name + ' ' + p.brand + ' ' + p.sup).toLowerCase().indexOf(q) >= 0; }), total = M.count(cur);
+    var backTo = cur.parent ? cur.parent.slug : null;
+    var top = '<div class="mtop">' + (backTo ? '<a class="hb-btn hb-icon-btn" data-intent="secondary" data-style="outlined" data-size="md" href="' + href(backTo) + '" data-slug="' + backTo + '" data-source="breadcrumb" aria-label="' + t('back') + '"><span class="hb-btn__icon" data-mirror>' + ic('arrowLeft') + '</span></a>' : '<a class="hb-btn hb-icon-btn" data-intent="secondary" data-style="outlined" data-size="md" href="#fresh-foods-dairy" aria-label="' + t('home') + '"><span class="hb-btn__icon" data-mirror>' + ic('arrowLeft') + '</span></a>') +
+      '<button class="mtop__title" data-mega aria-expanded="' + S.menuOpen + '" aria-controls="mega"><span>' + esc(n(l0)) + '</span>' + ic('chevronDown') + '</button>' +
+      '<button class="hb-btn hb-icon-btn" data-intent="secondary" data-style="outlined" data-size="md" data-msearch aria-label="' + t('search').split(' ')[0] + '" aria-expanded="' + !!S.msearch + '"><span class="hb-btn__icon">' + ic(S.msearch ? 'close' : 'search') + '</span></button></div>';
+    var search = S.msearch ? '<div class="msearch"><span class="hb-search" data-state="default"><span class="hb-search__icon">' + ic('search') + '</span><input class="hb-search__input" id="list-search" value="' + esc(S.f.q || '') + '" placeholder="' + t('searchAmong')(M.apply(cur, S.f).length) + '"></span></div>' : '';
+    var tab = function (node, label, on) { return '<a class="mtab" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="pill"' + (on ? ' aria-current="page"' : '') + '>' + esc(label) + '</a>'; };
+    var tabs = '<nav class="mtabs" aria-label="' + t('categories') + '"><button class="hb-btn hb-icon-btn mtabs__menu" data-intent="secondary" data-style="ghost" data-size="sm" data-mega aria-label="' + t('categories') + '"><span class="hb-btn__icon">' + ic('more') + '</span></button><div class="mtabs__row">' + tab(l0, t('all'), !l1) + l0.children.map(function (c) { return tab(c, n(c), c === l1); }).join('') + '</div></nav>';
+    var circleParent = l1 || l0, kids = circleParent.children;
+    var circle = function (node, label, on, slugFor) { return '<a class="mcircle" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="card"' + (on ? ' aria-current="page"' : '') + '><span class="mcircle__img" aria-hidden="true">' + PLACEHOLDER + '</span><span class="mcircle__name">' + esc(label) + '</span></a>'; };
+    var circles = kids.length ? '<div class="mcircles">' + circle(circleParent, t('all'), cur === circleParent) + kids.map(function (c) { return circle(c, n(c), c === cur); }).join('') + '</div>' : '';
+    var dchip = function (label, attr, on) { return '<button class="hb-chip mchip" data-style="' + (on ? 'tonal' : 'neutral') + '" data-size="lg" ' + attr + '><span class="hb-chip__label">' + label + '</span><span class="hb-chip__icon">' + ic('chevronDown') + '</span></button>'; };
+    var k = M.activeCount(S.f);
+    var chips = '<div class="mchips">' + dchip(t('sortBy'), 'id="open-sort"', S.sort !== 'best') + dchip(t('brand'), 'id="open-filter" data-focus="brand"', S.f.brand.length > 0) + dchip(t('supplier'), 'id="open-filter" data-focus="supplier"', S.f.supplier.length > 0 || S.f.mine) + '<button class="hb-chip mchip" data-style="' + (k ? 'tonal' : 'neutral') + '" data-size="lg" id="open-filter"><span class="hb-chip__icon">' + ic('filter') + '</span><span class="hb-chip__label">' + t('filters') + (k ? ' · ' + k : '') + '</span></button></div>';
+    var againList = guest() ? [] : M.apply(cur, M.blank()).filter(function (p) { return p.again; });
+    var again = againList.length && !q ? '<section class="magain"><h2 class="magain__title">' + t('orderAgain') + '</h2><div class="magain__row">' + againList.map(function (p) { return mcard(p, true); }).join('') + '</div></section>' : '';
+    var grid = list.length ? '<h2 class="mgrid__title">' + t('allProducts') + ' <span class="page__count">' + t('products')(list.length) + '</span></h2><div class="mgrid">' + list.map(function (p) { return mcard(p); }).join('') + '</div>' : '<div class="hb-empty" data-size="sm"><span class="hb-empty__art">' + ic('search') + '</span><span class="hb-empty__title">' + t('noRes') + '</span><span class="hb-empty__text">' + t('noResHint') + '</span><span class="hb-empty__actions"><button class="hb-btn" data-intent="primary" data-style="outlined" data-size="md" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></span></div>';
+    return '<div class="body body--m"><main class="page page--m" id="main">' + top + search + tabs + circles + '<h1 class="page__title page__title--m">' + esc(n(cur)) + ' <span class="page__count">' + t('products')(total) + '</span></h1>' + chips + applied() + again + grid + '</main></div>';
+  };
   var page = function () {
     var cur = current(), q = (S.f.q || '').trim().toLowerCase(), list = M.sort(M.apply(cur, S.f), S.sort).filter(function (p) { return !q || (p.name + ' ' + p.brand + ' ' + p.sup).toLowerCase().indexOf(q) >= 0; }), total = M.count(cur), shown = list.slice(0, S.limit);
     var back = cur.parent ? '<a class="back" href="' + href(cur.parent.slug) + '" data-slug="' + cur.parent.slug + '" data-source="breadcrumb"><span data-mirror>' + ic('chevronLeft') + '</span>' + esc(n(cur.parent)) + '</a>' : '<a class="back" href="#fresh-foods-dairy"><span data-mirror>' + ic('chevronLeft') + '</span>' + t('home') + '</a>';
@@ -1750,7 +1852,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var more = list.length ? '<div class="more"><span>' + t('shown')(Math.min(S.limit, list.length), list.length) + '</span>' + (list.length > S.limit ? '<button class="hb-btn" data-intent="primary" data-style="outlined" data-size="lg" id="load-more"><span class="hb-btn__label">' + t('loadMore') + '</span></button>' : '') + '</div>' : '';
     return '<div class="body">' + panel() + '<main class="page" id="main"><div class="page__head">' + back + crumbs(cur) + '<h1 class="page__title">' + esc(n(cur)) + ' <span class="page__count">' + t('products')(total) + '</span></h1></div>' + subsection(cur) + toolbar() + applied() + grid + more + '</main></div>';
   };
-  var bnav = function () { var it = function (icon, label, on) { return '<span class="bnav__item' + (on ? ' bnav__item--on' : '') + '">' + ic(icon) + '<span>' + label + '</span></span>'; }; return '<nav class="bnav" aria-label="Main">' + it('home', t('home')) + it('grid', t('categories'), true) + it('cart', t('cart')) + it('user', t('account')) + '</nav>'; };
+  var bnav = function () { var it = function (icon, label, on) { return '<span class="bnav__item' + (on ? ' bnav__item--on' : '') + '">' + ic(icon) + '<span>' + label + '</span></span>'; }; return '<nav class="bnav" aria-label="Main">' + it('home', t('home'), true) + it('tag', t('brandsNav')) + it('cart', t('cart')) + it('user', t('profile')) + '</nav>'; };
   var cartbar = function () {
     var ids = Object.keys(S.cart).filter(function (k) { return S.cart[k] > 0; }); if (!ids.length || guest()) return '';
     var tot = ids.reduce(function (s, k) { var p = M.byId(k); return s + S.cart[k] * M.priceFor(p, S.cart[k]); }, 0), sups = {}; ids.forEach(function (k) { sups[M.byId(k).sup] = 1; });
@@ -1766,7 +1868,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
   };
   var chrome = function () {
     var seg = function (id, key, opts) { return '<span class="px-seg" role="group" aria-label="' + id + '"><b>' + id + '</b>' + opts.map(function (o) { return '<button data-set="' + key + '" data-v="' + o[0] + '" aria-pressed="' + (S[key] === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</span>'; };
-    return '<div class="px-bar"><span class="px-title">Prototype</span>' + seg('Version', 'ver', [['a', 'A · Side filters'], ['b', 'B · Live + tiles'], ['c', 'C · Side filters + search']]) + seg('Preview', 'view', [['desk', 'Desktop'], ['mob', 'Mobile']]) + seg('Viewing as', 'user', [['buyer', 'Signed-in buyer'], ['guest', 'Guest']]) + seg('Language', 'lang', [['en', 'English'], ['ar', 'العربية']]) + '<span class="px-seg"><a class="px-link" href="#delicatessen">No children</a><a class="px-link" href="#fresh-milk">Lowest level</a></span></div>';
+    return '<div class="px-bar"><span class="px-title">Prototype</span>' + seg('Version', 'ver', [['a', 'A · Side filters'], ['b', 'B · Live + tiles'], ['c', 'C · Side filters + search'], ['m', 'M · Mobile, Talabat pattern']]) + seg('Preview', 'view', [['desk', 'Desktop'], ['mob', 'Mobile']]) + seg('Viewing as', 'user', [['buyer', 'Signed-in buyer'], ['guest', 'Guest']]) + seg('Language', 'lang', [['en', 'English'], ['ar', 'العربية']]) + '<span class="px-seg"><a class="px-link" href="#delicatessen">No children</a><a class="px-link" href="#fresh-milk">Lowest level</a></span></div>';
   };
   var renderLog = function () { var el = $('px-log'); if (!el) return; el.innerHTML = '<summary>PostHog events (' + S.events.length + ')</summary><ol>' + (S.events.length ? S.events.map(function (e) { return '<li><b>' + e.ev + '</b> ' + e.at + '\n' + esc(JSON.stringify(e.props)) + '</li>'; }).join('') : '<li>Nothing yet.</li>') + '</ol>'; };
 
@@ -1774,8 +1876,8 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var cur = current(), mob = isMobile();
     document.documentElement.lang = S.lang; document.documentElement.dir = S.lang === 'ar' ? 'rtl' : 'ltr';
     document.title = n(cur) + ' · Highbase';
-    var frame = $('frame'); frame.className = 'frame' + (S.view === 'mob' ? ' frame--phone' : '');
-    frame.innerHTML = '<div class="addr" aria-hidden="true"><span class="addr__dots"><i></i><i></i><i></i></span><span class="addr__url">staging.highbasemarket.com' + esc(M.url(cur.slug, S.lang)) + '</span></div><div class="app' + (mob ? ' m' : '') + ' ver-' + S.ver + '" id="app"><div class="scroller" id="scroller">' + header() + (S.ver === 'b' ? pageB() : page()) + '</div>' + (mob ? bnav() : '') + cartbar() + sheets() + '<div id="px-scrim" class="scrim"' + (S.menuOpen ? '' : ' hidden') + '></div><div class="toast" id="toast" hidden></div></div>';
+    var frame = $('frame'); frame.className = 'frame' + (S.view === 'mob' || S.ver === 'm' ? ' frame--phone' : '');
+    frame.innerHTML = '<div class="addr" aria-hidden="true"><span class="addr__dots"><i></i><i></i><i></i></span><span class="addr__url">staging.highbasemarket.com' + esc(M.url(cur.slug, S.lang)) + '</span></div><div class="app' + (mob ? ' m' : '') + ' ver-' + S.ver + '" id="app"><div class="scroller" id="scroller">' + (S.ver === 'm' ? mega() : header()) + (S.ver === 'b' ? pageB() : S.ver === 'm' ? pageM() : page()) + '</div>' + (mob ? bnav() : '') + cartbar() + sheets() + '<div id="px-scrim" class="scrim"' + (S.menuOpen ? '' : ' hidden') + '></div><div class="toast" id="toast" hidden></div></div>';
     $('px-chrome').innerHTML = chrome();
     if (S.lastPageview !== cur.slug + S.lang) { S.lastPageview = cur.slug + S.lang; window.posthog.capture('$pageview', { path: M.url(cur.slug, S.lang), category: cur.slug, level: cur.level }); }
     renderLog();
@@ -1794,7 +1896,9 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     if (e.target.closest('[data-mega]')) { S.menuOpen = !S.menuOpen; S.menuCol = 0; render(); return; }
     if ((el = e.target.closest('[data-megaback]'))) { S.menuCol = +el.getAttribute('data-megaback'); render(); return; }
     if (e.target.id === 'px-scrim') { closeMenu(); return; }
+    if (e.target.closest('[data-megaclose]')) { closeMenu(); return; }
     if (e.target.closest('[data-catbtn]')) { S.catOpen = !S.catOpen; render(); return; }
+    if (e.target.closest('[data-msearch]')) { S.msearch = !S.msearch; if (!S.msearch) S.f.q = ''; render(); if (S.msearch) { var si = $('list-search'); if (si) si.focus(); } return; }
     if (S.catOpen && !e.target.closest('.catpop')) { S.catOpen = false; render(); }
     if ((el = e.target.closest('[data-page]')) && !el.disabled) { S.pageNo = +el.getAttribute('data-page'); render(); var mm = document.querySelector('.lbar'); if (mm) mm.scrollIntoView({ block: 'start' }); return; }
     if ((el = e.target.closest('[data-livecart]'))) { var lp = M.byId(el.getAttribute('data-livecart')); S.cart[lp.id] = (S.cart[lp.id] || 0) + lp.moq; render(); toast(t('added')(lp.moq, lp.moq > 1 ? lp.pus : lp.pu, lp.name)); return; }
@@ -1814,7 +1918,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     if (e.target.closest('[data-signin]') || (guest() && e.target.closest('[data-account]'))) { S.user = 'buyer'; save(); render(); toast(t('signedIn')); return; }
     if ((el = e.target.closest('[data-supplier]'))) { var ps = M.byId(el.getAttribute('data-supplier')); M.ALL.forEach(function (x) { if (x.sup === ps.sup) x.mine = true; }); render(); toast(t('supplierAdded') + ps.sup); return; }
     if (e.target.closest('#load-more')) { S.limit += 12; render(); return; }
-    if (e.target.closest('#open-filter')) { S.draft = M.clone(S.f); S.sheet = 'filter'; render(); return; }
+    if ((el = e.target.closest('#open-filter'))) { S.draft = M.clone(S.f); S.sheet = 'filter'; S.sheetFocus = el.getAttribute('data-focus') || null; render(); if (S.sheetFocus) { var fg = document.querySelector('[data-sheet] .fgroup[data-key="' + S.sheetFocus + '"]'); if (fg) fg.scrollIntoView({ block: 'start' }); } return; }
     if (e.target.closest('#open-sort')) { S.sheet = 'sort'; render(); return; }
     if (e.target.closest('[data-close]') || (e.target.hasAttribute && e.target.hasAttribute('data-sheet'))) { S.sheet = null; S.draft = null; render(); return; }
     if (e.target.closest('#sheet-clear')) { S.draft = M.blank(); render(); return; }
