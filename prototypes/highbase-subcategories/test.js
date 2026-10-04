@@ -34,4 +34,21 @@ eq(M.url('fresh-milk', 'en'), '/bh-en/storefront/products?filter[category]=fresh
 eq(M.url('fresh-milk', 'ar'), '/bh-ar/storefront/products?filter[category]=fresh-milk', 'canonical URL, ar');
 
 console.log(`\n${pass} passed, ${fail} failed`);
-process.exit(fail ? 1 : 0);
+if (fail) process.exit(1);
+
+// ---- filters and sort (added with the side-panel revision) ----
+{
+  const M2 = require('./model.js'); let p2 = 0, f2 = 0;
+  const ok = (a, b, msg) => { const r = JSON.stringify(a) === JSON.stringify(b); r ? p2++ : f2++; console.log((r ? 'ok   ' : 'FAIL ') + msg + (r ? '' : ' got ' + JSON.stringify(a))); };
+  const n = M2.BY['fresh-foods-dairy'], f = M2.blank();
+  ok(M2.apply(n, f).length, M2.count(n), 'blank filter keeps every product');
+  f.brand.push('Almarai'); ok(M2.apply(n, f).every(p => p.brand === 'Almarai'), true, 'brand facet narrows to the brand');
+  ok(M2.options(n, f, 'brand').find(o => o.value === 'Nadec').n > 0, true, 'counts of other brands ignore the brand facet itself');
+  const g = M2.blank(); g.mine = true; ok(M2.apply(n, g).every(p => p.mine), true, 'my suppliers toggle');
+  const h = M2.blank(); h.min = '10'; h.max = '20'; ok(M2.apply(n, h).every(p => p.price >= 10 && p.price <= 20), true, 'price range');
+  ok(M2.activeCount(h), 2, 'active count');
+  const s = M2.sort(M2.products(n), 'priceAsc'); ok(s[0].price <= s[s.length - 1].price, true, 'sort by price ascending');
+  const milk = M2.byId('p1'); ok([M2.priceFor(milk, 2), M2.priceFor(milk, 10)], [7.8, 7.5], 'tier price applies from the tier quantity');
+  ok(M2.products(M2.BY['delicatessen']).length > 0 && M2.section(M2.BY['delicatessen']).kind, 'pills', 'delicatessen: products but no children → pills');
+  console.log(`\n${p2} passed, ${f2} failed (filters)`); if (f2) process.exit(1);
+}

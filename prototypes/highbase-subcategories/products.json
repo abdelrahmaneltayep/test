@@ -1,0 +1,795 @@
+[
+ {
+  "id": "p1",
+  "leaf": "fresh-milk",
+  "name": "Almarai Full Fat Fresh Milk 1 L",
+  "brand": "Almarai",
+  "sup": "Gulf Dairy Trading",
+  "pk": "12 × 1 L",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 7.8,
+  "unit": [
+   12,
+   "L"
+  ],
+  "moq": 2,
+  "tiers": [
+   [
+    10,
+    7.5
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Saudi Arabia",
+  "mine": true,
+  "again": true,
+  "off": 0,
+  "glyph": "milk",
+  "tone": "#e3effa",
+  "rank": 1,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p2",
+  "leaf": "yoghurt-chilled-desserts",
+  "name": "Almarai Mango Yoghurt Cup 125 g",
+  "brand": "Almarai",
+  "sup": "Gulf Dairy Trading",
+  "pk": "24 × 125 g",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 5.76,
+  "unit": [
+   24,
+   "cup"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    10,
+    5.5
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Saudi Arabia",
+  "mine": true,
+  "again": false,
+  "off": 12,
+  "glyph": "cup",
+  "tone": "#fff4dc",
+  "rank": 3,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p3",
+  "leaf": "laban-flavoured-milk",
+  "name": "Nadec Ayran Laban 225 ml",
+  "brand": "Nadec",
+  "sup": "Bahrain Food Distributors",
+  "pk": "24 × 225 ml",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 3.6,
+  "unit": [
+   24,
+   "bottle"
+  ],
+  "moq": 2,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Saudi Arabia",
+  "mine": false,
+  "again": false,
+  "off": 0,
+  "glyph": "milk",
+  "tone": "#e8f4ea",
+  "rank": 7,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p4",
+  "leaf": "long-life-milk",
+  "name": "Nestlé Full Cream Milk 500 ml",
+  "brand": "Nestlé",
+  "sup": "Bahrain Food Distributors",
+  "pk": "24 × 500 ml",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 6.96,
+  "unit": [
+   24,
+   "carton"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    5,
+    6.7
+   ]
+  ],
+  "storage": "Ambient",
+  "origin": "UAE",
+  "mine": false,
+  "again": false,
+  "off": 10,
+  "glyph": "milk",
+  "tone": "#e3effa",
+  "rank": 9,
+  "isNew": false,
+  "dl": 2,
+  "left": 0
+ },
+ {
+  "id": "p5",
+  "leaf": "eggs",
+  "name": "Farm Fresh White Eggs, Tray of 30",
+  "brand": "Delmon Poultry",
+  "sup": "Delmon Poultry",
+  "pk": "1 tray × 30 eggs",
+  "pu": "tray",
+  "pus": "trays",
+  "price": 1.95,
+  "unit": [
+   30,
+   "egg"
+  ],
+  "moq": 5,
+  "tiers": [
+   [
+    20,
+    1.85
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Bahrain",
+  "mine": true,
+  "again": true,
+  "off": 0,
+  "glyph": "egg",
+  "tone": "#fbf1e3",
+  "rank": 2,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p6",
+  "leaf": "cheese",
+  "name": "Puck Cream Cheese Spread 500 g",
+  "brand": "Puck",
+  "sup": "Gulf Dairy Trading",
+  "pk": "12 × 500 g",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 16.8,
+  "unit": [
+   12,
+   "jar"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Denmark",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "cheese",
+  "tone": "#fff4dc",
+  "rank": 11,
+  "isNew": true,
+  "dl": 1,
+  "left": 6
+ },
+ {
+  "id": "p7",
+  "leaf": "butter-margarine",
+  "name": "Lurpak Unsalted Butter 200 g",
+  "brand": "Lurpak",
+  "sup": "Gulf Dairy Trading",
+  "pk": "20 × 200 g",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 24,
+  "unit": [
+   20,
+   "pack"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    4,
+    23.2
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Denmark",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "butter",
+  "tone": "#fff8d9",
+  "rank": 8,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p8",
+  "leaf": "fresh-chicken",
+  "name": "Farm Chicken Whole Fresh 1 kg",
+  "brand": "Farm Chicken",
+  "sup": "Al Watania Poultry",
+  "pk": "10 × 1 kg",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 15.5,
+  "unit": [
+   10,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    5,
+    14.8
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Saudi Arabia",
+  "mine": true,
+  "again": true,
+  "off": 0,
+  "glyph": "chicken",
+  "tone": "#fdeede",
+  "rank": 1,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p9",
+  "leaf": "frozen-chicken",
+  "name": "Seara Chicken Breast Boneless 2 kg",
+  "brand": "Seara",
+  "sup": "Trans Gulf Foods",
+  "pk": "6 × 2 kg",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 19.8,
+  "unit": [
+   12,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    5,
+    19
+   ]
+  ],
+  "storage": "Frozen",
+  "origin": "Brazil",
+  "mine": true,
+  "again": false,
+  "off": 5,
+  "glyph": "chicken",
+  "tone": "#e9f0f7",
+  "rank": 4,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p10",
+  "leaf": "frozen-chicken",
+  "name": "Sadia Frozen Whole Chicken 1.1 kg",
+  "brand": "Sadia",
+  "sup": "Trans Gulf Foods",
+  "pk": "10 × 1.1 kg",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 14.3,
+  "unit": [
+   11,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Frozen",
+  "origin": "Brazil",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "chicken",
+  "tone": "#e9f0f7",
+  "rank": 6,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p11",
+  "leaf": "beef",
+  "name": "Fresh Beef Mince 500 g",
+  "brand": "Farm Fresh Meat",
+  "sup": "Farm Fresh Meat Co.",
+  "pk": "10 × 500 g",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 17.5,
+  "unit": [
+   5,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Australia",
+  "mine": false,
+  "again": false,
+  "off": 0,
+  "glyph": "meat",
+  "tone": "#fbe4e4",
+  "rank": 10,
+  "isNew": true,
+  "dl": 2,
+  "left": 4
+ },
+ {
+  "id": "p12",
+  "leaf": "lamb",
+  "name": "Australian Lamb Leg, Bone-in",
+  "brand": "Farm Fresh Meat",
+  "sup": "Farm Fresh Meat Co.",
+  "pk": "1 piece · about 2 kg",
+  "pu": "piece",
+  "pus": "pieces",
+  "price": 8.4,
+  "unit": [
+   2,
+   "kg"
+  ],
+  "moq": 2,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Australia",
+  "mine": false,
+  "again": false,
+  "off": 0,
+  "glyph": "meat",
+  "tone": "#fbe4e4",
+  "rank": 14,
+  "isNew": false,
+  "dl": 2,
+  "left": 0
+ },
+ {
+  "id": "p13",
+  "leaf": "fresh-fruit",
+  "name": "Black Grapes 10 kg Box, India",
+  "brand": "Unbranded",
+  "sup": "Green Oasis Fruits & Vegetables",
+  "pk": "1 box × 10 kg",
+  "pu": "box",
+  "pus": "boxes",
+  "price": 4,
+  "unit": [
+   10,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    5,
+    3.8
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "India",
+  "mine": true,
+  "again": true,
+  "off": 10,
+  "glyph": "grape",
+  "tone": "#efe9fa",
+  "rank": 5,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p14",
+  "leaf": "fresh-vegetables",
+  "name": "Long Beans 6 kg Box, Egypt",
+  "brand": "Unbranded",
+  "sup": "Green Oasis Fruits & Vegetables",
+  "pk": "1 box × 6 kg",
+  "pu": "box",
+  "pus": "boxes",
+  "price": 3.3,
+  "unit": [
+   6,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Egypt",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "leaf",
+  "tone": "#e6f2ec",
+  "rank": 12,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p15",
+  "leaf": "herbs",
+  "name": "Local Leeks 120 g Bunch",
+  "brand": "Unbranded",
+  "sup": "Green Oasis Fruits & Vegetables",
+  "pk": "1 bunch × 120 g",
+  "pu": "bunch",
+  "pus": "bunches",
+  "price": 0.35,
+  "unit": [
+   1,
+   "bunch"
+  ],
+  "moq": 10,
+  "tiers": [
+   [
+    30,
+    0.32
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Bahrain",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "leaf",
+  "tone": "#e6f2ec",
+  "rank": 13,
+  "isNew": true,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p16",
+  "leaf": "herbs",
+  "name": "Parsley 150 g Bunch",
+  "brand": "Unbranded",
+  "sup": "Green Oasis Fruits & Vegetables",
+  "pk": "1 bunch × 150 g",
+  "pu": "bunch",
+  "pus": "bunches",
+  "price": 0.43,
+  "unit": [
+   1,
+   "bunch"
+  ],
+  "moq": 10,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Bahrain",
+  "mine": true,
+  "again": true,
+  "off": 0,
+  "glyph": "leaf",
+  "tone": "#e6f2ec",
+  "rank": 9,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p17",
+  "leaf": "bread",
+  "name": "Arabic Bread Large, Pack of 6",
+  "brand": "Bahrain Flour Mills",
+  "sup": "Bahrain Flour Mills",
+  "pk": "20 packs × 6",
+  "pu": "crate",
+  "pus": "crates",
+  "price": 5,
+  "unit": [
+   120,
+   "piece"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Ambient",
+  "origin": "Bahrain",
+  "mine": true,
+  "again": true,
+  "off": 0,
+  "glyph": "bread",
+  "tone": "#f7ecd9",
+  "rank": 3,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p18",
+  "leaf": "pastries",
+  "name": "Butter Croissant Frozen, Ready to Bake",
+  "brand": "Délifrance",
+  "sup": "Trans Gulf Foods",
+  "pk": "60 × 70 g",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 14.4,
+  "unit": [
+   60,
+   "piece"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    3,
+    13.8
+   ]
+  ],
+  "storage": "Frozen",
+  "origin": "France",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "bread",
+  "tone": "#f7ecd9",
+  "rank": 8,
+  "isNew": true,
+  "dl": 2,
+  "left": 0
+ },
+ {
+  "id": "p19",
+  "leaf": "fresh-juice-salads",
+  "name": "FreshFlow Orange Juice 500 ml",
+  "brand": "FreshFlow",
+  "sup": "Bahrain Food Distributors",
+  "pk": "12 × 500 ml",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 6,
+  "unit": [
+   12,
+   "bottle"
+  ],
+  "moq": 2,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "UAE",
+  "mine": false,
+  "again": false,
+  "off": 10,
+  "glyph": "juice",
+  "tone": "#fff1dc",
+  "rank": 7,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p20",
+  "leaf": "delicatessen",
+  "name": "Smoked Turkey Breast Slices 1 kg",
+  "brand": "Siniora",
+  "sup": "Trans Gulf Foods",
+  "pk": "6 × 1 kg",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 29.4,
+  "unit": [
+   6,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Jordan",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "deli",
+  "tone": "#fbe4e4",
+  "rank": 12,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p21",
+  "leaf": "fresh-cream",
+  "name": "Almarai Whipping Cream 1 L",
+  "brand": "Almarai",
+  "sup": "Gulf Dairy Trading",
+  "pk": "12 × 1 L",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 21.6,
+  "unit": [
+   12,
+   "L"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    5,
+    20.8
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Saudi Arabia",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "cup",
+  "tone": "#fff4dc",
+  "rank": 10,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p22",
+  "leaf": "dairy-alternatives",
+  "name": "Alpro Oat Drink Barista 1 L",
+  "brand": "Alpro",
+  "sup": "Bahrain Food Distributors",
+  "pk": "8 × 1 L",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 9.6,
+  "unit": [
+   8,
+   "L"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Ambient",
+  "origin": "Belgium",
+  "mine": false,
+  "again": false,
+  "off": 0,
+  "glyph": "milk",
+  "tone": "#e8f4ea",
+  "rank": 13,
+  "isNew": true,
+  "dl": 2,
+  "left": 0
+ },
+ {
+  "id": "p23",
+  "leaf": "fresh-milk",
+  "name": "Awal Fresh Milk Low Fat 2 L",
+  "brand": "Awal",
+  "sup": "Awal Dairy",
+  "pk": "6 × 2 L",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 6.9,
+  "unit": [
+   12,
+   "L"
+  ],
+  "moq": 2,
+  "tiers": [
+   [
+    8,
+    6.6
+   ]
+  ],
+  "storage": "Chilled",
+  "origin": "Bahrain",
+  "mine": true,
+  "again": false,
+  "off": 5,
+  "glyph": "milk",
+  "tone": "#e3effa",
+  "rank": 4,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p24",
+  "leaf": "cheese",
+  "name": "Kraft Cheddar Cheese Slices 200 g",
+  "brand": "Kraft",
+  "sup": "Bahrain Food Distributors",
+  "pk": "24 × 200 g",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 19.2,
+  "unit": [
+   24,
+   "pack"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Chilled",
+  "origin": "Bahrain",
+  "mine": false,
+  "again": false,
+  "off": 0,
+  "glyph": "cheese",
+  "tone": "#fff4dc",
+  "rank": 12,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p25",
+  "leaf": "seafood",
+  "name": "Frozen Shrimp Peeled 31/40, 1 kg",
+  "brand": "Gulf Catch",
+  "sup": "Trans Gulf Foods",
+  "pk": "10 × 1 kg",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 32,
+  "unit": [
+   10,
+   "kg"
+  ],
+  "moq": 1,
+  "tiers": [
+   [
+    3,
+    30.5
+   ]
+  ],
+  "storage": "Frozen",
+  "origin": "India",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "fish",
+  "tone": "#e1f1f5",
+  "rank": 9,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ },
+ {
+  "id": "p26",
+  "leaf": "ready-meals",
+  "name": "Chicken Samosa Frozen, Pack of 20",
+  "brand": "Al Kabeer",
+  "sup": "Trans Gulf Foods",
+  "pk": "12 packs × 20",
+  "pu": "carton",
+  "pus": "cartons",
+  "price": 13.2,
+  "unit": [
+   12,
+   "pack"
+  ],
+  "moq": 1,
+  "tiers": [],
+  "storage": "Frozen",
+  "origin": "UAE",
+  "mine": true,
+  "again": false,
+  "off": 0,
+  "glyph": "deli",
+  "tone": "#f3ecf9",
+  "rank": 11,
+  "isNew": false,
+  "dl": 1,
+  "left": 0
+ }
+]
