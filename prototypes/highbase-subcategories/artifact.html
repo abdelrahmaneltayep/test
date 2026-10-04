@@ -1531,7 +1531,8 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .mtop__spacer{width:40px;flex:0 0 auto}
 
 /* Version C: grid / list switch beside the search; list layout for the Product Card */
-.tool--c .mlayout{flex:0 0 auto}
+.tool--c .mlayout{display:none;flex:0 0 auto}
+.m .tool--c .mlayout{display:inline-flex}
 .grid[data-mode="list"]{grid-template-columns:1fr}
 .grid[data-mode="list"] .hb-pcard{flex-direction:row;align-items:stretch}
 .grid[data-mode="list"] .hb-pcard__media{flex:0 0 220px;aspect-ratio:auto;min-height:200px}
@@ -1873,7 +1874,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
   var page = function () {
     var cur = current(), q = (S.f.q || '').trim().toLowerCase(), list = M.sort(M.apply(cur, S.f), S.sort).filter(function (p) { return !q || (p.name + ' ' + p.brand + ' ' + p.sup).toLowerCase().indexOf(q) >= 0; }), total = M.count(cur), shown = list.slice(0, S.limit);
     var back = cur.parent ? '<a class="back" href="' + href(cur.parent.slug) + '" data-slug="' + cur.parent.slug + '" data-source="breadcrumb"><span data-mirror>' + ic('chevronLeft') + '</span>' + esc(n(cur.parent)) + '</a>' : '<a class="back" href="#fresh-foods-dairy"><span data-mirror>' + ic('chevronLeft') + '</span>' + t('home') + '</a>';
-    var grid = list.length ? '<div class="grid"' + (S.ver === 'c' ? ' data-mode="' + S.layout + '"' : '') + '>' + shown.map(product).join('') + '</div>' : '<div class="hb-empty" data-size="sm"><span class="hb-empty__art">' + ic('search') + '</span><span class="hb-empty__title">' + t('noRes') + '</span><span class="hb-empty__text">' + t('noResHint') + '</span><span class="hb-empty__actions"><button class="hb-btn" data-intent="primary" data-style="outlined" data-size="md" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></span></div>';
+    var grid = list.length ? '<div class="grid"' + (S.ver === 'c' && isMobile() ? ' data-mode="' + S.layout + '"' : '') + '>' + shown.map(product).join('') + '</div>' : '<div class="hb-empty" data-size="sm"><span class="hb-empty__art">' + ic('search') + '</span><span class="hb-empty__title">' + t('noRes') + '</span><span class="hb-empty__text">' + t('noResHint') + '</span><span class="hb-empty__actions"><button class="hb-btn" data-intent="primary" data-style="outlined" data-size="md" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></span></div>';
     var more = list.length ? '<div class="more"><span>' + t('shown')(Math.min(S.limit, list.length), list.length) + '</span>' + (list.length > S.limit ? '<button class="hb-btn" data-intent="primary" data-style="outlined" data-size="lg" id="load-more"><span class="hb-btn__label">' + t('loadMore') + '</span></button>' : '') + '</div>' : '';
     return '<div class="body">' + panel() + '<main class="page" id="main"><div class="page__head">' + back + crumbs(cur) + '<h1 class="page__title">' + esc(n(cur)) + ' <span class="page__count">' + t('products')(total) + '</span></h1></div>' + subsection(cur) + toolbar() + applied() + grid + more + '</main></div>';
   };

@@ -361,7 +361,8 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .mtop__spacer{width:40px;flex:0 0 auto}
 
 /* Version C: grid / list switch beside the search; list layout for the Product Card */
-.tool--c .mlayout{flex:0 0 auto}
+.tool--c .mlayout{display:none;flex:0 0 auto}
+.m .tool--c .mlayout{display:inline-flex}
 .grid[data-mode="list"]{grid-template-columns:1fr}
 .grid[data-mode="list"] .hb-pcard{flex-direction:row;align-items:stretch}
 .grid[data-mode="list"] .hb-pcard__media{flex:0 0 220px;aspect-ratio:auto;min-height:200px}

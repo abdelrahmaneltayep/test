@@ -21,7 +21,7 @@ network request; tokens, component CSS, the icon sprite and the product data are
 | Version | What it is |
 |---|---|
 | **A · Side filters (new)** | the attached proposal: side filter panel, sort, applied chips, the richer product card, cart bar, sheets |
-| **C · Side filters + search** | Version A with the live search field ("Search among N products…") in the toolbar with the grid / list switch and Sort by beside it; the term shows as an applied chip |
+| **C · Side filters + search** | Version A with the live search field ("Search among N products…") in the toolbar beside Sort by, and on phones a grid / list switch next to the search; the term shows as an applied chip |
 | **M · Mobile, Talabat pattern** | the CEO's suggestion for phones: back arrow + level-0 title (opens the category menu), level-1 tabs, level-2 circles with "All" first and a ring on the current one, Sort / Brand / Supplier / Filters dropdown chips opening the sheets, an "Order again" row, and a compact two-column card with a + button that turns into the stepper, savings and "Best seller" / "Ordered before" tags, the search field with the grid / list switch beside it as the live page has; bottom bar Home / Brands / Cart / Profile as the live app `(proposal)` |
 | **B · Live + subcategory tiles** | the live page's logic as recorded on 4 Oct 2026 (title, top bar with search / Min Price / Max Price / Categories pop-up, "Only My Vendors", "Showing from … out of …", live card with coupon, Supplier Name, Add to Cart, Match My Price, pagination, the live empty state) plus the subcategory tiles and the Home-rooted breadcrumb |
 
