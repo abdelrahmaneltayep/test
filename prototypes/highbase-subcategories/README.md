@@ -27,6 +27,10 @@ network request; tokens, component CSS, the icon sprite and the product data are
 
 Both share the tree, the products, the tiles, the sibling pills, the mega menu, routing and tracking. In B the Categories pop-up keeps the live three-column checkbox tree; because every level is now a page, ticking a category opens that page (tracked with `source: "filter_popup"`, outside the brief's four sources) `(decision)`. The breadcrumb sits under the title as the live page places it, with Home added.
 
+## In Figma
+
+Version C was pushed on 4 Oct 2026 to the Marketplace file, page "🔸 Categories proposal": https://www.figma.com/design/80SOkAdwrp2xFD6yhQHJ27/Marketplace?node-id=1805-11346 — three desktop frames (levels 0, 1, 2) and three mobile frames (grid, list, Filters sheet), built from DS library instances with every value bound to a DS variable or text style. The decisions still open are listed in the notes block beside the frames.
+
 ## The prototype bar
 
 | Control | What it does |
