@@ -1444,6 +1444,14 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .m .grid--live{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-12)}
 .m .live .hb-pcard__match .hb-pcard__ribbon{font-size:var(--hb-font-size-10)}
 
+/* ---------- Version C: A + the live search beside Sort by ---------- */
+.tool--c{flex-wrap:nowrap}
+.tool__search{flex:1 1 280px;min-width:0}
+.tool--c .sortl{flex:0 0 auto}
+.m .tool--c{flex-wrap:wrap}
+.m .tool__search{flex-basis:100%}
+.m .tool--c .mbtns{width:100%}
+
 </style>
 </head>
 <body>
@@ -1645,7 +1653,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var items = M.breadcrumb(cur, S.lang);
     return '<nav class="crumbs" aria-label="Breadcrumb"><ol class="hb-crumbs">' + items.map(function (it, i) { var sep = i ? '<span class="hb-crumbs__sep" aria-hidden="true">•</span>' : ''; return '<li>' + sep + (it.current ? '<span class="hb-crumbs__current" aria-current="page">' + esc(it.name) + '</span>' : '<a class="hb-crumbs__link" href="' + (it.slug ? href(it.slug) : '#fresh-foods-dairy') + '" data-slug="' + (it.slug || '') + '" data-source="breadcrumb">' + esc(it.name) + '</a>') + '</li>'; }).join('') + '</ol></nav>';
   };
-  var card = function (node) { return '<li><a class="scard" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="card"><span class="scard__img" aria-hidden="true">' + (ART[node.img] || PLACEHOLDER) + '</span><span class="scard__name">' + esc(n(node)) + '</span></a></li>'; };
+  var card = function (node) { return '<li><a class="scard" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="card"><span class="scard__img" aria-hidden="true">' + PLACEHOLDER + '</span><span class="scard__name">' + esc(n(node)) + '</span></a></li>'; };
   var pill = function (node, cur) { return '<li><a class="pill" href="' + href(node.slug) + '" data-slug="' + node.slug + '" data-source="pill"' + (node === cur ? ' aria-current="page"' : '') + '>' + esc(n(node)) + '</a></li>'; };
   var subsection = function (cur) {
     var sec = M.section(cur);
@@ -1662,7 +1670,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var cur = current();
     var opts = function (key, labelOf) { return M.options(cur, f, key).sort(function (a, b) { return b.n - a.n; }).map(function (o) { return check(key, o.value, labelOf ? labelOf(o.value) : o.value, o.n, f[key].indexOf(o.value) >= 0); }).join(''); };
     var price = '<div class="range"><div class="hb-field hb-textfield" data-size="sm"><div class="hb-field__control"><input class="hb-field__input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="' + t('min') + '" data-fr="min" value="' + esc(f.min) + '"></div></div><span class="range__dash">–</span><div class="hb-field hb-textfield" data-size="sm"><div class="hb-field__control"><input class="hb-field__input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="' + t('max') + '" data-fr="max" value="' + esc(f.max) + '"></div></div></div>';
-    return group(t('price'), price, true) + group(t('deals'), opts('deal', function (v) { return t(v); }), true) + group(t('brand'), opts('brand'), true) + group(t('supplier'), toggle('mine', t('mine'), t('mineHint'), f.mine) + opts('supplier'), true) + '<div class="fgroup fgroup--flat">' + toggle('again', t('again'), t('againHint'), f.again) + '</div>';
+    return group(t('price'), price, true) + group(t('brand'), opts('brand'), true) + group(t('supplier'), toggle('mine', t('mine'), t('mineHint'), f.mine) + opts('supplier'), true) + '<div class="fgroup fgroup--flat">' + toggle('again', t('again'), t('againHint'), f.again) + '</div>';
   };
   var panel = function () { var k = M.activeCount(S.f); return '<aside class="fpanel hb-card" id="fpanel" aria-label="' + t('filters') + '"><div class="fpanel__head"><h2 class="hb-card__title">' + t('filters') + '</h2>' + (k ? '<button class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button>' : '') + '</div>' + facets(S.f) + '</aside>'; };
 
@@ -1673,11 +1681,12 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var promos = '<div class="promos">' + promo('again', t('again')) + '<button class="hb-chip promo" data-style="' + (S.f.deal.indexOf('offer') >= 0 ? 'tonal' : 'neutral') + '" data-size="lg" data-deal="offer" aria-pressed="' + (S.f.deal.indexOf('offer') >= 0) + '"><span class="hb-chip__label">' + t('offers') + '</span></button>' + promo('mine', t('mine')) + '</div>';
     var sortSel = '<label class="sortl"><span>' + t('sortBy') + '</span><span class="hb-field hb-textfield sortsel" data-size="sm"><span class="hb-field__control"><select id="sort" class="hb-field__input">' + SORTS.map(function (s) { return '<option value="' + s[0] + '"' + (S.sort === s[0] ? ' selected' : '') + '>' + t(s[1]) + '</option>'; }).join('') + '</select><span class="hb-field__icon" data-mirror>' + ic('chevronDown') + '</span></span></span></label>';
     var mbtns = '<div class="mbtns"><button class="hb-btn" data-intent="secondary" data-style="outlined" data-size="lg" id="open-filter"><span class="hb-btn__icon">' + ic('filter') + '</span><span class="hb-btn__label">' + t('filters') + (k ? ' <span class="hb-badge" data-variant="count" data-color="primary">' + k + '</span>' : '') + '</span></button><button class="hb-btn" data-intent="secondary" data-style="outlined" data-size="lg" id="open-sort"><span class="hb-btn__icon">' + ic('sort') + '</span><span class="hb-btn__label">' + t(SORTS.filter(function (s) { return s[0] === S.sort; })[0][1]) + '</span></button></div>';
+    if (S.ver === 'c') { var base = M.apply(current(), S.f).length, search = '<span class="hb-search tool__search" data-state="default"><span class="hb-search__icon">' + ic('search') + '</span><input class="hb-search__input" id="list-search" value="' + esc(S.f.q || '') + '" placeholder="' + t('searchAmong')(base) + '"></span>'; return '<div class="tool tool--c">' + search + sortSel + mbtns + '</div>' + '<div class="tool">' + promos + '</div>'; }
     return '<div class="tool">' + mbtns + promos + '<span class="tool__sp"></span>' + sortSel + '</div>';
   };
   var applied = function () {
     var ch = []; S.f.brand.forEach(function (v) { ch.push(['brand', v, t('brand') + ': ' + v]); }); S.f.supplier.forEach(function (v) { ch.push(['supplier', v, t('supplier') + ': ' + v]); }); S.f.deal.forEach(function (v) { ch.push(['deal', v, t(v)]); });
-    if (S.f.min !== '') ch.push(['min', '', t('min') + ' ' + S.f.min]); if (S.f.max !== '') ch.push(['max', '', t('max') + ' ' + S.f.max]); ['mine', 'again'].forEach(function (k) { if (S.f[k]) ch.push([k, '', t(k)]); });
+    if (S.f.q) ch.push(['q', '', '“' + S.f.q + '”']); if (S.f.min !== '') ch.push(['min', '', t('min') + ' ' + S.f.min]); if (S.f.max !== '') ch.push(['max', '', t('max') + ' ' + S.f.max]); ['mine', 'again'].forEach(function (k) { if (S.f[k]) ch.push([k, '', t(k)]); });
     if (!ch.length) return '';
     return '<div class="applied">' + ch.map(function (c) { return '<button class="hb-chip" data-style="tonal" data-size="md" data-rm="' + c[0] + '" data-v="' + esc(c[1]) + '" aria-label="' + t('remove') + ' ' + esc(c[2]) + '"><span class="hb-chip__label">' + esc(c[2]) + '</span><span class="hb-chip__icon">' + ic('close') + '</span></button>'; }).join('') + '<button class="hb-btn" data-intent="primary" data-style="ghost" data-size="sm" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></div>';
   };
@@ -1735,7 +1744,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     return '<div class="body body--live"><main class="page" id="main"><div class="page__head page__head--live">' + back + '<h1 class="page__title">' + esc(n(cur)) + ' <span class="page__count">' + t('products')(total) + '</span></h1>' + crumbs(cur) + '</div>' + subsection(cur) + bar + grid + pager + '</main></div>';
   };
   var page = function () {
-    var cur = current(), list = M.sort(M.apply(cur, S.f), S.sort), total = M.count(cur), shown = list.slice(0, S.limit);
+    var cur = current(), q = (S.f.q || '').trim().toLowerCase(), list = M.sort(M.apply(cur, S.f), S.sort).filter(function (p) { return !q || (p.name + ' ' + p.brand + ' ' + p.sup).toLowerCase().indexOf(q) >= 0; }), total = M.count(cur), shown = list.slice(0, S.limit);
     var back = cur.parent ? '<a class="back" href="' + href(cur.parent.slug) + '" data-slug="' + cur.parent.slug + '" data-source="breadcrumb"><span data-mirror>' + ic('chevronLeft') + '</span>' + esc(n(cur.parent)) + '</a>' : '<a class="back" href="#fresh-foods-dairy"><span data-mirror>' + ic('chevronLeft') + '</span>' + t('home') + '</a>';
     var grid = list.length ? '<div class="grid">' + shown.map(product).join('') + '</div>' : '<div class="hb-empty" data-size="sm"><span class="hb-empty__art">' + ic('search') + '</span><span class="hb-empty__title">' + t('noRes') + '</span><span class="hb-empty__text">' + t('noResHint') + '</span><span class="hb-empty__actions"><button class="hb-btn" data-intent="primary" data-style="outlined" data-size="md" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></span></div>';
     var more = list.length ? '<div class="more"><span>' + t('shown')(Math.min(S.limit, list.length), list.length) + '</span>' + (list.length > S.limit ? '<button class="hb-btn" data-intent="primary" data-style="outlined" data-size="lg" id="load-more"><span class="hb-btn__label">' + t('loadMore') + '</span></button>' : '') + '</div>' : '';
@@ -1757,7 +1766,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
   };
   var chrome = function () {
     var seg = function (id, key, opts) { return '<span class="px-seg" role="group" aria-label="' + id + '"><b>' + id + '</b>' + opts.map(function (o) { return '<button data-set="' + key + '" data-v="' + o[0] + '" aria-pressed="' + (S[key] === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</span>'; };
-    return '<div class="px-bar"><span class="px-title">Prototype</span>' + seg('Version', 'ver', [['a', 'A · Side filters (new)'], ['b', 'B · Live + subcategory tiles']]) + seg('Preview', 'view', [['desk', 'Desktop'], ['mob', 'Mobile']]) + seg('Viewing as', 'user', [['buyer', 'Signed-in buyer'], ['guest', 'Guest']]) + seg('Language', 'lang', [['en', 'English'], ['ar', 'العربية']]) + '<span class="px-seg"><a class="px-link" href="#delicatessen">No children</a><a class="px-link" href="#fresh-milk">Lowest level</a></span></div>';
+    return '<div class="px-bar"><span class="px-title">Prototype</span>' + seg('Version', 'ver', [['a', 'A · Side filters'], ['b', 'B · Live + tiles'], ['c', 'C · Side filters + search']]) + seg('Preview', 'view', [['desk', 'Desktop'], ['mob', 'Mobile']]) + seg('Viewing as', 'user', [['buyer', 'Signed-in buyer'], ['guest', 'Guest']]) + seg('Language', 'lang', [['en', 'English'], ['ar', 'العربية']]) + '<span class="px-seg"><a class="px-link" href="#delicatessen">No children</a><a class="px-link" href="#fresh-milk">Lowest level</a></span></div>';
   };
   var renderLog = function () { var el = $('px-log'); if (!el) return; el.innerHTML = '<summary>PostHog events (' + S.events.length + ')</summary><ol>' + (S.events.length ? S.events.map(function (e) { return '<li><b>' + e.ev + '</b> ' + e.at + '\n' + esc(JSON.stringify(e.props)) + '</li>'; }).join('') : '<li>Nothing yet.</li>') + '</ol>'; };
 
@@ -1797,7 +1806,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     if (!e.target.closest('#mega')) { if (S.menuOpen && !e.target.closest('[data-mega]')) closeMenu(); }
     if ((el = e.target.closest('[data-promo]'))) { var k = el.getAttribute('data-promo'); S.f[k] = !S.f[k]; S.limit = 12; render(); return; }
     if ((el = e.target.closest('[data-deal]'))) { var d = el.getAttribute('data-deal'), i = S.f.deal.indexOf(d); i >= 0 ? S.f.deal.splice(i, 1) : S.f.deal.push(d); S.limit = 12; render(); return; }
-    if ((el = e.target.closest('[data-rm]'))) { var rk = el.getAttribute('data-rm'); if (Array.isArray(S.f[rk])) { var ri = S.f[rk].indexOf(el.getAttribute('data-v')); if (ri >= 0) S.f[rk].splice(ri, 1); } else if (rk === 'min' || rk === 'max') S.f[rk] = ''; else S.f[rk] = false; render(); return; }
+    if ((el = e.target.closest('[data-rm]'))) { var rk = el.getAttribute('data-rm'); if (Array.isArray(S.f[rk])) { var ri = S.f[rk].indexOf(el.getAttribute('data-v')); if (ri >= 0) S.f[rk].splice(ri, 1); } else if (rk === 'min' || rk === 'max' || rk === 'q') S.f[rk] = ''; else S.f[rk] = false; render(); return; }
     if (e.target.closest('[data-clearall]')) { S.f = M.blank(); S.limit = 12; render(); return; }
     if ((el = e.target.closest('[data-add]'))) { var pa = M.byId(el.getAttribute('data-add')); setQty(pa.id, pa.moq, true); return; }
     if ((el = e.target.closest('[data-inc]'))) { var id1 = el.getAttribute('data-inc'); setQty(id1, (S.cart[id1] || 0) + 1); return; }

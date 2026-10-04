@@ -268,3 +268,11 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .m .lmeta{flex-wrap:wrap;row-gap:var(--hb-space-8)}
 .m .grid--live{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--hb-space-12)}
 .m .live .hb-pcard__match .hb-pcard__ribbon{font-size:var(--hb-font-size-10)}
+
+/* ---------- Version C: A + the live search beside Sort by ---------- */
+.tool--c{flex-wrap:nowrap}
+.tool__search{flex:1 1 280px;min-width:0}
+.tool--c .sortl{flex:0 0 auto}
+.m .tool--c{flex-wrap:wrap}
+.m .tool__search{flex-basis:100%}
+.m .tool--c .mbtns{width:100%}

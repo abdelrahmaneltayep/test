@@ -21,6 +21,7 @@ network request; tokens, component CSS, the icon sprite and the product data are
 | Version | What it is |
 |---|---|
 | **A · Side filters (new)** | the attached proposal: side filter panel, promo chips, sort, applied chips, the richer product card, cart bar, sheets |
+| **C · Side filters + search** | Version A with the live search field ("Search among N products…") in the toolbar beside Sort by; the term shows as an applied chip |
 | **B · Live + subcategory tiles** | the live page's logic as recorded on 4 Oct 2026 (title, top bar with search / Min Price / Max Price / Categories pop-up, "Only My Vendors", "Showing from … out of …", live card with coupon, Supplier Name, Add to Cart, Match My Price, pagination, the live empty state) plus the subcategory tiles and the Home-rooted breadcrumb |
 
 Both share the tree, the products, the tiles, the sibling pills, the mega menu, routing and tracking. In B the Categories pop-up keeps the live three-column checkbox tree; because every level is now a page, ticking a category opens that page (tracked with `source: "filter_popup"`, outside the brief's four sources) `(decision)`. The breadcrumb sits under the title as the live page places it, with Home added.
@@ -71,7 +72,8 @@ generated fillers so no page is empty.
 - **Tile background and radius.** The brief says `#F3F4F6` and 14 px. The system has no 14 px radius and its nearest grey is `surface-container-low`. The tile uses the token for the grey and a literal 14 px, marked `BRIEF` in `proto.css`. For Figma, either add `rounded/14px` or round to 12.
 - **Current sibling pill.** The attached prototype paints it dark (`surface-dark`); the earlier revision used `primary/700`. Dark is what ships here.
 - **Discount chip.** The system's Chip has no offer style, so the chip uses the secondary container colours via `data-tone="offer"`; a Chip variant would make it official.
-- **Category images.** The recording shows icons only at level 0 of the mega menu. The prototype gives a few categories drawings and leaves the rest on the placeholder so both cases are visible; which categories get real images is content.
+- **Category images.** Every subcategory tile shows the placeholder icon `(decision)`; real images are content and arrive later. The mega menu keeps its level-0 drawings as the live product has icons there.
+- **Deals filter.** Removed from the panel and the sheet `(decision)`; the Offers promo chip still toggles the same filter.
 - **Bottom navigation.** The system documents no bottom navigation; the attached prototype has one, so it is here as a `(proposal)`.
 
 ## Proposals that need a business decision `(proposal)`
