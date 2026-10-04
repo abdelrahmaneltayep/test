@@ -355,3 +355,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .mgrid[data-mode="list"] .mcard__step{inset-inline:var(--hb-space-4);bottom:var(--hb-space-4);height:32px}
 
 .mlayout .hb-icon-btn .hb-i[data-mirror],.mlayout [data-mirror]{display:inline-flex}
+
+.msearch{display:flex;align-items:center;gap:var(--hb-space-8)}
+.msearch .hb-search{flex:1 1 auto;min-width:0}
+.mtop__spacer{width:40px;flex:0 0 auto}
