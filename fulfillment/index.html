@@ -438,6 +438,20 @@ th[rowspan]{vertical-align:bottom}
 .pd-shared{background:var(--mint-50);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:14px}
 .pd-seg button{flex:1}
 @media (max-width:760px){.pd-info{grid-template-columns:minmax(0,1fr)}.pd-ess .fld{max-width:none}}
+.pd-rows{border:1px solid var(--line);border-radius:var(--r-lg)}
+.pd-row{display:flex;gap:12px;align-items:center;padding:14px 16px}.pd-row+.pd-row{border-top:1px solid var(--line-2)}
+.pd-ok{width:24px;height:24px;border-radius:50%;background:#e6f7ef;color:var(--ok);display:grid;place-items:center;flex:none}.pd-ok .icon{width:15px;height:15px}
+.pd-prev{background:var(--mint-50);border-radius:var(--r);padding:10px 12px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.pd-ml{margin:0;line-height:2.4;font-size:15px}
+.pd-tok{border:0;border-bottom:2px dashed var(--brand);background:var(--mint-50);border-radius:4px 4px 0 0;padding:2px 6px;font:inherit;font-weight:700;color:var(--brand);text-align:center;margin:0 2px}
+.pd-tok:focus{outline:2px solid var(--brand);outline-offset:1px}select.pd-tok{text-align:start;padding-inline-end:4px}
+.pd-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.pd-pre{border:1px solid var(--line);border-radius:var(--r);background:#fff;padding:10px;text-align:start;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.pd-pre small{color:var(--muted);font-size:12px}.pd-pre.on{border-color:var(--brand);background:var(--mint-50);box-shadow:0 0 0 2px var(--mint-50)}
+.pd-rv-br{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px}
+.pd-rv-routes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pd-rv-r{border:1px solid var(--line);border-radius:var(--r-lg);padding:12px;display:flex;gap:10px;align-items:flex-start}
+@media (max-width:760px){.pd-presets{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.pd-rv-routes{grid-template-columns:minmax(0,1fr)}.pd-row{flex-wrap:wrap}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1543,13 +1557,59 @@ function pdPage(w,id,su){
   return '';
 }
 
+/* ---------- progressive disclosure versions 6-10 ---------- */
+PD_UIS.splice(PD_UIS.length-1,0,['drawer','6. صفوف + درج تعديل'],['madlib','7. جملة قابلة للتعديل'],['preset','8. قوالب جاهزة + مخصص'],['attn','9. ما يحتاج انتباهك فقط'],['review','10. مراجعة ثم تخصيص']);
+function pdDrawerHtml(){const rid=S.setup.pdDr, r=S.setup.routes[rid];
+  return `<header class="drawer-h"><div class="row" style="gap:10px"><span class="pd-ric ${rid}">${RT_META[rid].ic}</span><div><h2 id="pdT">${RT_META[rid].n}</h2><div class="sm muted">${RT_META[rid].d}</div></div></div><button class="btn btn-sm btn-ghost" type="button" data-act="pd-dr-close" aria-label="إغلاق">${I.x}</button></header>
+   <div class="drawer-b"><div class="pd-body" data-sr="${rid}">${pdFull(r)}<div class="pd-prev sm"><span class="muted">يظهر لعميلك:</span> <span data-sl="pdsum">${pdSum(r)}</span></div></div></div>
+   <footer class="drawer-f"><button class="btn btn-p btn-block" type="button" data-act="pd-dr-close">حفظ</button></footer>`;}
+function pdDrawerOpen(rid){S.setup.pdDr=rid; closeDrawer(); const d=document.createElement('div'); d.className='drawer-wrap'; d.id='pdDrawer';
+  d.innerHTML=`<div class="drawer-bg" data-act="pd-dr-close"></div><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="pdT" style="width:min(460px,100vw)">${pdDrawerHtml()}</aside>`;
+  document.body.appendChild(d); requestAnimationFrame(()=>d.classList.add('open'));}
+function pdDrawerRefresh(){const a=document.querySelector('#pdDrawer .drawer'); if(a&&S.setup.pdDr) a.innerHTML=pdDrawerHtml();}
+const PRESETS=[['match','مطابق لتكلفة الناقل','عميلك يدفع نفس تكلفتك'],['fixed','سعر ثابت','سعر واحد لأي وزن'],['free','شحن مجاني','تتحمل أنت التكلفة'],['custom','مخصص','حسب الوزن بقيمك']];
+function pdApplyPreset(rid,k){const p=S.setup.routes[rid].p, c=RCOST[rid];
+  if(k==='match') Object.assign(p,{type:'weight',fee:String(c.base),baseW:String(c.w),extra:String(c.extra),per:'1'});
+  if(k==='fixed') Object.assign(p,{type:'fixed',fee:p.fee||String(c.base)});
+  if(k==='free') Object.assign(p,{type:'fixed',fee:'0'});
+  if(k==='custom') p.type='weight';}
+function pdMissing(r){const p=r.p, m=[]; if(p.fee==='') m.push(['fee','تكلفة الشحن للعميل','ر.س']); if(p.type==='weight'){if(p.baseW==='') m.push(['baseW','حتى وزن للشحنة','كجم']); if(p.extra==='') m.push(['extra','تكلفة الوزن الإضافي','ر.س']); if(p.per==='') m.push(['per','لكل','كجم']);} return m;}
+function pdPage2(w,id,su){
+  const v=S.pdUI, R=su.routes;
+  if(v==='drawer') return pdBranch(w,id,su,'compact')+`<section class="panel pad stack">${pdRoutesIntro()}<div class="pd-rows">${RT_ORDER.map(rid=>{const r=R[rid]; return `<div class="pd-row" data-sr="${rid}"><span class="pd-ric ${rid}">${RT_META[rid].ic}</span><div style="flex:1;min-width:0"><b>${RT_META[rid].n}</b> <span class="sm muted">${RT_META[rid].d}</span><div class="pd-sum sm" data-sl="pdsum">${pdSum(r)}</div></div>${pdDone(r)?`<span class="pd-ok">${I.check}</span>`:'<span class="pill warn">ناقص</span>'}<button class="btn btn-sm" type="button" data-act="pd-dr" data-v="${rid}">${I.pen}تعديل</button></div>`;}).join('')}</div></section>`;
+  if(v==='madlib') return pdBranch(w,id,su,'line')+`<section class="panel pad stack">${pdRoutesIntro()}<p class="sm muted" style="margin:0">${I.info} اضغط على أي قيمة مسطّرة لتعديلها.</p>${RT_ORDER.map(rid=>{const r=R[rid], p=r.p, tok=(f,v,wd=3)=>`<input class="pd-tok num" type="number" min="0" data-su="${f}" value="${esc(v)}" style="width:${wd+1.5}ch" aria-label="${f}">`;
+      return `<div class="pd-card" data-sr="${rid}">${pdHead(rid)}<p class="pd-ml">يظهر لعملائك ضمن ${tok('radius',r.cov.radius)} كم حول الفرع، بسعر ${tok('fee',p.fee,4)} ر.س
+        <select class="pd-tok" data-su="type" aria-label="نوع التسعير"><option value="weight" ${p.type==='weight'?'selected':''}>حتى وزن</option><option value="fixed" ${p.type!=='weight'?'selected':''}>ثابت لأي وزن</option></select>
+        ${p.type==='weight'?`${tok('baseW',p.baseW)} كجم، ثم ${tok('extra',p.extra)} ر.س لكل ${tok('per',p.per,2)} كجم إضافي.`:'.'}</p></div>`;}).join('')}</section>`;
+  if(v==='preset') return pdBranch(w,id,su,'line')+`<section class="panel pad stack">${pdRoutesIntro()}${RT_ORDER.map(rid=>{const r=R[rid], k=(su.pdPre||{})[rid]||(r.p.fee===''?'':r.p.type!=='weight'?'fixed':'custom'), c=RCOST[rid];
+      return `<div class="pd-card" data-sr="${rid}">${pdHead(rid,`<span class="chip gray">${I.pin}<span data-sl="rad">${r.cov.radius}</span> كم</span>`)}
+       <div class="pd-presets" role="radiogroup" aria-label="طريقة تسعير ${RT_META[rid].n}">${PRESETS.map(([pk,l,d])=>`<button type="button" role="radio" aria-checked="${k===pk}" class="pd-pre ${k===pk?'on':''}" data-act="pd-pre" data-v="${pk}"><b>${l}</b><small>${pk==='match'?`${c.base} ر.س لأول ${c.w} كجم`:d}</small></button>`).join('')}</div>
+       ${k==='fixed'?`<div class="grid2">${pdFee(r.p)}<div></div></div>`:k==='custom'?`<div class="pd-body">${pdW(r.p)}</div>`:k?`<div class="pd-sum sm" data-sl="pdsum">${pdSum(r)}</div>`:`<div class="pd-sum sm qty-bad">${I.info} اختر طريقة التسعير لهذا المسار.</div>`}</div>`;}).join('')}</section>`;
+  if(v==='attn'){const bad=RT_ORDER.filter(k=>!pdDone(R[k])), ok=RT_ORDER.filter(k=>pdDone(R[k]));
+    return pdBranch(w,id,su,'line')+`<section class="panel pad stack">${pdRoutesIntro()}
+      ${bad.length?`<div class="alert warn">${I.info}<span class="grow"><b>${bad.length===1?'مسار واحد يحتاج':bad.length+' مسارات تحتاج'} إكمال.</b> أكملنا الباقي بقيم مقترحة.</span></div>`:`<div class="alert ok">${I.check}<span class="grow">كل المسارات جاهزة بقيم مقترحة.</span></div>`}
+      ${bad.map(rid=>{const r=R[rid], full=(su.pdAdv||[]).includes(rid); return `<div class="pd-card open" data-sr="${rid}">${pdHead(rid,'<span class="pill warn">يحتاج إكمال</span>')}
+        ${full?`<div class="pd-body">${pdFull(r)}</div>`:`<div class="grid2">${pdMissing(r).map(([f,l,u])=>pdIn(f,l,r.p[f],u)).join('')}</div>`}
+        <div class="row between"><button class="link-btn sm" type="button" data-act="pd-adv" data-v="${rid}">${full?'إظهار الناقص فقط':'كل إعدادات المسار'}</button><button class="btn btn-sm btn-p" type="button" data-act="pd-attn-done">تم</button></div></div>`;}).join('')}
+      ${ok.length?`<details class="su-acc" ${su.pdOkOpen?'open':''}><summary><span class="row" style="gap:8px"><span class="pd-ok">${I.check}</span><b>${ok.length} ${ok.length===1?'مسار جاهز':'مسارات جاهزة'}</b></span><span class="sm muted">${ok.map(k=>RT_META[k].n.replace('شحن ','')).join('، ')}</span></summary>
+        <div class="stack" style="gap:8px;padding-top:10px">${ok.map(rid=>{const op=su.open.includes(rid); return `<div class="pd-card ${op?'open':''}" data-sr="${rid}">${pdHead(rid,`<button class="btn btn-sm" type="button" data-act="su-open" data-v="${rid}">${op?'تم':'تعديل'}</button>`)}${op?`<div class="pd-body">${pdFull(R[rid])}</div>`:`<div class="pd-sum sm" data-sl="pdsum">${pdSum(R[rid])}</div>`}</div>`;}).join('')}</div></details>`:''}</section>`;}
+  if(v==='review'){const c=su.pdCust;
+    return `<section class="panel pad stack pd-review"><div><h2>مراجعة الحجز</h2><div class="sm muted">جهّزنا كل شيء بقيم مقترحة. راجع وأكّد، أو خصّص قبل التأكيد.</div></div>
+      <div class="pd-rv-br"><div class="wimg" style="width:44px;height:44px">${whImg(w)}</div><div style="flex:1;min-width:0"><b>${w.name}</b><div class="sm muted">${w.city} · تشغيل ${OPERATOR[id]} · ${w.hours[0][0]} ${w.hours[0][1]}</div></div><button class="link-btn sm" type="button" data-act="pd-map">${su.pdMap?'إخفاء الموقع':'الموقع على الخريطة'}</button></div>
+      ${su.pdMap?`<div class="stack" style="gap:8px">${suMap(su,170)}<div>${pinBtn(su)}</div></div>`:''}
+      <div class="pd-rv-routes">${RT_ORDER.map(rid=>`<div class="pd-rv-r" data-sr="${rid}"><span class="pd-ric ${rid}">${RT_META[rid].ic}</span><div style="min-width:0"><b>${RT_META[rid].n}</b><div class="pd-sum sm" data-sl="pdsum">${pdSum(R[rid])}</div></div></div>`).join('')}</div>
+      <button class="link-btn" type="button" data-act="pd-cust" aria-expanded="${!!c}" style="align-self:flex-start">${c?'إخفاء التخصيص':'تخصيص النطاق والأسعار'}</button></section>
+      ${c?`<section class="panel pad stack">${pdRoutesIntro()}${RT_ORDER.map(rid=>`<div class="stack" style="gap:10px">${pdHead(rid)}<div class="pd-box" data-sr="${rid}">${pdFull(R[rid])}</div></div>`).join('')}</section>`:''}`;}
+  return '';
+}
+
 function screenSetup(id){
   const w=wh(id); if(!w) return screenList('browse');
   if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
   const su=S.setup;
   return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack" id="suRoot">
    ${suSw('نسخة الصفحة:',PD_UIS,S.pdUI,'pd-ui').replace(/>\d+\. /g,'>')}
-   ${S.pdUI!=='explore'?pdPage(w,id,su):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
+   ${S.pdUI!=='explore'?(pdPage(w,id,su)||pdPage2(w,id,su)):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
    ${suBranchArea(w,su,id)}
    ${suSw('مسارات الشحن:',SU_RT,S.suRtUI,'su-rt-ui')}
    ${suRoutesArea(w,su)}`}
@@ -1568,7 +1628,7 @@ function suRefreshRoute(rid){
   const li=document.querySelector(`[data-sl-list="${rid}"]`); if(li) li.textContent=r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف';
 }
 const suT=rid=>rid==='__all'?ROUTES.filter(R=>!(S.setup.ovr||[]).includes(R.id)).map(R=>S.setup.routes[R.id]):[S.setup.routes[rid]];
-function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; }
+function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; if(document.getElementById('pdDrawer')) pdDrawerRefresh(); }
 
 /* ---------- booking page layout variants (prototype switch) ---------- */
 S.suBrUI='current'; S.suRtUI='current';
@@ -2017,6 +2077,11 @@ document.addEventListener('click',e=>{
   if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>r.cov.mode=a.dataset.v); rerenderSetup();}
   if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>{r.cov.cities=r.cov.cities.filter(x=>x!==a.dataset.v);}); rerenderSetup();}
   if(act==='pd-ui'){S.pdUI=a.dataset.v; if(['sum'].includes(a.dataset.v)) S.setup.open=[]; if(a.dataset.v==='shared'){const su=S.setup; su.ovr=[]; RT_ORDER.forEach(k=>{if(k!=='std'){su.routes[k].p={...su.routes.std.p}; su.routes[k].cov={...su.routes.std.cov};}});} rerenderSetup();}
+  if(act==='pd-dr'){pdDrawerOpen(a.dataset.v); return;}
+  if(act==='pd-dr-close'){S.setup.pdDr=null; closeDrawer(); rerenderSetup(); return;}
+  if(act==='pd-pre'){const rid=a.closest('[data-sr]').dataset.sr; S.setup.pdPre={...(S.setup.pdPre||{}),[rid]:a.dataset.v}; pdApplyPreset(rid,a.dataset.v); rerenderSetup();}
+  if(act==='pd-attn-done'){rerenderSetup();}
+  if(act==='pd-cust'){S.setup.pdCust=!S.setup.pdCust; rerenderSetup();}
   if(act==='pd-map'){S.setup.pdMap=!S.setup.pdMap; rerenderSetup();}
   if(act==='pd-hours'){S.setup.pdHours=!S.setup.pdHours; rerenderSetup();}
   if(act==='pd-more'){S.setup.pdMore=!S.setup.pdMore; rerenderSetup();}
