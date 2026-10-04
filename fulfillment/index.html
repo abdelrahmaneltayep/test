@@ -411,6 +411,33 @@ th[rowspan]{vertical-align:bottom}
 .fee-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;border-top:1px solid var(--line-2);background:#fcfcfc}
 .fee-foot .icon{width:15px;height:15px;vertical-align:-3px}
 @media (max-width:760px){.fee-body{grid-template-columns:minmax(0,1fr)}.fee-head{flex-wrap:wrap}.fee-head>div:nth-child(2){flex-basis:calc(100% - 60px)}.fee-amt{width:100%;flex-direction:row;justify-content:space-between;align-items:center;border-top:1px dashed #f1d29a;padding-top:10px}.fee-foot .btn{width:100%}}
+.pd-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.pd-info>div{border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.pd-info span{font-size:12px;color:var(--muted)}.pd-info b{font-weight:500}
+.pd-hours{width:100%;min-width:0;border-collapse:collapse;font-size:13px}.pd-hours th{font-weight:400;color:var(--ink-2);text-align:start;padding:8px 0;border-bottom:1px solid var(--line-2)}
+.pd-hours td{padding:10px 0;border-bottom:1px solid var(--line-2)}.pd-hours th:last-child,.pd-hours td:last-child{text-align:end}
+.pd-hline{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line-2);padding-top:12px}
+.link-btn{background:none;border:0;padding:0;font:inherit}
+.pd-cmp{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.pd-rhead{display:flex;gap:10px;align-items:center}
+.pd-ric{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--line-2);color:var(--ink-2);flex:none}.pd-ric.exp{background:#e6f7ef;color:var(--ok)}
+.pd-box{border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:14px}
+.pd-rad{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.pd-radin{width:min(260px,100%)}
+.pd-card{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.pd-card.open{border-color:var(--mint-strong);box-shadow:0 0 0 3px var(--mint-50)}.pd-card.off{background:#fafafa}.pd-card.off .pd-rhead b{color:var(--muted)}
+.pd-sum{display:flex;align-items:center;gap:6px;flex-wrap:wrap;color:var(--ink-2)}.pd-sum .icon{width:15px;height:15px}
+.pd-body{display:flex;flex-direction:column;gap:14px}
+.pd-ess{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap}.pd-ess .fld{max-width:280px}.pd-ess-note{padding-bottom:10px}
+.pd-advbtn{align-self:flex-start;font-size:13px}
+.pd-prog{height:6px;border-radius:3px;background:var(--line-2);overflow:hidden}.pd-prog i{display:block;height:100%;background:var(--brand);transition:width .3s}
+.pd-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.pd-step{border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px}.pd-step.act{border-color:var(--brand);box-shadow:0 0 0 3px var(--mint-50)}
+.pd-step.done .su-sn{background:var(--brand);border-color:var(--brand);color:#fff}.pd-step.act .su-sn{border-color:var(--brand);color:var(--brand)}
+.pd-sh{display:flex;gap:12px;align-items:center}.pd-sh .muted{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.pd-sh .icon{width:14px;height:14px}
+.pd-sb{display:flex;flex-direction:column;gap:14px;padding-top:14px;margin-top:12px;border-top:1px solid var(--line-2)}
+.pd-shared{background:var(--mint-50);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:14px}
+.pd-seg button{flex:1}
+@media (max-width:760px){.pd-info{grid-template-columns:minmax(0,1fr)}.pd-ess .fld{max-width:none}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1449,16 +1476,84 @@ function suRoute(rid,r,su,w){
    ${open?`<div class="su-rbody">${suRouteBody(rid,r,w)}   </div>`:''}
   </div>`;
 }
+/* ---------- final booking design + 5 progressive-disclosure versions ---------- */
+S.pdUI='final';
+const PD_UIS=[['final','التصميم النهائي'],['sum','1. ملخص + تعديل'],['adv','2. الأساسي + إعدادات متقدمة'],['steps','3. خطوة بخطوة'],['shared','4. إعداد موحد + تخصيص'],['cond','5. حقول تظهر حسب الاختيار'],['explore','الاستكشافات السابقة']];
+const RT_ORDER=['eco','std','exp'];
+const BOLT='<svg class="icon" viewBox="0 0 24 24"><path d="M13 3 5 13h6l-1 8 8-10h-6z"/></svg>';
+const RT_META={eco:{n:'شحن اقتصادي',d:'3 – 5 أيام',ic:I.truckS},std:{n:'شحن عادي',d:'2 – 3 أيام',ic:I.truckS},exp:{n:'شحن سريع',d:'2 – 4 ساعات',ic:BOLT}};
+function pdSum(r){const p=r.p; if(!r.on) return 'المسار موقوف ولا يظهر لعملائك';
+  return `${I.pin}<span class="num">${r.cov.radius||'—'}</span> كم<span class="dot-sep">·</span>${p.fee===''?'<span class="qty-bad">لم يُحدد السعر</span>':`<b class="num">${p.fee} ر.س</b>`}${p.type==='weight'?` لأول <span class="num">${p.baseW||'—'}</span> كجم${p.extra!==''?`<span class="dot-sep">·</span>+<span class="num">${p.extra}</span> ر.س لكل <span class="num">${p.per||1}</span> كجم`:''}`:' ثابت لأي وزن'}`;}
+const pdDone=r=>!r.on||(r.p.fee!==''&&(r.p.type!=='weight'||(r.p.baseW!==''&&r.p.extra!==''&&r.p.per!=='')));
+const pdHead=(rid,extra='')=>`<div class="pd-rhead"><span class="pd-ric ${rid}">${RT_META[rid].ic}</span><div style="flex:1;min-width:0"><b>${RT_META[rid].n}</b><div class="sm muted">${RT_META[rid].d}</div></div>${extra}</div>`;
+// form pieces matching the final design
+const pdRadius=(r,{hint=true}={})=>`<div class="pd-rad"><div style="flex:1;min-width:0"><b class="sm">النطاق الحالي: <span data-sl="rad">${r.cov.radius||'—'}</span> كم</b>${hint?'<div class="sm muted">توصي سلة بنطاق 25 كم لتحقيق أفضل أداء للتوصيل السريع.</div>':''}</div><div class="field wide pd-radin"><input type="number" min="1" data-su="radius" value="${esc(r.cov.radius)}" aria-label="نطاق التغطية بالكيلومتر"><em>كم</em></div></div>`;
+const pdType=p=>`<div class="fld"><label>نوع التسعير <i>*</i></label><select class="inp" data-su="type"><option value="weight" ${p.type==='weight'?'selected':''}>حسب الوزن</option><option value="fixed" ${p.type!=='weight'?'selected':''}>ثابت</option></select></div>`;
+const pdIn=(f,l,v,u)=>`<div class="fld"><label>${l} <i>*</i></label><div class="field wide"><input type="number" min="0" data-su="${f}" value="${esc(v)}" aria-label="${l}"><em>${u}</em></div></div>`;
+const pdFee=p=>pdIn('fee','تكلفة الشحن للعميل',p.fee,'ر.س');
+const pdW=p=>`<div class="grid2">${pdIn('fee','تكلفة الشحن للعميل',p.fee,'ر.س')}${pdIn('baseW','حتى وزن للشحنة',p.baseW,'كجم')}</div><div class="grid2">${pdIn('extra','تكلفة الوزن الإضافي',p.extra,'ر.س')}${pdIn('per','لكل',p.per,'كجم')}</div>`;
+const pdFull=(r)=>`${pdRadius(r)}${pdType(r.p)}${r.p.type==='weight'?pdW(r.p):pdFee(r.p)}`;
+function pdHoursTable(w){return `<table class="pd-hours"><thead><tr><th>اليوم</th><th>الساعات</th></tr></thead><tbody>${w.hours.map(h=>`<tr><td>${h[0]}</td><td class="num ${h[1]==='مغلق'?'qty-bad':''}">${h[1]}</td></tr>`).join('')}</tbody></table>`;}
+function pdBranch(w,id,su,mode){
+  const boxes=`<div class="pd-info"><div><span>المدينة</span><b>${w.city}</b></div><div><span>اسم الفرع</span><b>${w.name}</b></div><div><span>الشركة المشغّلة</span><b>${OPERATOR[id]}</b></div></div>`;
+  const mapBtn=`<button class="btn btn-sm" type="button" data-act="pd-map" aria-expanded="${!!su.pdMap}">${I.pin}${su.pdMap?'إخفاء الخريطة':'موقع الفرع على الخريطة'}</button>`;
+  const map=su.pdMap?`<div class="stack" style="gap:8px">${suMap(su,190)}<div>${pinBtn(su)}</div></div>`:'';
+  const ti=todayInfo(w), today=`<span class="pill ${ti.open?'ok':'warn'}">${I.clock}${ti.txt}</span>`;
+  const head=`<div class="row between"><div><h2>بيانات الفرع</h2><div class="sm muted">تأكد من موقع الاستلام قبل الحجز.</div></div>${mapBtn}</div>`;
+  if(mode==='final') return `<section class="panel pad stack">${head}${boxes}${map}<div class="stack" style="gap:8px"><h3 style="font-size:15px">ساعات العمل</h3>${pdHoursTable(w)}</div></section>`;
+  if(mode==='line') return `<section class="panel pad stack">${head}${boxes}${map}
+     <div class="pd-hline"><span class="row" style="gap:8px;flex-wrap:wrap"><b class="sm">ساعات العمل</b>${today}</span><button class="link-btn" type="button" data-act="pd-hours" aria-expanded="${!!su.pdHours}">${su.pdHours?'إخفاء':'عرض كل الساعات'}</button></div>${su.pdHours?pdHoursTable(w):''}</section>`;
+  if(mode==='compact') return `<section class="panel pad stack"><div class="pd-cmp"><div class="wimg" style="width:44px;height:44px">${whImg(w)}</div><div style="flex:1;min-width:0"><b>${w.name}</b><div class="sm muted">${w.city} · تشغيل ${OPERATOR[id]}</div></div>${today}<button class="btn btn-sm" type="button" data-act="pd-more" aria-expanded="${!!su.pdMore}">${su.pdMore?'إخفاء التفاصيل':'التفاصيل والموقع'}</button></div>
+     ${su.pdMore?`<div class="stack" style="gap:12px;border-top:1px solid var(--line-2);padding-top:14px">${boxes}<div class="su-two"><div class="stack" style="gap:8px"><b class="sm">موقع الاستلام</b>${suMap(su,170)}<div>${pinBtn(su)}</div></div><div class="stack" style="gap:8px"><b class="sm">ساعات العمل</b>${pdHoursTable(w)}</div></div></div>`:''}</section>`;
+  return '';
+}
+function pdRoutesIntro(){return `<div><h2>مسارات الشحن ونطاقات التغطية</h2><p class="sm muted" style="margin:4px 0 0">سيتم إنشاء 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به، ويظهر لعميلك بسعره في صفحة الدفع.</p></div>`;}
+function pdPage(w,id,su){
+  const v=S.pdUI, R=su.routes;
+  if(v==='final') return pdBranch(w,id,su,'final')+`<section class="panel pad stack">${pdRoutesIntro()}${RT_ORDER.map(rid=>`<div class="stack" style="gap:10px">${pdHead(rid)}<div class="pd-box" data-sr="${rid}">${pdFull(R[rid])}</div></div>`).join('')}</section>`;
+  if(v==='sum') return pdBranch(w,id,su,'line')+`<section class="panel pad stack">${pdRoutesIntro()}${RT_ORDER.map(rid=>{const r=R[rid], op=su.open.includes(rid); return `<div class="pd-card ${op?'open':''}" data-sr="${rid}">${pdHead(rid,`<button class="btn btn-sm" type="button" data-act="su-open" data-v="${rid}" aria-expanded="${op}">${op?'تم':'تعديل'}</button>`)}
+      ${op?`<div class="pd-body">${pdFull(r)}</div>`:`<div class="pd-sum sm" data-sl="pdsum">${pdSum(r)}</div>`}</div>`;}).join('')}
+      <p class="sm muted">${I.info} أعددنا قيماً مقترحة لكل مسار. اضغط «تعديل» فقط إذا أردت تغييرها.</p></section>`;
+  if(v==='adv') return pdBranch(w,id,su,'line')+`<section class="panel pad stack">${pdRoutesIntro()}${RT_ORDER.map(rid=>{const r=R[rid], a=(su.pdAdv||[]).includes(rid); return `<div class="pd-card" data-sr="${rid}">${pdHead(rid,`<span class="chip gray">${I.pin}<span data-sl="rad">${r.cov.radius||'—'}</span> كم</span>`)}
+      <div class="pd-ess"><div class="fld" style="flex:1;min-width:0"><label>تكلفة الشحن للعميل <i>*</i></label><div class="field wide"><input type="number" min="0" data-su="fee" value="${esc(r.p.fee)}" aria-label="تكلفة الشحن للعميل ${RT_META[rid].n}"><em>ر.س</em></div></div><span class="sm muted pd-ess-note">${r.p.type==='weight'?`لأول ${r.p.baseW||'—'} كجم، و+${r.p.extra||'—'} ر.س لكل ${r.p.per||1} كجم إضافي`:'سعر ثابت لأي وزن'}</span></div>
+      <button class="link-btn pd-advbtn" type="button" data-act="pd-adv" data-v="${rid}" aria-expanded="${a}">${a?'إخفاء الإعدادات المتقدمة':'إعدادات متقدمة: النطاق، نوع التسعير، الوزن'}</button>
+      ${a?`<div class="pd-body" style="border-top:1px dashed var(--line);padding-top:12px">${pdRadius(r)}${pdType(r.p)}${r.p.type==='weight'?`<div class="grid2">${pdIn('baseW','حتى وزن للشحنة',r.p.baseW,'كجم')}<div></div></div><div class="grid2">${pdIn('extra','تكلفة الوزن الإضافي',r.p.extra,'ر.س')}${pdIn('per','لكل',r.p.per,'كجم')}</div>`:''}</div>`:''}</div>`;}).join('')}</section>`;
+  if(v==='steps'){const st=su.pdStep??0, all=[['br','بيانات الفرع']].concat(RT_ORDER.map(r=>[r,RT_META[r].n]));
+    return `<section class="panel pad stack"><div class="row between"><div><h2>إعداد المستودع</h2><div class="sm muted">4 خطوات قصيرة، وتقدر ترجع لأي خطوة.</div></div><span class="pill ${st>=4?'ok':'warn'}">${Math.min(st,4)} من 4</span></div>
+      <div class="pd-prog"><i style="width:${Math.min(st,4)*25}%"></i></div>
+      <ol class="pd-steps">${all.map(([k,t],i)=>{const act=i===st, done=i<st; const r=R[k];
+        const body=k==='br'?`<div class="stack" style="gap:12px"><div class="pd-info"><div><span>المدينة</span><b>${w.city}</b></div><div><span>اسم الفرع</span><b>${w.name}</b></div><div><span>الشركة المشغّلة</span><b>${OPERATOR[id]}</b></div></div>${suMap(su,170)}<div class="row between">${pinBtn(su)}<span class="sm muted">${w.hours[0][0]} ${w.hours[0][1]}</span></div></div>`:`<div class="pd-body" data-sr="${k}">${pdFull(r)}</div>`;
+        const sum=k==='br'?`${w.name} · ${su.pinMoved?'موقع معدّل':'الموقع الافتراضي'}`:`<span data-sr="${k}"><span data-sl="pdsum">${pdSum(r)}</span></span>`;
+        return `<li class="pd-step ${act?'act':''} ${done?'done':''}"><div class="pd-sh"><span class="su-sn">${done?I.check:i+1}</span><div style="flex:1;min-width:0"><b>${t}</b>${!act?`<div class="sm muted">${done?sum:k==='br'?'':RT_META[k].d}</div>`:''}</div>${done?`<button class="btn btn-sm btn-ghost" type="button" data-act="pd-step" data-v="${i}">تعديل</button>`:''}</div>
+          ${act?`<div class="pd-sb">${body}<div class="row" style="justify-content:flex-end;gap:8px">${i>0?`<button class="btn btn-sm" type="button" data-act="pd-step" data-v="${i-1}">السابق</button>`:''}<button class="btn btn-sm btn-p" type="button" data-act="pd-step" data-v="${i+1}">${i===3?'إنهاء':'التالي'}</button></div></div>`:''}</li>`;}).join('')}</ol></section>`;}
+  if(v==='shared'){const ovr=su.ovr||[], base=RT_ORDER.find(k=>!ovr.includes(k)), b=R[base||'std'];
+    return pdBranch(w,id,su,'compact')+`<section class="panel pad stack">${pdRoutesIntro()}
+      ${base?`<div class="pd-shared" data-sr="__all"><div class="row between"><b>إعداد موحد لـ ${RT_ORDER.filter(k=>!ovr.includes(k)).map(k=>RT_META[k].n.replace('شحن ','')).join(' و')}</b><span class="chip">${I.check}يُطبق على ${RT_ORDER.length-ovr.length} مسارات</span></div>${pdFull(b)}</div>`:''}
+      <div class="stack" style="gap:8px">${RT_ORDER.map(rid=>{const o=ovr.includes(rid); return `<div class="pd-card ${o?'open':''}" data-sr="${rid}">${pdHead(rid,`<button class="btn btn-sm ${o?'':'btn-ghost'}" type="button" data-act="pd-ovr" data-v="${rid}">${o?'استخدام الموحد':'تخصيص'}</button>`)}
+        ${o?`<div class="pd-body">${pdFull(R[rid])}</div>`:`<div class="pd-sum sm"><span class="chip gray">الإعداد الموحد</span> <span data-sl="pdsum">${pdSum(R[rid])}</span></div>`}</div>`;}).join('')}</div></section>`;}
+  if(v==='cond') return pdBranch(w,id,su,'line')+`<section class="panel pad stack">${pdRoutesIntro()}${RT_ORDER.map(rid=>{const r=R[rid], p=r.p, xw=(su.pdXw||{})[rid]??(p.extra!==''), rad=(su.pdRad||[]).includes(rid);
+      return `<div class="pd-card ${r.on?'':'off'}" data-sr="${rid}">${pdHead(rid,`<label class="toggle"><input type="checkbox" data-su="on" ${r.on?'checked':''} ${rid==='std'?'disabled':''} aria-label="تفعيل ${RT_META[rid].n}"><span></span></label>`)}
+       ${r.on?`<div class="pd-body">
+        <div class="row" style="gap:8px;flex-wrap:wrap"><span class="chip">${I.pin}نطاق <span data-sl="rad">${r.cov.radius||'—'}</span> كم ${+r.cov.radius===25?'· موصى به':''}</span><button class="link-btn" type="button" data-act="pd-rad" data-v="${rid}">${rad?'إخفاء':'تغيير النطاق'}</button></div>
+        ${rad?pdRadius(r):''}
+        <div class="fld"><span class="lbl">كيف تسعّر هذا المسار؟</span><div class="seg pd-seg">${[['fixed','سعر ثابت'],['weight','حسب الوزن']].map(([k,l])=>`<button type="button" class="${p.type===k?'on':''}" data-act="pd-type" data-v="${k}" aria-pressed="${p.type===k}">${l}</button>`).join('')}</div></div>
+        ${p.type==='weight'?`<div class="grid2">${pdIn('fee','تكلفة الشحن للعميل',p.fee,'ر.س')}${pdIn('baseW','حتى وزن للشحنة',p.baseW,'كجم')}</div>
+          <label class="chk"><input type="checkbox" data-pdxw="${rid}" ${xw?'checked':''}><span><b>أضف تكلفة للوزن الزائد</b><small>إذا تجاوزت الشحنة ${p.baseW||'—'} كجم.</small></span></label>
+          ${xw?`<div class="grid2">${pdIn('extra','تكلفة الوزن الإضافي',p.extra,'ر.س')}${pdIn('per','لكل',p.per,'كجم')}</div>`:''}`:pdFee(p)}</div>`:'<div class="pd-sum sm muted">المسار موقوف ولا يظهر لعملائك. فعّله لإعداد النطاق والسعر.</div>'}</div>`;}).join('')}</section>`;
+  return '';
+}
+
 function screenSetup(id){
   const w=wh(id); if(!w) return screenList('browse');
   if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
   const su=S.setup;
   return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack" id="suRoot">
-   ${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
+   ${suSw('نسخة الصفحة:',PD_UIS,S.pdUI,'pd-ui').replace(/>\d+\. /g,'>')}
+   ${S.pdUI!=='explore'?pdPage(w,id,su):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
    ${suBranchArea(w,su,id)}
    ${suSw('مسارات الشحن:',SU_RT,S.suRtUI,'su-rt-ui')}
-   ${suRoutesArea(w,su)}
-   <section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>
+   ${suRoutesArea(w,su)}`}
+   ${S.pdUI==='steps'&&(su.pdStep??0)<4?`<section class="panel pad row between su-bar"><span class="sm muted">أكمل الخطوات الأربع لتأكيد الحجز.</span><button class="btn btn-p" type="button" disabled>${I.check}تأكيد الحجز</button></section>`:`<section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>`}
   </div>`;
 }
 function suRefreshRoute(rid){
@@ -1467,7 +1562,8 @@ function suRefreshRoute(rid){
   const s=box.querySelector('[data-sl=sum]'); if(s) s.innerHTML=suSummary(rid,r,w.city);
   const b=box.querySelector('[data-sl=boxes]'); if(b) b.innerHTML=suPriceBoxes(rid,r.p);
   const rd=box.querySelector('[data-sl=rad]'); if(rd) rd.textContent=r.cov.radius||'—';
-  box.querySelectorAll('[data-sl=mg]').forEach(m=>m.innerHTML=suMargin(rid,r.p));});
+  box.querySelectorAll('[data-sl=mg]').forEach(m=>m.innerHTML=suMargin(rid,r.p));
+  box.querySelectorAll('[data-sl=pdsum]').forEach(m=>m.innerHTML=pdSum(r));});
   const co=document.querySelector(`[data-sl-co="${rid}"]`); if(co&&co.textContent) co.textContent=r.p.fee===''?'—':r.p.fee+' ر.س';
   const li=document.querySelector(`[data-sl-list="${rid}"]`); if(li) li.textContent=r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف';
 }
@@ -1920,6 +2016,15 @@ document.addEventListener('click',e=>{
   if(act==='su-open'){const v=a.dataset.v, su=S.setup; su.open=su.open.includes(v)?su.open.filter(x=>x!==v):[...su.open,v]; rerenderSetup();}
   if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>r.cov.mode=a.dataset.v); rerenderSetup();}
   if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>{r.cov.cities=r.cov.cities.filter(x=>x!==a.dataset.v);}); rerenderSetup();}
+  if(act==='pd-ui'){S.pdUI=a.dataset.v; if(['sum'].includes(a.dataset.v)) S.setup.open=[]; if(a.dataset.v==='shared'){const su=S.setup; su.ovr=[]; RT_ORDER.forEach(k=>{if(k!=='std'){su.routes[k].p={...su.routes.std.p}; su.routes[k].cov={...su.routes.std.cov};}});} rerenderSetup();}
+  if(act==='pd-map'){S.setup.pdMap=!S.setup.pdMap; rerenderSetup();}
+  if(act==='pd-hours'){S.setup.pdHours=!S.setup.pdHours; rerenderSetup();}
+  if(act==='pd-more'){S.setup.pdMore=!S.setup.pdMore; rerenderSetup();}
+  if(act==='pd-adv'){const v=a.dataset.v, l=S.setup.pdAdv||[]; S.setup.pdAdv=l.includes(v)?l.filter(x=>x!==v):[...l,v]; rerenderSetup();}
+  if(act==='pd-rad'){const v=a.dataset.v, l=S.setup.pdRad||[]; S.setup.pdRad=l.includes(v)?l.filter(x=>x!==v):[...l,v]; rerenderSetup();}
+  if(act==='pd-step'){S.setup.pdStep=+a.dataset.v; rerenderSetup(); document.querySelector('.pd-step.act')?.scrollIntoView({block:'center'});}
+  if(act==='pd-type'){const rid=a.closest('[data-sr]').dataset.sr; S.setup.routes[rid].p.type=a.dataset.v; rerenderSetup();}
+  if(act==='pd-ovr'){const su=S.setup, v=a.dataset.v; su.ovr=su.ovr||[]; if(su.ovr.includes(v)){su.ovr=su.ovr.filter(x=>x!==v); const b=RT_ORDER.find(k=>!su.ovr.includes(k)&&k!==v); if(b){su.routes[v].p={...su.routes[b].p}; su.routes[v].cov={...su.routes[b].cov};}} else su.ovr.push(v); rerenderSetup();}
   if(act==='su-br-ui'){S.suBrUI=a.dataset.v; rerenderSetup();}
   if(act==='su-rt-ui'){S.suRtUI=a.dataset.v; rerenderSetup();}
   if(act==='su-sel'){S.setup.sel=a.dataset.v; rerenderSetup();}
@@ -1955,7 +2060,8 @@ document.addEventListener('input',e=>{
   if(e.target.dataset.tn&&S.tn&&['date','notes'].includes(e.target.dataset.tn)){S.tn[e.target.dataset.tn]=e.target.value; return;}
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['fee','baseW','extra','per','dur','radius'].includes(e.target.dataset.su)){
     const rid=e.target.closest('[data-sr]').dataset.sr, f=e.target.dataset.su;
-    if(f==='radius'){suT(rid).forEach(r=>r.cov.radius=e.target.value); if(rid==='__all') ROUTES.forEach(R=>suRefreshRoute(R.id));} else S.setup.routes[rid].p[f]=e.target.value; suRefreshRoute(rid); return;}
+    if(f==='radius') suT(rid).forEach(r=>r.cov.radius=e.target.value); else suT(rid).forEach(r=>r.p[f]=e.target.value);
+    if(rid==='__all'){const rd=e.target.closest('[data-sr]').querySelector('[data-sl=rad]'); if(rd) rd.textContent=e.target.value||'—'; ROUTES.forEach(R=>suRefreshRoute(R.id));} else suRefreshRoute(rid); return;}
   if(e.target.id==='mq'){S.mq=e.target.value; const pos=e.target.selectionStart; route(); const q=document.getElementById('mq'); q.focus(); q.setSelectionRange(pos,pos);}
   if(e.target.dataset.zfi&&S.zoneEdit){S.zoneEdit.draft[e.target.dataset.zfi]=e.target.value; if(e.target.dataset.zfi==='radius'){rerenderSettings(); document.getElementById('zf-rad')?.focus();}}
   const f=e.target.dataset.pf;
@@ -1972,11 +2078,13 @@ document.addEventListener('change',e=>{
   if(e.target.dataset.su&&S.setup&&e.target.closest('[data-sr]')&&['on','cod','type','addcity'].includes(e.target.dataset.su)){
     const rid=e.target.closest('[data-sr]').dataset.sr, r=S.setup.routes[rid], f=e.target.dataset.su;
     if(f==='addcity'&&e.target.value&&rid==='__all'){suT(rid).forEach(x=>{if(!x.cov.cities.includes(e.target.value)) x.cov.cities.push(e.target.value);}); rerenderSetup(); return;}
+    if(f==='on'&&e.target.closest('.pd-card')){r.on=e.target.checked; rerenderSetup(); return;}
     if(f==='on'){r.on=e.target.checked; if(r.on&&!S.setup.open.includes(rid)) S.setup.open.push(rid);}
     else if(f==='cod') r.p.cod=e.target.checked;
-    else if(f==='type') r.p.type=e.target.value;
+    else if(f==='type') suT(rid).forEach(x=>x.p.type=e.target.value);
     else if(f==='addcity'&&e.target.value) r.cov.cities.push(e.target.value);
     rerenderSetup(); return;}
+  if(e.target.dataset.pdxw&&S.setup){const k=e.target.dataset.pdxw; S.setup.pdXw={...(S.setup.pdXw||{}),[k]:e.target.checked}; if(!e.target.checked) S.setup.routes[k].p.extra=''; rerenderSetup(); return;}
   if(e.target.dataset.actSel==='su-pvcity'){S.setup.pvCity=e.target.value; rerenderSetup(); return;}
   if(e.target.id==='city'){S.city=e.target.value;route();}
   if(e.target.dataset.rowon){const r=rowBy(e.target.dataset.rowon); r.on=e.target.checked; toast(r.on?'تم تفعيل '+r.name:'تم إيقاف '+r.name);}
