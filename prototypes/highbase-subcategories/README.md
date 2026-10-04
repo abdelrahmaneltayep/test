@@ -16,10 +16,20 @@ open index.html
 `index.html` is committed, so it opens without a build. The web fonts are the only
 network request; tokens, component CSS, the icon sprite and the product data are inlined.
 
+## Two versions, one switch
+
+| Version | What it is |
+|---|---|
+| **A · Side filters (new)** | the attached proposal: side filter panel, promo chips, sort, applied chips, the richer product card, cart bar, sheets |
+| **B · Live + subcategory tiles** | the live page's logic as recorded on 4 Oct 2026 (title, top bar with search / Min Price / Max Price / Categories pop-up, "Only My Vendors", "Showing from … out of …", live card with coupon, Supplier Name, Add to Cart, Match My Price, pagination, the live empty state) plus the subcategory tiles and the Home-rooted breadcrumb |
+
+Both share the tree, the products, the tiles, the sibling pills, the mega menu, routing and tracking. In B the Categories pop-up keeps the live three-column checkbox tree; because every level is now a page, ticking a category opens that page (tracked with `source: "filter_popup"`, outside the brief's four sources) `(decision)`. The breadcrumb sits under the title as the live page places it, with Home added.
+
 ## The prototype bar
 
 | Control | What it does |
 |---|---|
+| Version A / B | switches between the two versions above |
 | Preview Desktop / Mobile | Mobile renders the page inside a 390 × 844 phone frame with the same rules a real narrow window gets |
 | Viewing as Signed-in buyer / Guest | Guest sees list prices, "Your business price after sign-in" and "Sign in to order" `(proposal)` |
 | Language English / العربية | flips `dir`, the font family and the copy; the URL prefix follows (`/bh-en`, `/bh-ar`) |
@@ -76,4 +86,4 @@ tiers are illustrative.
 
 ## Files
 
-`model.js` data + pure rules · `products.json` the 26 products · `test.js` their tests (17 + 9) · `app.js` rendering, routing, cart and sheets · `proto.css` layout · `build.js` assembles `index.html` / `artifact.html` · `shots.js` screenshots and behaviour checks at 1440 and 390, EN and AR, buyer and guest.
+`model.js` data + pure rules · `products.json` the 26 products · `test.js` their tests (17 + 9) · `app.js` rendering (both versions), routing, cart and sheets · `proto.css` layout · `build.js` assembles `index.html` / `artifact.html` · `shots.js` screenshots and behaviour checks at 1440 and 390, EN and AR, buyer and guest.
