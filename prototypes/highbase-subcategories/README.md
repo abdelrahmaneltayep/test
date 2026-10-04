@@ -20,7 +20,7 @@ network request; tokens, component CSS, the icon sprite and the product data are
 
 | Version | What it is |
 |---|---|
-| **A · Side filters (new)** | the attached proposal: side filter panel, promo chips, sort, applied chips, the richer product card, cart bar, sheets |
+| **A · Side filters (new)** | the attached proposal: side filter panel, sort, applied chips, the richer product card, cart bar, sheets |
 | **C · Side filters + search** | Version A with the live search field ("Search among N products…") in the toolbar beside Sort by; the term shows as an applied chip |
 | **B · Live + subcategory tiles** | the live page's logic as recorded on 4 Oct 2026 (title, top bar with search / Min Price / Max Price / Categories pop-up, "Only My Vendors", "Showing from … out of …", live card with coupon, Supplier Name, Add to Cart, Match My Price, pagination, the live empty state) plus the subcategory tiles and the Home-rooted breadcrumb |
 
@@ -73,7 +73,7 @@ generated fillers so no page is empty.
 - **Current sibling pill.** The attached prototype paints it dark (`surface-dark`); the earlier revision used `primary/700`. Dark is what ships here.
 - **Discount chip.** The system's Chip has no offer style, so the chip uses the secondary container colours via `data-tone="offer"`; a Chip variant would make it official.
 - **Category images.** Every subcategory tile shows the placeholder icon `(decision)`; real images are content and arrive later. The mega menu keeps its level-0 drawings as the live product has icons there.
-- **Deals filter.** Removed from the panel and the sheet `(decision)`; the Offers promo chip still toggles the same filter.
+- **Deals filter.** Removed from the panel and the sheet `(decision)`; the promo chip row (Ordered before / Offers / My suppliers) was removed on review; both filters remain as switches in the panel.
 - **Bottom navigation.** The system documents no bottom navigation; the attached prototype has one, so it is here as a `(proposal)`.
 
 ## Proposals that need a business decision `(proposal)`
