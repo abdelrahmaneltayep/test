@@ -359,3 +359,17 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .msearch{display:flex;align-items:center;gap:var(--hb-space-8)}
 .msearch .hb-search{flex:1 1 auto;min-width:0}
 .mtop__spacer{width:40px;flex:0 0 auto}
+
+/* Version C: grid / list switch beside the search; list layout for the Product Card */
+.tool--c .mlayout{flex:0 0 auto}
+.grid[data-mode="list"]{grid-template-columns:1fr}
+.grid[data-mode="list"] .hb-pcard{flex-direction:row;align-items:stretch}
+.grid[data-mode="list"] .hb-pcard__media{flex:0 0 220px;aspect-ratio:auto;min-height:200px}
+.grid[data-mode="list"] .hb-pcard__body{flex:1 1 auto;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) 260px;grid-auto-rows:min-content;column-gap:var(--hb-space-24);align-content:start}
+.grid[data-mode="list"] .hb-pcard__title,.grid[data-mode="list"] .pack,.grid[data-mode="list"] .hb-pcard__price,.grid[data-mode="list"] .unit,.grid[data-mode="list"] .tier,.grid[data-mode="list"] .meta,.grid[data-mode="list"] .lock{grid-column:1}
+.grid[data-mode="list"] .hb-pcard__actions{grid-column:2;grid-row:1/span 8;align-self:center;margin-top:0}
+.m .tool--c .tool__search{flex:1 1 200px}
+.m .grid[data-mode="list"] .hb-pcard__media{flex-basis:120px;min-height:0}
+.m .grid[data-mode="list"] .hb-pcard__body{grid-template-columns:minmax(0,1fr);padding:var(--hb-space-12)}
+.m .grid[data-mode="list"] .hb-pcard__title{white-space:normal}
+.m .grid[data-mode="list"] .hb-pcard__actions{grid-column:1;grid-row:auto}

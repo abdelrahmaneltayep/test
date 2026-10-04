@@ -1535,6 +1535,20 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .msearch .hb-search{flex:1 1 auto;min-width:0}
 .mtop__spacer{width:40px;flex:0 0 auto}
 
+/* Version C: grid / list switch beside the search; list layout for the Product Card */
+.tool--c .mlayout{flex:0 0 auto}
+.grid[data-mode="list"]{grid-template-columns:1fr}
+.grid[data-mode="list"] .hb-pcard{flex-direction:row;align-items:stretch}
+.grid[data-mode="list"] .hb-pcard__media{flex:0 0 220px;aspect-ratio:auto;min-height:200px}
+.grid[data-mode="list"] .hb-pcard__body{flex:1 1 auto;min-width:0;display:grid;grid-template-columns:minmax(0,1fr) 260px;grid-auto-rows:min-content;column-gap:var(--hb-space-24);align-content:start}
+.grid[data-mode="list"] .hb-pcard__title,.grid[data-mode="list"] .pack,.grid[data-mode="list"] .hb-pcard__price,.grid[data-mode="list"] .unit,.grid[data-mode="list"] .tier,.grid[data-mode="list"] .meta,.grid[data-mode="list"] .lock{grid-column:1}
+.grid[data-mode="list"] .hb-pcard__actions{grid-column:2;grid-row:1/span 8;align-self:center;margin-top:0}
+.m .tool--c .tool__search{flex:1 1 200px}
+.m .grid[data-mode="list"] .hb-pcard__media{flex-basis:120px;min-height:0}
+.m .grid[data-mode="list"] .hb-pcard__body{grid-template-columns:minmax(0,1fr);padding:var(--hb-space-12)}
+.m .grid[data-mode="list"] .hb-pcard__title{white-space:normal}
+.m .grid[data-mode="list"] .hb-pcard__actions{grid-column:1;grid-row:auto}
+
 </style>
 </head>
 <body>
@@ -1765,7 +1779,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
     var promos = ''; if (false) promos = '<div class="promos">' + promo('again', t('again')) + '<button class="hb-chip promo" data-style="' + (S.f.deal.indexOf('offer') >= 0 ? 'tonal' : 'neutral') + '" data-size="lg" data-deal="offer" aria-pressed="' + (S.f.deal.indexOf('offer') >= 0) + '"><span class="hb-chip__label">' + t('offers') + '</span></button>' + promo('mine', t('mine')) + '</div>';
     var sortSel = '<label class="sortl"><span>' + t('sortBy') + '</span><span class="hb-field hb-textfield sortsel" data-size="sm"><span class="hb-field__control"><select id="sort" class="hb-field__input">' + SORTS.map(function (s) { return '<option value="' + s[0] + '"' + (S.sort === s[0] ? ' selected' : '') + '>' + t(s[1]) + '</option>'; }).join('') + '</select><span class="hb-field__icon" data-mirror>' + ic('chevronDown') + '</span></span></span></label>';
     var mbtns = '<div class="mbtns"><button class="hb-btn" data-intent="secondary" data-style="outlined" data-size="lg" id="open-filter"><span class="hb-btn__icon">' + ic('filter') + '</span><span class="hb-btn__label">' + t('filters') + (k ? ' <span class="hb-badge" data-variant="count" data-color="primary">' + k + '</span>' : '') + '</span></button><button class="hb-btn" data-intent="secondary" data-style="outlined" data-size="lg" id="open-sort"><span class="hb-btn__icon">' + ic('sort') + '</span><span class="hb-btn__label">' + t(SORTS.filter(function (s) { return s[0] === S.sort; })[0][1]) + '</span></button></div>';
-    if (S.ver === 'c') { var base = M.apply(current(), S.f).length, search = '<span class="hb-search tool__search" data-state="default"><span class="hb-search__icon">' + ic('search') + '</span><input class="hb-search__input" id="list-search" value="' + esc(S.f.q || '') + '" placeholder="' + t('searchAmong')(base) + '"></span>'; return '<div class="tool tool--c">' + search + sortSel + mbtns + '</div>'; }
+    if (S.ver === 'c') { var base = M.apply(current(), S.f).length, search = '<span class="hb-search tool__search" data-state="default"><span class="hb-search__icon">' + ic('search') + '</span><input class="hb-search__input" id="list-search" value="' + esc(S.f.q || '') + '" placeholder="' + t('searchAmong')(base) + '"></span>'; var lay = function (key, icon, label) { return '<button class="hb-btn hb-icon-btn" data-intent="' + (S.layout === key ? 'primary' : 'secondary') + '" data-style="' + (S.layout === key ? 'tonal' : 'ghost') + '" data-size="md" data-layout="' + key + '" aria-pressed="' + (S.layout === key) + '" aria-label="' + label + '"><span class="hb-btn__icon">' + ic(icon) + '</span></button>'; }; var sw = '<span class="mlayout" role="group" aria-label="Layout">' + lay('grid', 'grid', t('gridView')) + lay('list', 'list', t('listView')) + '</span>'; return '<div class="tool tool--c">' + search + sw + sortSel + mbtns + '</div>'; }
     return '<div class="tool">' + mbtns + '<span class="tool__sp"></span>' + sortSel + '</div>';
   };
   var applied = function () {
@@ -1866,7 +1880,7 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
   var page = function () {
     var cur = current(), q = (S.f.q || '').trim().toLowerCase(), list = M.sort(M.apply(cur, S.f), S.sort).filter(function (p) { return !q || (p.name + ' ' + p.brand + ' ' + p.sup).toLowerCase().indexOf(q) >= 0; }), total = M.count(cur), shown = list.slice(0, S.limit);
     var back = cur.parent ? '<a class="back" href="' + href(cur.parent.slug) + '" data-slug="' + cur.parent.slug + '" data-source="breadcrumb"><span data-mirror>' + ic('chevronLeft') + '</span>' + esc(n(cur.parent)) + '</a>' : '<a class="back" href="#fresh-foods-dairy"><span data-mirror>' + ic('chevronLeft') + '</span>' + t('home') + '</a>';
-    var grid = list.length ? '<div class="grid">' + shown.map(product).join('') + '</div>' : '<div class="hb-empty" data-size="sm"><span class="hb-empty__art">' + ic('search') + '</span><span class="hb-empty__title">' + t('noRes') + '</span><span class="hb-empty__text">' + t('noResHint') + '</span><span class="hb-empty__actions"><button class="hb-btn" data-intent="primary" data-style="outlined" data-size="md" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></span></div>';
+    var grid = list.length ? '<div class="grid"' + (S.ver === 'c' ? ' data-mode="' + S.layout + '"' : '') + '>' + shown.map(product).join('') + '</div>' : '<div class="hb-empty" data-size="sm"><span class="hb-empty__art">' + ic('search') + '</span><span class="hb-empty__title">' + t('noRes') + '</span><span class="hb-empty__text">' + t('noResHint') + '</span><span class="hb-empty__actions"><button class="hb-btn" data-intent="primary" data-style="outlined" data-size="md" data-clearall><span class="hb-btn__label">' + t('clearAll') + '</span></button></span></div>';
     var more = list.length ? '<div class="more"><span>' + t('shown')(Math.min(S.limit, list.length), list.length) + '</span>' + (list.length > S.limit ? '<button class="hb-btn" data-intent="primary" data-style="outlined" data-size="lg" id="load-more"><span class="hb-btn__label">' + t('loadMore') + '</span></button>' : '') + '</div>' : '';
     return '<div class="body">' + panel() + '<main class="page" id="main"><div class="page__head">' + back + crumbs(cur) + '<h1 class="page__title">' + esc(n(cur)) + ' <span class="page__count">' + t('products')(total) + '</span></h1></div>' + subsection(cur) + toolbar() + applied() + grid + more + '</main></div>';
   };
