@@ -340,6 +340,6 @@ h1,h2,h3,p,ul,ol{margin:0}ul,ol{padding:0;list-style:none}button{font:inherit}a{
 .ver-m .scrim{z-index:65}
 
 .mcard__add{width:40px;height:40px;min-width:0;padding:0}
-.ver-m .mega{display:flex;flex-direction:column}
+.ver-m .mega:not([hidden]){display:flex;flex-direction:column}
 .ver-m .mega__head{flex:0 0 auto;grid-column:1/-1}
 .ver-m .mega__col[data-active]{flex:1 1 auto;overflow:auto}
