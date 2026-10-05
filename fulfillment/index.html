@@ -506,6 +506,14 @@ th[rowspan]{vertical-align:bottom}
 .rc-advrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}.rc-advrow>b{min-width:100px}
 .rc-tbl{border:1px solid var(--line);border-radius:var(--r-lg)}.rc-tr{display:flex;gap:12px;align-items:center;padding:12px 14px}.rc-tr+.rc-tr{border-top:1px solid var(--line-2)}
 @media (max-width:760px){.rc-top{flex-wrap:wrap}.rc-sum{grid-template-columns:minmax(0,1fr)}.rc-line,.rc-li,.rc-tr{flex-wrap:wrap}}
+.bk-modal{gap:14px;max-width:480px}.bk-modal h2{font-size:18px}
+.bk-ic{width:44px;height:44px;border-radius:50%;background:var(--mint-50);color:var(--brand);display:grid;place-items:center}
+.bk-types{display:flex;gap:8px;flex-wrap:wrap}.bk-types span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:20px;padding:3px 10px 3px 4px;font-size:13px}
+.bk-types .pd-ric{width:24px;height:24px;border-radius:50%}.bk-types .pd-ric .icon{width:14px;height:14px}
+.rs-ic{width:44px;height:44px;border-radius:10px;background:var(--line-2);color:var(--brand);display:grid;place-items:center;flex:none}
+.rs-list{border:1px solid var(--line);border-radius:var(--r-lg);padding:0 16px}
+.rs-row{display:flex;gap:12px;align-items:center;padding:14px 0}.rs-row+.rs-row{border-top:1px solid var(--line-2)}
+@media (max-width:760px){.rs-row{flex-wrap:wrap}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1790,6 +1798,34 @@ function rcPage(w,id,su){
   return '';
 }
 
+
+/* ---------- booking confirmation modal + post-booking settings page ---------- */
+function bookModal(id){const w=wh(id); const o=document.createElement('div'); o.className='overlay';
+  o.innerHTML=`<div class="modal stack bk-modal" role="dialog" aria-modal="true" aria-labelledby="bkT"><span class="bk-ic">${I.info}</span>
+    <h2 id="bkT">تأكيد حجز ${w.name}</h2>
+    <p class="ink2">سيُضاف المستودع إلى مستودعاتك. <b>يمكنك تحديد نطاق التغطية والتسعيرة الخاصة بكل نوع شحن من الإعدادات بعد الحجز</b> من صفحة مراكز تخزين سلة.</p>
+    <div class="bk-types">${RT_ORDER.map(k=>`<span><i class="pd-ric ${k}">${RT_META[k].ic}</i>${RT_META[k].n}</span>`).join('')}</div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-x type="button">تراجع</button><button class="btn btn-p" data-ok type="button">${I.check}تأكيد الحجز</button></div></div>`;
+  document.body.appendChild(o); o.querySelector('[data-ok]').focus();
+  o.addEventListener('click',e=>{ if(e.target===o||e.target.closest('[data-x]')) o.remove();
+    if(e.target.closest('[data-ok]')){o.remove(); const k='new-'+id; S.mine[id]={status:'awaiting'}; S.rows=S.rows.filter(x=>x.key!==k);
+      S.rows.unshift(row(k,'مستودعات سلة – '+w.city,id,w.name.split('– ')[1]||'','awaiting',true,[]));
+      go('mine'); toast('تم حجز المستودع بنجاح. حدّد التغطية والتسعيرة من الإعدادات');}});
+  o.addEventListener('keydown',e=>{if(e.key==='Escape') o.remove();});
+}
+function rsetState(r){ if(!r.rs){const id=r.wh&&wh(r.wh)?r.wh:'ruh'; const st=newSetup(id); RT_ORDER.forEach(k=>st.routes[k].p.fee=''); st.rowKey=r.key; r.rs=st;} return r.rs; }
+function screenRSet(k){
+  const r=rowBy(k); if(!r) return screenList('mine'); const su=rsetState(r); S.setup=su; const w=wh(su.wh);
+  return crumbs(['الشحن والتوصيل','browse'],['مراكز تخزين سلة','mine'],[`إعدادات ${w.name}`,''])+`<div class="su-wrap stack wide" id="suRoot">
+   <section class="panel pad row between"><div class="row"><span class="rs-ic">${I.box}</span><div><b style="font-size:16px">${w.name}</b><div class="sm muted">${w.city} - ${OPERATOR[su.wh]}</div></div></div><button class="btn" type="button" data-act="rc-open" data-k="branch">تفاصيل الفرع</button></section>
+   <section class="panel pad stack"><div class="row" style="gap:12px;flex-wrap:nowrap"><span class="rs-ic">${I.box}</span><div><b style="font-size:16px">تحديد نطاق التغطية وتسعيرة الشحن</b><div class="sm muted">تم إنشاء 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به.</div></div></div>
+     <div class="rs-list">${RT_ORDER.map(rid=>{const rt=su.routes[rid], cv=wzCov(su,rid,w), set=rt.p.fee!==''; return `<div class="rs-row" data-sr="${rid}"><span class="pd-ric ${rid}">${RT_META[rid].ic}</span>
+       <div style="flex:1;min-width:0"><div class="row" style="gap:8px"><b>${RT_META[rid].n}</b><span class="sm muted">${RT_META[rid].d}</span>${set?'<span class="pill ok">محدد</span>':''}</div>
+       <div class="sm"><span class="muted">التغطية:</span> <b>${su.cvCustom?.[rid]?esc(cv.name):'كامل الدولة'}</b> <span class="muted">السعر:</span> <b data-sl="rsp">${set?rcPrice(rt):'لم يحدد بعد'}</b></div></div>
+       <button class="btn" type="button" data-act="rc-open" data-k="route" data-v="${rid}">تخصيص</button></div>`;}).join('')}</div></section>
+   <section class="panel pad row between"><span class="sm muted">التغييرات تظهر لعملائك في صفحة الدفع بعد الحفظ.</span><div class="row"><button class="btn" type="button" data-go="mine">إلغاء</button><button class="btn btn-p" type="button" data-act="rs-save">حفظ</button></div></section></div>`;
+}
+
 function screenSetup(id){
   const w=wh(id); if(!w) return screenList('browse');
   if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
@@ -1813,12 +1849,13 @@ function suRefreshRoute(rid){
   box.querySelectorAll('[data-sl=pdsum]').forEach(m=>m.innerHTML=pdSum(r));
   box.querySelectorAll('[data-sl=wzsum]').forEach(m=>m.innerHTML=wzSum(r,wzCov(su,rid,w)));
   box.querySelectorAll('[data-sl=rcp]').forEach(m=>m.innerHTML=rcPrice(r));
+  box.querySelectorAll('[data-sl=rsp]').forEach(m=>m.innerHTML=r.p.fee===''?'لم يحدد بعد':rcPrice(r));
   box.querySelectorAll('[data-sl=wzfee]').forEach(m=>m.textContent=r.p.fee===''?'—':r.p.fee+' ر.س');});
   const co=document.querySelector(`[data-sl-co="${rid}"]`); if(co&&co.textContent) co.textContent=r.p.fee===''?'—':r.p.fee+' ر.س';
   const li=document.querySelector(`[data-sl-list="${rid}"]`); if(li) li.textContent=r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف';
 }
 const suT=rid=>rid==='__all'?ROUTES.filter(R=>!(S.setup.ovr||[]).includes(R.id)).map(R=>S.setup.routes[R.id]):[S.setup.routes[rid]];
-function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; if(document.getElementById('pdDrawer')) pdDrawerRefresh(); if(document.getElementById('rcDrawer')) rcRefresh(); }
+function rerenderSetup(){ const top=document.scrollingElement.scrollTop; const h=location.hash; app.innerHTML=h.startsWith('#rset-')?screenRSet(h.slice(6)):screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; if(document.getElementById('pdDrawer')) pdDrawerRefresh(); if(document.getElementById('rcDrawer')) rcRefresh(); }
 
 /* ---------- booking page layout variants (prototype switch) ---------- */
 S.suBrUI='current'; S.suRtUI='current';
@@ -2196,6 +2233,7 @@ function route(){
   else if(h==='transfer') html=screenTransfer();
   else if(h==='transfer-new') html=screenTransferNew();
   else if(h.startsWith('setup-')) html=screenSetup(h.slice(6));
+  else if(h.startsWith('rset-')) html=screenRSet(h.slice(5));
   else html=screenList('browse');
   app.innerHTML=html;
 }
@@ -2204,30 +2242,12 @@ function toast(msg){
   const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.innerHTML=I.check+esc(msg);
   document.body.appendChild(t); setTimeout(()=>t.remove(),2600);
 }
-function bookModal(id){
-  const w=wh(id);
-  const o=document.createElement('div'); o.className='overlay';
-  o.innerHTML=`<div class="modal stack" role="dialog" aria-modal="true" aria-labelledby="mt">
-    <h2 id="mt">حجز مستودع ${w.city}</h2>
-    <p class="ink2">سيُضاف <b>${w.name}</b> كفرع في متجرك بحالة «بانتظار نقل المخزون». يتفعّل بعد نقل مخزونك وفحصه.</p>
-    <div class="dl"><dt>يبدأ من</dt><dd class="num">${w.price} ر.س / طلب</dd><dt>مسارات الشحن</dt><dd>عادي، سريع، اقتصادي</dd></div>
-    <div class="row" style="justify-content:flex-end"><button class="btn" data-x type="button">إلغاء</button><button class="btn btn-p" data-ok type="button">تأكيد الحجز</button></div></div>`;
-  document.body.appendChild(o);
-  o.querySelector('[data-ok]').focus();
-  o.addEventListener('click',e=>{
-    if(e.target===o||e.target.closest('[data-x]')) o.remove();
-    if(e.target.closest('[data-ok]')){ o.remove();
-      S.mine[id]={status:'awaiting'};
-      S.rows.unshift(row('new-'+id,'مستودعات سلة – '+w.city,id,w.name.split('– ')[1]||'','awaiting',true,[]));
-      go('mine'); toast('تم حجز المستودع بنجاح'); }
-  });
-}
-
 document.addEventListener('click',e=>{
   const g=e.target.closest('[data-go]'); if(g){e.preventDefault(); go(g.dataset.go); document.getElementById('notes').hidden=true; return;}
   const a=e.target.closest('[data-act]'); if(!a) return;
   const act=a.dataset.act;
-  if(act==='book'){S.setup=null; go('setup-'+a.dataset.id);}
+  if(act==='book'){bookModal(a.dataset.id); return;}
+  if(act==='rs-save'){toast('تم حفظ إعدادات المستودع'); go('mine'); return;}
   if(act==='hero-close'){S.hero='closed';save('fm-hero','closed');route();}
   if(act==='hero-open'){S.hero='open';save('fm-hero','open');route();}
   if(act==='scroll-cards') document.getElementById('cards')?.scrollIntoView({behavior:'smooth'});
@@ -2251,7 +2271,7 @@ document.addEventListener('click',e=>{
   if(act==='menu'){S.menu=S.menu===k?null:k; route(); document.querySelector('.menu button')?.focus();}
   if(act==='setmode'){S.setMode=a.dataset.v; route();}
   if(act==='open-settings'){e.preventDefault(); S.menu=null; S.zoneEdit=null; S.priceOpen=['std']; S.wiz=0; S.coEdit=null; document.getElementById('notes').hidden=true;
-    if(S.setMode==='page'){closeDrawer(); go('settings-'+k);} else {if(!location.hash.startsWith('#mine')) go('mine'); else route(); openDrawer(k);} }
+    closeDrawer(); go('rset-'+k); }
   if(act==='delete'){S.menu=null; route(); deleteModal(k);}
   if(act==='drawer-close') closeDrawer();
   if(act==='drawer-expand'){const kk=S.drawer; closeDrawer(); go('settings-'+kk);}
