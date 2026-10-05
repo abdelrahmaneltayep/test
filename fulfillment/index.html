@@ -491,6 +491,21 @@ th[rowspan]{vertical-align:bottom}
 .wz-phone{border-width:6px;padding:12px 10px}.wz-phone .co-opt{cursor:default}
 @media (max-width:1100px){.wz.wz3{grid-template-columns:200px minmax(0,1fr)}.wz-prev{grid-column:1/-1;position:static}}
 @media (max-width:860px){.wz.wz3{grid-template-columns:minmax(0,1fr)}.wz-top{grid-template-columns:minmax(0,1fr)}}
+.rc-card{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+.rc-top{display:flex;gap:14px;align-items:flex-start;justify-content:space-between}
+.rc-h{font-size:16px;margin:0}
+.rc-chip{display:inline-flex;align-items:center;border-radius:20px;padding:1px 10px;font-size:11px;font-weight:600;white-space:nowrap}
+.rc-chip.ok{background:#dff7ec;color:#0b7a52}.rc-chip.warn{background:#fff1d6;color:#9a5b00}.rc-chip.gray{background:var(--line-2);color:var(--ink-2)}
+.rc-sum{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;border-top:1px solid var(--line-2);padding-top:12px}
+.rc-sum>div{display:flex;flex-direction:column;gap:2px;font-size:13px;min-width:0}.rc-sum span:first-child{font-size:12px;color:var(--muted)}
+.rc-route{border:1px solid var(--line);border-radius:var(--r-lg);padding:12px 14px;display:flex;flex-direction:column;gap:10px}.rc-route.off{background:#fafafa}
+.rc-line,.rc-li{display:flex;gap:12px;align-items:center;border-top:1px solid var(--line-2);padding-top:10px}
+.rc-lic{width:30px;height:30px;border-radius:8px;background:var(--line-2);color:var(--ink-2);display:grid;place-items:center;flex:none}.rc-lic .icon{width:16px;height:16px}
+.rc-list{display:flex;flex-direction:column;gap:10px}.rc-list .rc-li:first-child{border-top:1px solid var(--line-2)}
+.rc-body{border-top:1px solid var(--line-2);padding-top:16px;display:flex;flex-direction:column;gap:22px}
+.rc-advrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}.rc-advrow>b{min-width:100px}
+.rc-tbl{border:1px solid var(--line);border-radius:var(--r-lg)}.rc-tr{display:flex;gap:12px;align-items:center;padding:12px 14px}.rc-tr+.rc-tr{border-top:1px solid var(--line-2)}
+@media (max-width:760px){.rc-top{flex-wrap:wrap}.rc-sum{grid-template-columns:minmax(0,1fr)}.rc-line,.rc-li,.rc-tr{flex-wrap:wrap}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1720,17 +1735,72 @@ function wzPage2(w,id,su){
   return '';
 }
 
+/* ---------- section cards + drawers (progressive disclosure, from routes project) ---------- */
+PD_UIS.splice(1,0,['rc1','بطاقات أقسام + درج'],['rc2','بطاقة لكل مسار بإجراءين'],['rc3','بطاقات تتوسع في مكانها'],['rc4','افتراضي + «إضافة» عند الحاجة'],['rc5','قائمة مسارات + صفحة لكل مسار']);
+const rcSplit=(rid,w,su)=>{const p=wzRtBody(rid,w,su).split('</section>'); return {cov:p[0]+'</section>',price:p[1]+'</section>'};};
+const rcChip=(t,k)=>`<span class="rc-chip ${k}">${t}</span>`;
+const rcPrice=r=>{const p=r.p; if(p.fee==='') return '<span class="qty-bad">لم تُحدد التسعيرة</span>'; return p.type==='weight'?`<b class="num">${p.fee} ر.س</b> لأول ${p.baseW||'—'} كجم${p.extra!==''?` · +${p.extra} ر.س لكل ${p.per||1} كجم`:''}`:`<b class="num">${p.fee} ر.س</b> ثابت لأي وزن`;};
+const rcCov=(su,rid,w)=>{const cv=wzCov(su,rid,w); return `${esc(cv.name)} <span class="muted">· ${esc(cv.city)}، ${esc(cv.district)}</span>`;};
+const rcCovChip=(su,rid)=>su.cvCustom?.[rid]?rcChip('معدّل','gray'):rcChip('افتراضي','gray');
+const rcRtChip=(su,rid)=>!su.routes[rid].on?rcChip('موقوف','gray'):pdDone(su.routes[rid])?rcChip('مكتملة','ok'):rcChip('ناقصة','warn');
+function rcCard(title,chip,desc,act,body=''){return `<section class="panel rc-card"><div class="rc-top"><div style="flex:1;min-width:0"><div class="row" style="gap:8px"><h3 class="rc-h">${title}</h3>${chip}</div><p class="sm muted" style="margin:4px 0 0">${desc}</p></div>${act}</div>${body}</section>`;}
+const rcBtn=(label,act,v='',ic=I.pen,extra='')=>`<button class="btn btn-sm" type="button" data-act="${act}" data-v="${v}" ${extra}>${ic}${label}</button>`;
+function rcHeader(w,id,su){const bad=RT_ORDER.filter(k=>su.routes[k].on&&!pdDone(su.routes[k])).length;
+  return `<section class="panel rc-card"><div class="rc-top"><div style="flex:1;min-width:0"><div class="row" style="gap:8px"><h2 style="margin:0">حجز ${w.name}</h2>${bad?rcChip(`${bad} ${bad===1?'قسم ناقص':'أقسام ناقصة'}`,'warn'):rcChip('جاهز للحجز','ok')}</div><p class="sm muted" style="margin:4px 0 0">سيُضاف المستودع كفرع في متجرك، مع 3 مسارات شحن بإعدادات مقترحة. راجع ما تحتاجه فقط.</p></div>${opBadge(id)}</div></section>`;}
+const rcBranchDesc=(w,id)=>`${w.city} · تشغيل ${OPERATOR[id]} · ${w.hours[0][0]} ${w.hours[0][1]}`;
+function rcDrawerHtml(){const su=S.setup, w=wh(su.wh), id=su.wh, d=su.rcDr, rid=d.rid; let t='', sub='', body='';
+  if(d.kind==='branch'){t='بيانات الفرع'; sub='يديرها المستودع. يمكنك تعديل نقطة الاستلام فقط.'; body=wzBrBody(w,id,su);}
+  else if(d.kind==='route'){t=RT_META[rid].n; sub=`${RT_META[rid].d} · نطاق التغطية وتسعيرة الشحن`; body=wzRtBody(rid,w,su);}
+  else if(d.kind==='cov'){t=`نطاق التغطية · ${RT_META[rid].n}`; sub='المناطق التي يظهر فيها المسار لعملائك.'; body=rcSplit(rid,w,su).cov;}
+  else if(d.kind==='price'){t=`تسعيرة الشحن · ${RT_META[rid].n}`; sub='السعر الذي يظهر لعميلك في صفحة الدفع.'; body=rcSplit(rid,w,su).price;}
+  else if(d.kind==='adv'){t='إعدادات متقدمة'; sub='خيارات إضافية لكل مسار. كلها اختيارية.'; body=(rid?[rid]:RT_ORDER).map(k=>{const p=su.routes[k].p; return `<div class="wz-box stack" style="gap:12px" data-sr="${k}"><b>${RT_META[k].n}</b><label class="chk"><input type="checkbox" data-su="cod" ${p.cod?'checked':''}><span><b>الدفع عند الاستلام</b><small>يظهر خيار الدفع عند الاستلام مع هذا المسار.</small></span></label><div class="fld"><label>مدة الشحن التي تظهر للعميل</label><input class="inp" data-su="dur" value="${esc(p.dur)}"></div></div>`;}).join('');}
+  return `<header class="drawer-h"><div><h2 id="rcT">${t}</h2><div class="sm muted">${sub}</div></div><button class="btn btn-sm btn-ghost" type="button" data-act="rc-close" aria-label="إغلاق">${I.x}</button></header>
+   <div class="drawer-b stack" style="gap:22px">${body}</div><footer class="drawer-f"><button class="btn btn-p btn-block" type="button" data-act="rc-close" data-v="save">حفظ</button></footer>`;}
+function rcOpen(kind,rid){S.setup.rcDr={kind,rid}; if(kind==='cov'&&S.setup.rcCovEdit){S.setup.covEdit=[...new Set([...(S.setup.covEdit||[]),rid])];} closeDrawer(); const d=document.createElement('div'); d.className='drawer-wrap'; d.id='rcDrawer';
+  d.innerHTML=`<div class="drawer-bg" data-act="rc-close"></div><aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="rcT" style="width:min(560px,100vw)">${rcDrawerHtml()}</aside>`; document.body.appendChild(d); requestAnimationFrame(()=>d.classList.add('open'));}
+function rcRefresh(){const a=document.querySelector('#rcDrawer .drawer'); if(a&&S.setup.rcDr){const y=a.querySelector('.drawer-b')?.scrollTop; a.innerHTML=rcDrawerHtml(); const b=a.querySelector('.drawer-b'); if(b) b.scrollTop=y||0;}}
+function rcPage(w,id,su){
+  const v=S.pdUI, R=su.routes, act=(k,rid)=>`data-act="rc-open" data-k="${k}" data-v="${rid||''}"`;
+  const brCard=rcCard('بيانات الفرع',rcChip('مكتملة','ok'),rcBranchDesc(w,id),`<button class="btn btn-sm" type="button" ${act('branch')}>${I.pin}عرض وتعديل الموقع</button>`);
+  const advCard=rcCard('إعدادات متقدمة',rcChip('اختياري','gray'),'الدفع عند الاستلام ومدة الشحن التي تظهر لعميلك لكل مسار.',`<button class="btn btn-sm" type="button" ${act('adv')}>${I.gear}عرض الإعدادات</button>`);
+  if(v==='rc1') return rcHeader(w,id,su)+brCard+RT_ORDER.map(k=>rcCard(RT_META[k].n,rcRtChip(su,k),`${RT_META[k].d} · ${R[k].on?'':'المسار موقوف'}`,`<button class="btn btn-sm" type="button" ${act('route',k)}>${I.pen}تعديل</button>`,
+      R[k].on?`<div class="rc-sum" data-sr="${k}"><div><span>نطاق التغطية</span>${rcCov(su,k,w)}</div><div><span>تسعيرة الشحن</span><span data-sl="rcp">${rcPrice(R[k])}</span></div></div>`:'')).join('')+advCard;
+  if(v==='rc2') return rcHeader(w,id,su)+brCard+`<section class="panel rc-card"><div><h3 class="rc-h">مسارات الشحن</h3><p class="sm muted" style="margin:4px 0 0">أنشأنا 3 مسارات تلقائياً. عدّل النطاق أو التسعيرة لأي مسار عند الحاجة.</p></div>
+      ${RT_ORDER.map(k=>`<div class="rc-route ${R[k].on?'':'off'}" data-sr="${k}"><div class="pd-rhead"><span class="pd-ric ${k}">${RT_META[k].ic}</span><div style="flex:1;min-width:0"><b>${RT_META[k].n}</b> <span class="sm muted">${RT_META[k].d}</span></div><label class="toggle"><input type="checkbox" data-su="on" ${R[k].on?'checked':''} ${k==='std'?'disabled':''} aria-label="تفعيل ${RT_META[k].n}"><span></span></label></div>
+        ${R[k].on?`<div class="rc-line"><span class="rc-lic">${I.map}</span><div style="flex:1;min-width:0"><div class="row" style="gap:6px"><b class="sm">نطاق التغطية</b>${rcCovChip(su,k)}</div><div class="sm ink2">${rcCov(su,k,w)}</div></div>${rcBtn('تعديل','rc-open',k,I.pen,'data-k="cov"')}</div>
+        <div class="rc-line"><span class="rc-lic">${I.receipt}</span><div style="flex:1;min-width:0"><div class="row" style="gap:6px"><b class="sm">تسعيرة الشحن</b>${pdDone(R[k])?rcChip('مكتملة','ok'):rcChip('ناقصة','warn')}</div><div class="sm ink2" data-sl="rcp">${rcPrice(R[k])}</div></div>${rcBtn(R[k].p.fee===''?'إضافة':'تعديل','rc-open',k,R[k].p.fee===''?'+ ':I.pen,'data-k="price"')}</div>`:''}</div>`).join('')}</section>`+advCard;
+  if(v==='rc3'){const op=su.rcOpen; const tog=(key,label='تعديل')=>`<button class="btn btn-sm" type="button" data-act="rc-tog" data-v="${key}" aria-expanded="${op===key}">${op===key?'تم':`${I.pen}${label}`}</button>`;
+    return rcHeader(w,id,su)+rcCard('بيانات الفرع',rcChip('مكتملة','ok'),rcBranchDesc(w,id),tog('br','عرض وتعديل الموقع'),op==='br'?`<div class="rc-body">${wzBrBody(w,id,su)}</div>`:'')
+      +RT_ORDER.map(k=>rcCard(RT_META[k].n,rcRtChip(su,k),RT_META[k].d,tog(k),op===k?`<div class="rc-body">${wzRtBody(k,w,su)}</div>`:`<div class="rc-sum" data-sr="${k}"><div><span>نطاق التغطية</span>${rcCov(su,k,w)}</div><div><span>تسعيرة الشحن</span><span data-sl="rcp">${rcPrice(R[k])}</span></div></div>`)).join('')
+      +rcCard('إعدادات متقدمة',rcChip('اختياري','gray'),'الدفع عند الاستلام ومدة الشحن التي تظهر لعميلك.',tog('adv','عرض الإعدادات'),op==='adv'?`<div class="rc-body stack">${RT_ORDER.map(k=>{const p=R[k].p; return `<div class="rc-advrow" data-sr="${k}"><b>${RT_META[k].n}</b><label class="chk"><input type="checkbox" data-su="cod" ${p.cod?'checked':''}><span>الدفع عند الاستلام</span></label><div class="fld" style="flex:1;min-width:160px"><input class="inp" data-su="dur" value="${esc(p.dur)}" aria-label="مدة الشحن"></div></div>`;}).join('')}</div>`:'');}
+  if(v==='rc4') return rcHeader(w,id,su)+brCard+RT_ORDER.map(k=>{const r=R[k], cv=wzCov(su,k,w), cus=su.cvCustom?.[k];
+      return rcCard(RT_META[k].n,rcRtChip(su,k),RT_META[k].d,'',`<div class="rc-list" data-sr="${k}">
+        <div class="rc-li"><span class="rc-lic">${I.map}</span><div style="flex:1;min-width:0"><span class="sm">${cus?'نطاق مخصص':'يستخدم النطاق الافتراضي'}: <b>${esc(cv.name)}</b></span></div>${cus?rcBtn('تعديل','rc-open',k,I.pen,'data-k="cov"'):`<button class="btn btn-sm btn-ghost" type="button" data-act="rc-add-cov" data-v="${k}">+ تخصيص النطاق</button>`}</div>
+        <div class="rc-li"><span class="rc-lic">${I.receipt}</span><div style="flex:1;min-width:0"><span class="sm" data-sl="rcp">${r.p.fee===''?'<span class="qty-bad">لم تُضف تسعيرة بعد</span>':rcPrice(r)}</span></div>${r.p.fee===''?`<button class="btn btn-sm btn-p" type="button" data-act="rc-open" data-k="price" data-v="${k}">+ إضافة تسعيرة</button>`:rcBtn('تعديل','rc-open',k,I.pen,'data-k="price"')}</div>
+        <div class="rc-li"><span class="rc-lic">${I.receipt}</span><div style="flex:1;min-width:0"><span class="sm">${r.p.cod?'الدفع عند الاستلام <b>مفعّل</b>':'<span class="muted">الدفع عند الاستلام غير مفعّل</span>'}</span></div><button class="btn btn-sm btn-ghost" type="button" data-act="rc-cod" data-v="${k}">${r.p.cod?'إزالة':'+ إضافة الدفع عند الاستلام'}</button></div></div>`);}).join('');
+  if(v==='rc5'){const cur=su.rcRoute;
+    if(!cur) return rcHeader(w,id,su)+brCard+`<section class="panel rc-card"><div><h3 class="rc-h">مسارات الشحن</h3><p class="sm muted" style="margin:4px 0 0">أي طلب يطابق نطاق المسار سيعرض خياراته على العميل في صفحة الدفع.</p></div>
+       <div class="rc-tbl">${RT_ORDER.map(k=>`<div class="rc-tr" data-sr="${k}"><span class="pd-ric ${k}">${RT_META[k].ic}</span><div style="flex:1;min-width:0"><div class="row" style="gap:8px"><b>${RT_META[k].n}</b>${rcRtChip(su,k)}</div><div class="sm muted">${rcCov(su,k,w)} · <span data-sl="rcp">${rcPrice(R[k])}</span></div></div><label class="toggle"><input type="checkbox" data-su="on" ${R[k].on?'checked':''} ${k==='std'?'disabled':''} aria-label="تفعيل ${RT_META[k].n}"><span></span></label><button class="btn btn-sm" type="button" data-act="rc-route" data-v="${k}">إدارة</button></div>`).join('')}</div></section>`;
+    const r=R[cur]; return `<button class="link-btn sm" type="button" data-act="rc-route" data-v="" style="align-self:flex-start">→ العودة لإعدادات الحجز</button>
+     <section class="panel rc-card" data-sr="${cur}"><div class="rc-top"><div style="flex:1;min-width:0"><div class="row" style="gap:8px"><h2 style="margin:0">${RT_META[cur].n}</h2>${r.on?rcChip('مفعّل','ok'):rcChip('موقوف','gray')}</div><p class="sm muted" style="margin:4px 0 0">أي طلب يطابق نطاق هذا المسار سيعرض خياراته على العميل في صفحة إتمام الطلب مباشرة.</p></div><label class="toggle"><input type="checkbox" data-su="on" ${r.on?'checked':''} ${cur==='std'?'disabled':''} aria-label="تفعيل المسار"><span></span></label></div></section>
+     ${rcCard('نطاق التغطية',rcCovChip(su,cur),rcCov(su,cur,w),rcBtn('تعديل','rc-open',cur,I.pen,'data-k="cov"'))}
+     ${rcCard('تسعيرة الشحن',pdDone(r)?rcChip('مكتملة','ok'):rcChip('ناقصة','warn'),`<span data-sr="${cur}"><span data-sl="rcp">${rcPrice(r)}</span></span>`,rcBtn(r.p.fee===''?'إضافة تسعيرة':'تعديل','rc-open',cur,r.p.fee===''?'+ ':I.pen,'data-k="price"'))}
+     ${rcCard('إعدادات متقدمة',rcChip('اختياري','gray'),'خيارات إضافية لتخصيص طريقة عمل هذا المسار.',rcBtn('عرض الإعدادات','rc-open',cur,I.gear,'data-k="adv"'))}
+     <section class="panel pad row between"><button class="btn btn-p" type="button" data-act="rc-route" data-v="">حفظ</button><button class="btn" type="button" data-act="rc-route" data-v="">إلغاء</button></section>`;}
+  return '';
+}
+
 function screenSetup(id){
   const w=wh(id); if(!w) return screenList('browse');
   if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
   const su=S.setup;
   return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack ${S.pdUI==='wizard'||S.pdUI.startsWith('wz-')?'wide':''}" id="suRoot">
    ${suSw('نسخة الصفحة:',PD_UIS,S.pdUI,'pd-ui').replace(/>\d+\. /g,'>')}
-   ${S.pdUI==='wizard'?wzPage(w,id,su):S.pdUI.startsWith('wz-')?wzPage2(w,id,su):S.pdUI!=='explore'?(pdPage(w,id,su)||pdPage2(w,id,su)):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
+   ${S.pdUI.startsWith('rc')?rcPage(w,id,su):S.pdUI==='wizard'?wzPage(w,id,su):S.pdUI.startsWith('wz-')?wzPage2(w,id,su):S.pdUI!=='explore'?(pdPage(w,id,su)||pdPage2(w,id,su)):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
    ${suBranchArea(w,su,id)}
    ${suSw('مسارات الشحن:',SU_RT,S.suRtUI,'su-rt-ui')}
    ${suRoutesArea(w,su)}`}
-   ${S.pdUI.startsWith('wiz')||S.pdUI.startsWith('wz-')?'':S.pdUI==='steps'&&(su.pdStep??0)<4?`<section class="panel pad row between su-bar"><span class="sm muted">أكمل الخطوات الأربع لتأكيد الحجز.</span><button class="btn btn-p" type="button" disabled>${I.check}تأكيد الحجز</button></section>`:`<section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>`}
+   ${S.pdUI.startsWith('wiz')||S.pdUI.startsWith('wz-')||(S.pdUI==='rc5'&&su.rcRoute)?'':S.pdUI==='steps'&&(su.pdStep??0)<4?`<section class="panel pad row between su-bar"><span class="sm muted">أكمل الخطوات الأربع لتأكيد الحجز.</span><button class="btn btn-p" type="button" disabled>${I.check}تأكيد الحجز</button></section>`:`<section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>`}
   </div>`;
 }
 function suRefreshRoute(rid){
@@ -1742,12 +1812,13 @@ function suRefreshRoute(rid){
   box.querySelectorAll('[data-sl=mg]').forEach(m=>m.innerHTML=suMargin(rid,r.p));
   box.querySelectorAll('[data-sl=pdsum]').forEach(m=>m.innerHTML=pdSum(r));
   box.querySelectorAll('[data-sl=wzsum]').forEach(m=>m.innerHTML=wzSum(r,wzCov(su,rid,w)));
+  box.querySelectorAll('[data-sl=rcp]').forEach(m=>m.innerHTML=rcPrice(r));
   box.querySelectorAll('[data-sl=wzfee]').forEach(m=>m.textContent=r.p.fee===''?'—':r.p.fee+' ر.س');});
   const co=document.querySelector(`[data-sl-co="${rid}"]`); if(co&&co.textContent) co.textContent=r.p.fee===''?'—':r.p.fee+' ر.س';
   const li=document.querySelector(`[data-sl-list="${rid}"]`); if(li) li.textContent=r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف';
 }
 const suT=rid=>rid==='__all'?ROUTES.filter(R=>!(S.setup.ovr||[]).includes(R.id)).map(R=>S.setup.routes[R.id]):[S.setup.routes[rid]];
-function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; if(document.getElementById('pdDrawer')) pdDrawerRefresh(); }
+function rerenderSetup(){ const top=document.scrollingElement.scrollTop; app.innerHTML=screenSetup(S.setup.wh); document.scrollingElement.scrollTop=top; if(document.getElementById('pdDrawer')) pdDrawerRefresh(); if(document.getElementById('rcDrawer')) rcRefresh(); }
 
 /* ---------- booking page layout variants (prototype switch) ---------- */
 S.suBrUI='current'; S.suRtUI='current';
@@ -2196,6 +2267,12 @@ document.addEventListener('click',e=>{
   if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>r.cov.mode=a.dataset.v); rerenderSetup();}
   if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>{r.cov.cities=r.cov.cities.filter(x=>x!==a.dataset.v);}); rerenderSetup();}
   if(act==='pd-ui'){S.pdUI=a.dataset.v; if(['sum'].includes(a.dataset.v)) S.setup.open=[]; if(a.dataset.v==='shared'){const su=S.setup; su.ovr=[]; RT_ORDER.forEach(k=>{if(k!=='std'){su.routes[k].p={...su.routes.std.p}; su.routes[k].cov={...su.routes.std.cov};}});} rerenderSetup();}
+  if(act==='rc-open'){rcOpen(a.dataset.k,a.dataset.v||null); return;}
+  if(act==='rc-close'){S.setup.rcDr=null; S.setup.covEdit=[]; closeDrawer(); rerenderSetup(); if(a.dataset.v==='save') toast('تم حفظ التعديلات'); return;}
+  if(act==='rc-tog'){S.setup.rcOpen=S.setup.rcOpen===a.dataset.v?null:a.dataset.v; rerenderSetup(); return;}
+  if(act==='rc-add-cov'){S.setup.covEdit=[...new Set([...(S.setup.covEdit||[]),a.dataset.v])]; rcOpen('cov',a.dataset.v); return;}
+  if(act==='rc-cod'){const p=S.setup.routes[a.dataset.v].p; p.cod=!p.cod; rerenderSetup(); toast(p.cod?'تم تفعيل الدفع عند الاستلام':'تم إيقاف الدفع عند الاستلام'); return;}
+  if(act==='rc-route'){S.setup.rcRoute=a.dataset.v||null; rerenderSetup(); document.scrollingElement.scrollTop=0; return;}
   if(act==='wz2-go'){const su=S.setup; su.wzSeenR=[...new Set([...(su.wzSeenR||[]),RT_ORDER[su.wzR||0]])]; su.wzR=+a.dataset.v; rerenderSetup(); if(S.pdUI!=='wz-d') document.scrollingElement.scrollTop=0; return;}
   if(act==='wz-bro'){S.setup.wzBrOpen=!S.setup.wzBrOpen; rerenderSetup(); return;}
   if(act==='wz-scroll'){document.getElementById('wzs-'+a.dataset.v)?.scrollIntoView({behavior:'smooth',block:'start'}); return;}
