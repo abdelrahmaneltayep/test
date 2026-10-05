@@ -1,0 +1,105 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script>document.documentElement.dir='rtl';document.documentElement.lang='ar';</script>
+<title>الفئات غير المقبولة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+:root{direction:rtl;color-scheme:light;
+  --brand:#004956;--ink:#1f2a2e;--ink-2:#4b5a5f;--muted:#7a878b;--mint-bg:#e6fbf4;--line:#e6ebec;--line-2:#f0f3f3;--page:#f4f6f6;--white:#fff;
+  --bad:#c93b36;--bad-bg:#fdeeee;--bad-line:#f6d2d0;--ok:#0f9f6e;
+  --font:'PingARLT','IBM Plex Sans Arabic',system-ui,sans-serif}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--page);color:var(--ink);font-family:var(--font);font-size:14px;line-height:1.6}
+h1,h2,h3,p{margin:0}button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 24px 80px}
+.intro h1{font-size:24px;color:var(--brand)}.intro p{color:var(--ink-2);margin-top:6px;max-width:70ch}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:28px;margin-top:28px;align-items:start}
+.opt-head{display:flex;gap:10px;align-items:baseline;margin-bottom:10px;flex-wrap:wrap}
+.opt-no{font-weight:700;color:var(--brand);background:#d2f6ea;border-radius:6px;padding:0 8px;font-size:13px}
+.opt-head h2{font-size:16px}.opt-head p{flex-basis:100%;color:var(--muted);font-size:13px}
+.card{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:20px}
+.ch{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+.ch h3{font-size:16px}.cnt{background:var(--bad-bg);color:var(--bad);border-radius:20px;padding:0 10px;font-size:12px;font-weight:600}
+.sub{color:var(--muted);font-size:13px;margin-bottom:14px}
+.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--bad-line);background:var(--bad-bg);color:var(--ink);border-radius:8px;padding:6px 10px;font-size:13px}
+.chip .ic{color:var(--bad);width:16px;height:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.more{border:1px dashed var(--line);background:var(--white);border-radius:8px;padding:6px 12px;font-size:13px;color:var(--brand);font-weight:600;cursor:pointer}
+.link{background:none;border:0;padding:0;color:var(--brand);font-weight:600;text-decoration:underline;cursor:pointer;font-size:13px}
+/* 2 */
+.glist{display:flex;flex-direction:column}.gl{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--line-2)}.gl:first-child{border-top:0;padding-top:0}
+.gl-ic{width:34px;height:34px;border-radius:9px;background:var(--bad-bg);color:var(--bad);display:grid;place-items:center;flex:none}
+.gl b{display:block;font-size:14px}.gl small{color:var(--ink-2);font-size:13px}
+/* 3 */
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;font-size:12px;min-width:0}
+.tile .ic{width:22px;height:22px;color:var(--bad)}
+.tile.more-t{border-style:dashed;color:var(--brand);font-weight:600;cursor:pointer;background:var(--white);justify-content:center}
+.dlg{position:fixed;inset:0;background:rgba(0,30,35,.45);display:grid;place-items:center;padding:16px;z-index:10}
+.dlg-b{background:var(--white);border-radius:16px;width:min(560px,100%);max-height:85vh;display:flex;flex-direction:column;overflow:hidden}
+.dlg-h{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+.dlg-c{padding:16px 20px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.x{border:0;background:none;cursor:pointer;width:32px;height:32px;border-radius:8px}.x:hover{background:var(--line-2)}
+.search{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.gtitle{font-size:12px;color:var(--muted);margin-bottom:6px}
+/* 4 */
+.acc{border:1px solid var(--line);border-radius:10px}.acc+.acc{margin-top:8px}
+.acc summary{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;list-style:none}.acc summary::-webkit-details-marker{display:none}
+.acc summary .n{margin-inline-start:auto;color:var(--muted);font-size:12px}.acc summary .chev{transition:transform .2s;color:var(--muted)}
+.acc[open] summary .chev{transform:rotate(180deg)}.acc .chips{padding:0 12px 12px}
+.prev{display:flex;gap:2px;color:var(--bad)}.prev .ic{width:15px;height:15px}
+/* 5 */
+.chk{display:flex;gap:8px;margin-top:4px}.chk .search{flex:1}
+.res{margin-top:10px;border-radius:10px;padding:10px 12px;font-size:13px;display:flex;gap:8px;align-items:center}
+.res.bad{background:var(--bad-bg);color:var(--bad)}.res.ok{background:var(--mint-bg);color:var(--ok)}
+.top{margin-top:14px}.top .gtitle{margin-bottom:8px}
+@media (max-width:560px){.wrap{padding:20px 16px 60px}.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+<div class="wrap">
+  <header class="intro"><h1>«المنتجات غير المقبولة» · 5 خيارات</h1><p>بديل لقسم «المنتجات المقبولة» في صفحة المستودع. البيانات: 20 فئة غير مقبولة في 6 مجموعات. كل خيار مصمم ليبقى مختصراً حتى مع عدد كبير من الفئات.</p></header>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+const P={snow:'<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9M9 4.5l3 2 3-2M9 19.5l3-2 3 2"/>',leaf:'<path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15M5 19l7-7"/>',flame:'<path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 3 3 3"/>',pill:'<rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="m9.5 8.5 5 7"/>',gem:'<path d="M6 4h12l3 5-9 11L3 9z"/><path d="M3 9h18M9 4l3 16 3-16"/>',sofa:'<path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M3 11a2 2 0 0 1 2 2v2h14v-2a2 2 0 1 1 2 2v3H3v-3a2 2 0 0 1 0-4zM6 18v2M18 18v2"/>'};
+const icon=k=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${P[k]}</svg>`;
+const G=[
+ {k:'snow',t:'مبرّدة ومجمّدة',c:['الأغذية المبرّدة','الأغذية المجمّدة','الآيس كريم والحلويات المبرّدة']},
+ {k:'leaf',t:'قابلة للتلف',c:['الزهور والنباتات الحية','الخضار والفواكه الطازجة','اللحوم والأسماك']},
+ {k:'flame',t:'مواد خطرة',c:['المواد القابلة للاشتعال','البطاريات المنفصلة','البخاخات والغازات المضغوطة','المواد الكيميائية','الألعاب النارية']},
+ {k:'pill',t:'منتجات منظّمة',c:['الأدوية','المكملات الغذائية','التبغ والسجائر الإلكترونية','الأسلحة والأدوات الحادة']},
+ {k:'gem',t:'قيمة عالية',c:['المجوهرات والذهب','البطاقات مسبقة الدفع','الساعات الفاخرة']},
+ {k:'sofa',t:'كبيرة الحجم',c:['الأثاث الكبير','الأجهزة الكهربائية الكبيرة']},
+];
+const ALL=G.flatMap(g=>g.c.map(n=>({n,k:g.k,g:g.t}))); // 20
+const chip=x=>`<span class="chip">${icon(x.k)}${x.n}</span>`;
+const head=(sub='لا يستقبل هذا المستودع المنتجات من الفئات التالية.')=>`<div class="ch"><h3>المنتجات غير المقبولة</h3><span class="cnt">${ALL.length} فئة</span></div><p class="sub">${sub}</p>`;
+const opts=[
+ ['شرائح + «عرض الكل»','أول 6 فئات كشرائح، والباقي يظهر في مكانه عند الضغط.',id=>`${head()}<div class="chips" id="${id}">${ALL.slice(0,6).map(chip).join('')}<button class="more" data-more="${id}" aria-expanded="false">+${ALL.length-6} فئة أخرى</button></div>`],
+ ['قائمة بالمجموعات','كل الفئات ظاهرة بدون تفاعل، مضغوطة في 6 أسطر حسب المجموعة.',()=>`${head()}<div class="glist">${G.map(g=>`<div class="gl"><span class="gl-ic">${icon(g.k)}</span><div><b>${g.t}</b><small>${g.c.join('، ')}</small></div></div>`).join('')}</div>`],
+ ['أيقونات + نافذة كاملة','7 أيقونات بارزة، و«عرض الكل» يفتح نافذة فيها بحث ومجموعات.',()=>`${head()}<div class="tiles">${ALL.filter((x,i)=>[0,3,6,7,11,14,18].includes(i)).map(x=>`<div class="tile">${icon(x.k)}<span>${x.n}</span></div>`).join('')}<button class="tile more-t" data-dlg>عرض كل الفئات (${ALL.length})</button></div>`],
+ ['مجموعات قابلة للتوسيع','6 مجموعات مغلقة، كل واحدة بعددها، وتفتح عند الحاجة.',()=>`${head()}${G.map((g,i)=>`<details class="acc" ${i===0?'open':''}><summary><span class="prev">${icon(g.k)}</span><b>${g.t}</b><span class="n">${g.c.length} فئات</span><svg class="ic chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></summary><div class="chips">${g.c.map(n=>chip({n,k:g.k})).join('')}</div></details>`).join('')}`],
+ ['تحقّق من منتجك','سؤال مباشر: اكتب نوع منتجك واعرف إن كان مقبولاً، مع أكثر الفئات شيوعاً.',()=>`${head('اكتب نوع منتجك لتعرف إن كان المستودع يستقبله.')}<div class="chk"><input class="search" data-check placeholder="مثال: عطور، بطاريات، شوكولاتة" aria-label="نوع المنتج"></div><div class="res" data-res hidden></div>
+   <div class="top"><div class="gtitle">الأكثر شيوعاً بين الفئات غير المقبولة</div><div class="chips">${[0,6,7,11,14].map(i=>chip(ALL[i])).join('')}<button class="link" data-dlg>كل الفئات (${ALL.length})</button></div></div>`],
+];
+document.getElementById('grid').innerHTML=opts.map(([t,d,f],i)=>`<section><div class="opt-head"><span class="opt-no">${i+1}</span><h2>${t}</h2><p>${d}</p></div><div class="card">${f('c'+i)}</div></section>`).join('');
+function dialog(){const o=document.createElement('div'); o.className='dlg'; o.innerHTML=`<div class="dlg-b" role="dialog" aria-modal="true" aria-labelledby="dT"><div class="dlg-h"><h3 id="dT">الفئات غير المقبولة (${ALL.length})</h3><button class="x" data-x aria-label="إغلاق">✕</button></div>
+ <div class="dlg-c"><input class="search" data-q placeholder="ابحث عن فئة" aria-label="بحث"><div data-list>${list('')}</div></div></div>`;
+ document.body.appendChild(o); o.querySelector('[data-q]').focus();
+ o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-x]')) o.remove();});
+ o.querySelector('[data-q]').addEventListener('input',e=>o.querySelector('[data-list]').innerHTML=list(e.target.value.trim()));}
+function list(q){const gs=G.map(g=>({...g,c:g.c.filter(n=>!q||n.includes(q)||g.t.includes(q))})).filter(g=>g.c.length);
+ return gs.length?gs.map(g=>`<div style="margin-bottom:12px"><div class="gtitle">${g.t}</div><div class="chips">${g.c.map(n=>chip({n,k:g.k})).join('')}</div></div>`).join(''):'<p class="sub">لا توجد فئة مطابقة، ويبدو أن المنتج مقبول.</p>';}
+const SYN={'عطر':'المواد القابلة للاشتعال','عطور':'المواد القابلة للاشتعال','بطارية':'البطاريات المنفصلة','بطاريات':'البطاريات المنفصلة','شوكولاتة':'الأغذية المبرّدة','آيس':'الآيس كريم والحلويات المبرّدة','ورد':'الزهور والنباتات الحية','زهور':'الزهور والنباتات الحية','دواء':'الأدوية','فيتامين':'المكملات الغذائية','سكين':'الأسلحة والأدوات الحادة','ذهب':'المجوهرات والذهب','كنب':'الأثاث الكبير','ثلاجة':'الأجهزة الكهربائية الكبيرة','معطر':'البخاخات والغازات المضغوطة','سجائر':'التبغ والسجائر الإلكترونية','لحم':'اللحوم والأسماك'};
+document.addEventListener('click',e=>{
+  const m=e.target.closest('[data-more]'); if(m){const box=document.getElementById(m.dataset.more), open=m.getAttribute('aria-expanded')==='true';
+    box.innerHTML=(open?ALL.slice(0,6):ALL).map(chip).join('')+`<button class="more" data-more="${box.id}" aria-expanded="${!open}">${open?`+${ALL.length-6} فئة أخرى`:'عرض أقل'}</button>`; return;}
+  if(e.target.closest('[data-dlg]')) dialog();
+});
+document.addEventListener('input',e=>{if(!e.target.matches('[data-check]')) return; const q=e.target.value.trim(), r=e.target.closest('.card').querySelector('[data-res]');
+  if(!q){r.hidden=true; return;} const hit=ALL.find(x=>x.n.includes(q))||ALL.find(x=>x.n===SYN[Object.keys(SYN).find(k=>q.includes(k))]);
+  r.hidden=false; r.className='res '+(hit?'bad':'ok'); r.innerHTML=hit?`${icon(hit.k)}<span>غير مقبول · ضمن فئة «${hit.n}»</span>`:'<span>✓ لا يندرج تحت الفئات غير المقبولة، غالباً مقبول.</span>';});
+</script>
