@@ -1,0 +1,264 @@
+<title>مركز المستودع</title>
+<script>document.documentElement.dir='rtl';document.documentElement.lang='ar';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: Salla dashboard shell; single 1000px column; one "next step" card leads every warehouse screen */
+:root{
+  --bg:#f3f6f6; --surface:#fff; --ink:#15262a; --ink-2:#4a5b5f; --muted:#7a8a8e; --line:#e1e8e9; --line-2:#eef3f3;
+  --brand:#004956; --on-brand:#fff; --brand-soft:#e3f3f1; --mint:#baf3e6; --mint-strong:#5dd5bd;
+  --ok:#0d8a60; --ok-bg:#e2f6ee; --warn:#a95d00; --warn-bg:#fff2dc; --bad:#c4362f; --bad-bg:#fdecea;
+  --f:'IBM Plex Sans Arabic',Tahoma,system-ui,sans-serif; direction:rtl;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a1c;--surface:#152427;--ink:#e3eeef;--ink-2:#b4c3c5;--muted:#8a9b9e;--line:#27393c;--line-2:#1c2e31;--brand:#7fd8c8;--on-brand:#062a2f;--brand-soft:#173b3c;--mint:#1f4a45;--mint-strong:#3fb39d;--ok:#5fd6a6;--ok-bg:#123327;--warn:#ffb562;--warn-bg:#3a2a12;--bad:#ff8a80;--bad-bg:#3a1d1b;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a1c;--surface:#152427;--ink:#e3eeef;--ink-2:#b4c3c5;--muted:#8a9b9e;--line:#27393c;--line-2:#1c2e31;--brand:#7fd8c8;--on-brand:#062a2f;--brand-soft:#173b3c;--mint:#1f4a45;--mint-strong:#3fb39d;--ok:#5fd6a6;--ok-bg:#123327;--warn:#ffb562;--warn-bg:#3a2a12;--bad:#ff8a80;--bad-bg:#3a1d1b;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:14px;line-height:1.65}
+h1,h2,h3,p{margin:0}h1,h2,h3{text-wrap:balance;line-height:1.35}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.top{background:#004956;color:#fff;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px))}
+.top-in{max-width:1000px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-weight:700;font-size:18px;color:#baf3e6}
+.top nav{display:flex;gap:4px;flex-wrap:wrap}
+.top nav a{color:#d7ecea;text-decoration:none;padding:4px 10px;border-radius:8px;font-size:13px}
+.top nav a.on{background:rgba(255,255,255,.14);color:#fff}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:20px 120px;display:flex;flex-direction:column;gap:16px}
+.crumbs{font-size:12px;color:var(--muted)}.crumbs a{color:var(--muted)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.grow{flex:1;min-width:0}
+.stack{display:flex;flex-direction:column;gap:12px}
+.muted{color:var(--muted)}.sm{font-size:13px}.xs{font-size:12px}
+.btn{color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:500;display:inline-flex;gap:6px;align-items:center;text-decoration:none}
+.btn:hover{border-color:var(--brand)}.btn-p{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}.btn-p:hover{filter:brightness(1.08)}
+.btn-sm{padding:5px 12px;font-size:13px}.btn-ghost{border-color:transparent;background:none;color:var(--brand)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:1px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}.pill.warn{background:var(--warn-bg);color:var(--warn)}.pill.bad{background:var(--bad-bg);color:var(--bad)}.pill.gray{background:var(--line-2);color:var(--ink-2)}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.proto{border:1px dashed #d4b54d;background:#fff8dc;color:#6b5512;border-radius:10px;padding:8px 12px;font-size:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+:root[data-theme="dark"] .proto{background:#2f2810;color:#e9d58c;border-color:#6b5a1f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .proto{background:#2f2810;color:#e9d58c;border-color:#6b5a1f}}
+/* discover */
+.hero h1{font-size:24px}.hero p{color:var(--ink-2);margin-top:4px;max-width:62ch}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:4px 12px;font-size:13px;cursor:pointer}.chip.on{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:14px}
+.wcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.wimg{height:96px;background:linear-gradient(135deg,var(--brand-soft),var(--mint));display:grid;place-items:center;color:var(--brand)}
+.wimg .ic{width:38px;height:38px}
+.wbody{padding:14px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.compat{display:flex;gap:10px;align-items:center;border-radius:10px;padding:8px 10px;font-size:13px}
+.compat.ok{background:var(--ok-bg);color:var(--ok)}.compat.warn{background:var(--warn-bg);color:var(--warn)}
+.meter{height:6px;border-radius:3px;background:var(--line-2);overflow:hidden}.meter i{display:block;height:100%;background:var(--brand)}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:13px}.kv>span{color:var(--muted)}
+/* detail */
+.dhead{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.dhead .wimg{width:84px;height:84px;border-radius:14px;flex:none}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.list{display:flex;flex-direction:column}.li{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line-2)}.li:first-child{border-top:0}
+.thumb{width:34px;height:34px;border-radius:8px;background:var(--line-2);display:grid;place-items:center;font-size:17px;flex:none}
+.reason{font-size:12px;color:var(--bad)}
+.range{width:100%;accent-color:var(--brand)}
+.big{font-size:28px;font-weight:700}
+details.more{border-top:1px solid var(--line);padding-top:12px}details.more summary{cursor:pointer;color:var(--brand);font-weight:600}
+.sbar{position:fixed;inset-inline:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 20px rgba(0,40,50,.08);z-index:5}
+.sbar-in{max-width:1000px;margin:0 auto;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+/* book */
+.method{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 0;border-top:1px solid var(--line-2)}.method:first-of-type{border-top:0}
+.mic{width:40px;height:40px;border-radius:10px;background:var(--brand-soft);color:var(--brand);display:grid;place-items:center}
+.margin{font-size:12px;font-weight:600}.margin.pos{color:var(--ok)}.margin.neg{color:var(--bad)}.margin.zero{color:var(--muted)}
+.edit{grid-column:1/-1;background:var(--bg);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.sentence{line-height:2.4}
+.tok{width:5ch;border:0;border-bottom:2px dashed var(--brand);background:var(--surface);border-radius:4px 4px 0 0;padding:2px 4px;text-align:center;font-weight:700;color:var(--brand)}
+.toggle{position:relative;width:40px;height:22px;flex:none}.toggle input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}
+.toggle span{position:absolute;inset:0;border-radius:11px;background:var(--line);transition:.2s}.toggle span::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+.toggle input:checked+span{background:var(--brand)}.toggle input:checked+span::after{inset-inline-start:21px}
+.toggle input:disabled+span{opacity:.6}
+/* hub */
+.journey{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.jstep{border-top:4px solid var(--line);padding-top:8px;font-size:13px;color:var(--muted)}
+.jstep b{display:block;color:var(--ink-2);font-weight:600}.jstep.done{border-color:var(--ok)}.jstep.done b{color:var(--ink)}.jstep.cur{border-color:var(--brand)}.jstep.cur b{color:var(--brand)}
+.next{background:var(--brand);color:var(--on-brand);border-radius:16px;padding:20px 22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.next h2{font-size:20px}.next p{opacity:.85;margin-top:4px;max-width:58ch}.next .eb{font-size:12px;opacity:.75;font-weight:600}
+.next .btn{background:var(--mint);color:#004956;border-color:var(--mint);font-weight:700}
+.next.warn{background:var(--warn-bg);color:var(--ink)}.next.warn .btn{background:var(--warn);color:#fff;border-color:var(--warn)}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}.kpi span{font-size:12px;color:var(--muted)}.kpi b{display:block;font-size:22px}
+/* send */
+.prow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line-2)}
+.qty{width:76px;border:1px solid var(--line);border-radius:8px;padding:5px 8px;text-align:center;background:var(--surface)}
+.cb{width:18px;height:18px;accent-color:var(--brand)}
+.opt2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.oc{border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:var(--surface);text-align:start}.oc.on{border-color:var(--brand);background:var(--brand-soft)}
+.oc small{display:block;color:var(--muted)}
+/* track */
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sum{border-radius:12px;padding:14px;background:var(--line-2)}.sum b{display:block;font-size:26px}.sum.ok{background:var(--ok-bg);color:var(--ok)}.sum.bad{background:var(--bad-bg);color:var(--bad)}.sum.warn{background:var(--warn-bg);color:var(--warn)}
+.todo{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line-2)}.todo:first-of-type{border-top:0}
+.tl{list-style:none;margin:0;padding:0}.tl li{display:grid;grid-template-columns:16px minmax(0,1fr) auto;gap:12px;padding:8px 0;font-size:13px}
+.tl i{width:10px;height:10px;border-radius:50%;background:var(--brand);margin-top:6px}.tl li.future i{background:var(--line)}.tl li.future{color:var(--muted)}
+.toast{position:fixed;top:16px;inset-inline-start:50%;transform:translateX(50%);background:var(--ink);color:var(--bg);border-radius:10px;padding:8px 16px;font-size:13px;z-index:20}
+@media (max-width:700px){.grid2,.summary,.kpis,.opt2{grid-template-columns:minmax(0,1fr)}.journey{grid-template-columns:repeat(2,minmax(0,1fr))}.method{grid-template-columns:auto minmax(0,1fr)}.method>.r{grid-column:1/-1}.prow{grid-template-columns:auto auto minmax(0,1fr)}.prow .qty{grid-column:3}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top"><div class="top-in"><span class="logo">سلة</span><nav aria-label="التنقل"><a href="#discover" id="nDisc">اكتشف المستودعات</a><a href="#mine" id="nMine">مستودعاتي</a></nav></div></header>
+<div class="wrap" id="app"></div>
+<div id="bar"></div>
+
+<script>
+const IC={wh:'<path d="M3 10 12 4l9 6v10H3z"/><path d="M8 20v-6h8v6M8 17h8"/>',truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',bolt:'<path d="M13 3 5 13h6l-1 8 8-10h-6z"/>',check:'<path d="m5 12 5 5 9-10"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',box:'<path d="m12 3 9 5v8l-9 5-9-5V8z"/><path d="m3 8 9 5 9-5M12 13v8"/>',coin:'<circle cx="12" cy="12" r="8"/><path d="M12 7v10M9.5 9.5h4a1.5 1.5 0 0 1 0 3h-3a1.5 1.5 0 0 0 0 3h4"/>',alert:'<path d="M12 4 2 20h20z"/><path d="M12 10v4M12 17h.01"/>',clock:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',pen:'<path d="M4 20h4L19 9l-4-4L4 16z"/>'};
+const icon=k=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+// merchant catalog (example data): cat = category rule key, s30 = units sold in last 30 days
+const CAT=[
+ {n:'تيشيرت قطني',e:'👕',s30:120,kg:.3},{n:'قميص كتان',e:'👔',s30:85,kg:.35},{n:'عباية سوداء',e:'🧥',s30:60,kg:.8},{n:'حقيبة يد جلد',e:'👜',s30:24,kg:.9},{n:'حذاء رياضي',e:'👟',s30:40,kg:.9},
+ {n:'كوب سيراميك',e:'☕',s30:55,kg:.4,fragile:1},{n:'طقم أكواب زجاج',e:'🥛',s30:18,kg:1.6,fragile:1},{n:'سجادة صلاة',e:'🧶',s30:70,kg:1.2},{n:'مخدة قطنية',e:'🛏️',s30:33,kg:.7},{n:'إطار صور',e:'🖼️',s30:21,kg:.5,fragile:1},
+ {n:'سماعة لاسلكية',e:'🎧',s30:48,kg:.2},{n:'شاحن سريع',e:'🔌',s30:90,kg:.15},{n:'ساعة ذكية',e:'⌚',s30:16,kg:.1},{n:'كريم مرطب',e:'🧴',s30:65,kg:.1},{n:'مجموعة عناية',e:'🧼',s30:30,kg:.6},
+ {n:'شوكولاتة داكنة',e:'🍫',s30:44,kg:.4,cat:'cold'},{n:'عطر عود',e:'🌸',s30:26,kg:.5,cat:'haz'},{n:'بطارية احتياطية',e:'🔋',s30:38,kg:.45,cat:'bat'},{n:'مكيف متنقل',e:'❄️',s30:4,kg:32,cat:'heavy'},{n:'ورد طبيعي',e:'🌹',s30:12,kg:.6,cat:'cold'},
+];
+const RULE={cold:'المستودع لا يدعم التبريد',haz:'مادة قابلة للاشتعال',bat:'بطاريات منفصلة',heavy:'أثقل من 25 كجم'};
+// warehouses (example data): reject = rule keys this warehouse refuses
+const WH=[
+ {id:'ruh',city:'الرياض',name:'مستودع سلة – حي الملقا',op:'أرامكس',cap:72,share:41,reject:['haz','bat','heavy'],cost:{eco:18,std:24,exp:32}},
+ {id:'jed',city:'جدة',name:'مستودع سلة – حي الأمير فواز',op:'سمسا',cap:35,share:27,reject:['cold','haz','bat','heavy'],cost:{eco:17,std:23,exp:30}},
+ {id:'dmm',city:'الدمام',name:'مستودع سلة – حي الفيصلية',op:'أرامكس',cap:48,share:14,reject:['cold','haz','bat','heavy'],cost:{eco:18,std:24,exp:32}},
+ {id:'mak',city:'مكة المكرمة',name:'مستودع سلة – العزيزية',op:'سمسا',cap:88,share:9,reject:['cold','bat','heavy'],cost:{eco:17,std:23,exp:31}},
+];
+const METH=[['eco','شحن اقتصادي','5 – 7 أيام','truck'],['std','شحن عادي','2 – 5 أيام','truck'],['exp','شحن سريع','خلال 4 ساعات · داخل المدينة','bolt']];
+const S={city:'all',orders:300,booked:{},edit:null,send:null};
+const wh=id=>WH.find(w=>w.id===id);
+const ok=(w,p)=>!p.cat||!w.reject.includes(p.cat);
+const compat=w=>CAT.filter(p=>ok(w,p)).length;
+const app=document.getElementById('app'), bar=document.getElementById('bar');
+function toast(t){const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200);}
+const proto=t=>`<div class="proto"><b>للنموذج:</b>${t}</div>`;
+const sar=n=>`<span class="num">${n}</span> ر.س`;
+
+/* ---------- 1. discover ---------- */
+function vDiscover(){
+  const list=WH.filter(w=>S.city==='all'||w.city===S.city).sort((a,b)=>b.share-a.share);
+  return `<section class="hero"><h1>اختر مستودعاً قريباً من عملائك</h1><p>رتّبنا المستودعات حسب مدن عملائك، وفحصنا كتالوجك (${CAT.length} منتجاً) مقابل شروط كل مستودع.</p></section>
+  <div class="chips" role="group" aria-label="المدينة">${[['all','كل المدن'],...WH.map(w=>[w.city,w.city])].map(([k,l])=>`<button class="chip ${S.city===k?'on':''}" data-city="${k}" aria-pressed="${S.city===k}">${l}</button>`).join('')}</div>
+  <div class="cards">${list.map(w=>{const c=compat(w), full=w.cap>=100, b=S.booked[w.id];
+    return `<article class="wcard"><div class="wimg">${icon('wh')}</div><div class="wbody">
+      <div class="row between"><div><h3 style="font-size:16px">${w.city}</h3><div class="xs muted">${w.name} · تشغيل ${w.op}</div></div>${b?'<span class="pill ok">محجوز</span>':''}</div>
+      <div class="compat ${c===CAT.length?'ok':'warn'}">${icon(c===CAT.length?'check':'box')}<span><b class="num">${c} من ${CAT.length}</b> من منتجاتك مقبولة</span></div>
+      <div class="kv"><span>من طلباتك تذهب إلى ${w.city}</span><b class="num">${w.share}%</b></div>
+      <div><div class="kv"><span>السعة المتاحة</span><b class="num">${100-w.cap}%</b></div><div class="meter" role="img" aria-label="السعة المستخدمة ${w.cap}%"><i style="width:${w.cap}%"></i></div></div>
+      <div class="kv"><span>تكلفة الشحن عليك</span><b>من ${sar(w.cost.eco)}</b></div>
+      <a class="btn ${b?'':'btn-p'}" href="#${b?'hub':'wh'}-${w.id}" style="justify-content:center;margin-top:auto">${b?'افتح المستودع':'التفاصيل والحجز'}</a></div></article>`;}).join('')}</div>`;
+}
+/* ---------- 2. warehouse detail ---------- */
+function vDetail(id){const w=wh(id), acc=CAT.filter(p=>ok(w,p)), rej=CAT.filter(p=>!ok(w,p)), est=Math.round(S.orders*w.cost.std*.6+S.orders*3);
+  bar.innerHTML=`<div class="sbar"><div class="sbar-in"><div class="grow"><div class="xs muted">تكلفة شهرية تقديرية عند ${S.orders} طلب</div><b class="num" data-est>${est.toLocaleString('en')}</b> ر.س</div><a class="btn btn-p" href="#book-${id}">احجز ${w.city}</a></div></div>`;
+  return `<div class="crumbs"><a href="#discover">اكتشف المستودعات</a> › ${w.city}</div>
+  <section class="panel dhead"><div class="wimg">${icon('wh')}</div><div class="grow"><h1 style="font-size:22px">${w.name}</h1><div class="sm muted">${w.city} · تشغيل ${w.op} · يعمل الأحد – الخميس 7:00 ص – 7:30 م</div></div><span class="pill ${w.cap<80?'ok':'warn'}">متاح للحجز · ${100-w.cap}% سعة</span></section>
+  <div class="grid2">
+   <section class="panel stack"><div class="row between"><h2 style="font-size:17px">منتجاتك في هذا المستودع</h2><span class="pill ${rej.length?'warn':'ok'}">${acc.length} من ${CAT.length}</span></div>
+     <p class="sm muted">${rej.length?`${rej.length} منتجات لا يستقبلها المستودع، وتبقى تُشحن من فرعك كالمعتاد.`:'كل منتجاتك مقبولة.'}</p>
+     <div class="list">${rej.map(p=>`<div class="li"><span class="thumb">${p.e}</span><div class="grow"><b class="sm">${p.n}</b><div class="reason">${RULE[p.cat]}</div></div>${icon('x')}</div>`).join('')}
+       <details class="more"><summary>${acc.length} منتجاً مقبولاً</summary><div class="list" style="margin-top:8px">${acc.map(p=>`<div class="li"><span class="thumb">${p.e}</span><span class="grow sm">${p.n}</span><span style="color:var(--ok)">${icon('check')}</span></div>`).join('')}</div></details></div></section>
+   <section class="panel stack"><h2 style="font-size:17px">كم سيكلفك؟</h2>
+     <label class="sm" for="orders">طلباتك الشهرية المتوقعة: <b class="num" data-o>${S.orders}</b></label><input class="range" id="orders" type="range" min="50" max="2000" step="50" value="${S.orders}">
+     <div class="kv"><span>شحن عادي لكل طلب (أول 15 كجم)</span><b>${sar(w.cost.std)}</b></div><div class="kv"><span>تجهيز وتغليف لكل طلب</span><b>${sar(3)}</b></div><div class="kv"><span>التخزين</span><b>مجاني أول 3 أشهر</b></div>
+     <p class="xs muted">التقدير يفترض أن 60% من طلباتك تُشحن بالشحن العادي. يدفع عميلك سعر الشحن الذي تحدده، فيعوّض معظم هذه التكلفة.</p></section>
+  </div>
+  <section class="panel"><details class="more" style="border:0;padding:0"><summary>ساعات العمل والخدمات وخطوات الانضمام</summary><div class="stack" style="margin-top:12px"><div class="sm">الأحد – الخميس 7:00 ص – 7:30 م · السبت 9:00 ص – 3:00 م · الجمعة مغلق</div><div class="sm">تخزين جاف · تجهيز الطلبات · إرجاع المنتجات · تغليف هدايا</div><div class="sm">1. احجز ← 2. أرسل مخزونك ← 3. نستلمه ونفحصه ← 4. يبدأ البيع من المستودع</div></div></details></section>`;}
+/* ---------- 3. book (review) ---------- */
+function bookState(id){const w=wh(id); return S.booked[id]?.m||Object.fromEntries(METH.map(([k])=>[k,{on:true,fee:w.cost[k],w:15,extra:2,area:k==='exp'?`داخل ${w.city}`:'كل مدن المملكة'}]));}
+function vBook(id){const w=wh(id); S.draft=S.draft&&S.draft.id===id?S.draft:{id,m:bookState(id)}; const m=S.draft.m;
+  bar.innerHTML=`<div class="sbar"><div class="sbar-in"><span class="grow sm muted">يمكنك تعديل الأسعار وطرق الشحن لاحقاً في أي وقت.</span><a class="btn" href="#wh-${id}">رجوع</a><button class="btn btn-p" data-act="confirm">${icon('check')}احجز ${w.city}</button></div></div>`;
+  return `<div class="crumbs"><a href="#discover">اكتشف المستودعات</a> › <a href="#wh-${id}">${w.city}</a> › راجع واحجز</div>
+  <section class="panel stack"><div><h1 style="font-size:22px">راجع واحجز</h1><p class="sm muted">جهّزنا كل شيء بقيم مقترحة. لا يلزمك إدخال أي بيانات، وخصّص فقط ما تريد تغييره.</p></div>
+    <div class="row" style="background:var(--bg);border-radius:12px;padding:12px 14px">${icon('pin')}<div class="grow"><b>${w.name}</b><div class="xs muted">يُضاف كمستودع في متجرك · الاستلام من موقع المستودع · تشغيل ${w.op}</div></div></div></section>
+  <section class="panel"><div class="row between" style="margin-bottom:6px"><h2 style="font-size:17px">طرق الشحن لعملائك</h2><span class="xs muted">السعر المقترح = تكلفتك، فلا تخسر على أي شحنة</span></div>
+   ${METH.map(([k,n,d,ic])=>{const r=m[k], diff=r.fee-w.cost[k], ed=S.edit===k;
+     return `<div class="method"><span class="mic">${icon(ic)}</span><div class="grow"><div class="row" style="gap:8px"><b>${n}</b><span class="xs muted">${d}</span></div>
+       <div class="sm">${r.on?`يدفع عميلك <b class="num">${r.fee} ر.س</b> حتى ${r.w} كجم · ${r.area}`:'<span class="muted">موقوف ولا يظهر لعملائك</span>'}</div>
+       ${r.on?`<div class="margin ${diff>0?'pos':diff<0?'neg':'zero'}" data-mg="${k}">${diff>0?`تربح ${diff} ر.س لكل شحنة`:diff<0?`تتحمل ${-diff} ر.س لكل شحنة`:'يغطي تكلفتك بالضبط'}</div>`:''}</div>
+       <div class="row r" style="gap:8px">${k!=='std'?`<label class="toggle"><input type="checkbox" data-on="${k}" ${r.on?'checked':''} aria-label="تفعيل ${n}"><span></span></label>`:'<span class="xs muted">إلزامي</span>'}<button class="btn btn-sm" data-edit="${k}" aria-expanded="${ed}" ${r.on?'':'disabled'}>${ed?'تم':`${icon('pen')}تخصيص`}</button></div>
+       ${ed?`<div class="edit"><p class="sentence">يدفع عميلك <input class="tok num" type="number" min="0" data-f="fee" data-k="${k}" value="${r.fee}" aria-label="السعر"> ر.س حتى <input class="tok num" type="number" min="1" data-f="w" data-k="${k}" value="${r.w}" aria-label="الوزن"> كجم، ثم <input class="tok num" type="number" min="0" data-f="extra" data-k="${k}" value="${r.extra}" aria-label="الوزن الإضافي"> ر.س لكل كيلو إضافي.</p>
+         <div class="row sm"><span class="muted">يصل إلى:</span><select data-area="${k}" style="border:1px solid var(--line);border-radius:8px;padding:4px 8px;background:var(--surface)">${(k==='exp'?[`داخل ${w.city}`]:['كل مدن المملكة',`${w.city} والمدن القريبة`,`داخل ${w.city}`]).map(a=>`<option ${a===r.area?'selected':''}>${a}</option>`).join('')}</select></div>
+         <p class="xs muted">تكلفتك مع ${w.op}: ${w.cost[k]} ر.س حتى 15 كجم، شاملة الضريبة.</p></div>`:''}</div>`;}).join('')}</section>`;}
+/* ---------- 4. hub ---------- */
+const STAGES=['محجوز','أرسل مخزونك','الاستلام والفحص','متاح للبيع'];
+function nextFor(id){const b=S.booked[id], s=b.stage;
+  if(s===0) return {eb:'الخطوة التالية',t:'أرسل أول مخزون',p:`جهّزنا شحنة مقترحة من ${compat(wh(id))} منتجاً متوافقاً بكميات تكفي 30 يوماً من مبيعاتك.`,btn:'جهّز الشحنة',href:`#send-${id}`};
+  if(s===1) return {eb:'بانتظار المستودع',t:'المستودع يراجع شحنتك',p:'عادةً خلال 24 ساعة عمل. نرسل لك إشعاراً بالنتيجة، ويمكنك تعديل الشحنة حتى ذلك الحين.',btn:'تابع الشحنة',href:`#track-${id}`};
+  if(s===2&&!b.paid) return {warn:1,eb:'مطلوب منك قبل 17 سبتمبر',t:'ادفع 45 ر.س لإكمال النقل',p:'30 قطعة بدون ملصق SKU و5 قطع قابلة للكسر تحتاج تغليفاً إضافياً. نخصمها من محفظة البوليصات لأن رصيد المتجر لا يكفي.',btn:'ادفع من المحفظة',act:'pay'};
+  if(s===2) return {eb:'في الطريق',t:'شحنتك في الطريق للمستودع',p:'الوصول المتوقع 17 سبتمبر، ثم فحص الجودة خلال يوم عمل.',btn:'تابع الشحنة',href:`#track-${id}`};
+  return {eb:'تم',t:'مخزونك متاح للبيع',p:'81 وحدة خُزّنت، وطلبات عملائك القريبة تُشحن الآن من المستودع.',btn:'راجع نتيجة الاستلام',href:`#track-${id}`};}
+function vHub(id){const w=wh(id), b=S.booked[id]; if(!b){location.hash='#wh-'+id; return '';} const nx=nextFor(id), cur=b.stage+(b.stage===2&&!b.paid?0:0);
+  return `<div class="crumbs"><a href="#mine">مستودعاتي</a> › ${w.city}</div>
+  <section class="panel stack"><div class="row between"><div><h1 style="font-size:22px">${w.name}</h1><div class="sm muted">${w.city} · تشغيل ${w.op}</div></div><a class="btn btn-sm" href="#book-${id}">${icon('pen')}الأسعار وطرق الشحن</a></div>
+   <div class="journey">${STAGES.map((t,i)=>`<div class="jstep ${i<cur||b.stage===3?'done':i===cur?'cur':''}"><b>${t}</b>${i<cur||b.stage===3?'تم':i===cur?'الآن':''}</div>`).join('')}</div></section>
+  <section class="next ${nx.warn?'warn':''}"><div class="grow"><div class="eb">${nx.eb}</div><h2>${nx.t}</h2><p>${nx.p}</p></div>${nx.act?`<button class="btn" data-act="${nx.act}">${nx.btn}</button>`:`<a class="btn" href="${nx.href}">${nx.btn}</a>`}</section>
+  ${b.stage===3?`<div class="kpis"><div class="kpi"><span>في المستودع</span><b class="num">81</b><span>وحدة</span></div><div class="kpi"><span>طلبات شُحنت اليوم</span><b class="num">14</b></div><div class="kpi"><span>يكفي حتى</span><b>~ 24 يوماً</b></div></div>`:''}
+  <section class="panel"><h2 style="font-size:16px;margin-bottom:6px">طرق الشحن لعملائك</h2>${METH.map(([k,n])=>{const r=b.m[k]; return `<div class="kv" style="padding:6px 0"><span>${n}</span><b>${r.on?`${sar(r.fee)} · ${r.area}`:'موقوف'}</b></div>`;}).join('')}</section>
+  ${proto(`<span>محاكاة تقدّم الحالة:</span><button class="btn btn-sm" data-act="adv">الحالة التالية</button><button class="btn btn-sm btn-ghost" data-act="reset">من البداية</button>`)}`;}
+/* ---------- 5. send ---------- */
+function vSend(id){const w=wh(id); if(!S.send||S.send.id!==id) S.send={id,how:'pickup',items:Object.fromEntries(CAT.map((p,i)=>[i,{on:ok(w,p),q:p.s30}]))};
+  const sd=S.send, acc=CAT.map((p,i)=>[p,i]).filter(([p])=>ok(w,p)), rej=CAT.filter(p=>!ok(w,p));
+  const tot=acc.reduce((a,[p,i])=>a+(sd.items[i].on?+sd.items[i].q||0:0),0), n=acc.filter(([p,i])=>sd.items[i].on).length, capLeft=1500;
+  bar.innerHTML=`<div class="sbar"><div class="sbar-in"><div class="grow sm"><b class="num" data-tot>${tot}</b> وحدة من <b class="num" data-n>${n}</b> منتجاً · رسوم متوقعة <b data-fee>${sar(acc.some(([p,i])=>sd.items[i].on&&p.fragile)?15:0)}</b></div><a class="btn" href="#hub-${id}">رجوع</a><button class="btn btn-p" data-act="send" ${n?'':'disabled'}>أرسل الشحنة</button></div></div>`;
+  return `<div class="crumbs"><a href="#mine">مستودعاتي</a> › <a href="#hub-${id}">${w.city}</a> › أرسل مخزونك</div>
+  <section class="panel stack"><div><h1 style="font-size:22px">شحنة مقترحة لمستودع ${w.city}</h1><p class="sm muted">اخترنا كل المنتجات المتوافقة بكمية تساوي مبيعاتها في آخر 30 يوماً. غيّر ما تريد فقط.</p></div>
+   <div><div class="kv"><span>السعة بعد الشحنة</span><b class="num" data-cap>${Math.round(tot/capLeft*100)}% من المساحة المتاحة</b></div><div class="meter"><i data-capbar style="width:${Math.min(100,tot/capLeft*100)}%"></i></div></div></section>
+  <section class="panel"><div class="row between"><h2 style="font-size:16px">جاهزة للإرسال (${acc.length})</h2><button class="btn btn-sm btn-ghost" data-act="all">${n===acc.length?'إلغاء تحديد الكل':'تحديد الكل'}</button></div>
+   ${acc.map(([p,i])=>`<div class="prow"><input class="cb" type="checkbox" data-pi="${i}" ${sd.items[i].on?'checked':''} aria-label="${p.n}"><span class="thumb">${p.e}</span><div class="grow"><b class="sm">${p.n}</b><div class="xs muted">بِيع ${p.s30} في 30 يوماً${p.fragile?' · يحتاج تغليفاً بالفقاعات':''}</div></div><input class="qty num" type="number" min="1" data-pq="${i}" value="${sd.items[i].q}" aria-label="كمية ${p.n}" ${sd.items[i].on?'':'disabled'}></div>`).join('')}</section>
+  ${rej.length?`<section class="panel"><details class="more" style="border:0;padding:0"><summary>${rej.length} منتجات لا يستقبلها هذا المستودع</summary><div class="list" style="margin-top:8px">${rej.map(p=>`<div class="li"><span class="thumb">${p.e}</span><div class="grow"><b class="sm">${p.n}</b><div class="reason">${RULE[p.cat]}</div></div></div>`).join('')}</div></details></section>`:''}
+  <section class="panel stack"><h2 style="font-size:16px">كيف تصل الشحنة للمستودع؟</h2><div class="opt2">${[['pickup','نستلمها من فرعك','مندوب سلة يستلم الكراتين خلال يومين'],['self','أوصلها بنفسك','سلّمها في ساعات عمل المستودع']].map(([k,t,d])=>`<button class="oc ${sd.how===k?'on':''}" data-how="${k}" aria-pressed="${sd.how===k}"><b>${t}</b><small>${d}</small></button>`).join('')}</div></section>`;}
+/* ---------- 6. track ---------- */
+function vTrack(id){const w=wh(id), b=S.booked[id]; if(!b) return '';
+  const s=b.stage, events=[['أرسلت الشحنة','14 سبتمبر'],['قبل المستودع 85 من 120 وحدة','15 سبتمبر'],['استلم المندوب 4 كراتين','16 سبتمبر'],['وصلت الشحنة واكتمل الفحص','18 سبتمبر']];
+  return `<div class="crumbs"><a href="#mine">مستودعاتي</a> › <a href="#hub-${id}">${w.city}</a> › الشحنة #274607591</div>
+  <section class="panel stack"><div class="row between"><h1 style="font-size:20px">الشحنة #274607591</h1><span class="pill ${s>=3?'ok':s===2&&!b.paid?'warn':'gray'}">${s>=3?'خُزّنت':s===2?(b.paid?'في الطريق':'بانتظار الدفع'):'بانتظار المراجعة'}</span></div>
+   ${s>=3?`<div class="summary"><div class="sum ok"><b class="num">81</b>وحدة متاحة للبيع</div><div class="sum bad"><b class="num">3</b>تالفة · تعود لفرعك</div><div class="sum warn"><b class="num">1</b>مفقودة · يمكنك الاعتراض</div></div>`
+     :s===2?`<div class="summary"><div class="sum ok"><b class="num">85</b>وحدة مقبولة</div><div class="sum bad"><b class="num">35</b>مرفوضة · شوكولاتة (تبريد)</div><div class="sum"><b>17 سبتمبر</b>الوصول المتوقع</div></div>`
+     :`<p class="sm muted">أرسلنا الشحنة للمستودع لمراجعتها. عادةً خلال 24 ساعة عمل.</p>`}</section>
+  ${s>=2?`<section class="panel"><h2 style="font-size:16px;margin-bottom:4px">مطلوب منك</h2>
+    ${s===2&&!b.paid?`<div class="todo">${icon('coin')}<div class="grow"><b class="sm">ادفع 45 ر.س رسوماً إضافية</b><div class="xs muted">قبل 17 سبتمبر · من محفظة البوليصات</div></div><button class="btn btn-sm btn-p" data-act="pay">ادفع</button></div>`:''}
+    ${s>=3?`<div class="todo">${icon('alert')}<div class="grow"><b class="sm">وحدة مفقودة من «كوب سيراميك»</b><div class="xs muted">اعترض خلال 7 أيام إن كانت أُرسلت فعلاً</div></div><button class="btn btn-sm" data-act="toast" data-msg="أُرسل الاعتراض">اعتراض</button></div>
+    <div class="todo">${icon('truck')}<div class="grow"><b class="sm">3 وحدات تالفة تعود لفرعك</b><div class="xs muted">تصل خلال 3 – 5 أيام · بدون رسوم</div></div><span class="pill gray">لا إجراء</span></div>`:''}
+    ${s===2&&b.paid?'<p class="sm muted">لا شيء الآن.</p>':''}</section>`:''}
+  ${s>=3?`<section class="panel"><details class="more" style="border:0;padding:0"><summary>المنتجات التي لم تصل كاملة (2)</summary><div class="list" style="margin-top:8px"><div class="li"><span class="thumb">☕</span><span class="grow sm">كوب سيراميك</span><span class="xs muted num">أُرسل 30 · خُزّن 26 · تالف 3 · مفقود 1</span></div><div class="li"><span class="thumb">🍫</span><span class="grow sm">شوكولاتة داكنة</span><span class="xs muted">رُفض قبل الإرسال (تبريد)</span></div></div></details></section>`:''}
+  <section class="panel"><h2 style="font-size:16px;margin-bottom:6px">ما حدث حتى الآن</h2><ul class="tl">${events.map((e,i)=>`<li class="${i>s?'future':''}"><i></i><span>${e[0]}</span><span class="num muted">${i>s?'متوقع':e[1]}</span></li>`).join('')}</ul></section>
+  ${proto(`<button class="btn btn-sm" data-act="adv">الحالة التالية</button><a class="btn btn-sm btn-ghost" href="#hub-${id}">مركز المستودع</a>`)}`;}
+/* ---------- mine ---------- */
+function vMine(){const ids=Object.keys(S.booked);
+  if(!ids.length) return `<section class="panel stack" style="text-align:center;align-items:center;padding:40px 20px"><span class="mic">${icon('wh')}</span><h1 style="font-size:20px">لم تحجز مستودعاً بعد</h1><p class="sm muted">احجز مستودعاً قريباً من عملائك، ونجهّز لك الشحن منه خلال أيام.</p><a class="btn btn-p" href="#discover">اكتشف المستودعات</a></section>`;
+  return `<h1 style="font-size:22px">مستودعاتي</h1>${ids.map(id=>{const w=wh(id), nx=nextFor(id); return `<section class="panel row"><span class="mic">${icon('wh')}</span><div class="grow"><b>${w.name}</b><div class="sm muted">${STAGES[S.booked[id].stage]} · ${nx.t}</div></div>${nx.act?`<a class="btn btn-p btn-sm" href="#hub-${id}">${nx.btn}</a>`:`<a class="btn btn-p btn-sm" href="${nx.href}">${nx.btn}</a>`}<a class="btn btn-sm" href="#hub-${id}">افتح</a></section>`;}).join('')}`;}
+/* ---------- router & events ---------- */
+function route(){const h=location.hash.slice(1)||'discover'; const [v,id]=h.split('-'); bar.innerHTML=''; S.edit=v==='book'?S.edit:null;
+  document.getElementById('nDisc').className=v==='discover'||v==='wh'||v==='book'?'on':''; document.getElementById('nMine').className=['mine','hub','send','track'].includes(v)?'on':'';
+  app.innerHTML=v==='wh'?vDetail(id):v==='book'?vBook(id):v==='hub'?vHub(id):v==='send'?vSend(id):v==='track'?vTrack(id):v==='mine'?vMine():vDiscover();}
+function rerender(){const y=document.scrollingElement.scrollTop; route(); document.scrollingElement.scrollTop=y;}
+addEventListener('hashchange',()=>{route();scrollTo(0,0);});
+document.addEventListener('click',e=>{const t=e.target.closest('button'); if(!t) return; const h=location.hash.slice(1).split('-'), id=h[1];
+  if(t.dataset.city){S.city=t.dataset.city; rerender();}
+  if(t.dataset.edit){S.edit=S.edit===t.dataset.edit?null:t.dataset.edit; rerender();}
+  if(t.dataset.how){S.send.how=t.dataset.how; rerender();}
+  const a=t.dataset.act;
+  if(a==='confirm'){S.booked[id]={stage:0,paid:false,m:S.draft.m}; S.draft=null; toast(`تم حجز مستودع ${wh(id).city}`); location.hash='#hub-'+id;}
+  if(a==='send'){S.booked[id].stage=1; toast('أُرسلت الشحنة للمستودع'); location.hash='#hub-'+id;}
+  if(a==='pay'){S.booked[id].paid=true; toast('دُفعت 45 ر.س من محفظة البوليصات'); rerender();}
+  if(a==='adv'){const b=S.booked[id]; if(b.stage===2&&!b.paid) b.paid=true; else b.stage=Math.min(3,b.stage+1); rerender();}
+  if(a==='reset'){S.booked[id].stage=0; S.booked[id].paid=false; S.send=null; rerender();}
+  if(a==='all'){const w=wh(id), acc=CAT.map((p,i)=>i).filter(i=>ok(w,CAT[i])), all=acc.every(i=>S.send.items[i].on); acc.forEach(i=>S.send.items[i].on=!all); rerender();}
+  if(a==='toast') toast(t.dataset.msg);
+});
+document.addEventListener('input',e=>{const t=e.target;
+  if(t.id==='orders'){S.orders=+t.value; const w=wh(location.hash.split('-')[1]); document.querySelector('[data-o]').textContent=S.orders; document.querySelector('[data-est]').textContent=Math.round(S.orders*w.cost.std*.6+S.orders*3).toLocaleString('en');}
+  if(t.dataset.f){const r=S.draft.m[t.dataset.k]; r[t.dataset.f]=+t.value||0; const w=wh(S.draft.id), d=r.fee-w.cost[t.dataset.k], el=document.querySelector(`[data-mg="${t.dataset.k}"]`); if(el){el.className='margin '+(d>0?'pos':d<0?'neg':'zero'); el.textContent=d>0?`تربح ${d} ر.س لكل شحنة`:d<0?`تتحمل ${-d} ر.س لكل شحنة`:'يغطي تكلفتك بالضبط';}}
+  if(t.dataset.pq){S.send.items[t.dataset.pq].q=t.value; const pos=t.selectionStart; rerender(); const q=document.querySelector(`[data-pq="${t.dataset.pq}"]`); q.focus(); try{q.setSelectionRange(pos,pos)}catch(_){}}
+});
+document.addEventListener('change',e=>{const t=e.target;
+  if(t.dataset.on){S.draft.m[t.dataset.on].on=t.checked; rerender();}
+  if(t.dataset.area){S.draft.m[t.dataset.area].area=t.value; rerender();}
+  if(t.dataset.pi){S.send.items[t.dataset.pi].on=t.checked; rerender();}
+});
+route();
+</script>

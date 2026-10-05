@@ -1,0 +1,328 @@
+<title>تقييم تجربة مستودعات سلة</title>
+<script>document.documentElement.dir='rtl';document.documentElement.lang='ar';</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one reading column (~760px) with a sticky screen index on wide screens; findings as severity-striped rows */
+:root{
+  --bg:#f3f6f6; --surface:#ffffff; --ink:#15262a; --ink-2:#47585c; --muted:#76878b; --line:#dfe7e8;
+  --brand:#004956; --brand-soft:#e3f3f1; --mint:#baf3e6;
+  --crit:#c4362f; --crit-bg:#fdecea; --high:#b8650a; --high-bg:#fff2df; --med:#2f6fa3; --med-bg:#e8f1fa; --ok:#0d8a60; --ok-bg:#e2f6ee;
+  --f-body:'IBM Plex Sans Arabic',Tahoma,system-ui,sans-serif; --f-mono:'IBM Plex Mono',ui-monospace,monospace;
+  direction:rtl;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a1c;--surface:#152427;--ink:#e3eeef;--ink-2:#b2c2c4;--muted:#87999c;--line:#26393c;--brand:#7fd8c8;--brand-soft:#173b3c;--mint:#1f4a45;--crit:#ff8a80;--crit-bg:#3a1d1b;--high:#ffb562;--high-bg:#3a2a12;--med:#8cc1ef;--med-bg:#16293a;--ok:#5fd6a6;--ok-bg:#123327;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1a1c;--surface:#152427;--ink:#e3eeef;--ink-2:#b2c2c4;--muted:#87999c;--line:#26393c;--brand:#7fd8c8;--brand-soft:#173b3c;--mint:#1f4a45;--crit:#ff8a80;--crit-bg:#3a1d1b;--high:#ffb562;--high-bg:#3a2a12;--med:#8cc1ef;--med-bg:#16293a;--ok:#5fd6a6;--ok-bg:#123327;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75}
+h1,h2,h3,h4,p{margin:0}h1,h2,h3{text-wrap:balance;line-height:1.35}
+a{color:var(--brand)}
+.wrap{max-width:1160px;margin:0 auto;padding-inline:20px;padding-block:36px 90px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:40px}
+.toc{position:sticky;top:20px;align-self:start;font-size:13px}
+.toc b{display:block;color:var(--muted);font-size:12px;letter-spacing:.02em;margin-bottom:8px}
+.toc a{display:block;text-decoration:none;color:var(--ink-2);padding:4px 10px;border-inline-start:2px solid var(--line)}
+.toc a:hover{color:var(--brand);border-color:var(--brand)}
+main{min-width:0;display:flex;flex-direction:column;gap:56px}
+.eyebrow{font-size:12px;color:var(--brand);font-weight:600;letter-spacing:.02em}
+header h1{font-size:32px;margin-top:6px}
+.lede{color:var(--ink-2);margin-top:12px;max-width:66ch}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.tag{border:1px solid var(--line);background:var(--surface);border-radius:20px;padding:2px 12px;font-size:12px;color:var(--ink-2)}
+section>h2{font-size:22px;margin-bottom:6px}
+section>.sub{color:var(--muted);margin-bottom:18px;max-width:66ch}
+.verdict{background:var(--brand);color:#fff;border-radius:14px;padding:22px 24px;display:grid;gap:10px}
+:root[data-theme="dark"] .verdict{color:#062a2f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .verdict{color:#062a2f}}
+.verdict p{max-width:70ch}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi span{display:block;font-size:12px;color:var(--muted)}.kpi b{font-size:24px;font-variant-numeric:tabular-nums}.kpi small{display:block;color:var(--ink-2);font-size:12px}
+.kpi b.down{color:var(--ok)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+.tw{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+th,td{text-align:start;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600;background:transparent}
+tr:last-child td{border-bottom:0}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.bar{display:inline-block;height:8px;border-radius:4px;background:var(--brand);vertical-align:middle}
+.barbg{display:inline-block;width:120px;height:8px;border-radius:4px;background:var(--line);vertical-align:middle;margin-inline-end:8px}
+.screen{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.screen-h{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;border-bottom:1px solid var(--line)}
+.sn{font-family:var(--f-mono);font-size:13px;color:var(--brand);background:var(--brand-soft);border-radius:8px;padding:2px 8px;flex:none}
+.screen-h h3{font-size:18px}.screen-h p{color:var(--ink-2);font-size:14px;margin-top:2px}
+.score{margin-inline-start:auto;text-align:center;flex:none}.score b{display:block;font-size:22px;font-variant-numeric:tabular-nums}.score span{font-size:11px;color:var(--muted)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.cols>div{padding:16px 20px;min-width:0}.cols>div+div{border-inline-start:1px solid var(--line)}
+.cols h4{font-size:13px;color:var(--muted);margin-bottom:10px;font-weight:600}
+.f{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;padding:8px 0;font-size:14px}
+.f+.f{border-top:1px dashed var(--line)}
+.sev{font-size:11px;font-weight:700;border-radius:6px;padding:1px 8px;height:fit-content;white-space:nowrap}
+.sev.c{background:var(--crit-bg);color:var(--crit)}.sev.h{background:var(--high-bg);color:var(--high)}.sev.m{background:var(--med-bg);color:var(--med)}
+.fix{display:flex;gap:10px;padding:8px 0;font-size:14px}.fix+.fix{border-top:1px dashed var(--line)}
+.fix::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-top:9px}
+.ks{display:flex;gap:6px;flex-wrap:wrap;padding:12px 20px;border-top:1px solid var(--line);background:var(--bg);font-size:12px;color:var(--ink-2)}
+.ks b{color:var(--ink)}
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.card h3{font-size:16px;margin-bottom:6px}.card p,.card li{color:var(--ink-2);font-size:14px}
+.card ul{margin:0;padding-inline-start:18px}
+.cta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--brand-soft);border-radius:14px;padding:18px 20px}
+.cta p{flex:1;min-width:220px}
+.btn{display:inline-block;background:var(--brand);color:#fff;text-decoration:none;border-radius:10px;padding:9px 18px;font-weight:600}
+:root[data-theme="dark"] .btn{color:#062a2f}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#062a2f}}
+.note{font-size:13px;color:var(--muted);border-inline-start:3px solid var(--line);padding-inline-start:12px}
+ol.pri{margin:0;padding-inline-start:20px;display:grid;gap:8px}ol.pri li{padding-inline-start:4px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.toc{display:none}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cols,.two{grid-template-columns:minmax(0,1fr)}.cols>div+div{border-inline-start:0;border-top:1px solid var(--line)}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="فهرس التقرير"><b>الفهرس</b>
+  <a href="#verdict">الخلاصة</a><a href="#method">المنهجية</a><a href="#flow">رحلة التاجر</a><a href="#heur">المعايير العشرة</a>
+  <a href="#s1">1 · قائمة المستودعات</a><a href="#s2">2 · تفاصيل المستودع</a><a href="#s3">3 · إعدادات الحجز</a><a href="#s4">4 · مستودعاتي</a><a href="#s5">5 · إعدادات المستودع</a><a href="#s6">6 · طلب نقل جديد</a><a href="#s7">7 · تفاصيل طلب النقل</a><a href="#s8">8 · الرسوم الإضافية</a>
+  <a href="#cross">مشاكل مشتركة</a><a href="#new">الحل المقترح</a><a href="#next">الأولويات</a>
+</nav>
+<main>
+<header>
+  <div class="eyebrow">مراجعة تجربة · فريق OMS</div>
+  <h1>تقييم تجربة مستودعات سلة</h1>
+  <p class="lede">تقييم شامل لرحلة التاجر من اكتشاف المستودع إلى أن يصبح مخزونه متاحاً للبيع: سهولة الاستخدام، والحمل الذهني، وتسلسل الرحلة، والنصوص. لكل شاشة: ما الذي يعمل، وما الذي يعيق التاجر، والتحسين المقترح. وفي النهاية حل جديد في نموذج منفصل.</p>
+  <div class="meta"><span class="tag">8 شاشات</span><span class="tag">3 مراحل: اكتشاف · حجز · نقل وتتبّع</span><span class="tag">تقييم خبير (Heuristic)</span><span class="tag">أكتوبر 2026</span></div>
+</header>
+
+<section id="verdict">
+  <div class="verdict">
+    <h2 style="font-size:20px">الخلاصة</h2>
+    <p>الرحلة مكتملة وظيفياً، لكنها تطلب من التاجر قرارات كثيرة مبكراً قبل أن يرى أي قيمة: يحجز ثم يملأ نحو 30 حقلاً لثلاث مسارات، ثم ينشئ طلب نقل منتجاً منتجاً، ثم يتابع جداول فيها 7 أعمدة أرقام. أكبر مصدر للحمل الذهني هو <b>التسعير لكل مسار</b> و<b>جدول نتائج الاستلام</b>. أكبر فجوة في الرحلة: لا يوجد مكان واحد يقول للتاجر «ما خطوتك التالية؟».</p>
+    <p>الاتجاه المقترح: <b>قيم افتراضية ذكية بدل النماذج</b>، و<b>التحقق من توافق المنتجات قبل الحجز لا بعده</b>، و<b>مركز واحد للمستودع</b> يعرض الحالة والخطوة التالية.</p>
+  </div>
+  <div class="kpis" style="margin-top:14px">
+    <div class="kpi"><span>حقول الحجز الإلزامية</span><b class="num">~30 ← 0</b><small>القيم الافتراضية تُراجع ولا تُعبّأ</small></div>
+    <div class="kpi"><span>شاشات حتى أول حجز</span><b class="num">6 ← 3</b><small>قائمة · تفاصيل · مراجعة</small></div>
+    <div class="kpi"><span>أعمدة جدول الاستلام</span><b class="num">11 ← 4</b><small>الملخص أولاً والتفصيل عند الطلب</small></div>
+    <div class="kpi"><span>اكتشاف رفض المنتج</span><b>بعد الإرسال ← قبل الحجز</b><small>توافق الكتالوج على البطاقة</small></div>
+  </div>
+  <p class="note" style="margin-top:12px">الأرقام تقديرية من عدّ الحقول والشاشات في النموذج الحالي والمقترح، وليست نتائج اختبار مع تجار.</p>
+</section>
+
+<section id="method">
+  <h2>المنهجية</h2>
+  <p class="sub">مراجعة خبير لكل شاشة مقابل معايير نيلسن العشرة، وتقدير الحمل الذهني (عدد القرارات والحقول والمفاهيم الجديدة في الشاشة)، وتتبع مسار المهام الثلاث الأساسية.</p>
+  <div class="two">
+    <div class="card"><h3>المصادر</h3><ul><li>النموذج التفاعلي (23 نسخة) وكل البدائل المجرّبة.</li><li>الشاشات المرسلة: تفاصيل المستودع، صفحة الإعدادات، طلب نقل جديد، تفاصيل الطلب.</li><li>مستند المتطلبات (المشكلة فقط، بدون الحلول المقترحة فيه).</li></ul></div>
+    <div class="card"><h3>المهام المقيّمة</h3><ul><li>اختيار مستودع مناسب وحجزه.</li><li>إرسال أول مخزون للمستودع.</li><li>فهم نتيجة الاستلام والتصرف فيها (رسوم، تالف، مفقود).</li></ul></div>
+  </div>
+  <p class="note" style="margin-top:12px">ملف Figma (العقدة 18209-241695) لم يكن متاحاً للقراءة أثناء التقييم لأن الربط مع Figma يحتاج إعادة تفويض. التقييم مبني على النموذج والشاشات المرسلة.</p>
+</section>
+
+<section id="flow">
+  <h2>رحلة التاجر الحالية</h2>
+  <p class="sub">الرحلة الحالية تفصل بين «الحجز» و«الإعداد» و«النقل» كأنها منتجات منفصلة. التاجر لا يعرف بعد الحجز أن المستودع لن يعمل قبل أن ينقل المخزون ويجتاز فحص الجودة.</p>
+  <div class="flow"><pre class="mermaid">
+flowchart RL
+  A[قائمة المستودعات] --> B[تفاصيل المستودع]
+  B --> C[إعدادات الحجز<br/>4 خطوات · ~30 حقلاً]
+  C --> D[مستودعاتي<br/>الحالة: بانتظار]
+  D -->|لا يوجد توجيه| E[طلب نقل جديد]
+  E --> F[بانتظار التأكيد]
+  F --> G[نتيجة المراجعة<br/>رفض بعض المنتجات]
+  G --> H[دفع رسوم إضافية]
+  H --> I[الاستلام وفحص الجودة]
+  I --> J[متاح للبيع]
+  style G fill:#fdecea,stroke:#c4362f
+  style C fill:#fff2df,stroke:#b8650a
+  style D fill:#fff2df,stroke:#b8650a
+</pre></div>
+  <div class="two" style="margin-top:14px">
+    <div class="card"><h3>نقاط الاحتكاك الأعلى</h3><ul><li><b>إعدادات الحجز:</b> تسعير 3 مسارات قبل أن يرى التاجر أي نتيجة.</li><li><b>مستودعاتي → طلب نقل:</b> فجوة بلا توجيه، والحالة «بانتظار» لا تقول بانتظار ماذا.</li><li><b>نتيجة المراجعة:</b> الرفض يحدث متأخراً، بعد أن جهّز التاجر الكراتين.</li></ul></div>
+    <div class="card"><h3>نقاط تعمل جيداً</h3><ul><li>الأخطاء على صف المنتج نفسه مع زر التصحيح.</li><li>حالة الانتظار الفارغة بنص واضح ووقت متوقع.</li><li>اختيار مصدر الدفع تلقائياً عند نقص الرصيد.</li><li>النطاق الافتراضي مع «تعديل».</li></ul></div>
+  </div>
+</section>
+
+<section id="heur">
+  <h2>المعايير العشرة</h2>
+  <p class="sub">تقييم من 5 للتجربة كاملة. أقل المعايير: التطابق مع لغة التاجر، ومنع الأخطاء، والتمييز بين المهم والثانوي.</p>
+  <div class="tw"><table>
+    <thead><tr><th>المعيار</th><th>التقييم</th><th>السبب الرئيسي</th></tr></thead>
+    <tbody>
+    <tr><td>وضوح حالة النظام</td><td><span class="barbg"><span class="bar" style="width:72px"></span></span><span class="num">3/5</span></td><td>الحالات موجودة لكن بلا «الخطوة التالية»، والمراحل تظهر في مكانين.</td></tr>
+    <tr><td>التطابق مع لغة التاجر</td><td><span class="barbg"><span class="bar" style="width:48px"></span></span><span class="num">2/5</span></td><td>«مسار»، «فرع»، «مركز تخزين»، «حتى وزن للشحنة» مصطلحات نظام لا تاجر.</td></tr>
+    <tr><td>التحكم والتراجع</td><td><span class="barbg"><span class="bar" style="width:72px"></span></span><span class="num">3/5</span></td><td>«إلغاء الطلب» متاح، لكن لا مسودة للحجز ولا تراجع عن الحذف.</td></tr>
+    <tr><td>الاتساق</td><td><span class="barbg"><span class="bar" style="width:48px"></span></span><span class="num">2/5</span></td><td>نفس إعدادات التسعير تظهر بأشكال مختلفة في الحجز والإعدادات اللاحقة.</td></tr>
+    <tr><td>منع الأخطاء</td><td><span class="barbg"><span class="bar" style="width:48px"></span></span><span class="num">2/5</span></td><td>توافق المنتجات يُكتشف عند إنشاء النقل، لا عند اختيار المستودع.</td></tr>
+    <tr><td>التعرّف بدل التذكّر</td><td><span class="barbg"><span class="bar" style="width:72px"></span></span><span class="num">3/5</span></td><td>تكلفة الناقل ظاهرة بجانب سعر العميل، لكن الهامش يُحسب ذهنياً.</td></tr>
+    <tr><td>المرونة والكفاءة</td><td><span class="barbg"><span class="bar" style="width:48px"></span></span><span class="num">2/5</span></td><td>إضافة المنتجات واحداً واحداً، ولا نسخ لإعدادات مسار على آخر.</td></tr>
+    <tr><td>البساطة والتركيز</td><td><span class="barbg"><span class="bar" style="width:48px"></span></span><span class="num">2/5</span></td><td>صفحة تفاصيل المستودع 9 أقسام، وجدول الاستلام 11 عموداً.</td></tr>
+    <tr><td>التعافي من الأخطاء</td><td><span class="barbg"><span class="bar" style="width:96px"></span></span><span class="num">4/5</span></td><td>رسائل الخطأ محددة ومعها زر تصحيح مباشر.</td></tr>
+    <tr><td>المساعدة والتوثيق</td><td><span class="barbg"><span class="bar" style="width:72px"></span></span><span class="num">3/5</span></td><td>خطوات الانضمام مفيدة، لكنها في صفحة التفاصيل فقط ولا تتابع التاجر بعدها.</td></tr>
+    </tbody></table></div>
+</section>
+
+<section><h2>تقييم الشاشات</h2><p class="sub">لكل شاشة: المشاكل مرتبة حسب الخطورة (حرجة · عالية · متوسطة)، والتحسينات المقترحة، وتقدير الحمل الذهني.</p>
+<div style="display:flex;flex-direction:column;gap:18px">
+
+<article class="screen" id="s1"><div class="screen-h"><span class="sn">1</span><div><h3>قائمة مستودعات سلة</h3><p>البانر التعريفي وبطاقات المستودعات مع حالة السعة والشركة المشغّلة.</p></div><div class="score"><b class="num">3.2</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev h">عالية</span><span>البطاقة تحمل 8 عناصر (صورة، مدينة، مشغّل، سعة، خدمات، سعر، زرّان) بنفس الوزن البصري، فيصعب المسح السريع بين 6 بطاقات.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>لا شيء يقول للتاجر هل يقبل المستودع منتجاته. السؤال الأهم يُجاب عنه بعد 4 شاشات.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>«يبدأ من 10 ر.س» لا يوضح هل هو سعر للتاجر أم للعميل، ولأي مسار.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>لا ترتيب ولا فلترة حسب المدينة الأقرب لعملاء التاجر.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">شارة توافق على كل بطاقة: «يقبل 18 من 20 منتجاً عندك»، محسوبة من كتالوج التاجر.</div>
+  <div class="fix">ترتيب افتراضي حسب «أقرب لعملائك» من بيانات الطلبات، مع فلتر المدينة.</div>
+  <div class="fix">هرمية البطاقة: المدينة والتوافق أولاً، ثم السعة والسعر، وزر أساسي واحد.</div>
+  <div class="fix">«قارن» لاختيار مستودعين أو ثلاثة جنباً إلى جنب.</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> 8 عناصر لكل بطاقة × 6 بطاقات · المقترح: 5 عناصر لكل بطاقة</div>
+</article>
+
+<article class="screen" id="s2"><div class="screen-h"><span class="sn">2</span><div><h3>تفاصيل المستودع</h3><p>المعرض، الوصف، الأسعار، الخدمات، المنتجات المقبولة، خطوات الانضمام، التقييمات، ساعات العمل، بطاقة الحجز.</p></div><div class="score"><b class="num">3.0</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev h">عالية</span><span>9 أقسام بنفس الوزن، وزر «حجز» في بطاقة جانبية صغيرة تختفي مع التمرير.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>جدول الأسعار بصفوف مثل «التوصيل للمدن الأخرى: -» بدون شرح، ولا يفرّق بين تكلفة التاجر وسعر العميل.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>قائمة المنتجات المقبولة (أو غير المقبولة) عامة، لا تقول شيئاً عن منتجات هذا التاجر.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>«للحصول على تقدير التكلفة الشهرية تواصل مع المبيعات» يكسر الخدمة الذاتية في لحظة القرار.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">شريط حجز ثابت بأسفل الصفحة: التكلفة التقديرية + «احجز».</div>
+  <div class="fix">قسم «منتجاتك هنا»: المتوافق والمرفوض من كتالوجه، مع السبب.</div>
+  <div class="fix">حاسبة بسيطة: عدد الطلبات الشهرية ← تكلفة تقديرية، بدل التواصل مع المبيعات.</div>
+  <div class="fix">ترتيب الأقسام حسب القرار: توافق ← تكلفة ← تغطية ← ثقة (تقييمات) ← تفاصيل.</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> 9 أقسام · المقترح: 4 أقسام أساسية والباقي قابل للتوسيع</div>
+</article>
+
+<article class="screen" id="s3"><div class="screen-h"><span class="sn">3</span><div><h3>إعدادات الحجز</h3><p>قائمة جانبية بخطوات: بيانات الفرع، ثم نطاق التغطية وتسعيرة الشحن لكل من الاقتصادي والعادي والسريع.</p></div><div class="score"><b class="num">2.4</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev c">حرجة</span><span>~30 حقلاً إلزامياً (5 حقول نطاق + 5 تسعير × 3 مسارات) قبل الحجز، وكلها لها إجابة منطقية يمكن اقتراحها.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>التاجر يرى «تكلفتك 24 ر.س» و«تكلفة الشحن للعميل» ويحسب الفرق بنفسه. الخسارة لا تظهر إلا ذهنياً.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>«حتى وزن للشحنة» و«لكل» و«تكلفة الوزن الإضافي» مصطلحات تحتاج شرحاً.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>لا حفظ كمسودة. الخروج من الصفحة يضيّع كل شيء.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">تعبئة كل شيء افتراضياً (سعر العميل = تكلفة الناقل، النطاق = مدينة الفرع)، وشاشة «راجع وأكّد» بضغطة واحدة.</div>
+  <div class="fix">مؤشر هامش حي: «تربح 2 ر.س لكل شحنة» أو «تتحمل 4 ر.س».</div>
+  <div class="fix">جملة بدل المصطلحات: «20 ر.س حتى 15 كجم، ثم 2 ر.س لكل كيلو».</div>
+  <div class="fix">التخصيص لكل مسار في درج جانبي، وليس جزءاً من الحجز.</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> ~30 حقلاً، 4 مفاهيم جديدة (مسار، نطاق، تكلفة ناقل، وزن أساسي) · المقترح: 0 حقول إلزامية</div>
+</article>
+
+<article class="screen" id="s4"><div class="screen-h"><span class="sn">4</span><div><h3>مستودعاتي</h3><p>جدول المستودعات المحجوزة بحالة كل مستودع وقائمة ⋯ (الإعدادات، الحذف).</p></div><div class="score"><b class="num">2.8</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev c">حرجة</span><span>الحالة «بانتظار» لا تقول ماذا ينتظر المستودع. المستودع لن يعمل حتى ينقل التاجر مخزوناً، ولا يوجد زر لذلك في الصف.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>«الإعدادات» و«حذف» في نفس القائمة المخفية، والحذف إجراء خطير بجانب إجراء يومي.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>لا أرقام تشغيلية في الصف (المخزون، الطلبات المشحونة) فلا يعرف التاجر هل المستودع يعمل.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">عمود «الخطوة التالية» بزر واحد: «أرسل أول مخزون»، «ادفع 45 ر.س»، «راجع النتيجة».</div>
+  <div class="fix">حالة بلغة التاجر: «محجوز · بانتظار مخزونك» بدل «بانتظار».</div>
+  <div class="fix">الحذف داخل صفحة الإعدادات مع تأكيد يوضح الأثر (المخزون المتبقي، الطلبات المفتوحة).</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> منخفض لكن بلا توجيه · المقترح: كل صف يحمل إجراءه التالي</div>
+</article>
+
+<article class="screen" id="s5"><div class="screen-h"><span class="sn">5</span><div><h3>إعدادات المستودع (بعد الحجز)</h3><p>درج أو صفحة لتعديل التغطية والتسعير لكل مسار.</p></div><div class="score"><b class="num">2.9</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev h">عالية</span><span>نفس البيانات بشكل مختلف عن صفحة الحجز، فيتعلّم التاجر واجهتين لنفس الشيء.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>النسخة الأولى بالتبويبات أعطت انطباعاً بسعر واحد. تم حلها بالكتل المتتالية، لكن يبقى الطول.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">مكوّن واحد «بطاقة مسار» يُستخدم في الحجز والإعدادات بنفس الشكل.</div>
+  <div class="fix">ملخص لكل مسار مع حالة التشغيل (مفعّل · موقوف)، والتعديل في درج.</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> متوسط · المقترح: نفس المكوّن في كل مكان</div>
+</article>
+
+<article class="screen" id="s6"><div class="screen-h"><span class="sn">6</span><div><h3>طلب نقل جديد</h3><p>فرع الإرسال والاستلام، طريقة التسليم، تعليمات المستودع، المنتجات، تفاصيل الشحن.</p></div><div class="score"><b class="num">3.4</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev h">عالية</span><span>القائمة تعرض كل المنتجات، والمرفوضة تُكتشف بعد إضافتها. التاجر يضيف ثم يحذف.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>إضافة منتج واحد في كل مرة. تاجر بـ 200 منتج يحتاج 200 اختيار.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>شريط التعليمات و20 قاعدة يتنافسان على الانتباه مع جدول المنتجات.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>لا اقتراح للكميات، والتاجر لا يعرف كم يرسل.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">قائمة المنتجات تقسم نفسها: «جاهزة للإرسال» و«لا يقبلها المستودع» (معطلة مع السبب).</div>
+  <div class="fix">«أضف كل المتوافق» وتحديد متعدد مع البحث.</div>
+  <div class="fix">كمية مقترحة = مبيعات 30 يوماً، قابلة للتعديل، مع مؤشر السعة المتبقية.</div>
+  <div class="fix">التعليمات تظهر عند المخالفة فقط، ومختصرها في سطر.</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> قرار لكل منتج · المقترح: قرار واحد «أرسل المقترح» ثم تعديل الاستثناءات</div>
+</article>
+
+<article class="screen" id="s7"><div class="screen-h"><span class="sn">7</span><div><h3>تفاصيل طلب النقل</h3><p>قائمة الطلبات الجانبية، مراحل النقل، تفاصيل الشحنة، جدول المنتجات، السجل. ثلاث حالات: بانتظار التأكيد، نتيجة المراجعة، بعد فحص الجودة.</p></div><div class="score"><b class="num">2.7</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev c">حرجة</span><span>جدول المنتجات بعد الفحص فيه 11 عموداً (مرسلة، مقبولة، مرفوضة، مستلمة، اجتازت، تالفة، مفقودة…). التاجر يريد إجابة واحدة: كم أصبح متاحاً للبيع وما المطلوب مني.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>المراحل (stepper) وحالة الطلب والسجل تكرر نفس المعلومة في ثلاثة أماكن.</span></div>
+  <div class="f"><span class="sev h">عالية</span><span>الرفض الجزئي يظهر في الجدول، والسبب في عمود ملاحظات نصي طويل.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>الإجراءات (اعتراض، طلب إرجاع، دفع) متفرقة في بطاقات مختلفة.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">ملخص بجملة: «81 وحدة متاحة للبيع · 3 تالفة تعود لك · 1 مفقودة»، والجدول الكامل عند الطلب.</div>
+  <div class="fix">بطاقة «مطلوب منك» واحدة تجمع كل الإجراءات المفتوحة مع مواعيدها.</div>
+  <div class="fix">خط زمني واحد يدمج المراحل والسجل.</div>
+  <div class="fix">الجدول يعرض الفروقات فقط افتراضياً (المنتجات التي لم تصل كاملة).</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> 11 عموداً × 5 منتجات = 55 رقماً · المقترح: 3 أرقام في الملخص + الفروقات فقط</div>
+</article>
+
+<article class="screen" id="s8"><div class="screen-h"><span class="sn">8</span><div><h3>الرسوم الإضافية ونقص الرصيد</h3><p>بطاقة الرسوم مع تفاصيلها واختيار مصدر الدفع (رصيد المتجر، المحفظة، البطاقة).</p></div><div class="score"><b class="num">3.9</b><span>من 5</span></div></div>
+ <div class="cols"><div><h4>المشاكل</h4>
+  <div class="f"><span class="sev h">عالية</span><span>الرسوم تظهر بعد الطلب. التاجر لم يعرف أن هناك رسوماً لملصقات SKU أو التغليف قبل الإرسال.</span></div>
+  <div class="f"><span class="sev m">متوسطة</span><span>عواقب عدم الدفع («يُلغى النقل») في سطر صغير أسفل البطاقة.</span></div>
+ </div><div><h4>التحسينات</h4>
+  <div class="fix">تقدير الرسوم المحتملة عند إنشاء الطلب: «قطع بلا SKU: 1 ر.س للقطعة».</div>
+  <div class="fix">الدفع التلقائي من المصدر المختار مسبقاً، مع إشعار بدل إيقاف الطلب.</div>
+  <div class="fix">العاقبة والموعد في عنوان البطاقة نفسه.</div>
+ </div></div>
+ <div class="ks"><b>الحمل الذهني:</b> منخفض · أفضل شاشة في الرحلة لأنها تختار نيابة عن التاجر</div>
+</article>
+</div></section>
+
+<section id="cross">
+  <h2>مشاكل مشتركة</h2>
+  <p class="sub">مشاكل لا تخص شاشة واحدة، وتأثيرها أكبر من أي مشكلة منفردة.</p>
+  <div class="tw"><table>
+   <thead><tr><th>المشكلة</th><th>أمثلة</th><th>التوصية</th></tr></thead>
+   <tbody>
+   <tr><td><b>تعدد المصطلحات لنفس الشيء</b></td><td>مستودعات سلة · مراكز تخزين سلة · فرع · مستودع</td><td>«مستودع» للتاجر في كل مكان، و«فرع» داخلياً فقط.</td></tr>
+   <tr><td><b>لغة النظام بدل لغة التاجر</b></td><td>مسار شحن · نطاق التغطية · حتى وزن للشحنة</td><td>«طريقة شحن»، «أين يصل»، «سعر أول 15 كجم».</td></tr>
+   <tr><td><b>الحالة باللون فقط</b></td><td>شارات السعة وحالات الجدول</td><td>نص + أيقونة + لون دائماً (إتاحة).</td></tr>
+   <tr><td><b>لا مكان واحد للخطوة التالية</b></td><td>مستودعاتي، تفاصيل الطلب، الإشعارات</td><td>بطاقة «الخطوة التالية» ثابتة أعلى مركز المستودع.</td></tr>
+   <tr><td><b>كثرة البدائل في النموذج</b></td><td>23 نسخة، أكثر من 60 بديلاً</td><td>تثبيت 3 مكونات أساسية (بطاقة مسار، بطاقة قسم، ملخص الطلب) قبل التصميم النهائي.</td></tr>
+   <tr><td><b>أرقام بلا سياق</b></td><td>234/0، 599/599 في قائمة الطلبات</td><td>«234 وحدة · لم يُستلم بعد» بدل الكسور.</td></tr>
+   </tbody></table></div>
+</section>
+
+<section id="new">
+  <h2>الحل المقترح: «مركز المستودع»</h2>
+  <p class="sub">بدل رحلة من 9 شاشات منفصلة، مركز واحد لكل مستودع يتقدم مع التاجر، ويعرض دائماً خطوة واحدة. أربع أفكار أساسية:</p>
+  <div class="two">
+    <div class="card"><h3>1 · التوافق قبل الحجز</h3><p>كتالوج التاجر يُفحص مقابل قيود كل مستودع، فتعرض البطاقة «يقبل 18 من 20 منتجاً» قبل أي قرار.</p></div>
+    <div class="card"><h3>2 · احجز بقيم مقترحة</h3><p>شاشة مراجعة واحدة: 3 طرق شحن بأسعار مقترحة وهامش ظاهر، وزر «احجز». التخصيص اختياري في درج.</p></div>
+    <div class="card"><h3>3 · إرسال مخزون مقترح</h3><p>قائمة منتجات متوافقة بكميات من مبيعات 30 يوماً، ومؤشر سعة، و«أرسل» بضغطة. المرفوض ظاهر ومعطّل مع السبب.</p></div>
+    <div class="card"><h3>4 · تتبّع بجملة واحدة</h3><p>شريط تقدم من 4 مراحل، وملخص الاستلام بثلاثة أرقام، وبطاقة «مطلوب منك» تجمع كل الإجراءات.</p></div>
+  </div>
+  <div class="flow" style="margin-top:14px"><pre class="mermaid">
+flowchart RL
+  A[اكتشف<br/>مع التوافق] --> B[راجع واحجز<br/>0 حقول إلزامية]
+  B --> C[مركز المستودع<br/>الخطوة التالية]
+  C --> D[أرسل المخزون المقترح]
+  D --> C
+  C --> E[متاح للبيع]
+  style C fill:#e3f3f1,stroke:#004956
+</pre></div>
+  <div class="cta" style="margin-top:14px"><p><b>النموذج الجديد</b> يطبّق الأفكار الأربع على نفس البيانات: اكتشاف، حجز، مركز المستودع، إرسال مخزون، وتتبّع.</p><a class="btn" href="https://claude.ai/artifact/4KBLoiHhx9nWo8VKQqb1fR" id="protoLink">افتح النموذج</a></div>
+</section>
+
+<section id="next">
+  <h2>الأولويات</h2>
+  <p class="sub">مرتبة حسب الأثر على التاجر مقابل الجهد التقديري.</p>
+  <ol class="pri">
+    <li><b>قيم افتراضية للحجز</b> مع شاشة مراجعة واحدة. أكبر تقليل للحمل الذهني، وجهد منخفض.</li>
+    <li><b>بطاقة «الخطوة التالية»</b> في مستودعاتي وتفاصيل الطلب. تسد الفجوة بين الحجز والنقل.</li>
+    <li><b>ملخص الاستلام</b> بثلاثة أرقام والجدول عند الطلب.</li>
+    <li><b>توافق الكتالوج</b> على بطاقات المستودعات. يحتاج تصنيفات المنتجات وقيود المستودع من فريق التشغيل.</li>
+    <li><b>إرسال مخزون مقترح</b> بالتحديد المتعدد والكميات من المبيعات.</li>
+    <li><b>توحيد المصطلحات</b> في كل الشاشات.</li>
+  </ol>
+  <p class="note" style="margin-top:14px">قبل التنفيذ: اختبار استخدام مع 5 تجار على مهمتي «احجز مستودعاً» و«أرسل أول مخزون»، لقياس الوقت والأخطاء في التصميم الحالي مقابل المقترح.</p>
+</section>
+</main>
+</div>
