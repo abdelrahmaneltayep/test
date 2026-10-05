@@ -471,6 +471,26 @@ th[rowspan]{vertical-align:bottom}
 .wz-info{grid-template-columns:repeat(4,minmax(0,1fr))}
 .wz-foot{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line-2);padding-top:16px}
 @media (max-width:860px){.wz{grid-template-columns:minmax(0,1fr);padding:10px}.wz-side{position:static}.wz-nav{flex-direction:row;overflow-x:auto}.wz-ni{white-space:nowrap}.wz-cost,.wz-info{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.wz-def{flex-wrap:wrap}.wz-main{padding:6px}}
+.wz-sep{height:1px;background:var(--line);margin:14px 0}
+.wz-brc{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:12px;display:flex;flex-direction:column;gap:8px}
+.wz-brc .pd-hours{font-size:12px}
+.wz-brc-row{border:0;padding:0;flex-direction:row;flex-wrap:wrap;align-items:center;gap:14px}.wz-brc-row>.row{flex:1;min-width:220px}.wz-brc-row>.stack{flex-basis:100%}
+.wz-banner{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.wz-top{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.wz-ti{width:100%;display:flex;gap:10px;align-items:center;border:0;border-bottom:3px solid var(--line);background:none;font:inherit;color:var(--ink-2);text-align:start;padding:10px 4px;cursor:pointer}
+.wz-ti small{display:block;font-size:11px;color:var(--muted)}.wz-ti.on{border-color:var(--brand);color:var(--brand);font-weight:600}.wz-ti.on .su-sn{border-color:var(--brand)}
+.wz-ti.done{border-color:var(--ok)}.wz-ti.done .su-sn{background:var(--ok);border-color:var(--ok);color:#fff}.wz-ti.bad{border-color:var(--warn)}
+.wz-sec{display:flex;flex-direction:column;gap:22px;padding-bottom:26px;border-bottom:1px solid var(--line-2);scroll-margin-top:16px}.wz-sec:last-child{border-bottom:0}
+.wz-sech{padding-top:6px}
+.wz-sumbr{display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;margin-bottom:10px}
+.wz-sumlist{display:flex;flex-direction:column;gap:8px}
+.wz-sumi{display:flex;flex-direction:column;align-items:flex-start;gap:4px;border:1px solid var(--line);border-radius:var(--r-lg);background:#fff;padding:10px 12px;font:inherit;color:inherit;text-align:start;cursor:pointer}
+.wz-sumi small{font-size:12px;color:var(--ink-2);display:flex;gap:4px;align-items:center;flex-wrap:wrap}.wz-sumi small .icon{width:14px;height:14px}.wz-sumi.on{border-color:var(--brand);box-shadow:0 0 0 3px var(--mint-50)}
+.wz.wz3{grid-template-columns:220px minmax(0,1fr) 290px}
+.wz-prev{align-self:start;position:sticky;top:12px;background:#f8fafa;border-radius:var(--r-lg);padding:16px}
+.wz-phone{border-width:6px;padding:12px 10px}.wz-phone .co-opt{cursor:default}
+@media (max-width:1100px){.wz.wz3{grid-template-columns:200px minmax(0,1fr)}.wz-prev{grid-column:1/-1;position:static}}
+@media (max-width:860px){.wz.wz3{grid-template-columns:minmax(0,1fr)}.wz-top{grid-template-columns:minmax(0,1fr)}}
 .su-bar{position:sticky;bottom:12px;box-shadow:0 8px 24px rgba(0,40,50,.1)}
 @media (max-width:760px){.su-two{grid-template-columns:1fr}.su-cost-grid{grid-template-columns:1fr}.su-sum-grid{grid-template-columns:1fr}.su-arrow{transform:rotate(-90deg);justify-self:center}.su-rhead{flex-wrap:wrap}}
 .dd-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -1632,19 +1652,11 @@ function wzCov(su,rid,w){su.cv=su.cv||{}; if(!su.cv[rid]) su.cv[rid]={name:rid==
 const WZ_STEPS=[['br','بيانات الفرع']].concat(RT_ORDER.map(k=>[k,RT_META[k].n]));
 function wzSel(k,opts,v,lbl){return `<div class="fld"><label>${lbl} <i>*</i></label><select class="inp" data-cv="${k}" aria-label="${lbl}">${opts.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;}
 function wzSum(r,cv){return pdSum(r).replace(/^.*?كم<span class="dot-sep">·<\/span>/,`${I.map}${esc(cv.city)}، ${esc(cv.district)}<span class="dot-sep">·</span>`);}
-function wzPage(w,id,su){
-  const st=su.wz??0, [key,title]=WZ_STEPS[st];
-  const nav=`<aside class="wz-side"><b class="wz-st">تحديد نطاق التغطية وتسعيرة الشحن</b><p class="sm muted" style="margin:4px 0 14px">سيتم إنشاء 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به.</p>
-     <nav class="wz-nav" aria-label="خطوات الإعداد">${WZ_STEPS.map(([k,t],i)=>{const on=i===st, done=(k==='br'&&(su.wzSeen||[]).includes('br')&&!on)||(k!=='br'&&pdDone(su.routes[k])&&i!==st&&(su.wzSeen||[]).includes(k)); const ic=k==='br'?I.box:RT_META[k].ic;
-       return `<button type="button" class="wz-ni ${on?'on':''}" data-act="wz-go" data-v="${i}" aria-current="${on?'step':'false'}"><span class="wz-nic">${ic}</span><span class="grow">${t}</span>${done?`<span class="pd-ok">${I.check}</span>`:on?'<span aria-hidden="true">←</span>':(k!=='br'&&(su.wzSeen||[]).includes(k))?'<span class="pill warn">ناقص</span>':''}</button>`;}).join('')}</nav></aside>`;
-  let body='';
-  if(key==='br'){const ti=todayInfo(w);
-    body=`<section class="stack" style="gap:12px"><div class="row between"><div><h3 class="wz-h">بيانات الفرع</h3><p class="sm muted" style="margin:4px 0 0">سيُضاف هذا المستودع كفرع في متجرك. بياناته الأساسية يديرها المستودع.</p></div>${opBadge(id)}</div>
+function wzBrBody(w,id,su){const ti=todayInfo(w); return `<section class="stack" style="gap:12px"><div class="row between"><div><h3 class="wz-h">بيانات الفرع</h3><p class="sm muted" style="margin:4px 0 0">سيُضاف هذا المستودع كفرع في متجرك. بياناته الأساسية يديرها المستودع.</p></div>${opBadge(id)}</div>
       <div class="pd-info wz-info"><div><span>اسم الفرع</span><b>${w.name}</b></div><div><span>المدينة</span><b>${w.city}</b></div><div><span>الشركة المشغّلة</span><b>${OPERATOR[id]}</b></div><div><span>وقت التجهيز</span><b>حتى 24 ساعة</b></div></div></section>
       <section class="stack" style="gap:12px"><div class="row between"><div><h3 class="wz-h">موقع الاستلام</h3><p class="sm muted" style="margin:4px 0 0">يصل مندوب الشحن إلى هذا الموقع لاستلام الطلبات.</p></div>${pinBtn(su)}</div>${suMap(su,220)}<div class="sm ink2">${I.pin} ${w.name}، ${w.city}${su.pinMoved?' · <b>موقع معدّل</b>':''}</div></section>
       <section class="stack" style="gap:12px"><div class="row between"><h3 class="wz-h">ساعات العمل</h3><span class="pill ${ti.open?'ok':'warn'}">${I.clock}${ti.txt}</span></div>${pdHoursTable(w)}<p class="sm muted" style="margin:0">ساعات العمل يحددها المستودع، وتُستخدم لحساب مواعيد التجهيز والتوصيل.</p></section>`;}
-  else {const rid=key, r=su.routes[rid], c=RCOST[rid], cv=wzCov(su,rid,w), ed=(su.covEdit||[]).includes(rid);
-    body=`<section class="stack" style="gap:12px" data-sr="${rid}"><div><h3 class="wz-h">نطاق التغطية</h3><p class="sm muted" style="margin:4px 0 0">المناطق التي يظهر فيها «${RT_META[rid].n}» لعملائك في صفحة الدفع.</p></div>
+function wzRtBody(rid,w,su){const r=su.routes[rid], c=RCOST[rid], cv=wzCov(su,rid,w), ed=(su.covEdit||[]).includes(rid); return `<section class="stack" style="gap:12px" data-sr="${rid}"><div><h3 class="wz-h">نطاق التغطية</h3><p class="sm muted" style="margin:4px 0 0">المناطق التي يظهر فيها «${RT_META[rid].n}» لعملائك في صفحة الدفع.</p></div>
       ${ed?`<div class="wz-box stack" style="gap:14px"><div class="fld"><label>اسم النطاق <i>*</i></label><div class="field wide"><input data-cv="name" value="${esc(cv.name)}" placeholder="أدخل اسم المنطقة، مثل: توصيل شمال جدة"><em>AR</em></div></div>
          <div class="grid2">${wzSel('country',['السعودية'],cv.country,'الدولة')}${wzSel('region',REGIONS,cv.region,'المنطقة')}</div>
          <div class="grid2">${wzSel('city',CITIES,cv.city,'المدينة')}${wzSel('district',DISTRICTS,cv.district,'الحي')}</div>
@@ -1657,22 +1669,68 @@ function wzPage(w,id,su){
         <div class="wz-cost"><div><span>التكلفة الأساسية</span><b class="num">${c.base} ر.س</b><small>لأول ${c.w} كجم</small></div><div><span>الوزن الإضافي</span><b class="num">${c.extra} ر.س</b><small>لكل ${c.per} كجم إضافي</small></div><div><span>مدة التوصيل من شركة الشحن</span><b>${c.dur}</b><small>${rid==='exp'?'داخل المدينة':'أيام عمل'}</small></div></div>
         ${pdType(r.p)}${r.p.type==='weight'?pdW(r.p):`<div class="grid2">${pdFee(r.p)}<div></div></div>`}
         <div class="pd-prev sm"><span class="muted">يظهر لعميلك:</span> <span data-sl="wzsum">${wzSum(r,cv)}</span></div></div></section>`;}
+function wzPage(w,id,su){
+  const st=su.wz??0, [key,title]=WZ_STEPS[st];
+  const nav=`<aside class="wz-side"><b class="wz-st">تحديد نطاق التغطية وتسعيرة الشحن</b><p class="sm muted" style="margin:4px 0 14px">سيتم إنشاء 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به.</p>
+     <nav class="wz-nav" aria-label="خطوات الإعداد">${WZ_STEPS.map(([k,t],i)=>{const on=i===st, done=(k==='br'&&(su.wzSeen||[]).includes('br')&&!on)||(k!=='br'&&pdDone(su.routes[k])&&i!==st&&(su.wzSeen||[]).includes(k)); const ic=k==='br'?I.box:RT_META[k].ic;
+       return `<button type="button" class="wz-ni ${on?'on':''}" data-act="wz-go" data-v="${i}" aria-current="${on?'step':'false'}"><span class="wz-nic">${ic}</span><span class="grow">${t}</span>${done?`<span class="pd-ok">${I.check}</span>`:on?'<span aria-hidden="true">←</span>':(k!=='br'&&(su.wzSeen||[]).includes(k))?'<span class="pill warn">ناقص</span>':''}</button>`;}).join('')}</nav></aside>`;
+  let body='';
+  body=key==='br'?wzBrBody(w,id,su):wzRtBody(key,w,su);
   const last=st===WZ_STEPS.length-1;
   return `<div class="wz">${nav}<div class="wz-main"><div class="wz-step sm muted">الخطوة ${st+1} من ${WZ_STEPS.length} · ${title}</div>${body}
     <div class="wz-foot"><button class="btn" type="button" ${st===0?'data-go="browse"':`data-act="wz-go" data-v="${st-1}"`}>${st===0?'إلغاء':'الرجوع للخلف'}</button>${last?`<button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button>`:`<button class="btn btn-p" type="button" data-act="wz-go" data-v="${st+1}">التالي</button>`}</div></div></div>`;
+}
+
+/* ---------- settings page: 5 more layouts ---------- */
+PD_UIS.splice(1,0,['wz-a','الإعدادات أ: بطاقة الفرع ثابتة'],['wz-b','ب: شريط خطوات علوي'],['wz-c','ج: صفحة واحدة + فهرس'],['wz-d','د: ملخص حي جانبي'],['wz-e','هـ: مع معاينة صفحة الدفع']);
+const wzRDone=(su,k)=>pdDone(su.routes[k]);
+const wzFoot=(i,n,act)=>`<div class="wz-foot"><button class="btn" type="button" ${i===0?'data-go="browse"':`data-act="${act}" data-v="${i-1}"`}>${i===0?'إلغاء':'الرجوع للخلف'}</button>${i===n-1?`<button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button>`:`<button class="btn btn-p" type="button" data-act="${act}" data-v="${i+1}">التالي</button>`}</div>`;
+const wzRNav=(su,cur,act)=>`<nav class="wz-nav" aria-label="مسارات الشحن">${RT_ORDER.map((k,i)=>{const on=i===cur, seen=(su.wzSeenR||[]).includes(k), ok=wzRDone(su,k); return `<button type="button" class="wz-ni ${on?'on':''}" data-act="${act}" data-v="${i}" aria-current="${on?'step':'false'}"><span class="wz-nic">${RT_META[k].ic}</span><span class="grow">${RT_META[k].n}</span>${on?'<span aria-hidden="true">←</span>':seen?(ok?`<span class="pd-ok">${I.check}</span>`:'<span class="pill warn">ناقص</span>'):''}</button>`;}).join('')}</nav>`;
+const wzHead=`<b class="wz-st">تحديد نطاق التغطية وتسعيرة الشحن</b><p class="sm muted" style="margin:4px 0 14px">سيتم إنشاء 3 مسارات شحن تلقائياً لهذا المستودع. لكل مسار نطاق تغطية وتسعيرة خاصة به.</p>`;
+function wzBrMini(w,id,su,{open=false,act='wz-bro'}={}){const ti=todayInfo(w);
+  return `<div class="wz-brc"><div class="row" style="gap:10px;flex-wrap:nowrap"><div class="wimg" style="width:44px;height:44px">${whImg(w)}</div><div style="min-width:0"><b>${w.name}</b><div class="sm muted">${w.city} · تشغيل ${OPERATOR[id]}</div></div></div>
+   <span class="pill ${ti.open?'ok':'warn'}" style="align-self:flex-start">${I.clock}${ti.txt}</span>
+   <button class="link-btn sm" type="button" data-act="${act}" aria-expanded="${open}" style="align-self:flex-start">${open?'إخفاء التفاصيل':'الموقع وساعات العمل'}</button>
+   ${open?`<div class="stack" style="gap:8px">${suMap(su,140)}${pinBtn(su)}${pdHoursTable(w)}</div>`:''}</div>`;}
+function wzPreview(w,su){const R=su.routes;
+  return `<div class="co-phone wz-phone"><div class="sm muted">صفحة الدفع · عميل من ${w.city}</div>${RT_ORDER.map(k=>{const r=R[k], cv=wzCov(su,k,w); return `<div class="co-opt ${k===RT_ORDER[su.wzR||0]?'on':''}" data-sr="${k}"><span class="co-radio"></span><span class="grow"><b>${RT_META[k].n}</b><small>${esc(r.p.dur||RT_META[k].d)} · ${esc(cv.city)}</small></span><b class="num" data-sl="wzfee">${r.p.fee===''?'—':r.p.fee+' ر.س'}</b></div>`;}).join('')}</div>`;}
+function wzPage2(w,id,su){
+  const v=S.pdUI, ri=su.wzR||0, rid=RT_ORDER[ri];
+  if(v==='wz-a') return `<div class="wz"><aside class="wz-side">${wzHead}${wzBrMini(w,id,su,{open:!!su.wzBrOpen})}<div class="wz-sep"></div>${wzRNav(su,ri,'wz2-go')}</aside>
+     <div class="wz-main"><div class="wz-step sm muted">المسار ${ri+1} من 3 · ${RT_META[rid].n}</div>${wzRtBody(rid,w,su)}${wzFoot(ri,3,'wz2-go')}</div></div>`;
+  if(v==='wz-b'){const ti=todayInfo(w);
+    return `<section class="panel pad stack"><div class="wz-banner"><div class="wimg" style="width:52px;height:52px">${whImg(w)}</div><div style="flex:1;min-width:0"><h2 style="margin:0">${w.name}</h2><div class="sm muted">${w.city} · وقت التجهيز حتى 24 ساعة</div></div>${opBadge(id)}<span class="pill ${ti.open?'ok':'warn'}">${I.clock}${ti.txt}</span><button class="btn btn-sm" type="button" data-act="wz-bro" aria-expanded="${!!su.wzBrOpen}">${I.pin}${su.wzBrOpen?'إخفاء':'الموقع وساعات العمل'}</button></div>
+      ${su.wzBrOpen?`<div class="su-two"><div class="stack" style="gap:8px">${suMap(su,180)}<div>${pinBtn(su)}</div></div>${pdHoursTable(w)}</div>`:''}</section>
+     <section class="panel pad stack"><div>${wzHead.replace('margin:4px 0 14px','margin:4px 0 0')}</div>
+      <ol class="wz-top">${RT_ORDER.map((k,i)=>{const on=i===ri, seen=(su.wzSeenR||[]).includes(k), ok=wzRDone(su,k); return `<li><button type="button" class="wz-ti ${on?'on':''} ${seen&&ok?'done':''} ${seen&&!ok?'bad':''}" data-act="wz2-go" data-v="${i}"><span class="su-sn">${seen&&ok&&!on?I.check:i+1}</span><span>${RT_META[k].n}<small>${RT_META[k].d}</small></span></button></li>`;}).join('')}</ol>
+      <div class="wz-main" style="padding:8px 0 0">${wzRtBody(rid,w,su)}${wzFoot(ri,3,'wz2-go')}</div></section>`;}
+  if(v==='wz-c') return `<div class="wz"><aside class="wz-side">${wzHead}<nav class="wz-nav" aria-label="أقسام الصفحة">${[['br','بيانات الفرع',I.box]].concat(RT_ORDER.map(k=>[k,RT_META[k].n,RT_META[k].ic])).map(([k,t,ic])=>`<button type="button" class="wz-ni" data-act="wz-scroll" data-v="${k}"><span class="wz-nic">${ic}</span><span class="grow">${t}</span>${k==='br'||wzRDone(su,k)?`<span class="pd-ok">${I.check}</span>`:'<span class="pill warn">ناقص</span>'}</button>`).join('')}</nav>
+       <button class="btn btn-p btn-block" type="button" data-act="su-confirm" style="margin-top:14px">${I.check}تأكيد الحجز</button></aside>
+     <div class="wz-main"><div id="wzs-br" class="wz-sec">${wzBrBody(w,id,su)}</div>${RT_ORDER.map(k=>`<div id="wzs-${k}" class="wz-sec"><div class="pd-rhead wz-sech"><span class="pd-ric ${k}">${RT_META[k].ic}</span><div><b style="font-size:18px">${RT_META[k].n}</b><div class="sm muted">${RT_META[k].d}</div></div></div>${wzRtBody(k,w,su)}</div>`).join('')}</div></div>`;
+  if(v==='wz-d'){const all=RT_ORDER.every(k=>wzRDone(su,k));
+    return `<div class="wz"><aside class="wz-side"><b class="wz-st">ملخص الحجز</b><p class="sm muted" style="margin:4px 0 12px">يتحدث مع كل تعديل. اضغط على مسار لتعديله.</p>
+      <div class="wz-sumbr">${I.pin}<div><b>${w.name}</b><div class="sm muted">${w.city} · ${OPERATOR[id]}</div></div></div>
+      <div class="wz-sumlist">${RT_ORDER.map((k,i)=>{const r=su.routes[k], cv=wzCov(su,k,w), ok=wzRDone(su,k); return `<button type="button" class="wz-sumi ${i===ri?'on':''}" data-act="wz2-go" data-v="${i}" data-sr="${k}"><span class="row between" style="width:100%"><b>${RT_META[k].n}</b>${ok?`<span class="pd-ok">${I.check}</span>`:'<span class="pill warn">ناقص</span>'}</span><small>${I.map} ${esc(cv.name)}</small><small data-sl="wzsum">${wzSum(r,cv)}</small></button>`;}).join('')}</div>
+      <button class="btn btn-p btn-block" type="button" data-act="su-confirm" ${all?'':'disabled'} style="margin-top:12px">${I.check}تأكيد الحجز</button>${all?'':'<p class="sm muted" style="margin:6px 0 0;text-align:center">أكمل المسارات الناقصة للتأكيد</p>'}</aside>
+     <div class="wz-main"><div class="wz-step sm muted">المسار ${ri+1} من 3 · ${RT_META[rid].n}</div>${wzRtBody(rid,w,su)}<div class="wz-foot"><button class="btn" type="button" ${ri===0?'data-go="browse"':`data-act="wz2-go" data-v="${ri-1}"`}>${ri===0?'إلغاء':'المسار السابق'}</button>${ri<2?`<button class="btn btn-p" type="button" data-act="wz2-go" data-v="${ri+1}">المسار التالي</button>`:''}</div></div></div>`;}
+  if(v==='wz-e') return `<section class="panel pad">${wzBrMini(w,id,su,{open:!!su.wzBrOpen}).replace('class="wz-brc"','class="wz-brc wz-brc-row"')}</section>
+     <div class="wz wz3"><aside class="wz-side">${wzRNav(su,ri,'wz2-go')}</aside>
+      <div class="wz-main"><div class="wz-step sm muted">المسار ${ri+1} من 3 · ${RT_META[rid].n}</div>${wzRtBody(rid,w,su)}${wzFoot(ri,3,'wz2-go')}</div>
+      <aside class="wz-prev"><b>كيف يراه عميلك</b><p class="sm muted" style="margin:2px 0 10px">تتحدث المعاينة مع كل تعديل.</p>${wzPreview(w,su)}</aside></div>`;
+  return '';
 }
 
 function screenSetup(id){
   const w=wh(id); if(!w) return screenList('browse');
   if(!S.setup||S.setup.wh!==id) S.setup=newSetup(id);
   const su=S.setup;
-  return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack ${S.pdUI==='wizard'?'wide':''}" id="suRoot">
+  return crumbs(['الشحن والتوصيل','browse'],['مستودعات سلة','browse'],[`حجز ${w.city}`,''])+`<div class="su-wrap stack ${S.pdUI==='wizard'||S.pdUI.startsWith('wz-')?'wide':''}" id="suRoot">
    ${suSw('نسخة الصفحة:',PD_UIS,S.pdUI,'pd-ui').replace(/>\d+\. /g,'>')}
-   ${S.pdUI==='wizard'?wzPage(w,id,su):S.pdUI!=='explore'?(pdPage(w,id,su)||pdPage2(w,id,su)):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
+   ${S.pdUI==='wizard'?wzPage(w,id,su):S.pdUI.startsWith('wz-')?wzPage2(w,id,su):S.pdUI!=='explore'?(pdPage(w,id,su)||pdPage2(w,id,su)):`${suSw('بيانات الفرع:',SU_BR,S.suBrUI,'su-br-ui')}
    ${suBranchArea(w,su,id)}
    ${suSw('مسارات الشحن:',SU_RT,S.suRtUI,'su-rt-ui')}
    ${suRoutesArea(w,su)}`}
-   ${S.pdUI==='wizard'?'':S.pdUI==='steps'&&(su.pdStep??0)<4?`<section class="panel pad row between su-bar"><span class="sm muted">أكمل الخطوات الأربع لتأكيد الحجز.</span><button class="btn btn-p" type="button" disabled>${I.check}تأكيد الحجز</button></section>`:`<section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>`}
+   ${S.pdUI.startsWith('wiz')||S.pdUI.startsWith('wz-')?'':S.pdUI==='steps'&&(su.pdStep??0)<4?`<section class="panel pad row between su-bar"><span class="sm muted">أكمل الخطوات الأربع لتأكيد الحجز.</span><button class="btn btn-p" type="button" disabled>${I.check}تأكيد الحجز</button></section>`:`<section class="panel pad row between su-bar"><span class="sm muted">جاهز للحجز؟ يمكنك تعديل المسارات والتسعير لاحقاً من «مستودعاتي».</span><button class="btn btn-p" type="button" data-act="su-confirm">${I.check}تأكيد الحجز</button></section>`}
   </div>`;
 }
 function suRefreshRoute(rid){
@@ -1683,7 +1741,8 @@ function suRefreshRoute(rid){
   const rd=box.querySelector('[data-sl=rad]'); if(rd) rd.textContent=r.cov.radius||'—';
   box.querySelectorAll('[data-sl=mg]').forEach(m=>m.innerHTML=suMargin(rid,r.p));
   box.querySelectorAll('[data-sl=pdsum]').forEach(m=>m.innerHTML=pdSum(r));
-  box.querySelectorAll('[data-sl=wzsum]').forEach(m=>m.innerHTML=wzSum(r,wzCov(su,rid,w)));});
+  box.querySelectorAll('[data-sl=wzsum]').forEach(m=>m.innerHTML=wzSum(r,wzCov(su,rid,w)));
+  box.querySelectorAll('[data-sl=wzfee]').forEach(m=>m.textContent=r.p.fee===''?'—':r.p.fee+' ر.س');});
   const co=document.querySelector(`[data-sl-co="${rid}"]`); if(co&&co.textContent) co.textContent=r.p.fee===''?'—':r.p.fee+' ر.س';
   const li=document.querySelector(`[data-sl-list="${rid}"]`); if(li) li.textContent=r.on?`${covLabel(r.cov,w.city)} · ${r.p.fee===''?'بدون سعر':r.p.fee+' ر.س'}`:'موقوف';
 }
@@ -2137,9 +2196,12 @@ document.addEventListener('click',e=>{
   if(act==='su-cov'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>r.cov.mode=a.dataset.v); rerenderSetup();}
   if(act==='su-city-rm'){const rid=a.closest('[data-sr]').dataset.sr; suT(rid).forEach(r=>{r.cov.cities=r.cov.cities.filter(x=>x!==a.dataset.v);}); rerenderSetup();}
   if(act==='pd-ui'){S.pdUI=a.dataset.v; if(['sum'].includes(a.dataset.v)) S.setup.open=[]; if(a.dataset.v==='shared'){const su=S.setup; su.ovr=[]; RT_ORDER.forEach(k=>{if(k!=='std'){su.routes[k].p={...su.routes.std.p}; su.routes[k].cov={...su.routes.std.cov};}});} rerenderSetup();}
+  if(act==='wz2-go'){const su=S.setup; su.wzSeenR=[...new Set([...(su.wzSeenR||[]),RT_ORDER[su.wzR||0]])]; su.wzR=+a.dataset.v; rerenderSetup(); if(S.pdUI!=='wz-d') document.scrollingElement.scrollTop=0; return;}
+  if(act==='wz-bro'){S.setup.wzBrOpen=!S.setup.wzBrOpen; rerenderSetup(); return;}
+  if(act==='wz-scroll'){document.getElementById('wzs-'+a.dataset.v)?.scrollIntoView({behavior:'smooth',block:'start'}); return;}
   if(act==='wz-go'){const su=S.setup, cur=WZ_STEPS[su.wz??0][0]; su.wzSeen=[...new Set([...(su.wzSeen||[]),cur])]; su.wz=+a.dataset.v; rerenderSetup(); document.scrollingElement.scrollTop=0; return;}
-  if(act==='wz-cov-edit'){const su=S.setup, rid=WZ_STEPS[su.wz][0], l=su.covEdit||[]; if(l.includes(rid)){su.covEdit=l.filter(x=>x!==rid); toast('تم حفظ نطاق التغطية');} else su.covEdit=[...l,rid]; rerenderSetup(); return;}
-  if(act==='wz-cov-reset'){const su=S.setup, rid=WZ_STEPS[su.wz][0]; delete su.cv[rid]; if(su.cvCustom) delete su.cvCustom[rid]; su.covEdit=(su.covEdit||[]).filter(x=>x!==rid); rerenderSetup(); return;}
+  if(act==='wz-cov-edit'){const su=S.setup, rid=a.closest('[data-sr]').dataset.sr, l=su.covEdit||[]; if(l.includes(rid)){su.covEdit=l.filter(x=>x!==rid); toast('تم حفظ نطاق التغطية');} else su.covEdit=[...l,rid]; rerenderSetup(); return;}
+  if(act==='wz-cov-reset'){const su=S.setup, rid=a.closest('[data-sr]').dataset.sr; delete su.cv[rid]; if(su.cvCustom) delete su.cvCustom[rid]; su.covEdit=(su.covEdit||[]).filter(x=>x!==rid); rerenderSetup(); return;}
   if(act==='pd-dr'){pdDrawerOpen(a.dataset.v); return;}
   if(act==='pd-dr-close'){S.setup.pdDr=null; closeDrawer(); rerenderSetup(); return;}
   if(act==='pd-pre'){const rid=a.closest('[data-sr]').dataset.sr; S.setup.pdPre={...(S.setup.pdPre||{}),[rid]:a.dataset.v}; pdApplyPreset(rid,a.dataset.v); rerenderSetup();}
@@ -2190,7 +2252,7 @@ document.addEventListener('input',e=>{
     const rid=e.target.closest('[data-sr]').dataset.sr, f=e.target.dataset.su;
     if(f==='radius') suT(rid).forEach(r=>r.cov.radius=e.target.value); else suT(rid).forEach(r=>r.p[f]=e.target.value);
     if(rid==='__all'){const rd=e.target.closest('[data-sr]').querySelector('[data-sl=rad]'); if(rd) rd.textContent=e.target.value||'—'; ROUTES.forEach(R=>suRefreshRoute(R.id));} else suRefreshRoute(rid); return;}
-  if(e.target.dataset.cv==='name'&&S.setup){const su=S.setup, rid=WZ_STEPS[su.wz][0]; su.cv[rid].name=e.target.value; su.cvCustom={...(su.cvCustom||{}),[rid]:true}; return;}
+  if(e.target.dataset.cv==='name'&&S.setup){const su=S.setup, rid=e.target.closest('[data-sr]').dataset.sr; su.cv[rid].name=e.target.value; su.cvCustom={...(su.cvCustom||{}),[rid]:true}; return;}
   if(e.target.id==='mq'){S.mq=e.target.value; const pos=e.target.selectionStart; route(); const q=document.getElementById('mq'); q.focus(); q.setSelectionRange(pos,pos);}
   if(e.target.dataset.zfi&&S.zoneEdit){S.zoneEdit.draft[e.target.dataset.zfi]=e.target.value; if(e.target.dataset.zfi==='radius'){rerenderSettings(); document.getElementById('zf-rad')?.focus();}}
   const f=e.target.dataset.pf;
@@ -2213,7 +2275,7 @@ document.addEventListener('change',e=>{
     else if(f==='type') suT(rid).forEach(x=>x.p.type=e.target.value);
     else if(f==='addcity'&&e.target.value) r.cov.cities.push(e.target.value);
     rerenderSetup(); return;}
-  if(e.target.dataset.cv&&S.setup){const su=S.setup, rid=WZ_STEPS[su.wz][0], k=e.target.dataset.cv; su.cv[rid][k]=e.target.value; su.cvCustom={...(su.cvCustom||{}),[rid]:true}; if(k==='city'&&CITY_REGION[e.target.value]) su.cv[rid].region=CITY_REGION[e.target.value]; if(k!=='name') rerenderSetup(); return;}
+  if(e.target.dataset.cv&&S.setup){const su=S.setup, rid=e.target.closest('[data-sr]').dataset.sr, k=e.target.dataset.cv; su.cv[rid][k]=e.target.value; su.cvCustom={...(su.cvCustom||{}),[rid]:true}; if(k==='city'&&CITY_REGION[e.target.value]) su.cv[rid].region=CITY_REGION[e.target.value]; if(k!=='name') rerenderSetup(); return;}
   if(e.target.dataset.pdxw&&S.setup){const k=e.target.dataset.pdxw; S.setup.pdXw={...(S.setup.pdXw||{}),[k]:e.target.checked}; if(!e.target.checked) S.setup.routes[k].p.extra=''; rerenderSetup(); return;}
   if(e.target.dataset.actSel==='su-pvcity'){S.setup.pvCity=e.target.value; rerenderSetup(); return;}
   if(e.target.id==='city'){S.city=e.target.value;route();}
