@@ -1,0 +1,97 @@
+# Highbase — subcategories as pages (prototype)
+
+A clickable proposal for the storefront category page, built on the Highbase design
+system. It changes nothing in the system or the Figma file; it is the thing to push
+to Figma next. This revision follows the attached `Highbase_Category_Prototype.html`
+(side filter panel, buyer/guest views, cart bar, bottom sheets) rebuilt from the system's
+own components.
+
+```
+node build.js /path/to/highbase-ds   # writes index.html (and --artifact for the hosted copy)
+node test.js                         # the pure rules: breadcrumb, no-children, counts, URLs, filters, sort, tiers
+NODE_PATH=... node shots.js out/      # Playwright screenshots + behaviour checks
+open index.html
+```
+
+`index.html` is committed, so it opens without a build. The web fonts are the only
+network request; tokens, component CSS, the icon sprite and the product data are inlined.
+
+## Two versions, one switch
+
+| Version | What it is |
+|---|---|
+| **A · Side filters (new)** | the attached proposal: side filter panel, sort, applied chips, the richer product card, cart bar, sheets |
+| **C · Side filters + search** | Version A with the live search field ("Search among N products…") in the toolbar beside Sort by, and on phones a grid / list switch next to the search; the term shows as an applied chip |
+| **M · Mobile, Talabat pattern** | the CEO's suggestion for phones: back arrow + level-0 title (opens the category menu), level-1 tabs, level-2 circles with "All" first and a ring on the current one, Sort / Brand / Supplier / Filters dropdown chips opening the sheets, an "Order again" row, and a compact two-column card with a + button that turns into the stepper, savings and "Best seller" / "Ordered before" tags, the search field with the grid / list switch beside it as the live page has; bottom bar Home / Brands / Cart / Profile as the live app `(proposal)` |
+| **B · Live + subcategory tiles** | the live page's logic as recorded on 4 Oct 2026 (title, top bar with search / Min Price / Max Price / Categories pop-up, "Only My Vendors", "Showing from … out of …", live card with coupon, Supplier Name, Add to Cart, Match My Price, pagination, the live empty state) plus the subcategory tiles and the Home-rooted breadcrumb |
+
+Both share the tree, the products, the tiles, the sibling pills, the mega menu, routing and tracking. In B the Categories pop-up keeps the live three-column checkbox tree; because every level is now a page, ticking a category opens that page (tracked with `source: "filter_popup"`, outside the brief's four sources) `(decision)`. The breadcrumb sits under the title as the live page places it, with Home added.
+
+## In Figma
+
+Version C was pushed on 4 Oct 2026 to the Marketplace file, page "🔸 Categories proposal": https://www.figma.com/design/80SOkAdwrp2xFD6yhQHJ27/Marketplace?node-id=1805-11346 — three desktop frames (levels 0, 1, 2) and three mobile frames (grid, list, Filters sheet), built from DS library instances with every value bound to a DS variable or text style. The decisions still open are listed in the notes block beside the frames.
+
+## The prototype bar
+
+| Control | What it does |
+|---|---|
+| Version A / B | switches between the two versions above |
+| Preview Desktop / Mobile | Mobile renders the page inside a 390 × 844 phone frame with the same rules a real narrow window gets |
+| Viewing as Signed-in buyer / Guest | Guest sees list prices, "Your business price after sign-in" and "Sign in to order" `(proposal)` |
+| Language English / العربية | flips `dir`, the font family and the copy; the URL prefix follows (`/bh-en`, `/bh-ar`) |
+| No children / Lowest level | jump links to the two edge cases |
+| PostHog events (bottom corner) | every capture the page would send |
+
+## What it is built against
+
+| Source | What it gave |
+|---|---|
+| Mobile screen recording, 30 s, 4 Oct 2026 `(live)` | the live phone page: title + breadcrumb, "All Products" with search and filter icon, "Only My Vendors", one card per row, bottom bar Home / Brands / Cart / Profile |
+| Screen recording, 12 s, 4 Oct 2026 `(live)` | the header, the three-column mega menu, the Fresh Foods & Dairy > Dairy, Eggs & Cheese branch (verbatim), title, dot breadcrumb, the 4-up product grid |
+| The brief | every navigation behaviour and the tile spec |
+| `Highbase_Category_Prototype.html` (attached) | the side filter panel and its groups, promo chips, sort options, applied chips, the product card content (pack line, per-unit price, tier pill, delivery, minimum order, line total), add → stepper, cart bar, toast, guest and not-my-supplier states, Filters/Sort bottom sheets, bottom nav, the 26 illustrative products and the Arabic copy |
+| `highbase-ds` | every colour, space, radius and type value; Header, Search, Card, Text Field, Checkbox, Radio, Switch, Chip, Badge, Avatar, Breadcrumb, Product Card, Add to Cart, Snackbar, Bottom Sheet, Dialog Header, Dialog Actions and Empty State are the system's own CSS |
+
+Branches of the tree the recording did not expand are `(proposal)` fillers. The 26 products
+are the attached prototype's, mapped onto the tree's leaves; leaves without any get stable
+generated fillers so no page is empty.
+
+## How the brief maps
+
+| Brief | Where |
+|---|---|
+| Every level is its own page with its own URL; Back works; reload restores | hash routing stands in for Inertia visits; the address bar shows the real URL `/bh-en/storefront/products?filter[category]=<slug>` |
+| Level 0 and level 1 show child tiles; level 2 and childless level 1 show the sibling tiles under "More in <parent>", the current one outlined and `aria-current="page"` (decision 4 Oct: tiles at every level, no pills) | `HBModel.section()` in `model.js`, tested |
+| Breadcrumb Home > ancestors (links) > current (plain text) | `HBModel.breadcrumb()`, tested; the Breadcrumb molecule renders it |
+| Title = category name + product count | `.page__title` |
+| Navigation resets filters, pagination and scroll; focus moves to the title | full re-render on `hashchange`; checked by `shots.js` |
+| Filter panel at the side on desktop, no category tree in it; behind a Filters button on mobile | `.fpanel` (Card organism, 250 px, sticky); the Filters sheet on mobile applies on "Show n products" |
+| Mega menu keeps three columns; every entry at every level is a link | `.mega__item` is an `<a>` at levels 0, 1, 2 plus "All in …" per column; hover reveals columns on desktop, taps drill down on phones |
+| Tile: 1:1 grey square, 14 px radius, image contain with 10 % padding, placeholder icon when no image, bold 14 px name on two lines, outline + lift on hover/focus, whole tile one `<a>` | `.scard` |
+| Desktop 112 px tiles, 18 px gap, wrapping; mobile 92 px in one scrolling row, no scrollbar; back link replaces breadcrumb | `.subs__grid`, the `.m` rules |
+| RTL mirrors with logical properties; chevrons flip; Latin product data keeps its reading order inside Arabic | `[dir="rtl"]`, `data-mirror`, `unicode-bidi: plaintext` on product text |
+| PostHog `storefront_subcategory_selected` {from_category, to_category, level, source card/pill/breadcrumb/mega_menu}; one `$pageview` per navigation, none per keystroke or filter change | `track()` in `app.js`; the events panel shows every capture |
+| Keyboard: Tab reaches every tile, pill, crumb and menu entry, Enter opens it; Escape closes the menu and the sheets | checked by `shots.js` |
+
+## Decisions the brief leaves to you `(decision)`
+
+- **Tile background and radius.** The brief says `#F3F4F6` and 14 px. The system has no 14 px radius and its nearest grey is `surface-container-low`. The tile uses the token for the grey and a literal 14 px, marked `BRIEF` in `proto.css`. For Figma, either add `rounded/14px` or round to 12.
+- **Current sibling tile.** Level-2 and childless pages show the siblings as tiles (same component as the children) with the current one outlined in primary; the pill row was dropped on 4 Oct.
+- **Discount chip.** The system's Chip has no offer style, so the chip uses the secondary container colours via `data-tone="offer"`; a Chip variant would make it official.
+- **Category images.** Every subcategory tile shows the placeholder icon `(decision)`; real images are content and arrive later. The mega menu keeps its level-0 drawings as the live product has icons there.
+- **Deals filter.** Removed from the panel and the sheet `(decision)`; the promo chip row (Ordered before / Offers / My suppliers) was removed on review; both filters remain as switches in the panel.
+- **Bottom navigation.** The system documents none, but the live phone app has Home / Brands / Cart / Profile, so the prototype uses those `(live)`.
+
+## Proposals that need a business decision `(proposal)`
+
+Guest list price (shown as business price × 1.08), adding a supplier from the card, whether
+"My suppliers" starts on (it starts off here), and the 10 % placeholder discount on offers.
+
+## Not in this prototype
+
+Search results, the cart page, checkout, the dashboard. Product names, prices, suppliers and
+tiers are illustrative.
+
+## Files
+
+`model.js` data + pure rules · `products.json` the 26 products · `test.js` their tests (17 + 9) · `app.js` rendering (both versions), routing, cart and sheets · `proto.css` layout · `build.js` assembles `index.html` / `artifact.html` · `shots.js` screenshots and behaviour checks at 1440 and 390, EN and AR, buyer and guest.
