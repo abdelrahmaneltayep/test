@@ -2,7 +2,7 @@
 
 The current About Us is a modal opened from the footer link (recording, 2026-10-06). This prototype turns it into a
 full marketplace page on the Highbase design system, with marketing's rewritten copy (`HIGHBASE_About_Us_Rewrite.md`)
-used verbatim, and offers **ten layout options** behind one switcher. Section order was agreed on 2026-10-06:
+used verbatim, and offers **sixteen layout options** behind one switcher (1–10 from the marketplace and distributor references, 11–16 from Rylo, Column and Moneda). Section order was agreed on 2026-10-06:
 
 1. Hero — what a buyer gets, with `Join as a Buyer` (primary) and `Join as a Supplier` (secondary); both work signed-out.
 2. Trust band — facts only (see below).
@@ -17,7 +17,7 @@ used verbatim, and offers **ten layout options** behind one switcher. Section or
 | Styles | `about.css` — tokens only; bare numbers are page geometry and icon boxes, marked `LAYOUT` |
 | Switcher | prototype bar: option 1–10 (`#v3` deep-links), Desktop / Mobile (390×844 frame), Global trade hidden / shown |
 
-## The ten options
+## The sixteen options
 
 | # | Name | Inspiration | What differs |
 |---|---|---|---|
@@ -31,6 +31,12 @@ used verbatim, and offers **ten layout options** behind one switcher. Section or
 | 8 | Dark hero | — | hero on `surface-dark` with the orange eyebrow; final CTA goes light to avoid two dark bands |
 | 9 | Region first | Tradeling | Bahrain headquarters card beside the hero, dark trust band |
 | 10 | Bento grid | — | mixed-size tiles for hero, facts, audiences, reasons and steps; sticky CTA bar on mobile |
+| 11 | Mission | Rylo | one centred manifesto line, an illustration strip, the reasons as a values ladder |
+| 12 | Declarations | Rylo | the copy's own sentences ("Nothing changes in your commercial relationships.", "Local trade is live today.") become full-width declarative bands |
+| 13 | Plain statement | Column | conversational headline, then every section as a label-and-content ledger; facts as a blunt list |
+| 14 | Snapshots | Column | candid polaroid cards for the five audiences beside the hero |
+| 15 | Three pillars | Moneda | hero plus three pillar cards from the reasons, each with its fact |
+| 16 | App first | Moneda | phone mock of the app beside the hero and the live "Download Our App Now" CTA |
 
 ## Trust band — facts only
 

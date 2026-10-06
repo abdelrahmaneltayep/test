@@ -35,6 +35,12 @@ const VERSIONS = [
   ['Dark hero',        'Hero on the footer’s dark blue with the orange accent; light sections follow.',        () => [R.heroDark(), R.trust('light'), R.what('01'), R.who('02'), R.how('03'), R.why('04', true), R.both('05'), R.global('06'), R.finalCta('light'), R.contact()]],
   ['Region first',     'Bahrain and the Gulf up front: a headquarters card beside the hero — Tradeling.',      () => [R.heroRegion(), R.trust('dark'), R.what('01'), R.who('02'), R.how('03'), R.why('04', true), R.both('05'), R.global('06'), R.finalCta(), R.contact()]],
   ['Bento grid',       'Mixed-size tiles carry hero, facts, audiences, reasons and steps; sticky CTAs on mobile.', () => [R.heroBento(), R.what('01'), R.both('02'), R.global('03'), R.finalCta(), R.contact(), R.sticky()]],
+  ['Mission',          'One centred manifesto line, an illustration strip, then the reasons as a values ladder — Rylo.', () => [R.heroMission(), R.values('01'), R.what('02'), R.who('03'), R.how('04'), R.trust('light'), R.both('05'), R.global('06'), R.finalCta(), R.contact()]],
+  ['Declarations',     'The copy’s own sentences become full-width declarative headers between sections — Rylo.',      () => [R.heroSplit(), R.whatPlain('01'), R.declare(C.what.p2), R.who('02'), R.how('03'), R.why('04', true), R.declare(C.final.lede), R.both('05'), R.global('06'), R.finalCta(), R.contact()]],
+  ['Plain statement',  'A conversational headline, then every section as a label-and-content ledger with blunt facts — Column.', () => [R.heroStatement(), R.ledger('01', C.what.title, `<div class="prose"><p>${C.what.p1}</p><p>${C.what.p2}</p></div>`), R.ledger('02', C.who.title, R.tilesOnly()), R.ledger('03', C.how.title, R.stepsOnly(), C.how.lede), R.ledger('04', C.why.title, R.whysOnly()), R.ledger('05', C.both.title, R.bothOnly()), R.ledger('Facts', C.trust.title, R.factsList()), R.global('06'), R.finalCta('light'), R.contact()]],
+  ['Snapshots',        'Candid polaroid cards for the five audiences beside the hero, instead of a tile row — Column.',  () => [R.heroSnapshots(), R.trust('light'), R.what('01'), R.how('02'), R.why('03', true), R.both('04'), R.global('05'), R.finalCta(), R.contact()]],
+  ['Three pillars',    'Hero plus three pillar cards from the reasons, each with its fact — Moneda.',                     () => [R.heroPillars(), R.what('01'), R.who('02'), R.how('03'), R.both('04'), R.trust('dark'), R.global('05'), R.finalCta(), R.contact()]],
+  ['App first',        'A phone mock of the app beside the hero and the live “Download Our App Now” CTA — Moneda.',     () => [R.heroApp(), R.pillarsSec('01'), R.what('02'), R.who('03'), R.how('04'), R.both('05'), R.global('06'), R.finalCta(), R.contact()]],
 ];
 const mains = VERSIONS.map(([name, , build], i) => `<main class="about v${i + 1}" data-v="${i + 1}" aria-label="Version ${i + 1} — ${name}"${i ? ' hidden' : ''}>${build().join('\n')}</main>`).join('\n');
 const bar = `<div class="px-bar" id="px-bar"><span class="px-title">Prototype</span>
@@ -46,13 +52,17 @@ const script = `(function(){
 var DESC=${JSON.stringify(VERSIONS.map(([n, d]) => n + ' — ' + d))};
 var bar=document.getElementById('px-bar'), frame=document.getElementById('frame'), app=document.getElementById('app'), desc=document.getElementById('px-desc');
 function press(group, attr, val){ bar.querySelectorAll('['+attr+']').forEach(function(b){ b.setAttribute('aria-pressed', String(b.getAttribute(attr)===String(val))); }); }
-function setVer(v){ v=Math.min(10,Math.max(1,v|0||1)); app.querySelectorAll('main[data-v]').forEach(function(m){ m.hidden = m.getAttribute('data-v')!==String(v); }); press('ver','data-ver',v); desc.textContent=DESC[v-1]; app.setAttribute('data-ver',v); try{ history.replaceState(null,'','#v'+v); }catch(e){} app.scrollTo(0,0); window.scrollTo(0,0); }
+function setVer(v){ v=Math.min(DESC.length,Math.max(1,v|0||1)); app.querySelectorAll('main[data-v]').forEach(function(m){ m.hidden = m.getAttribute('data-v')!==String(v); }); press('ver','data-ver',v); desc.textContent=DESC[v-1]; app.setAttribute('data-ver',v); try{ history.replaceState(null,'','#v'+v); }catch(e){} app.scrollTo(0,0); window.scrollTo(0,0); }
 function setView(m){ frame.classList.toggle('frame--phone', m==='mob'); app.classList.toggle('m', m==='mob'); press('view','data-view',m); }
 function setGlobal(on){ app.querySelectorAll('.sec--global').forEach(function(s){ s.hidden=!on; }); press('global','data-global',on?1:0); }
 bar.addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; if(b.hasAttribute('data-ver')) setVer(+b.getAttribute('data-ver')); else if(b.hasAttribute('data-view')) setView(b.getAttribute('data-view')); else if(b.hasAttribute('data-global')) setGlobal(b.getAttribute('data-global')==='1'); });
 app.addEventListener('click', function(e){ var a=e.target.closest('a[href="#"]'); if(a) e.preventDefault(); });
 var m=/^#v(\\d+)$/.exec(location.hash); setVer(m?+m[1]:1);
 })();`;
+/* compact rules are written once for the phone frame (.m …); the same rules are emitted as a media query for real narrow windows */
+const aboutSrc = fs.readFileSync(path.join(__dirname, 'about.css'), 'utf8');
+const mRules = aboutSrc.split('\n').filter(l => l.startsWith('.m ')).map(l => l.replace(/\.m /g, '.app ')).join(' ');
+const aboutCss = aboutSrc + '\n@media (max-width:759px){' + mRules + '}\n';
 const head = `<title>Highbase About Us</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap">
@@ -62,7 +72,7 @@ const head = `<title>Highbase About Us</title>
 ${read('03_Tokens/dist/tokens.css')}
 ${dsCss}
 .hb-i{width:1em;height:1em;display:inline-block;fill:currentColor;flex:0 0 auto}[dir="rtl"] [data-mirror]>.hb-i,[dir="rtl"] .hb-i[data-mirror]{transform:scaleX(-1)}
-${fs.readFileSync(path.join(__dirname, 'about.css'), 'utf8')}
+${aboutCss}
 </style>`;
 const body = `${ISPRITE}${LSPRITE}
 ${bar}
