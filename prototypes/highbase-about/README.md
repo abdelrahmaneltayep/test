@@ -2,7 +2,7 @@
 
 The current About Us is a modal opened from the footer link (recording, 2026-10-06). This prototype turns it into a
 full marketplace page on the Highbase design system, with marketing's rewritten copy (`HIGHBASE_About_Us_Rewrite.md`)
-used verbatim, and offers **sixteen layout options** behind one switcher (1–10 from the marketplace and distributor references, 11–16 from Rylo, Column and Moneda). Section order was agreed on 2026-10-06:
+used verbatim, and offers **twenty-one layout options** behind one switcher (1–10 from the marketplace and distributor references, 11–16 from Rylo, Column and Moneda, 17–21 illustration-led with new layouts for sections 01–05 and the Contact block). Section order was agreed on 2026-10-06:
 
 1. Hero — what a buyer gets, with `Join as a Buyer` (primary) and `Join as a Supplier` (secondary); both work signed-out.
 2. Trust band — facts only (see below).
@@ -17,7 +17,7 @@ used verbatim, and offers **sixteen layout options** behind one switcher (1–10
 | Styles | `about.css` — tokens only; bare numbers are page geometry and icon boxes, marked `LAYOUT` |
 | Switcher | prototype bar: option 1–10 (`#v3` deep-links), Desktop / Mobile (390×844 frame), Global trade hidden / shown |
 
-## The sixteen options
+## The twenty-one options
 
 | # | Name | Inspiration | What differs |
 |---|---|---|---|
@@ -37,6 +37,11 @@ used verbatim, and offers **sixteen layout options** behind one switcher (1–10
 | 14 | Snapshots | Column | candid polaroid cards for the five audiences beside the hero |
 | 15 | Three pillars | Moneda | hero plus three pillar cards from the reasons, each with its fact |
 | 16 | App first | Moneda | phone mock of the app beside the hero and the live "Download Our App Now" CTA |
+| 17 | Zigzag | illustrated | sections 01–05 alternate text and a tinted illustration panel; contact as an illustrated band |
+| 18 | Story | illustrated | three-illustration hero row, audience cards, vertical illustrated timeline, split both-sides panel; postcard contact |
+| 19 | Poster | illustrated | full-bleed poster hero, chapters opened by a centred illustration; centred contact card |
+| 20 | Side rail | illustrated | sticky 01–05 rail beside the sections; contact is a DS form (TextField + TextArea) |
+| 21 | Mosaic | illustrated | three-illustration mosaic hero, big what-card, audience and reason cards; address card plus form |
 
 ## Trust band — facts only
 
@@ -49,6 +54,8 @@ drawn until names exist.
 ## Decisions and proposals
 
 - Page, not modal `(decision)`; header and footer are the DS organisms; "About Us" marked current in the footer.
+- Illustrations in options 17–21 are mapped by meaning `(proposal)`: products = catalogue, team = audiences, cart = buyers, upload = suppliers, orders = tracking, success = no disruption, messages = fewer calls and the contact block, documents = real workflows, welcome = register.
+- The contact form in options 20 and 21 is a prototype: submit shows a confirmation in place; nothing is sent.
 - Icons per tile `(proposal)`; `phone` and `mail` keys were **added to the DS icon map** (Hugeicons `call`, `email-icon`) so the footer and contact block are no longer blank.
 - The GCC flags row and the four-tab "Why you have to join" block from the modal are not carried over; the tabs became sections.
 - Section 8 hidden at build time, toggled by the bar; it is self-contained for launch.
