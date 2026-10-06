@@ -1,36 +1,52 @@
-# Highbase — About Us page (prototype)
+# Highbase — About Us page, ten options (prototype)
 
 The current About Us is a modal opened from the footer link (recording, 2026-10-06). This prototype turns it into a
-full marketplace page built on the Highbase design system, with the rewritten copy from marketing
-(`HIGHBASE_About_Us_Rewrite.md`, 8 sections) used verbatim.
+full marketplace page on the Highbase design system, with marketing's rewritten copy (`HIGHBASE_About_Us_Rewrite.md`)
+used verbatim, and offers **ten layout options** behind one switcher. Section order was agreed on 2026-10-06:
+
+1. Hero — what a buyer gets, with `Join as a Buyer` (primary) and `Join as a Supplier` (secondary); both work signed-out.
+2. Trust band — facts only (see below).
+3. What is HIGHBASE · 4. Who it's for · 5. How it works · 6. Why HIGHBASE (each point carries a concrete fact from the copy) ·
+   7. Built for both sides · 8. Global trade (hidden until launch) · 9. Final CTA, then the contact and location block (Bahrain), then the DS Footer.
 
 | | |
 |---|---|
 | Build | `node build.js <path-to-highbase-ds>` → `index.html`; add `--artifact` → `artifact.html` |
-| Copy | `content.js` — the document's text, section by section |
-| Styles | `about.css` — tokens only; bare numbers are page geometry (max-width, phone frame) and marked `LAYOUT` |
-| Hosted copy | see the artifact link in the chat thread |
+| Copy | `content.js` — the document's text, plus the trust facts, the contact block, and sample catalogue rows for option 5 |
+| Sections | `sections.js` — one renderer per section and per hero; `build.js` composes the ten versions |
+| Styles | `about.css` — tokens only; bare numbers are page geometry and icon boxes, marked `LAYOUT` |
+| Switcher | prototype bar: option 1–10 (`#v3` deep-links), Desktop / Mobile (390×844 frame), Global trade hidden / shown |
 
-## What the page does
+## The ten options
 
-1. **Hero** — eyebrow, tagline as the H1, lede, the two CTAs (`Join as a Buyer` filled, `Join as a Supplier` outlined) and the `welcome` spot illustration.
-2. **What is HIGHBASE** — prose plus the "nothing changes in your commercial relationships" sentence as a tinted callout.
-3. **Who it's for** — five tiles with icons.
-4. **How it works** — two cards (buyers / suppliers) with the `01 02 03` numerals carried over from the live "Registration steps" `(live)`.
-5. **Built for both sides** — two cards with check lists; marketing's "verify the supplier copy" note kept as a small footnote.
-6. **Global trade** — `hidden` by default (document: "publish at launch"); the prototype bar toggles it. It is a self-contained section with a `Coming soon` chip, so launch is a one-attribute change.
-7. **Why HIGHBASE** — four tiles.
-8. **Final CTA** — dark band on `surface-dark` (the footer colour) with both CTAs again, then the DS Footer with "About Us" marked current.
+| # | Name | Inspiration | What differs |
+|---|---|---|---|
+| 1 | Editorial split | — | hero text beside the `welcome` illustration, calm white and tinted sections |
+| 2 | Numbers first | JOOR | short centred hero, then a dark trust band |
+| 3 | Two audiences | Faire | hero splits into a buyer card and a supplier card, each with its own CTA |
+| 4 | Explainer | Amazon Business | "What is HIGHBASE?" as the H1, 720px reading column, pull-quote |
+| 5 | Product led | — | device frame with real `hb-pcard` Product Cards (sample rows) |
+| 6 | Reasons list | Uline | "Why HIGHBASE" opens the page as 01–04, fact chip per reason |
+| 7 | Journey | — | three-node timeline (Register, Order, Track) carrying both sides |
+| 8 | Dark hero | — | hero on `surface-dark` with the orange eyebrow; final CTA goes light to avoid two dark bands |
+| 9 | Region first | Tradeling | Bahrain headquarters card beside the hero, dark trust band |
+| 10 | Bento grid | — | mixed-size tiles for hero, facts, audiences, reasons and steps; sticky CTA bar on mobile |
 
-Desktop (≥1024) and compact layouts; the prototype bar previews the page in a 390×844 phone frame.
+## Trust band — facts only
+
+You asked for real numbers and real people "only from the content I gave". The document contains neither, so the band
+carries four facts that exist in the sources, each tagged in `content.js`: Bahrain HQ `(live, footer)`, the Gulf
+`(doc)`, 3 registration steps `(live, modal)`, 0 changes to prices and credit terms `(doc)`. Send figures (suppliers,
+buyers, orders, cities) and leadership names and the band takes them without a layout change. No leadership grid is
+drawn until names exist.
 
 ## Decisions and proposals
 
-- **Page, not modal** `(decision, this request)` — reachable from the footer "About Us" link; header and footer are the DS organisms.
-- Icons per audience / benefit tile `(proposal)` — `store`, `team`, `building`, `dashboard`, `truck`, `check`, `clock`, `view`, `globe`; swap freely, they are semantic keys.
-- The GCC flags row and the "WHY YOU HAVE TO JOIN" four-tab block from the current modal are **not carried over** — the new copy has no flags section and the tabs became sections 4–5. Flag if marketing wants the flags back.
-- Section 6 hidden at build time, shown by the bar `(file)` — the document says to publish it at launch.
-- Final CTA band on `--hb-color-surface-dark` `(proposal)`; the outlined CTA there uses a transparent ground with the on-dark text colour, which the Button component has no variant for.
-- Icon tiles use `primary-container-low` behind `primary` `(proposal)`; eyebrow numerals `(proposal)`.
-- **Arabic not built** — copy is pending from marketing and Noto Kufi Arabic is not installed in this environment. The CSS uses logical properties throughout so the RTL pass is a content change.
-- The footer's social, mail and phone glyphs are blank, as in the DS review page — those icons are not in the library yet.
+- Page, not modal `(decision)`; header and footer are the DS organisms; "About Us" marked current in the footer.
+- Icons per tile `(proposal)`; `phone` and `mail` keys were **added to the DS icon map** (Hugeicons `call`, `email-icon`) so the footer and contact block are no longer blank.
+- The GCC flags row and the four-tab "Why you have to join" block from the modal are not carried over; the tabs became sections.
+- Section 8 hidden at build time, toggled by the bar; it is self-contained for launch.
+- Outlined CTA on dark bands uses a transparent ground `(proposal)` — the Button has no on-dark variant.
+- Option 5's catalogue rows are prototype sample data, not live products.
+- Arabic not built: copy pending from marketing and Noto Kufi Arabic is not installed here. CSS is logical-property only.
+- The ten reference sites could not be fetched from this environment (egress blocked); the comparison was built from their indexed content.
