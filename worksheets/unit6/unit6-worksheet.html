@@ -1,1136 +1,1182 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
+<!DOCTYPE html>
+
+<html dir="rtl" lang="ar">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8"/>
 <title>ملزمة الوحدة السادسة - دراسة المعلومات</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
 <style>
   :root{
-    --blue:#1565c0; --blue-l:#e3f0fd; --red:#c62828; --red-l:#fdecea;
-    --green:#2e7d32; --green-l:#e8f5e9; --amber:#f9a825; --amber-l:#fff8e1;
-    --ink:#1f2933; --muted:#5f6b7a; --line:#cfd8e3;
+    --ink:#121317; --ink-2:#3a3d46; --muted:#6c7080; --line:#e6e7ee; --surface:#f7f7fb;
+    --accent:#5a46f0; --accent-2:#7b6cf6; --accent-soft:#efedff;
+    --green:#14a37f; --green-soft:#e6f7f1; --yellow:#ffd23f; --yellow-soft:#fff7d6;
+    --coral:#ef4f63; --coral-soft:#fff0f2; --blue:#3b82f6; --blue-soft:#e9f1ff;
   }
-  @page{ size:A4; margin:16mm 14mm 18mm 14mm; }
+  @page{ size:A4; margin:15mm 14mm 17mm 14mm; }
   *{ box-sizing:border-box; }
-  body{ font-family:'Cairo',sans-serif; color:var(--ink); font-size:12.5pt; line-height:1.85; margin:0; background:#fff; }
-  .n{ direction:ltr; unicode-bidi:isolate; display:inline-block; font-family:'Cairo',sans-serif; }
+  body{ font-family:'Cairo',sans-serif; color:var(--ink-2); font-size:12pt; line-height:1.85; margin:0; background:#fff; }
+  .n{ direction:ltr; unicode-bidi:isolate; display:inline-block; }
+  .en{ direction:ltr; unicode-bidi:isolate; color:var(--muted); font-size:.85em; font-weight:500; }
   sub{ font-size:.65em; }
-  h1,h2,h3,h4{ margin:0; line-height:1.4; }
-  .page-break{ break-before:page; }
-  .avoid{ break-inside:avoid; }
-
-  /* Cover */
-  .cover{ height:255mm; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
-          border:3px solid var(--blue); border-radius:18px; padding:20mm; background:linear-gradient(180deg,var(--blue-l),#fff 60%); }
-  .cover .tag{ background:var(--blue); color:#fff; padding:6px 22px; border-radius:30px; font-weight:700; font-size:14pt; }
-  .cover h1{ font-size:40pt; color:var(--blue); margin:18px 0 6px; font-weight:800; }
-  .cover h2{ font-size:22pt; color:var(--red); font-weight:700; }
-  .cover p{ color:var(--muted); font-size:13pt; margin-top:22px; }
-  .cover .grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:28px; width:100%; }
-  .cover .grid div{ background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:8px 12px; font-weight:600; text-align:right; }
-  .cover .grid b{ color:var(--blue); margin-left:6px; }
-  .name-box{ margin-top:30px; width:100%; border-top:2px dashed var(--line); padding-top:16px; text-align:right; font-weight:600; }
-
-  /* Lesson header */
-  .lesson-head{ display:flex; align-items:center; gap:14px; background:var(--blue); color:#fff; border-radius:14px; padding:12px 18px; margin-bottom:14px; }
-  .lesson-head .num{ background:#fff; color:var(--blue); font-weight:800; font-size:20pt; border-radius:10px; padding:2px 14px; direction:ltr; }
-  .lesson-head h2{ font-size:20pt; font-weight:800; }
-  .lesson-head small{ display:block; font-size:11pt; opacity:.9; font-weight:600; }
-
-  h3.sec{ font-size:15pt; color:var(--blue); border-bottom:2px solid var(--blue-l); padding-bottom:3px; margin:16px 0 8px; }
-  h3.sec.q{ color:var(--red); border-color:var(--red-l); }
-  h4{ font-size:13pt; color:var(--ink); margin:12px 0 4px; break-after:avoid; }
-  h3.sec{ break-after:avoid; }
+  h1,h2,h3,h4{ margin:0; line-height:1.35; color:var(--ink); }
+  b,strong{ color:var(--ink); }
   p{ margin:4px 0; }
   ul,ol{ margin:4px 0; padding-right:22px; }
-  li{ margin:2px 0; }
+  li{ margin:3px 0; }
+  .page-break{ break-before:page; }
+  .avoid{ break-inside:avoid; }
+  .ico{ width:15px; height:15px; vertical-align:-3px; }
 
-  .box{ border-radius:10px; padding:10px 14px; margin:10px 0; break-inside:avoid; }
-  .def{ background:var(--blue-l); border-right:5px solid var(--blue); }
-  .ex{ background:var(--green-l); border-right:5px solid var(--green); }
-  .tip{ background:var(--amber-l); border-right:5px solid var(--amber); }
-  .warn{ background:var(--red-l); border-right:5px solid var(--red); }
-  .box .lbl{ font-weight:800; display:block; margin-bottom:2px; }
-  .def .lbl{ color:var(--blue); } .ex .lbl{ color:var(--green); } .tip .lbl{ color:#b07800; } .warn .lbl{ color:var(--red); }
-  .term{ color:var(--red); font-weight:700; }
-  .en{ direction:ltr; unicode-bidi:isolate; color:var(--muted); font-size:.9em; }
+  /* ---------- Cover (lesson-intro style) ---------- */
+  .cover{ height:262mm; display:flex; flex-direction:column; }
+  .cover .topbar{ display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-weight:700; font-size:10.5pt; }
+  .cover .brand{ display:flex; align-items:center; gap:8px; color:var(--ink); }
+  .cover .brand i{ width:26px; height:26px; border-radius:8px; background:var(--accent); display:inline-block; }
+  .cover .bar{ height:6px; border-radius:99px; background:var(--line); margin:14px 0 0; overflow:hidden; }
+  .cover .bar span{ display:block; height:100%; width:12%; background:var(--accent); border-radius:99px; }
+  .cover-main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .eyebrow{ font-size:10.5pt; font-weight:800; color:var(--muted); letter-spacing:.3px; }
+  .cover h1{ font-size:52pt; font-weight:800; line-height:1.15; margin:8px 0 10px; }
+  .cover h1 em{ font-style:normal; background:linear-gradient(transparent 62%, var(--yellow) 62%); }
+  .cover .sub{ font-size:15pt; color:var(--muted); max-width:150mm; }
+  .cover .meta{ margin-top:14px; }
+  .cover .cta{ margin-top:22px; display:flex; align-items:center; justify-content:space-between; background:var(--accent); color:#fff;
+               border-radius:14px; padding:12px 20px; font-weight:800; font-size:14pt; max-width:120mm; }
+  .cover .cta small{ font-weight:600; opacity:.85; font-size:10.5pt; }
+  .sticker{ position:absolute; left:0; top:-6px; font-size:40pt; font-weight:800; color:var(--accent); direction:ltr;
+            -webkit-text-stroke:2px var(--ink); paint-order:stroke fill; transform:rotate(-6deg); }
+  .bits{ display:flex; gap:6px; direction:ltr; margin-top:26px; }
+  .bits span{ width:34px; height:44px; border:2px solid var(--ink); border-radius:8px; display:grid; place-items:center; font-weight:800; font-size:15pt; color:var(--ink); }
+  .bits .one{ background:#c9c1ff; } .bits .zero{ background:#bcd6ff; } .bits .y{ background:#ffd7a8; }
+  .cover .name{ border-top:1px solid var(--line); padding-top:14px; display:flex; gap:24px; color:var(--muted); font-weight:700; }
+  .cover .name span{ flex:1; border-bottom:1.5px solid var(--line); padding-bottom:4px; }
 
-  table{ border-collapse:collapse; margin:8px auto; break-inside:avoid; }
-  th,td{ border:1px solid var(--line); padding:3px 10px; text-align:center; }
-  th{ background:var(--blue); color:#fff; font-weight:700; }
-  tr:nth-child(even) td{ background:#f6f9fc; }
+  /* ---------- Meta row ---------- */
+  .meta{ display:flex; flex-wrap:wrap; gap:18px; color:var(--muted); font-size:10.5pt; font-weight:700; }
+  .meta span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- Curriculum (TOC) ---------- */
+  .curr{ border:1px solid var(--line); border-radius:16px; overflow:hidden; margin-top:6px; }
+  .curr .grp{ display:flex; justify-content:space-between; background:var(--surface); padding:10px 18px; font-weight:800; color:var(--ink); border-top:1px solid var(--line); }
+  .curr .grp:first-child{ border-top:0; }
+  .curr .grp small{ color:var(--muted); font-weight:700; }
+  .curr .row{ display:flex; align-items:center; gap:14px; padding:8px 18px; border-top:1px solid var(--line); }
+  .curr .row .no{ width:44px; color:var(--muted); font-weight:700; direction:ltr; text-align:right; }
+  .curr .row .t{ flex:1; color:var(--ink); font-weight:600; }
+  .curr .row .c{ color:var(--muted); font-size:10.5pt; font-weight:700; }
+  .curr .row .dot{ width:20px; height:20px; border-radius:50%; background:var(--accent); display:grid; place-items:center; }
+  .curr .row .dot::after{ content:""; border-style:solid; border-width:4px 6px 4px 0; border-color:transparent #fff transparent transparent; margin-left:-1px; }
+
+  /* ---------- Lesson header ---------- */
+  .lesson-head{ position:relative; padding-bottom:16px; margin-bottom:18px; border-bottom:1px solid var(--line); }
+  .lesson-head .bar{ height:6px; border-radius:99px; background:var(--line); margin:8px 0 16px; overflow:hidden; width:62%; }
+  .lesson-head .bar span{ display:block; height:100%; background:var(--accent); border-radius:99px; }
+  .lesson-head h2{ font-size:28pt; font-weight:800; max-width:72%; }
+  .lesson-head .sub{ font-size:13pt; color:var(--muted); margin:2px 0 10px; max-width:76%; }
+  .lesson-head .sticker{ top:0; font-size:34pt; }
+  .lesson-head.green .bar span{ background:var(--green); }
+  .lesson-head.green .sticker{ color:var(--green); }
+
+  /* ---------- Section titles ---------- */
+  h3.sec{ font-size:15pt; font-weight:800; margin:20px 0 10px; display:flex; align-items:center; gap:10px; break-after:avoid; }
+  h3.sec::before{ content:""; width:6px; height:20px; border-radius:4px; background:var(--accent); }
+  h3.sec.q::before{ background:var(--coral); }
+  h4{ font-size:13pt; font-weight:800; margin:16px 0 6px; break-after:avoid; }
+
+  .term{ color:var(--ink); font-weight:800; background:linear-gradient(transparent 64%, var(--yellow) 64%); padding:0 1px; }
+
+  /* ---------- Cards ---------- */
+  .box{ border-radius:16px; padding:12px 16px; margin:12px 0; break-inside:avoid; border:1px solid var(--line); background:#fff; }
+  .box .lbl{ display:table; font-weight:800; font-size:10pt; padding:1px 10px; border-radius:8px; margin-bottom:6px; }
+  .def .lbl{ background:var(--accent-soft); color:var(--accent); }
+  .ex{ background:var(--surface); border-color:transparent; }
+  .ex .lbl{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .tip{ background:var(--yellow-soft); border-color:transparent; }
+  .tip .lbl{ background:var(--yellow); color:var(--ink); }
+  .warn{ background:var(--coral-soft); border-color:transparent; }
+  .warn .lbl{ background:var(--coral); color:#fff; }
+
+  /* ---------- Tables ---------- */
+  table{ border-collapse:separate; border-spacing:0; margin:10px auto; break-inside:avoid; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td{ padding:5px 12px; text-align:center; border-top:1px solid var(--line); }
+  tr:first-child th, tr:first-child td{ border-top:0; }
+  th{ background:var(--surface); color:var(--ink); font-weight:800; }
+  td + td, th + th, td + th, th + td{ border-right:1px solid var(--line); }
   .tables-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
   .tables-row > .box{ flex:1 1 0; min-width:0; }
-  table.ascii td, table.ascii th{ padding:1px 7px; font-size:10.5pt; direction:ltr; }
-  table.ascii td.h{ background:#fde7ef; font-weight:700; }
+  table.ascii td, table.ascii th{ padding:1px 8px; font-size:10.5pt; direction:ltr; }
+  table.ascii td.h{ background:var(--accent-soft); color:var(--accent); font-weight:800; }
 
-  .calc{ direction:ltr; font-family:'Courier New',monospace; font-size:13pt; line-height:1.5; display:inline-block; text-align:right;
-         background:#fff; border:1px dashed var(--green); border-radius:8px; padding:6px 14px; margin:4px 8px; white-space:pre; max-width:100%; overflow:hidden; }
+  .calc{ direction:ltr; font-family:'Courier New',monospace; font-size:12.5pt; line-height:1.55; display:inline-block; text-align:right;
+         background:#fff; border:2px solid var(--ink); border-radius:12px; box-shadow:3px 3px 0 var(--ink);
+         padding:8px 16px; margin:6px 8px 8px; white-space:pre; max-width:100%; color:var(--ink); }
+  .calc.mixed{ unicode-bidi:plaintext; text-align:right; font-family:'Cairo',sans-serif; font-size:12pt; }
 
-  /* Questions */
-  .qblock{ margin:8px 0 12px; }
-  .qtitle{ break-after:avoid; background:var(--red); color:#fff; display:inline-block; padding:2px 14px; border-radius:8px; font-weight:700; margin:8px 0 6px; }
-  ol.qs > li{ margin:6px 0; break-inside:avoid; }
-  .opts{ display:grid; grid-template-columns:repeat(4,1fr); gap:2px 10px; margin-top:2px; }
+  /* ---------- Questions ---------- */
+  .qblock{ border:1px solid var(--line); border-radius:18px; padding:12px 16px 10px; margin:12px 0; }
+  .qhead{ display:flex; align-items:center; gap:10px; background:var(--accent-soft); border-radius:12px; padding:8px 12px; margin:0 0 8px; break-after:avoid; }
+  .qhead .chip{ border:1.5px solid var(--ink); border-radius:8px; padding:0 8px; font-weight:800; font-size:10pt; color:var(--ink); background:#fff; white-space:nowrap; }
+  .qhead .qt{ flex:1; font-weight:800; color:var(--ink); font-size:12.5pt; }
+  .qhead .cnt{ color:var(--muted); font-size:10pt; font-weight:700; white-space:nowrap; }
+  ol.qs > li{ margin:7px 0; break-inside:avoid; }
+  ol.qs > li::marker{ color:var(--accent); font-weight:800; }
+  .opts{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px 8px; margin-top:6px; }
   .opts.two{ grid-template-columns:repeat(2,1fr); }
-  .opts span::before{ content:attr(data-l) " ) "; font-weight:700; color:var(--blue); }
-  .blank{ display:inline-block; min-width:90px; border-bottom:1.5px dotted var(--ink); }
-  .tf::after{ content:"(      )"; float:left; color:var(--muted); white-space:pre; max-width:100%; overflow:hidden; }
-  .ansline{ border-bottom:1px dotted #9aa5b1; height:26px; }
+  .opts > span{ display:block; border:1.5px solid var(--line); border-radius:12px; padding:3px 8px; background:#fff; color:var(--ink); font-weight:600; }
+  .opts > span::before{ content:attr(data-l); flex:none; width:22px; height:22px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+                      font-weight:800; font-size:9.5pt; display:inline-grid; place-items:center; line-height:1; vertical-align:middle; margin-left:8px; }
+  .blank{ display:inline-block; min-width:96px; border-bottom:1.5px solid #c9ccd6; }
+  .tf{ padding-left:56px; position:relative; }
+  .tf::after{ content:""; position:absolute; left:0; top:4px; width:42px; height:24px; border:1.5px solid #c9ccd6; border-radius:8px; }
+  .ansline{ border-bottom:1.5px solid var(--line); height:28px; }
   .match{ width:100%; }
-  .match td{ text-align:right; }
+  .match td{ text-align:right; height:30px; }
 
-  .pix{ display:inline-grid; grid-template-columns:repeat(5,18px); grid-auto-rows:18px; border:1.5px solid var(--ink); margin:4px 10px; vertical-align:middle; direction:ltr; }
-  .pix i{ border:1px solid #9aa5b1; }
-  .pix i.b{ background:#111; }
+  .pix{ display:inline-grid; grid-template-columns:repeat(5,18px); grid-auto-rows:18px; border:2px solid var(--ink); border-radius:6px; overflow:hidden; margin:4px 10px; vertical-align:middle; direction:ltr; }
+  .pix i{ border:1px solid #d4d6de; }
+  .pix i.b{ background:var(--ink); }
 
-  /* Answer key */
-  .key h3{ font-size:14pt; color:#fff; background:var(--green); padding:4px 14px; border-radius:8px; margin:14px 0 6px; }
-  .key h4{ color:var(--green); }
+  /* ---------- Answer key ---------- */
+  .key h3{ display:flex; align-items:center; gap:10px; font-size:13.5pt; font-weight:800; color:var(--green); background:var(--green-soft); padding:6px 14px; border-radius:12px; margin:16px 0 6px; break-after:avoid; }
+  .key h3::before{ content:"✓"; width:22px; height:22px; border-radius:50%; background:var(--green); color:#fff; display:grid; place-items:center; font-size:11pt; }
+  .key h4{ color:var(--ink); font-size:11.5pt; margin:10px 0 2px; }
   .key ol{ columns:2; column-gap:26px; }
   .key ol.one{ columns:1; }
   .key li{ break-inside:avoid; }
-
-  .toc li{ font-size:13.5pt; margin:6px 0; }
-  .toc b{ color:var(--blue); display:inline-block; min-width:52px; }
+  .key li::marker{ color:var(--green); font-weight:800; }
 </style>
 </head>
 <body>
-
 <!-- ================= COVER ================= -->
 <section class="cover">
-  <span class="tag">الصف الأول الثانوي · تكنولوجيا المعلومات والاتصالات</span>
-  <h1>الوحدة السادسة</h1>
-  <h2>دراسة المعلومات</h2>
-  <p>ملزمة شاملة فيها شرح مبسط وأمثلة محلولة وأسئلة متنوعة على كل درس، ونموذج الإجابة في آخرها</p>
-  <div class="grid">
-    <div><b class="n">2-6</b> النظام الثنائي وكمية البيانات</div>
-    <div><b class="n">3-6</b> النظام السادس عشر</div>
-    <div><b class="n">4-6</b> التمثيل الرقمي للأحرف</div>
-    <div><b class="n">5-6</b> العمليات الحسابية العددية [1]</div>
-    <div><b class="n">6-6</b> العمليات الحسابية العددية [2]</div>
-    <div><b class="n">8-6</b> رقمنة الصور</div>
-    <div><b class="n">9-6</b> ضغط البيانات</div>
-    <div><b class="n">10-6</b> تصميم البيانات</div>
-  </div>
-  <div class="name-box">اسم الطالب: ............................................. &nbsp;&nbsp; الفصل: ..................</div>
+<div class="topbar"><span class="brand"><i></i>ملزمة تكنولوجيا المعلومات والاتصالات</span><span>الصف الأول الثانوي · الترم الأول</span></div>
+<div class="bar"><span></span></div>
+<div class="cover-main" style="position:relative">
+<span class="sticker" style="font-size:46pt;top:10px">0101</span>
+<div class="eyebrow">الوحدة السادسة · ملزمة شاملة</div>
+<h1>دراسة<br/><em>المعلومات</em></h1>
+<p class="sub">شرح مبسط وأمثلة محلولة وأسئلة متنوعة على كل درس، ونموذج الإجابة في آخر الملزمة.</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> 8 دروس</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 133 سؤال</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> نموذج إجابة كامل</span></div>
+<div class="cta"><span>ابدأ المذاكرة</span><small>الدرس 2-6 ←</small></div>
+<div class="bits"><span class="one">1</span><span class="zero">0</span><span class="one">1</span><span class="one">1</span><span class="y">=</span><span class="zero" style="width:auto;padding:0 10px">11</span></div>
+</div>
+<div class="name"><span>اسم الطالب</span><span style="flex:.5">الفصل</span></div>
 </section>
-
 <!-- ================= TOC ================= -->
 <section class="page-break">
-  <div class="lesson-head"><div><h2>فهرس الملزمة</h2><small>اتبع الترتيب؛ كل درس بيبني على اللي قبله</small></div></div>
-  <ol class="toc" style="list-style:none;padding:0">
-    <li><b class="n">2-6</b> النظام الثنائي وكمية البيانات</li>
-    <li><b class="n">3-6</b> النظام السادس عشر <span class="en">(Hexadecimal)</span></li>
-    <li><b class="n">4-6</b> التمثيل الرقمي للأحرف</li>
-    <li><b class="n">5-6</b> العمليات الحسابية العددية [1]: جمع وطرح الأرقام الثنائية</li>
-    <li><b class="n">6-6</b> العمليات الحسابية العددية [2]: المكملات والطرح باستخدامها</li>
-    <li><b class="n">8-6</b> رقمنة الصور</li>
-    <li><b class="n">9-6</b> ضغط البيانات (من درس التمثيل الرقمي وضغط الفيديو)</li>
-    <li><b class="n">10-6</b> تصميم البيانات</li>
-    <li><b>✦</b> مراجعة عامة على الوحدة</li>
-    <li><b>✦</b> نموذج الإجابة</li>
-  </ol>
-  <div class="box warn"><span class="lbl">ملحوظة</span>
+<div class="lesson-head"><div class="eyebrow">المحتوى</div><h2 style="max-width:100%">دروس الملزمة</h2><p class="sub">ذاكر الدروس بالترتيب، لأن كل درس بيعتمد على اللي قبله.</p></div>
+<div class="curr"><div class="grp"><span>الجزء الأول: الأنظمة العددية وتمثيل البيانات</span><small>3 دروس</small></div><div class="row"><span class="no">2-6</span><span class="t">النظام الثنائي وكمية البيانات</span><span class="c">25 سؤال</span><span class="dot"></span></div><div class="row"><span class="no">3-6</span><span class="t">النظام السادس عشر</span><span class="c">12 سؤال</span><span class="dot"></span></div><div class="row"><span class="no">4-6</span><span class="t">التمثيل الرقمي للأحرف</span><span class="c">21 سؤال</span><span class="dot"></span></div><div class="grp"><span>الجزء الثاني: العمليات الحسابية</span><small>2 دروس</small></div><div class="row"><span class="no">5-6</span><span class="t">العمليات الحسابية العددية [1]</span><span class="c">8 سؤال</span><span class="dot"></span></div><div class="row"><span class="no">6-6</span><span class="t">العمليات الحسابية العددية [2]</span><span class="c">9 سؤال</span><span class="dot"></span></div><div class="grp"><span>الجزء الثالث: الوسائط وتصميم البيانات</span><small>3 دروس</small></div><div class="row"><span class="no">8-6</span><span class="t">رقمنة الصور</span><span class="c">20 سؤال</span><span class="dot"></span></div><div class="row"><span class="no">9-6</span><span class="t">ضغط البيانات</span><span class="c">13 سؤال</span><span class="dot"></span></div><div class="row"><span class="no">10-6</span><span class="t">تصميم البيانات</span><span class="c">15 سؤال</span><span class="dot"></span></div><div class="grp"><span>الختام</span><small>10 سؤال</small></div><div class="row"><span class="no">✦</span><span class="t">مراجعة عامة على الوحدة</span><span class="c">10 سؤال</span><span class="dot"></span></div><div class="row"><span class="no">✓</span><span class="t">نموذج الإجابة</span><span class="c">كل الدروس</span><span class="dot" style="background:var(--green)"></span></div></div>
+<div class="box warn"><span class="lbl">ملحوظة</span>
     الملزمة مش شاملة الدروس دي: التناظري والرقمي، ورقمنة الصوت <span class="n">(7-6)</span>، وجزء آلية الفيديو وحساب حجم بياناته من درس <span class="n">9-6</span>.
   </div>
-  <div class="box tip"><span class="lbl">طريقة المذاكرة</span>
-    <ol>
-      <li>اقرأ الشرح والتعريفات اللي في الصناديق الزرقاء.</li>
-      <li>حل الأمثلة المحلولة (الصناديق الخضراء) بنفسك قبل ما تبص على الحل.</li>
-      <li>حل أسئلة الدرس في الملزمة، وبعدها صحح من نموذج الإجابة اللي في الآخر.</li>
-    </ol>
-  </div>
-  <div class="box def"><span class="lbl">جدول الوحدات اللي هتحتاجه طول الوحدة</span>
-    <table>
-      <tr><th>الوحدة</th><th>تساوي</th></tr>
-      <tr><td>1 Byte <span class="en">(B)</span></td><td>8 bit</td></tr>
-      <tr><td>1 KB</td><td>1024 B</td></tr>
-      <tr><td>1 MB</td><td>1024 KB</td></tr>
-      <tr><td>1 GB</td><td>1024 MB</td></tr>
-      <tr><td>1 TB</td><td>1024 GB</td></tr>
-    </table>
-    <p>⚠️ في المسائل اللي السؤال بيقول فيها «افترض أن <span class="n">1 KB = 1000 B</span>» استخدم <span class="n">1000</span> بدل <span class="n">1024</span>.</p>
-  </div>
+<div class="box tip"><span class="lbl">طريقة المذاكرة</span>
+<ol>
+<li>اقرأ الشرح، وركّز على الكلمات المظللة بالأصفر وبطاقات «التعريفات».</li>
+<li>حل الأمثلة (البطاقات الرمادية) بنفسك قبل ما تبص على الحل.</li>
+<li>حل أسئلة الدرس في الملزمة، وبعدها صحح من نموذج الإجابة اللي في الآخر.</li>
+</ol>
+</div>
+<div class="box def"><span class="lbl">جدول الوحدات اللي هتحتاجه طول الوحدة</span>
+<table>
+<tr><th>الوحدة</th><th>تساوي</th></tr>
+<tr><td>1 Byte <span class="en">(B)</span></td><td>8 bit</td></tr>
+<tr><td>1 KB</td><td>1024 B</td></tr>
+<tr><td>1 MB</td><td>1024 KB</td></tr>
+<tr><td>1 GB</td><td>1024 MB</td></tr>
+<tr><td>1 TB</td><td>1024 GB</td></tr>
+</table>
+<p>⚠️ في المسائل اللي السؤال بيقول فيها «افترض أن <span class="n">1 KB = 1000 B</span>» استخدم <span class="n">1000</span> بدل <span class="n">1024</span>.</p>
+</div>
 </section>
-
 <!-- ================= LESSON 6-2 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">2-6</span><div><h2>النظام الثنائي وكمية البيانات</h2><small>Bits &amp; Bytes · النظام العشري والثنائي</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <h4>أ) البت والبايت</h4>
-  <div class="box def"><span class="lbl">التعريفات</span>
-    <ul>
-      <li><span class="term">البت <span class="en">(bit)</span></span>: أصغر وحدة للمعلومات، وليها حالتين بس: <span class="n">0</span> أو <span class="n">1</span>.<br>
+<div class="lesson-head">
+<div class="eyebrow">الدرس 1 من 8</div>
+<div class="bar"><span style="width:12.5%"></span></div>
+<span class="sticker">2-6</span>
+<h2>النظام الثنائي وكمية البيانات</h2>
+<p class="sub">Bits &amp; Bytes · النظام العشري والثنائي</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 5 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 25 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<h4>أ) البت والبايت</h4>
+<div class="box def"><span class="lbl">التعريفات</span>
+<ul>
+<li><span class="term">البت <span class="en">(bit)</span></span>: أصغر وحدة للمعلومات، وليها حالتين بس: <span class="n">0</span> أو <span class="n">1</span>.<br/>
       أمثلة على الحالتين: المفتاح (مفتوح / مقفول)، والجهد (مرتفع / منخفض)، واتجاه المغناطيس (شمال / جنوب).</li>
-      <li><span class="term">البايت <span class="en">(Byte)</span></span>: وحدة مكونة من <span class="n">8 bit</span> ورمزها <span class="n"><span class="en">(B)</span></span>، وتقدر تمثل <span class="n">2<sup>8</sup> = 256</span> احتمال.</li>
-    </ul>
-  </div>
-  <div class="box tip"><span class="lbl">القاعدة الذهبية</span>
+<li><span class="term">البايت <span class="en">(Byte)</span></span>: وحدة مكونة من <span class="n">8 bit</span> ورمزها <span class="n"><span class="en">(B)</span></span>، وتقدر تمثل <span class="n">2<sup>8</sup> = 256</span> احتمال.</li>
+</ul>
+</div>
+<div class="box tip"><span class="lbl">القاعدة الذهبية</span>
     عدد الاحتمالات اللي يقدر يمثلها <span class="n">n bit</span> = <span class="n">2<sup>n</sup></span>
-    <table>
-      <tr><th>عدد البتات</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
-      <tr><th>عدد الاحتمالات</th><td>2</td><td>4</td><td>8</td><td>16</td><td>32</td><td>64</td><td>128</td><td>256</td></tr>
-    </table>
+<table>
+<tr><th>عدد البتات</th><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+<tr><th>عدد الاحتمالات</th><td>2</td><td>4</td><td>8</td><td>16</td><td>32</td><td>64</td><td>128</td><td>256</td></tr>
+</table>
     مثلًا <span class="n">2 bit</span> بيدّوا 4 احتمالات: <span class="n">00 , 01 , 10 , 11</span>.
   </div>
-  <div class="box ex"><span class="lbl">إزاي أعرف عدد البتات اللازمة لتمثيل عدد معين من العناصر؟</span>
+<div class="box ex"><span class="lbl">إزاي أعرف عدد البتات اللازمة لتمثيل عدد معين من العناصر؟</span>
     دوّر على أصغر <span class="n">n</span> بحيث <span class="n">2<sup>n</sup></span> يكون أكبر من عدد العناصر أو يساويه.
     <ul>
-      <li>الفصول الأربعة: 4 عناصر، و<span class="n">2<sup>2</sup> = 4</span>، يبقى نحتاج <b>2 bit</b>.</li>
-      <li>رمي نردين: <span class="n">6 × 6 = 36</span> نتيجة. <span class="n">2<sup>5</sup> = 32</span> مش كفاية، و<span class="n">2<sup>6</sup> = 64</span> كفاية، يبقى نحتاج <b>6 bit</b>.</li>
-      <li>52 ورقة لعب: <span class="n">2<sup>6</sup> = 64 ≥ 52</span>، يبقى نحتاج <b>6 bit</b>.</li>
-    </ul>
-  </div>
-  <div class="box ex"><span class="lbl">إزاي أقارن كمية بيانات بكمية تانية؟</span>
-    كام مرة <span class="n">4 bit</span> أكبر من <span class="n">2 bit</span>؟ &nbsp;
+<li>الفصول الأربعة: 4 عناصر، و<span class="n">2<sup>2</sup> = 4</span>، يبقى نحتاج <b>2 bit</b>.</li>
+<li>رمي نردين: <span class="n">6 × 6 = 36</span> نتيجة. <span class="n">2<sup>5</sup> = 32</span> مش كفاية، و<span class="n">2<sup>6</sup> = 64</span> كفاية، يبقى نحتاج <b>6 bit</b>.</li>
+<li>52 ورقة لعب: <span class="n">2<sup>6</sup> = 64 ≥ 52</span>، يبقى نحتاج <b>6 bit</b>.</li>
+</ul>
+</div>
+<div class="box ex"><span class="lbl">إزاي أقارن كمية بيانات بكمية تانية؟</span>
+    كام مرة <span class="n">4 bit</span> أكبر من <span class="n">2 bit</span>؟  
     <span class="n">2<sup>4</sup> ÷ 2<sup>2</sup> = 16 ÷ 4 = 4</span> مرات.
   </div>
-
-  <h4>ب) وحدات البيانات</h4>
-  <p>الوحدة الأساسية هي <span class="n">1 B</span>، وكل وحدة أكبر من اللي قبلها بـ <b class="n">1024</b> مرة (<span class="n">2<sup>10</sup></span>):</p>
-  <p style="text-align:center"><span class="n">B → KB → MB → GB → TB</span> (من الأصغر للأكبر)</p>
-  <div class="box ex"><span class="lbl">مثال</span>
-    كام Byte في <span class="n">1 MB</span>؟ &nbsp; <span class="n">1 MB = 1024 KB = 1024 × 1024 B = 2<sup>10</sup> × 2<sup>10</sup> = 2<sup>20</sup> B</span>
-  </div>
-
-  <h4>ج) النظام العشري والنظام الثنائي</h4>
-  <div class="box def"><span class="lbl">التعريفات</span>
-    <ul>
-      <li><span class="term">النظام العشري <span class="en">(Decimal system)</span></span>: بيمثل الأرقام بعشر أرقام من <span class="n">0</span> لحد <span class="n">9</span>، وده النظام اللي بنستخدمه في حياتنا اليومية.</li>
-      <li><span class="term">النظام الثنائي <span class="en">(Binary system)</span></span>: نظام عدّ بيستخدم رقمين بس (<span class="n">0</span> و<span class="n">1</span>)، وده النظام اللي بيتعامل بيه الكمبيوتر. وساعات بيتكتب جنب الرقم <span class="n">(2)</span> صغيرة تحت على يمينه، زي <span class="n">1011<sub>(2)</sub></span>.</li>
-    </ul>
-  </div>
-  <div class="box ex avoid"><span class="lbl">التحويل من ثنائي إلى عشري: اضرب كل رقم في 2 أُس مكانه (والعدّ بيبدأ من 0 من اليمين) وبعدين اجمع</span>
-    <div class="calc">(10111)₂ = 1×2⁴ + 0×2³ + 1×2² + 1×2¹ + 1×2⁰
+<h4>ب) وحدات البيانات</h4>
+<p>الوحدة الأساسية هي <span class="n">1 B</span>، وكل وحدة أكبر من اللي قبلها بـ <b class="n">1024</b> مرة (<span class="n">2<sup>10</sup></span>):</p>
+<p style="text-align:center"><span class="n">B → KB → MB → GB → TB</span> (من الأصغر للأكبر)</p>
+<div class="box ex"><span class="lbl">مثال</span>
+    كام Byte في <span class="n">1 MB</span>؟   <span class="n">1 MB = 1024 KB = 1024 × 1024 B = 2<sup>10</sup> × 2<sup>10</sup> = 2<sup>20</sup> B</span>
+</div>
+<h4>ج) النظام العشري والنظام الثنائي</h4>
+<div class="box def"><span class="lbl">التعريفات</span>
+<ul>
+<li><span class="term">النظام العشري <span class="en">(Decimal system)</span></span>: بيمثل الأرقام بعشر أرقام من <span class="n">0</span> لحد <span class="n">9</span>، وده النظام اللي بنستخدمه في حياتنا اليومية.</li>
+<li><span class="term">النظام الثنائي <span class="en">(Binary system)</span></span>: نظام عدّ بيستخدم رقمين بس (<span class="n">0</span> و<span class="n">1</span>)، وده النظام اللي بيتعامل بيه الكمبيوتر. وساعات بيتكتب جنب الرقم <span class="n">(2)</span> صغيرة تحت على يمينه، زي <span class="n">1011<sub>(2)</sub></span>.</li>
+</ul>
+</div>
+<div class="box ex avoid"><span class="lbl">التحويل من ثنائي إلى عشري: اضرب كل رقم في 2 أُس مكانه (والعدّ بيبدأ من 0 من اليمين) وبعدين اجمع</span>
+<div class="calc">(10111)₂ = 1×2⁴ + 0×2³ + 1×2² + 1×2¹ + 1×2⁰
         = 16 + 0 + 4 + 2 + 1 = (23)₁₀</div>
-    <p>جدول القيم المكانية اللي بيساعدك:</p>
-    <table><tr><th>2<sup>7</sup></th><th>2<sup>6</sup></th><th>2<sup>5</sup></th><th>2<sup>4</sup></th><th>2<sup>3</sup></th><th>2<sup>2</sup></th><th>2<sup>1</sup></th><th>2<sup>0</sup></th></tr>
-    <tr><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr></table>
-  </div>
-  <div class="box ex avoid"><span class="lbl">التحويل من عشري إلى ثنائي: اقسم على 2 أكتر من مرة واكتب الباقي كل مرة، وبعدين اكتب البواقي من الأخير للأول</span>
-    <div class="calc">39 ÷ 2 = 19  باقي 1   ↑
+<p>جدول القيم المكانية اللي بيساعدك:</p>
+<table dir="ltr"><tr><th>2<sup>7</sup></th><th>2<sup>6</sup></th><th>2<sup>5</sup></th><th>2<sup>4</sup></th><th>2<sup>3</sup></th><th>2<sup>2</sup></th><th>2<sup>1</sup></th><th>2<sup>0</sup></th></tr>
+<tr><td>128</td><td>64</td><td>32</td><td>16</td><td>8</td><td>4</td><td>2</td><td>1</td></tr></table>
+</div>
+<div class="box ex avoid"><span class="lbl">التحويل من عشري إلى ثنائي: اقسم على 2 أكتر من مرة واكتب الباقي كل مرة، وبعدين اكتب البواقي من الأخير للأول</span>
+<div class="calc">39 ÷ 2 = 19  باقي 1   ↑
 19 ÷ 2 =  9  باقي 1   │
  9 ÷ 2 =  4  باقي 1   │
  4 ÷ 2 =  2  باقي 0   │
  2 ÷ 2 =  1  باقي 0   │
- 1 ÷ 2 =  0  باقي 1   │  اقرأ من تحت لفوق</div>
-    <p>يبقى <span class="n">(39)<sub>10</sub> = (100111)<sub>2</sub></span>، وبنفس الطريقة <span class="n">(120)<sub>10</sub> = (1111000)<sub>2</sub></span>.</p>
-  </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: اختر الإجابة الصحيحة</span>
-    <ol class="qs">
-      <li>أصغر وحدة للمعلومات هي:
+ 1 ÷ 2 =  0  باقي 1   │</div>
+<p>اقرأ البواقي من تحت لفوق، يبقى <span class="n">(39)<sub>10</sub> = (100111)<sub>2</sub></span>، وبنفس الطريقة <span class="n">(120)<sub>10</sub> = (1111000)<sub>2</sub></span>.</p>
+</div>
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 7</span></div>
+<ol class="qs">
+<li>أصغر وحدة للمعلومات هي:
         <div class="opts"><span data-l="أ">Byte</span><span data-l="ب">bit</span><span data-l="ج">KB</span><span data-l="د">pixel</span></div></li>
-      <li>عدد الاحتمالات اللي يقدر يمثلها <span class="n">5 bit</span>:
+<li>عدد الاحتمالات اللي يقدر يمثلها <span class="n">5 bit</span>:
         <div class="opts"><span data-l="أ">10</span><span data-l="ب">25</span><span data-l="ج">32</span><span data-l="د">64</span></div></li>
-      <li>البايت الواحد يقدر يمثل ............ احتمال.
+<li>البايت الواحد يقدر يمثل ............ احتمال.
         <div class="opts"><span data-l="أ">8</span><span data-l="ب">128</span><span data-l="ج">255</span><span data-l="د">256</span></div></li>
-      <li><span class="n">1 GB</span> يساوي:
+<li><span class="n">1 GB</span> يساوي:
         <div class="opts"><span data-l="أ">1000 MB</span><span data-l="ب">1024 MB</span><span data-l="ج">1024 KB</span><span data-l="د">8 MB</span></div></li>
-      <li>أقل عدد bit لازم لتمثيل 26 حرف من الحروف الإنجليزية:
+<li>أقل عدد bit لازم لتمثيل 26 حرف من الحروف الإنجليزية:
         <div class="opts"><span data-l="أ">4</span><span data-l="ب">5</span><span data-l="ج">6</span><span data-l="د">26</span></div></li>
-      <li>الترتيب الصحيح من الأصغر للأكبر:
+<li>الترتيب الصحيح من الأصغر للأكبر:
         <div class="opts two"><span data-l="أ">KB &lt; MB &lt; GB &lt; TB</span><span data-l="ب">KB &lt; GB &lt; MB &lt; TB</span><span data-l="ج">TB &lt; GB &lt; MB &lt; KB</span><span data-l="د">MB &lt; KB &lt; GB &lt; TB</span></div></li>
-      <li>الرقم <span class="n">(1010)<sub>2</sub></span> يساوي في النظام العشري:
+<li>الرقم <span class="n">(1010)<sub>2</sub></span> يساوي في النظام العشري:
         <div class="opts"><span data-l="أ">8</span><span data-l="ب">10</span><span data-l="ج">12</span><span data-l="د">1010</span></div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: ضع علامة (✓) أو (✗) وصحّح الخطأ</span>
-    <ol class="qs">
-      <li class="tf">البايت بيتكون من <span class="n">8 bit</span>.</li>
-      <li class="tf"><span class="n">3 bit</span> يقدروا يمثلوا 6 احتمالات.</li>
-      <li class="tf">النظام الثنائي بيستخدم الأرقام من <span class="n">0</span> لحد <span class="n">9</span>.</li>
-      <li class="tf">عند التحويل من عشري لثنائي بنكتب البواقي من الأول للأخير.</li>
-      <li class="tf"><span class="n">1 MB = 2<sup>20</sup></span> بايت.</li>
-      <li class="tf">كمية البيانات في <span class="n">5 bit</span> أكبر 4 مرات من كمية البيانات في <span class="n">3 bit</span>.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: أكمل</span>
-    <ol class="qs">
-      <li>الأرقام اللي بنستخدمها في حياتنا اليومية بنعبّر عنها بالنظام <span class="blank"></span>، والكمبيوتر بيستخدم النظام <span class="blank"></span>.</li>
-      <li><span class="n">n bit</span> يقدروا يمثلوا <span class="blank"></span> احتمال.</li>
-      <li><span class="n">24 bit</span> = <span class="blank"></span> Byte.</li>
-      <li><span class="n">1 TB</span> = <span class="blank"></span> GB.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: التحويلات</span>
-    <p>(1) حوّل للنظام العشري: &nbsp;
-      <span class="n">[أ] (1101)<sub>2</sub></span> &nbsp; <span class="n">[ب] (100110)<sub>2</sub></span> &nbsp; <span class="n">[ج] (111111)<sub>2</sub></span> &nbsp; <span class="n">[د] (1010101)<sub>2</sub></span></p>
-    <p>(2) حوّل للنظام الثنائي: &nbsp;
-      <span class="n">[أ] 25</span> &nbsp; <span class="n">[ب] 64</span> &nbsp; <span class="n">[ج] 100</span> &nbsp; <span class="n">[د] 200</span></p>
-    <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الخامس: مسائل</span>
-    <ol class="qs">
-      <li>كام bit في <span class="n">4 Byte</span>؟</li>
-      <li>كام bit لازم لتمثيل أيام الأسبوع السبعة؟ وكام bit لتمثيل شهور السنة؟</li>
-      <li>مدرسة فيها 100 طالب وعايزين نديهم أكواد ثنائية مختلفة. ما أقل عدد bit مطلوب؟</li>
-      <li>كام مرة كمية البيانات في <span class="n">7 bit</span> أكبر من كمية البيانات في <span class="n">4 bit</span>؟</li>
-      <li>كام Byte في <span class="n">1 GB</span>؟ (اكتب الإجابة على صورة أُس للعدد 2)</li>
-      <li>كام bit لازم لتسجيل كل النتايج الممكنة لرمي عملة معدنية 3 مرات؟</li>
-      <li>كام ملف حجمه <span class="n">3 MB</span> ممكن تخزنه على فلاشة سعتها <span class="n">16 GB</span>؟ (استخدم <span class="n">1 GB = 1024 MB</span> وقرّب لأقرب عدد صحيح أقل)</li>
-    </ol>
-  </div>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗) وصحّح الخطأ</span><span class="cnt">0 / 6</span></div>
+<ol class="qs">
+<li class="tf">البايت بيتكون من <span class="n">8 bit</span>.</li>
+<li class="tf"><span class="n">3 bit</span> يقدروا يمثلوا 6 احتمالات.</li>
+<li class="tf">النظام الثنائي بيستخدم الأرقام من <span class="n">0</span> لحد <span class="n">9</span>.</li>
+<li class="tf">عند التحويل من عشري لثنائي بنكتب البواقي من الأول للأخير.</li>
+<li class="tf"><span class="n">1 MB = 2<sup>20</sup></span> بايت.</li>
+<li class="tf">كمية البيانات في <span class="n">5 bit</span> أكبر 4 مرات من كمية البيانات في <span class="n">3 bit</span>.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">أكمل</span><span class="cnt">0 / 4</span></div>
+<ol class="qs">
+<li>الأرقام اللي بنستخدمها في حياتنا اليومية بنعبّر عنها بالنظام <span class="blank"></span>، والكمبيوتر بيستخدم النظام <span class="blank"></span>.</li>
+<li><span class="n">n bit</span> يقدروا يمثلوا <span class="blank"></span> احتمال.</li>
+<li><span class="n">24 bit</span> = <span class="blank"></span> Byte.</li>
+<li><span class="n">1 TB</span> = <span class="blank"></span> GB.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">التحويلات</span></div>
+<p>(1) حوّل للنظام العشري:  
+      <span class="n">[أ] (1101)<sub>2</sub></span>   <span class="n">[ب] (100110)<sub>2</sub></span>   <span class="n">[ج] (111111)<sub>2</sub></span>   <span class="n">[د] (1010101)<sub>2</sub></span></p>
+<p>(2) حوّل للنظام الثنائي:  
+      <span class="n">[أ] 25</span>   <span class="n">[ب] 64</span>   <span class="n">[ج] 100</span>   <span class="n">[د] 200</span></p>
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الخامس</span><span class="qt">مسائل</span><span class="cnt">0 / 7</span></div>
+<ol class="qs">
+<li>كام bit في <span class="n">4 Byte</span>؟</li>
+<li>كام bit لازم لتمثيل أيام الأسبوع السبعة؟ وكام bit لتمثيل شهور السنة؟</li>
+<li>مدرسة فيها 100 طالب وعايزين نديهم أكواد ثنائية مختلفة. ما أقل عدد bit مطلوب؟</li>
+<li>كام مرة كمية البيانات في <span class="n">7 bit</span> أكبر من كمية البيانات في <span class="n">4 bit</span>؟</li>
+<li>كام Byte في <span class="n">1 GB</span>؟ (اكتب الإجابة على صورة أُس للعدد 2)</li>
+<li>كام bit لازم لتسجيل كل النتايج الممكنة لرمي عملة معدنية 3 مرات؟</li>
+<li>كام ملف حجمه <span class="n">3 MB</span> ممكن تخزنه على فلاشة سعتها <span class="n">16 GB</span>؟ (استخدم <span class="n">1 GB = 1024 MB</span> وقرّب لأقرب عدد صحيح أقل)</li>
+</ol>
+</div>
 </section>
-
 <!-- ================= LESSON 6-3 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">3-6</span><div><h2>النظام السادس عشر</h2><small>Hexadecimal</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <div class="box def"><span class="lbl">التعريف</span>
-    <span class="term">النظام السادس عشر <span class="en">(Hexadecimal)</span></span>: طريقة لتمثيل الأرقام بالأرقام من <span class="n">0</span> لحد <span class="n">9</span> والحروف من <span class="n">A</span> لحد <span class="n">F</span> (يعني 16 رمز).
+<div class="lesson-head">
+<div class="eyebrow">الدرس 2 من 8</div>
+<div class="bar"><span style="width:25.0%"></span></div>
+<span class="sticker">3-6</span>
+<h2>النظام السادس عشر</h2>
+<p class="sub">Hexadecimal</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 3 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 12 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<div class="box def"><span class="lbl">التعريف</span>
+<span class="term">النظام السادس عشر <span class="en">(Hexadecimal)</span></span>: طريقة لتمثيل الأرقام بالأرقام من <span class="n">0</span> لحد <span class="n">9</span> والحروف من <span class="n">A</span> لحد <span class="n">F</span> (يعني 16 رمز).
     وبيتكتب جنب الرقم <span class="n">(16)</span> صغيرة تحت على يمينه، زي <span class="n">A4<sub>(16)</sub></span>، والرقم ده اسمه <span class="term">الرقم السادس عشر <span class="en">(Hexadecimal number)</span></span>.
   </div>
-  <h4>جدول التحويل (لازم تحفظه)</h4>
-  <div class="tables-row">
-    <table>
-      <tr><th>العشري</th><th>الثنائي</th><th>السادس عشر</th></tr>
-      <tr><td>0</td><td>0000</td><td>0</td></tr><tr><td>1</td><td>0001</td><td>1</td></tr>
-      <tr><td>2</td><td>0010</td><td>2</td></tr><tr><td>3</td><td>0011</td><td>3</td></tr>
-      <tr><td>4</td><td>0100</td><td>4</td></tr><tr><td>5</td><td>0101</td><td>5</td></tr>
-      <tr><td>6</td><td>0110</td><td>6</td></tr><tr><td>7</td><td>0111</td><td>7</td></tr>
-      <tr><td>8</td><td>1000</td><td>8</td></tr>
-    </table>
-    <table>
-      <tr><th>العشري</th><th>الثنائي</th><th>السادس عشر</th></tr>
-      <tr><td>9</td><td>1001</td><td>9</td></tr><tr><td>10</td><td>1010</td><td><b>A</b></td></tr>
-      <tr><td>11</td><td>1011</td><td><b>B</b></td></tr><tr><td>12</td><td>1100</td><td><b>C</b></td></tr>
-      <tr><td>13</td><td>1101</td><td><b>D</b></td></tr><tr><td>14</td><td>1110</td><td><b>E</b></td></tr>
-      <tr><td>15</td><td>1111</td><td><b>F</b></td></tr><tr><td>16</td><td>10000</td><td><b>10</b></td></tr>
-    </table>
-  </div>
-  <div class="box tip"><span class="lbl">سر الحفظ</span>
+<h4>جدول التحويل (لازم تحفظه)</h4>
+<div class="tables-row">
+<table>
+<tr><th>العشري</th><th>الثنائي</th><th>السادس عشر</th></tr>
+<tr><td>0</td><td>0000</td><td>0</td></tr><tr><td>1</td><td>0001</td><td>1</td></tr>
+<tr><td>2</td><td>0010</td><td>2</td></tr><tr><td>3</td><td>0011</td><td>3</td></tr>
+<tr><td>4</td><td>0100</td><td>4</td></tr><tr><td>5</td><td>0101</td><td>5</td></tr>
+<tr><td>6</td><td>0110</td><td>6</td></tr><tr><td>7</td><td>0111</td><td>7</td></tr>
+<tr><td>8</td><td>1000</td><td>8</td></tr>
+</table>
+<table>
+<tr><th>العشري</th><th>الثنائي</th><th>السادس عشر</th></tr>
+<tr><td>9</td><td>1001</td><td>9</td></tr><tr><td>10</td><td>1010</td><td><b>A</b></td></tr>
+<tr><td>11</td><td>1011</td><td><b>B</b></td></tr><tr><td>12</td><td>1100</td><td><b>C</b></td></tr>
+<tr><td>13</td><td>1101</td><td><b>D</b></td></tr><tr><td>14</td><td>1110</td><td><b>E</b></td></tr>
+<tr><td>15</td><td>1111</td><td><b>F</b></td></tr><tr><td>16</td><td>10000</td><td><b>10</b></td></tr>
+</table>
+</div>
+<div class="box tip"><span class="lbl">سر الحفظ</span>
     كل رقم في النظام السادس عشر بيتمثل بـ <b>4 bit</b> بالظبط، علشان <span class="n">2<sup>4</sup> = 16</span>.
   </div>
-
-  <h4>ب) التحويل بين الأنظمة الثلاثة</h4>
-  <div class="box ex avoid"><span class="lbl">[1] من ثنائي إلى سادس عشر: قسّم الرقم لمجموعات من 4 أرقام تبدأ من اليمين، وحوّل كل مجموعة</span>
-    <div class="calc">10011010₂  →  1001 | 1010
+<h4>ب) التحويل بين الأنظمة الثلاثة</h4>
+<div class="box ex avoid"><span class="lbl">[1] من ثنائي إلى سادس عشر: قسّم الرقم لمجموعات من 4 أرقام تبدأ من اليمين، وحوّل كل مجموعة</span>
+<div class="calc">10011010₂  →  1001 | 1010
                     9  |  A      →  9A₁₆</div>
-    <p>لو المجموعة اللي على الشمال ناقصة، كمّلها بأصفار: <span class="n">1110011 → 0111 | 0011 → 73<sub>(16)</sub></span></p>
-  </div>
-  <div class="box ex avoid"><span class="lbl">[2] من سادس عشر إلى ثنائي: حوّل كل رقم لـ 4 bit ورتّبهم جنب بعض</span>
-    <div class="calc">A4₁₆  →  A = 1010 ,  4 = 0100   →  10100100₂</div>
-  </div>
-  <div class="box ex avoid"><span class="lbl">[3] من سادس عشر إلى عشري: حوّل الأول لثنائي، وبعدين من ثنائي لعشري</span>
-    <div class="calc">C6₁₆ → C = 1100 , 6 = 0110 → 11000110₂
+<p>لو المجموعة اللي على الشمال ناقصة، كمّلها بأصفار: <span class="n">1110011 → 0111 | 0011 → 73<sub>(16)</sub></span></p>
+</div>
+<div class="box ex avoid"><span class="lbl">[2] من سادس عشر إلى ثنائي: حوّل كل رقم لـ 4 bit ورتّبهم جنب بعض</span>
+<div class="calc">A4₁₆  →  A = 1010 ,  4 = 0100   →  10100100₂</div>
+</div>
+<div class="box ex avoid"><span class="lbl">[3] من سادس عشر إلى عشري: حوّل الأول لثنائي، وبعدين من ثنائي لعشري</span>
+<div class="calc">C6₁₆ → C = 1100 , 6 = 0110 → 11000110₂
 11000110₂ = 128 + 64 + 0 + 0 + 0 + 4 + 2 + 0 = 198</div>
-    <p><b>طريقة مختصرة:</b> اضرب الرقم اللي على الشمال في 16 واجمع عليه اللي على اليمين: <span class="n">C6 = 12 × 16 + 6 = 198</span></p>
-  </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: اختر الإجابة الصحيحة</span>
-    <ol class="qs">
-      <li>عدد الرموز المستخدمة في النظام السادس عشر:
+<p><b>طريقة مختصرة:</b> اضرب الرقم اللي على الشمال في 16 واجمع عليه اللي على اليمين: <span class="n">C6 = 12 × 16 + 6 = 198</span></p>
+</div>
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li>عدد الرموز المستخدمة في النظام السادس عشر:
         <div class="opts"><span data-l="أ">10</span><span data-l="ب">15</span><span data-l="ج">16</span><span data-l="د">2</span></div></li>
-      <li>الرقم العشري 15 بيتكتب في النظام السادس عشر:
+<li>الرقم العشري 15 بيتكتب في النظام السادس عشر:
         <div class="opts"><span data-l="أ">E</span><span data-l="ب">F</span><span data-l="ج">15</span><span data-l="د">10</span></div></li>
-      <li>كل رقم في النظام السادس عشر بيتمثل بـ:
+<li>كل رقم في النظام السادس عشر بيتمثل بـ:
         <div class="opts"><span data-l="أ">2 bit</span><span data-l="ب">4 bit</span><span data-l="ج">8 bit</span><span data-l="د">16 bit</span></div></li>
-      <li><span class="n">(10)<sub>16</sub></span> يساوي في العشري:
+<li><span class="n">(10)<sub>16</sub></span> يساوي في العشري:
         <div class="opts"><span data-l="أ">10</span><span data-l="ب">2</span><span data-l="ج">16</span><span data-l="د">1</span></div></li>
-      <li><span class="n">(1011)<sub>2</sub></span> يساوي في السادس عشر:
+<li><span class="n">(1011)<sub>2</sub></span> يساوي في السادس عشر:
         <div class="opts"><span data-l="أ">A</span><span data-l="ب">B</span><span data-l="ج">C</span><span data-l="د">11</span></div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: ضع علامة (✓) أو (✗)</span>
-    <ol class="qs">
-      <li class="tf">الحرف <span class="n">D</span> في النظام السادس عشر يساوي 13.</li>
-      <li class="tf">للتحويل من ثنائي لسادس عشر بنقسم الرقم لمجموعات من 3 أرقام.</li>
-      <li class="tf">أكبر رقم ممكن تكتبه بخانتين في النظام السادس عشر هو <span class="n">FF</span> ويساوي 255.</li>
-      <li class="tf">بنبدأ تقسيم الرقم الثنائي لمجموعات من الشمال.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: التحويلات</span>
-    <p>(1) حوّل من ثنائي لسادس عشر: &nbsp;
-      <span class="n">[أ] 11110000<sub>(2)</sub></span> &nbsp; <span class="n">[ب] 10111101<sub>(2)</sub></span> &nbsp; <span class="n">[ج] 1110011<sub>(2)</sub></span> &nbsp; <span class="n">[د] 11011011<sub>(2)</sub></span></p>
-    <p>(2) حوّل من سادس عشر لثنائي: &nbsp;
-      <span class="n">[أ] 3F<sub>(16)</sub></span> &nbsp; <span class="n">[ب] B7<sub>(16)</sub></span> &nbsp; <span class="n">[ج] 9E<sub>(16)</sub></span></p>
-    <p>(3) حوّل من سادس عشر لعشري: &nbsp;
-      <span class="n">[أ] 2A<sub>(16)</sub></span> &nbsp; <span class="n">[ب] FF<sub>(16)</sub></span> &nbsp; <span class="n">[ج] 80<sub>(16)</sub></span> &nbsp; <span class="n">[د] 1C<sub>(16)</sub></span> &nbsp; <span class="n">[هـ] A5<sub>(16)</sub></span></p>
-    <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: فكّر</span>
-    <ol class="qs">
-      <li>ليه المبرمجين بيفضلوا يكتبوا البيانات بالنظام السادس عشر بدل الثنائي؟</li>
-      <li>رتّب الأرقام دي تصاعديًا: <span class="n">(1100)<sub>2</sub></span> ، <span class="n"><span class="en">(B)</span><sub>16</sub></span> ، <span class="n">(14)<sub>10</sub></span></li>
-    </ol>
-  </div>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 4</span></div>
+<ol class="qs">
+<li class="tf">الحرف <span class="n">D</span> في النظام السادس عشر يساوي 13.</li>
+<li class="tf">للتحويل من ثنائي لسادس عشر بنقسم الرقم لمجموعات من 3 أرقام.</li>
+<li class="tf">أكبر رقم ممكن تكتبه بخانتين في النظام السادس عشر هو <span class="n">FF</span> ويساوي 255.</li>
+<li class="tf">بنبدأ تقسيم الرقم الثنائي لمجموعات من الشمال.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">التحويلات</span></div>
+<p>(1) حوّل من ثنائي لسادس عشر:  
+      <span class="n">[أ] 11110000<sub>(2)</sub></span>   <span class="n">[ب] 10111101<sub>(2)</sub></span>   <span class="n">[ج] 1110011<sub>(2)</sub></span>   <span class="n">[د] 11011011<sub>(2)</sub></span></p>
+<p>(2) حوّل من سادس عشر لثنائي:  
+      <span class="n">[أ] 3F<sub>(16)</sub></span>   <span class="n">[ب] B7<sub>(16)</sub></span>   <span class="n">[ج] 9E<sub>(16)</sub></span></p>
+<p>(3) حوّل من سادس عشر لعشري:  
+      <span class="n">[أ] 2A<sub>(16)</sub></span>   <span class="n">[ب] FF<sub>(16)</sub></span>   <span class="n">[ج] 80<sub>(16)</sub></span>   <span class="n">[د] 1C<sub>(16)</sub></span>   <span class="n">[هـ] A5<sub>(16)</sub></span></p>
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">فكّر</span><span class="cnt">0 / 2</span></div>
+<ol class="qs">
+<li>ليه المبرمجين بيفضلوا يكتبوا البيانات بالنظام السادس عشر بدل الثنائي؟</li>
+<li>رتّب الأرقام دي تصاعديًا: <span class="n">(1100)<sub>2</sub></span> ، <span class="n"><span class="en">(B)</span><sub>16</sub></span> ، <span class="n">(14)<sub>10</sub></span></li>
+</ol>
+</div>
 </section>
-
 <!-- ================= LESSON 6-4 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">4-6</span><div><h2>التمثيل الرقمي للأحرف</h2><small>Character code · ASCII · Unicode</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <div class="box def"><span class="lbl">التعريفات المهمة</span>
-    <ol>
-      <li><span class="term">رمز الحرف <span class="en">(Character code)</span></span>: قيمة رقمية فريدة بتتحدد لكل حرف أو رمز.</li>
-      <li><span class="term">نظام رموز الأحرف <span class="en">(Character code system)</span></span>: بيلخص التحويلات بين الأحرف ورموزها.</li>
-      <li><span class="term">كود ASCII</span>: فيه بس حروف اللغة الإنجليزية <span class="n"><span class="en">(A-Z)</span><span class="en">(a-z)</span></span> والأرقام <span class="n">(0-9)</span> والرموز وأحرف التحكم، و<b>مابيدعمش اللغات التانية</b> زي العربي.</li>
-      <li><span class="term">يونيكود <span class="en">(Unicode)</span></span>: معيار ترميز بيجمع كل حروف لغات العالم في نظام واحد، وليه أكتر من صورة زي <span class="n">UTF-8</span> و<span class="n">UTF-16</span>.</li>
-      <li><span class="term">التشفير <span class="en">(Encoding)</span></span>: تمثيل سلسلة نصية برموز الأحرف، والعكس اسمه <span class="term">فك التشفير <span class="en">(Decoding)</span></span>.</li>
-      <li><span class="term">فساد الحرف <span class="en">(Character corruption)</span></span>: ظاهرة بتحصل لما طريقة التشفير ماتكونش هي نفس طريقة فك التشفير، فالنص يظهر رموز غريبة.</li>
-      <li><span class="term">الخط <span class="en">(Font)</span></span>: بيانات شكل الأحرف المقابلة لرموز الأحرف، زي <span class="en">Sans-serif, Serif, Semi-cursive</span>.</li>
-    </ol>
-    <p>علشان الحرف يظهر على الشاشة أو في الطباعة لازم عنصرين: <b>رمز الحرف</b> و<b>الخط</b>.</p>
-  </div>
-
-  <h4>جدول رموز ASCII (الأعمدة: الـ 4 bits الأكثر أهمية · الصفوف: الـ 4 bits الأقل أهمية)</h4>
-  <table class="ascii">
-    <tr><th>Hex ↓ / →</th><th>2<br><small>0010</small></th><th>3<br><small>0011</small></th><th>4<br><small>0100</small></th><th>5<br><small>0101</small></th><th>6<br><small>0110</small></th><th>7<br><small>0111</small></th></tr>
-    <tr><td class="h">0 · 0000</td><td>SP</td><td>0</td><td>@</td><td>P</td><td>`</td><td>p</td></tr>
-    <tr><td class="h">1 · 0001</td><td>!</td><td>1</td><td>A</td><td>Q</td><td>a</td><td>q</td></tr>
-    <tr><td class="h">2 · 0010</td><td>"</td><td>2</td><td>B</td><td>R</td><td>b</td><td>r</td></tr>
-    <tr><td class="h">3 · 0011</td><td>#</td><td>3</td><td>C</td><td>S</td><td>c</td><td>s</td></tr>
-    <tr><td class="h">4 · 0100</td><td>$</td><td>4</td><td>D</td><td>T</td><td>d</td><td>t</td></tr>
-    <tr><td class="h">5 · 0101</td><td>%</td><td>5</td><td>E</td><td>U</td><td>e</td><td>u</td></tr>
-    <tr><td class="h">6 · 0110</td><td>&amp;</td><td>6</td><td>F</td><td>V</td><td>f</td><td>v</td></tr>
-    <tr><td class="h">7 · 0111</td><td>'</td><td>7</td><td>G</td><td>W</td><td>g</td><td>w</td></tr>
-    <tr><td class="h">8 · 1000</td><td>(</td><td>8</td><td>H</td><td>X</td><td>h</td><td>x</td></tr>
-    <tr><td class="h">9 · 1001</td><td>)</td><td>9</td><td>I</td><td>Y</td><td>i</td><td>y</td></tr>
-    <tr><td class="h">A · 1010</td><td>*</td><td>:</td><td>J</td><td>Z</td><td>j</td><td>z</td></tr>
-    <tr><td class="h">B · 1011</td><td>+</td><td>;</td><td>K</td><td>[</td><td>k</td><td>{</td></tr>
-    <tr><td class="h">C · 1100</td><td>,</td><td>&lt;</td><td>L</td><td>¥</td><td>l</td><td>|</td></tr>
-    <tr><td class="h">D · 1101</td><td>-</td><td>=</td><td>M</td><td>]</td><td>m</td><td>}</td></tr>
-    <tr><td class="h">E · 1110</td><td>.</td><td>&gt;</td><td>N</td><td>^</td><td>n</td><td>~</td></tr>
-    <tr><td class="h">F · 1111</td><td>/</td><td>?</td><td>O</td><td>_</td><td>o</td><td>DEL</td></tr>
-  </table>
-  <p style="text-align:center;color:var(--muted);font-size:10.5pt">العمودين 0 و1 فيهم رموز التحكم في الكمبيوتر، وشلناهم من الجدول. ‎SP‎ معناها المسافة <span class="en">(Space)</span>.</p>
-
-  <div class="box ex avoid"><span class="lbl">إزاي أقرأ الجدول؟ رقم العمود هو الخانة الشمال، ورقم الصف هو الخانة اليمين</span>
+<div class="lesson-head">
+<div class="eyebrow">الدرس 3 من 8</div>
+<div class="bar"><span style="width:37.5%"></span></div>
+<span class="sticker">4-6</span>
+<h2>التمثيل الرقمي للأحرف</h2>
+<p class="sub">Character code · ASCII · Unicode</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 1 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 21 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<div class="box def"><span class="lbl">التعريفات المهمة</span>
+<ol>
+<li><span class="term">رمز الحرف <span class="en">(Character code)</span></span>: قيمة رقمية فريدة بتتحدد لكل حرف أو رمز.</li>
+<li><span class="term">نظام رموز الأحرف <span class="en">(Character code system)</span></span>: بيلخص التحويلات بين الأحرف ورموزها.</li>
+<li><span class="term">كود ASCII</span>: فيه بس حروف اللغة الإنجليزية <span class="n"><span class="en">(A-Z)</span><span class="en">(a-z)</span></span> والأرقام <span class="n">(0-9)</span> والرموز وأحرف التحكم، و<b>مابيدعمش اللغات التانية</b> زي العربي.</li>
+<li><span class="term">يونيكود <span class="en">(Unicode)</span></span>: معيار ترميز بيجمع كل حروف لغات العالم في نظام واحد، وليه أكتر من صورة زي <span class="n">UTF-8</span> و<span class="n">UTF-16</span>.</li>
+<li><span class="term">التشفير <span class="en">(Encoding)</span></span>: تمثيل سلسلة نصية برموز الأحرف، والعكس اسمه <span class="term">فك التشفير <span class="en">(Decoding)</span></span>.</li>
+<li><span class="term">فساد الحرف <span class="en">(Character corruption)</span></span>: ظاهرة بتحصل لما طريقة التشفير ماتكونش هي نفس طريقة فك التشفير، فالنص يظهر رموز غريبة.</li>
+<li><span class="term">الخط <span class="en">(Font)</span></span>: بيانات شكل الأحرف المقابلة لرموز الأحرف، زي <span class="en">Sans-serif, Serif, Semi-cursive</span>.</li>
+</ol>
+<p>علشان الحرف يظهر على الشاشة أو في الطباعة لازم عنصرين: <b>رمز الحرف</b> و<b>الخط</b>.</p>
+</div>
+<h4>جدول رموز ASCII (الأعمدة: الـ 4 bits الأكثر أهمية · الصفوف: الـ 4 bits الأقل أهمية)</h4>
+<table class="ascii" dir="ltr">
+<tr><th>Hex ↓ / →</th><th>2<br/><small>0010</small></th><th>3<br/><small>0011</small></th><th>4<br/><small>0100</small></th><th>5<br/><small>0101</small></th><th>6<br/><small>0110</small></th><th>7<br/><small>0111</small></th></tr>
+<tr><td class="h">0 · 0000</td><td>SP</td><td>0</td><td>@</td><td>P</td><td>`</td><td>p</td></tr>
+<tr><td class="h">1 · 0001</td><td>!</td><td>1</td><td>A</td><td>Q</td><td>a</td><td>q</td></tr>
+<tr><td class="h">2 · 0010</td><td>"</td><td>2</td><td>B</td><td>R</td><td>b</td><td>r</td></tr>
+<tr><td class="h">3 · 0011</td><td>#</td><td>3</td><td>C</td><td>S</td><td>c</td><td>s</td></tr>
+<tr><td class="h">4 · 0100</td><td>$</td><td>4</td><td>D</td><td>T</td><td>d</td><td>t</td></tr>
+<tr><td class="h">5 · 0101</td><td>%</td><td>5</td><td>E</td><td>U</td><td>e</td><td>u</td></tr>
+<tr><td class="h">6 · 0110</td><td>&amp;</td><td>6</td><td>F</td><td>V</td><td>f</td><td>v</td></tr>
+<tr><td class="h">7 · 0111</td><td>'</td><td>7</td><td>G</td><td>W</td><td>g</td><td>w</td></tr>
+<tr><td class="h">8 · 1000</td><td>(</td><td>8</td><td>H</td><td>X</td><td>h</td><td>x</td></tr>
+<tr><td class="h">9 · 1001</td><td>)</td><td>9</td><td>I</td><td>Y</td><td>i</td><td>y</td></tr>
+<tr><td class="h">A · 1010</td><td>*</td><td>:</td><td>J</td><td>Z</td><td>j</td><td>z</td></tr>
+<tr><td class="h">B · 1011</td><td>+</td><td>;</td><td>K</td><td>[</td><td>k</td><td>{</td></tr>
+<tr><td class="h">C · 1100</td><td>,</td><td>&lt;</td><td>L</td><td>¥</td><td>l</td><td>|</td></tr>
+<tr><td class="h">D · 1101</td><td>-</td><td>=</td><td>M</td><td>]</td><td>m</td><td>}</td></tr>
+<tr><td class="h">E · 1110</td><td>.</td><td>&gt;</td><td>N</td><td>^</td><td>n</td><td>~</td></tr>
+<tr><td class="h">F · 1111</td><td>/</td><td>?</td><td>O</td><td>_</td><td>o</td><td>DEL</td></tr>
+</table>
+<p style="text-align:center;color:var(--muted);font-size:10.5pt">العمودين 0 و1 فيهم رموز التحكم في الكمبيوتر، وشلناهم من الجدول. ‎SP‎ معناها المسافة <span class="en">(Space)</span>.</p>
+<div class="box ex avoid"><span class="lbl">إزاي أقرأ الجدول؟ رقم العمود هو الخانة الشمال، ورقم الصف هو الخانة اليمين</span>
     حوّل كلمة <b class="n">"Hello"</b>:
     <table>
-      <tr><th>الحرف</th><td>H</td><td>e</td><td>l</td><td>l</td><td>o</td></tr>
-      <tr><th>ثنائي</th><td>01001000</td><td>01100101</td><td>01101100</td><td>01101100</td><td>01101111</td></tr>
-      <tr><th>سادس عشر</th><td>48</td><td>65</td><td>6C</td><td>6C</td><td>6F</td></tr>
-    </table>
-    <b>العكس (فك التشفير):</b> <span class="n">"4C6F766516"</span> نقسمه لأزواج <span class="n">4C / 6F / 76 / 65</span>، فيطلع <b class="n">Love</b>.
+<tr><th>الحرف</th><td>H</td><td>e</td><td>l</td><td>l</td><td>o</td></tr>
+<tr><th>ثنائي</th><td>01001000</td><td>01100101</td><td>01101100</td><td>01101100</td><td>01101111</td></tr>
+<tr><th>سادس عشر</th><td>48</td><td>65</td><td>6C</td><td>6C</td><td>6F</td></tr>
+</table>
+<b>العكس (فك التشفير):</b> <span class="n">"4C6F766516"</span> نقسمه لأزواج <span class="n">4C / 6F / 76 / 65</span>، فيطلع <b class="n">Love</b>.
   </div>
-  <div class="box tip"><span class="lbl">حجم البيانات</span>
-    في ASCII كل حرف = <b class="n">1 Byte</b>. يعني <span class="n">"Welcome"</span> فيها 7 أحرف وحجمها <b class="n">7 Byte</b>، و<span class="n">"HappyBirthday"</span> حجمها <b class="n">13 Byte</b>.<br>
-    <span class="n">1 Byte</span> يقدر يمثل <b class="n">256</b> نوع من الأحرف، و<span class="n">2 Byte</span> يقدروا يمثلوا <b class="n">65,536</b> نوع (<span class="n">2<sup>16</sup></span>).
+<div class="box tip"><span class="lbl">حجم البيانات</span>
+    في ASCII كل حرف = <b class="n">1 Byte</b>. يعني <span class="n">"Welcome"</span> فيها 7 أحرف وحجمها <b class="n">7 Byte</b>، و<span class="n">"HappyBirthday"</span> حجمها <b class="n">13 Byte</b>.<br/>
+<span class="n">1 Byte</span> يقدر يمثل <b class="n">256</b> نوع من الأحرف، و<span class="n">2 Byte</span> يقدروا يمثلوا <b class="n">65,536</b> نوع (<span class="n">2<sup>16</sup></span>).
   </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: اكتب المصطلح العلمي</span>
-    <ol class="qs">
-      <li>قيمة رقمية فريدة بتتحدد لكل حرف أو رمز. <span class="blank"></span></li>
-      <li>معيار بيجمع كل حروف لغات العالم في نظام رموز واحد. <span class="blank"></span></li>
-      <li>تمثيل سلسلة نصية برموز الأحرف. <span class="blank"></span></li>
-      <li>ظاهرة بتحصل لما طريقة التشفير وفك التشفير مايكونوش متطابقين. <span class="blank"></span></li>
-      <li>بيانات شكل الأحرف المقابلة لرموز الأحرف. <span class="blank"></span></li>
-      <li>نظام فيه حروف الإنجليزي والأرقام والرموز بس، ومابيدعمش اللغات التانية. <span class="blank"></span></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: اختر الإجابة الصحيحة</span>
-    <ol class="qs">
-      <li>عدد أنواع الأحرف اللي يقدر يمثلها <span class="n">1 Byte</span>:
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اكتب المصطلح العلمي</span><span class="cnt">0 / 6</span></div>
+<ol class="qs">
+<li>قيمة رقمية فريدة بتتحدد لكل حرف أو رمز. <span class="blank"></span></li>
+<li>معيار بيجمع كل حروف لغات العالم في نظام رموز واحد. <span class="blank"></span></li>
+<li>تمثيل سلسلة نصية برموز الأحرف. <span class="blank"></span></li>
+<li>ظاهرة بتحصل لما طريقة التشفير وفك التشفير مايكونوش متطابقين. <span class="blank"></span></li>
+<li>بيانات شكل الأحرف المقابلة لرموز الأحرف. <span class="blank"></span></li>
+<li>نظام فيه حروف الإنجليزي والأرقام والرموز بس، ومابيدعمش اللغات التانية. <span class="blank"></span></li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 4</span></div>
+<ol class="qs">
+<li>عدد أنواع الأحرف اللي يقدر يمثلها <span class="n">1 Byte</span>:
         <div class="opts"><span data-l="أ">8</span><span data-l="ب">128</span><span data-l="ج">256</span><span data-l="د">65,536</span></div></li>
-      <li>لو كتبت نص عربي، أنسب نظام ترميز:
+<li>لو كتبت نص عربي، أنسب نظام ترميز:
         <div class="opts"><span data-l="أ">ASCII</span><span data-l="ب">Unicode</span><span data-l="ج">Binary</span><span data-l="د">Font</span></div></li>
-      <li>حجم البيانات لكلمة <span class="n">"Egypt"</span> بنظام ASCII:
+<li>حجم البيانات لكلمة <span class="n">"Egypt"</span> بنظام ASCII:
         <div class="opts"><span data-l="أ">5 bit</span><span data-l="ب">5 Byte</span><span data-l="ج">40 Byte</span><span data-l="د">8 Byte</span></div></li>
-      <li>من صور الـ Unicode:
+<li>من صور الـ Unicode:
         <div class="opts"><span data-l="أ">UTF-8</span><span data-l="ب">dpi</span><span data-l="ج">RGB</span><span data-l="د">PCM</span></div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: استخدم جدول ASCII</span>
-    <ol class="qs">
-      <li>رمز الحرف <span class="n">"A"</span> بالنظام الثنائي والسادس عشر.</li>
-      <li>رمز الحرف <span class="n">"a"</span> بالنظام الثنائي.</li>
-      <li>رمز الحرف <span class="n">"z"</span> بالنظام السادس عشر.</li>
-      <li>رموز كلمة <span class="n">"CAT"</span> بالنظام السادس عشر.</li>
-      <li>إيه الحرف المقابل لـ <span class="n">01001101<sub>(2)</sub></span>؟</li>
-      <li>إيه الكلمة المقابلة لـ <span class="n">"4F4B"<sub>(16)</sub></span>؟ وإيه الكلمة المقابلة لـ <span class="n">"4869"<sub>(16)</sub></span>؟</li>
-      <li>إيه الجملة المقابلة لـ <span class="n">"486F6D65"<sub>(16)</sub></span>؟</li>
-      <li>احسب حجم البيانات لجملة <span class="n">"Hello World"</span> (المسافة بتتحسب حرف).</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: أسئلة مقالية</span>
-    <ol class="qs">
-      <li>اشرح باختصار خصائص نظام ترميز الأحرف ASCII.</li>
-      <li>اشرح باختصار خصائص نظام ترميز الأحرف Unicode.</li>
-      <li>إيه العنصرين اللازمين علشان الحرف يظهر على الشاشة؟</li>
-    </ol>
-  </div>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">استخدم جدول ASCII</span><span class="cnt">0 / 8</span></div>
+<ol class="qs">
+<li>رمز الحرف <span class="n">"A"</span> بالنظام الثنائي والسادس عشر.</li>
+<li>رمز الحرف <span class="n">"a"</span> بالنظام الثنائي.</li>
+<li>رمز الحرف <span class="n">"z"</span> بالنظام السادس عشر.</li>
+<li>رموز كلمة <span class="n">"CAT"</span> بالنظام السادس عشر.</li>
+<li>إيه الحرف المقابل لـ <span class="n">01001101<sub>(2)</sub></span>؟</li>
+<li>إيه الكلمة المقابلة لـ <span class="n">"4F4B"<sub>(16)</sub></span>؟ وإيه الكلمة المقابلة لـ <span class="n">"4869"<sub>(16)</sub></span>؟</li>
+<li>إيه الجملة المقابلة لـ <span class="n">"486F6D65"<sub>(16)</sub></span>؟</li>
+<li>احسب حجم البيانات لجملة <span class="n">"Hello World"</span> (المسافة بتتحسب حرف).</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">أسئلة مقالية</span><span class="cnt">0 / 3</span></div>
+<ol class="qs">
+<li>اشرح باختصار خصائص نظام ترميز الأحرف ASCII.</li>
+<li>اشرح باختصار خصائص نظام ترميز الأحرف Unicode.</li>
+<li>إيه العنصرين اللازمين علشان الحرف يظهر على الشاشة؟</li>
+</ol>
+</div>
 </section>
-
 <!-- ================= LESSON 6-5 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">5-6</span><div><h2>العمليات الحسابية العددية [1]</h2><small>جمع وطرح الأرقام الثنائية</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <p>بنجمع ونطرح الأرقام الثنائية خانة خانة من اليمين، زي ما بنعمل في الأرقام العشرية بالظبط.</p>
-  <div class="tables-row">
-    <div class="box def" style="flex:1"><span class="lbl">(1) قواعد الجمع الثنائي</span>
-      <div class="calc">0 + 0 = 0
+<div class="lesson-head">
+<div class="eyebrow">الدرس 4 من 8</div>
+<div class="bar"><span style="width:50.0%"></span></div>
+<span class="sticker">5-6</span>
+<h2>العمليات الحسابية العددية [1]</h2>
+<p class="sub">جمع وطرح الأرقام الثنائية</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 3 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 8 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<p>بنجمع ونطرح الأرقام الثنائية خانة خانة من اليمين، زي ما بنعمل في الأرقام العشرية بالظبط.</p>
+<div class="tables-row">
+<div class="box def" style="flex:1"><span class="lbl">(1) قواعد الجمع الثنائي</span>
+<div class="calc">0 + 0 = 0
 0 + 1 = 1
 1 + 0 = 1
 1 + 1 = 10   (اكتب 0 واحمل 1)
 1 + 1 + 1 = 11   (اكتب 1 واحمل 1)</div>
-      <p>لما المجموع يوصل 2 بنرحّل (نحمل <span class="en">Carry</span>) 1 للخانة اللي بعدها.</p>
-    </div>
-    <div class="box def" style="flex:1"><span class="lbl">(2) قواعد الطرح الثنائي</span>
-      <div class="calc">0 − 0 = 0
+<p>لما المجموع يوصل 2 بنرحّل (نحمل <span class="en">Carry</span>) 1 للخانة اللي بعدها.</p>
+</div>
+<div class="box def" style="flex:1"><span class="lbl">(2) قواعد الطرح الثنائي</span>
+<div class="calc">0 − 0 = 0
 1 − 0 = 1
 1 − 1 = 0
 10 − 1 = 1   (بعد الاستلاف)</div>
-      <p>لما المطروح منه مايكونش كفاية بنستلف (<span class="en">Borrow</span>) من الخانة الأعلى، فيبقى عندنا <span class="n">2</span> (يعني <span class="n">10<sub>(2)</sub></span>).</p>
-    </div>
-  </div>
-  <div class="tables-row">
-    <div class="box ex" style="flex:1"><span class="lbl">مثال جمع</span>
-      <div class="calc">  carry  1
+<p>لما المطروح منه مايكونش كفاية بنستلف (<span class="en">Borrow</span>) من الخانة الأعلى، فيبقى عندنا <span class="n">2</span> (يعني <span class="n">10<sub>(2)</sub></span>).</p>
+</div>
+</div>
+<div class="tables-row">
+<div class="box ex" style="flex:1"><span class="lbl">مثال جمع</span>
+<div class="calc">  carry  1
    0 1 0 1
  + 1 0 0 1
  ---------
    1 1 1 0</div>
-      <p>تحقق بالعشري: <span class="n">5 + 9 = 14 = 1110<sub>(2)</sub></span> ✓</p>
-    </div>
-    <div class="box ex" style="flex:1"><span class="lbl">مثال طرح</span>
-      <div class="calc">   1 0 1 0
+<p>تحقق بالعشري: <span class="n">5 + 9 = 14 = 1110<sub>(2)</sub></span> ✓</p>
+</div>
+<div class="box ex" style="flex:1"><span class="lbl">مثال طرح</span>
+<div class="calc">   1 0 1 0
  − 0 1 1 0
  ---------
    0 1 0 0</div>
-      <p>تحقق بالعشري: <span class="n">10 − 6 = 4 = 0100<sub>(2)</sub></span> ✓</p>
-    </div>
-  </div>
-  <div class="box ex avoid"><span class="lbl">مثال فيه حمل متكرر</span>
-    <div class="calc">  carry 1 1
+<p>تحقق بالعشري: <span class="n">10 − 6 = 4 = 0100<sub>(2)</sub></span> ✓</p>
+</div>
+</div>
+<div class="box ex avoid"><span class="lbl">مثال فيه حمل متكرر</span>
+<div class="calc">  carry 1 1
    1 0 1 1
  + 0 0 1 1
  ---------
    1 1 1 0</div>
-    <p><span class="n">11 + 3 = 14</span> ✓</p>
-  </div>
-  <div class="box tip"><span class="lbl">نصيحة</span>
+<p><span class="n">11 + 3 = 14</span> ✓</p>
+</div>
+<div class="box tip"><span class="lbl">نصيحة</span>
     دايمًا اتأكد من إجابتك: حوّل الأرقام لعشري، احسب، وقارن النتيجة.
   </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: أكمل</span>
-    <ol class="qs">
-      <li><span class="n">1<sub>(2)</sub> + 1<sub>(2)</sub></span> = <span class="blank"></span></li>
-      <li><span class="n">1<sub>(2)</sub> + 1<sub>(2)</sub> + 1<sub>(2)</sub></span> = <span class="blank"></span></li>
-      <li><span class="n">10<sub>(2)</sub> − 1<sub>(2)</sub></span> = <span class="blank"></span></li>
-      <li>في الجمع الثنائي لما نجمع 1 مع 1 بيحصل <span class="blank"></span> بمقدار 1 للخانة الأعلى.</li>
-      <li>في الطرح الثنائي لما المطروح منه مايكونش كفاية بنعمل <span class="blank"></span> من الخانة الأعلى.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: اجمع الأرقام الثنائية</span>
-    <p class="n" style="display:block;text-align:right">
-      (1) 0110 + 0011 &nbsp;&nbsp;&nbsp; (2) 1011 + 0110 &nbsp;&nbsp;&nbsp; (3) 0111 + 0111 &nbsp;&nbsp;&nbsp; (4) 1100 + 0101 &nbsp;&nbsp;&nbsp; (5) 0101 + 0110
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">أكمل</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li><span class="n">1<sub>(2)</sub> + 1<sub>(2)</sub></span> = <span class="blank"></span></li>
+<li><span class="n">1<sub>(2)</sub> + 1<sub>(2)</sub> + 1<sub>(2)</sub></span> = <span class="blank"></span></li>
+<li><span class="n">10<sub>(2)</sub> − 1<sub>(2)</sub></span> = <span class="blank"></span></li>
+<li>في الجمع الثنائي لما نجمع 1 مع 1 بيحصل <span class="blank"></span> بمقدار 1 للخانة الأعلى.</li>
+<li>في الطرح الثنائي لما المطروح منه مايكونش كفاية بنعمل <span class="blank"></span> من الخانة الأعلى.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">اجمع الأرقام الثنائية</span></div>
+<p class="n" style="display:block;text-align:right">
+      (1) 0110 + 0011     (2) 1011 + 0110     (3) 0111 + 0111     (4) 1100 + 0101     (5) 0101 + 0110
     </p>
-    <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: اطرح الأرقام الثنائية</span>
-    <p class="n" style="display:block;text-align:right">
-      (1) 1001 − 0011 &nbsp;&nbsp;&nbsp; (2) 1110 − 0111 &nbsp;&nbsp;&nbsp; (3) 1000 − 0001 &nbsp;&nbsp;&nbsp; (4) 1101 − 1011 &nbsp;&nbsp;&nbsp; (5) 1011 − 0110
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">اطرح الأرقام الثنائية</span></div>
+<p class="n" style="display:block;text-align:right">
+      (1) 1001 − 0011     (2) 1110 − 0111     (3) 1000 − 0001     (4) 1101 − 1011     (5) 1011 − 0110
     </p>
-    <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: اكتشف الخطأ</span>
-    <p>طالب جمع <span class="n">0111<sub>(2)</sub> + 0001<sub>(2)</sub></span> وطلعت له <span class="n">0111<sub>(2)</sub></span>. وضّح الخطأ واكتب الإجابة الصحيحة.</p>
-    <div class="ansline"></div><div class="ansline"></div>
-  </div>
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">اكتشف الخطأ</span></div>
+<p>طالب جمع <span class="n">0111<sub>(2)</sub> + 0001<sub>(2)</sub></span> وطلعت له <span class="n">0111<sub>(2)</sub></span>. وضّح الخطأ واكتب الإجابة الصحيحة.</p>
+<div class="ansline"></div><div class="ansline"></div>
+</div>
 </section>
-
 <!-- ================= LESSON 6-6 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">6-6</span><div><h2>العمليات الحسابية العددية [2]</h2><small>تمثيل الأرقام السالبة بالمتممات · الطرح باستخدام المكملات</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <h4>أ) تمثيل الأرقام السالبة باستخدام المتممات</h4>
-  <div class="box def"><span class="lbl">التعريف</span>
-    <span class="term">المكمل (المتمم)</span>: أصغر رقم لما تضيفه لعدد معين بيحصل ترحيل <span class="en"><span class="en">(carry)</span></span> للخانة الأعلى اللي بعدها.
+<div class="lesson-head">
+<div class="eyebrow">الدرس 5 من 8</div>
+<div class="bar"><span style="width:62.5%"></span></div>
+<span class="sticker">6-6</span>
+<h2>العمليات الحسابية العددية [2]</h2>
+<p class="sub">تمثيل الأرقام السالبة بالمتممات · الطرح باستخدام المكملات</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 4 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 9 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<h4>أ) تمثيل الأرقام السالبة باستخدام المتممات</h4>
+<div class="box def"><span class="lbl">التعريف</span>
+<span class="term">المكمل (المتمم)</span>: أصغر رقم لما تضيفه لعدد معين بيحصل ترحيل <span class="en"><span class="en">(carry)</span></span> للخانة الأعلى اللي بعدها.
     الكمبيوتر بيستخدم المتممات علشان يمثل الأرقام السالبة.
   </div>
-  <div class="tables-row">
-    <div class="box ex" style="flex:1"><span class="lbl">[1] المكمل العشري</span>
-      <p><b>المكمل للتسعة <span class="en">(9's Complement)</span>:</b> اطرح كل رقم من 9.</p>
-      <p><b>المكمل للعشرة <span class="en">(10's Complement)</span>:</b> المكمل للتسعة ونزود عليه 1.</p>
-      <div class="calc">العدد 635
+<div class="tables-row">
+<div class="box ex" style="flex:1"><span class="lbl">[1] المكمل العشري</span>
+<p><b>المكمل للتسعة <span class="en">(9's Complement)</span>:</b> اطرح كل رقم من 9.</p>
+<p><b>المكمل للعشرة <span class="en">(10's Complement)</span>:</b> المكمل للتسعة ونزود عليه 1.</p>
+<div class="calc mixed">العدد 635
 9's : 9-6=3 , 9-3=6 , 9-5=4 → 364
 10's: 364 + 1 = 365</div>
-      <p>تحقق: <span class="n">635 + 365 = 1000</span> ✓ (حصل ترحيل). وبالمثل المتمم العشري لـ 71 هو 29.</p>
-    </div>
-    <div class="box ex" style="flex:1"><span class="lbl">[2] المكمل الثنائي</span>
-      <p><b>المكمل للآحاد <span class="en">(One's Complement)</span>:</b> اقلب كل bit (الـ <span class="n">0</span> يبقى <span class="n">1</span>، والـ <span class="n">1</span> يبقى <span class="n">0</span>).</p>
-      <p><b>المكمل للاثنين <span class="en">(Two's Complement)</span>:</b> المكمل للآحاد ونزود عليه 1، وده اللي بنسميه <b>المكمل الثنائي</b>.</p>
-      <div class="calc">العدد 0101
+<p>تحقق: <span class="n">635 + 365 = 1000</span> ✓ (حصل ترحيل). وبالمثل المتمم العشري لـ 71 هو 29.</p>
+</div>
+<div class="box ex" style="flex:1"><span class="lbl">[2] المكمل الثنائي</span>
+<p><b>المكمل للآحاد <span class="en">(One's Complement)</span>:</b> اقلب كل bit (الـ <span class="n">0</span> يبقى <span class="n">1</span>، والـ <span class="n">1</span> يبقى <span class="n">0</span>).</p>
+<p><b>المكمل للاثنين <span class="en">(Two's Complement)</span>:</b> المكمل للآحاد ونزود عليه 1، وده اللي بنسميه <b>المكمل الثنائي</b>.</p>
+<div class="calc mixed">العدد 0101
 1's : 1010
 2's : 1010 + 0001 = 1011</div>
-      <p>تحقق: <span class="n">0101 + 1011 = 10000</span> ✓</p>
-    </div>
-  </div>
-
-  <h4>ب) الطرح باستخدام المكملات</h4>
-  <p>الكمبيوتر مابيطرحش طرح مباشر، هو بيحوّل الطرح لعملية جمع مع المكمل:</p>
-  <div class="box def"><span class="lbl">خطوات الطرح بالمكملات</span>
-    <ol>
-      <li>هات <b>المكمل</b> بتاع المطروح (الرقم التاني).</li>
-      <li><b>اجمع</b> المكمل ده على المطروح منه.</li>
-      <li><b>تجاهل</b> الرقم الزايد اللي على الشمال (الترحيل) واكتب الإجابة.</li>
-    </ol>
-  </div>
-  <div class="tables-row">
-    <div class="box ex" style="flex:1"><span class="lbl">مثال (1): عشري  8 − 6</span>
-      <div class="calc">1) المتمم العشري لـ 6 = 4
+<p>تحقق: <span class="n">0101 + 1011 = 10000</span> ✓</p>
+</div>
+</div>
+<h4>ب) الطرح باستخدام المكملات</h4>
+<p>الكمبيوتر مابيطرحش طرح مباشر، هو بيحوّل الطرح لعملية جمع مع المكمل:</p>
+<div class="box def"><span class="lbl">خطوات الطرح بالمكملات</span>
+<ol>
+<li>هات <b>المكمل</b> بتاع المطروح (الرقم التاني).</li>
+<li><b>اجمع</b> المكمل ده على المطروح منه.</li>
+<li><b>تجاهل</b> الرقم الزايد اللي على الشمال (الترحيل) واكتب الإجابة.</li>
+</ol>
+</div>
+<div class="tables-row">
+<div class="box ex" style="flex:1"><span class="lbl">مثال (1): عشري  8 − 6</span>
+<div class="calc mixed">1) المتمم العشري لـ 6 = 4
 2) 8 + 4 = 12
 3) نتجاهل 1 الرائد → 2</div>
-    </div>
-    <div class="box ex" style="flex:1"><span class="lbl">مثال (2): ثنائي  1000 − 0111</span>
-      <div class="calc">1) المكمل الثنائي لـ 0111 = 1001
+</div>
+<div class="box ex" style="flex:1"><span class="lbl">مثال (2): ثنائي  1000 − 0111</span>
+<div class="calc mixed">1) المكمل الثنائي لـ 0111 = 1001
 2) 1000 + 1001 = 10001
 3) نتجاهل 1 الرائد → 0001</div>
-      <p>تحقق: <span class="n">8 − 7 = 1</span> ✓</p>
-    </div>
-  </div>
-  <div class="box warn"><span class="lbl">انتبه</span>
+<p>تحقق: <span class="n">8 − 7 = 1</span> ✓</p>
+</div>
+</div>
+<div class="box warn"><span class="lbl">انتبه</span>
     لازم الرقمين يبقوا بنفس عدد الخانات قبل ما تجيب المكمل. ولو طلع عندك رقم زيادة على الشمال بعد الجمع، احذفه.
   </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: اختر الإجابة الصحيحة</span>
-    <ol class="qs">
-      <li>المكمل للتسعة للعدد 382:
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li>المكمل للتسعة للعدد 382:
         <div class="opts"><span data-l="أ">618</span><span data-l="ب">617</span><span data-l="ج">283</span><span data-l="د">718</span></div></li>
-      <li>المكمل للعشرة للعدد 47:
+<li>المكمل للعشرة للعدد 47:
         <div class="opts"><span data-l="أ">52</span><span data-l="ب">53</span><span data-l="ج">63</span><span data-l="د">43</span></div></li>
-      <li>المكمل للآحاد للعدد <span class="n">1100<sub>(2)</sub></span>:
+<li>المكمل للآحاد للعدد <span class="n">1100<sub>(2)</sub></span>:
         <div class="opts"><span data-l="أ">0011</span><span data-l="ب">0100</span><span data-l="ج">1101</span><span data-l="د">0010</span></div></li>
-      <li>المكمل الثنائي (للاثنين) للعدد <span class="n">0011<sub>(2)</sub></span>:
+<li>المكمل الثنائي (للاثنين) للعدد <span class="n">0011<sub>(2)</sub></span>:
         <div class="opts"><span data-l="أ">1100</span><span data-l="ب">1101</span><span data-l="ج">0100</span><span data-l="د">1110</span></div></li>
-      <li>الكمبيوتر بينفذ عملية الطرح عن طريق:
+<li>الكمبيوتر بينفذ عملية الطرح عن طريق:
         <div class="opts two"><span data-l="أ">القسمة على 2</span><span data-l="ب">الجمع مع المكملات</span><span data-l="ج">الضرب في 2</span><span data-l="د">التحويل للسادس عشر</span></div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: هات المكمل الثنائي للأعداد دي</span>
-    <p class="n" style="display:block;text-align:right">
-      (1) 0110 &nbsp;&nbsp;&nbsp; (2) 1001 &nbsp;&nbsp;&nbsp; (3) 0100 &nbsp;&nbsp;&nbsp; (4) 1000 &nbsp;&nbsp;&nbsp; (5) 00101100
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">هات المكمل الثنائي للأعداد دي</span></div>
+<p class="n" style="display:block;text-align:right">
+      (1) 0110     (2) 1001     (3) 0100     (4) 1000     (5) 00101100
     </p>
-    <div class="ansline"></div><div class="ansline"></div>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: استخدم المكملات في عمليات الطرح دي</span>
-    <p class="n" style="display:block;text-align:right">
-      (1) 1101 − 0100 &nbsp;&nbsp;&nbsp; (2) 1011 − 0011 &nbsp;&nbsp;&nbsp; (3) 1110 − 1001 &nbsp;&nbsp;&nbsp; (4) 1100 − 0111
+<div class="ansline"></div><div class="ansline"></div>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">استخدم المكملات في عمليات الطرح دي</span></div>
+<p class="n" style="display:block;text-align:right">
+      (1) 1101 − 0100     (2) 1011 − 0011     (3) 1110 − 1001     (4) 1100 − 0111
     </p>
-    <p>(5) بالعشري: <span class="n">9 − 3</span> &nbsp;&nbsp; و &nbsp;&nbsp; <span class="n">75 − 28</span> باستخدام المكمل للعشرة.</p>
-    <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: علّل</span>
-    <ol class="qs">
-      <li>الكمبيوتر بيستخدم المتممات.</li>
-      <li>بنتجاهل الرقم الرائد (اللي على الشمال) بعد الجمع في الطرح بالمكملات.</li>
-    </ol>
-  </div>
+<p>(5) بالعشري: <span class="n">9 − 3</span>    و    <span class="n">75 − 28</span> باستخدام المكمل للعشرة.</p>
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">علّل</span><span class="cnt">0 / 2</span></div>
+<ol class="qs">
+<li>الكمبيوتر بيستخدم المتممات.</li>
+<li>بنتجاهل الرقم الرائد (اللي على الشمال) بعد الجمع في الطرح بالمكملات.</li>
+</ol>
+</div>
 </section>
-
 <!-- ================= LESSON 6-8 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">8-6</span><div><h2>رقمنة الصور</h2><small>البكسل · خطوات الرقمنة · حجم بيانات الصورة · تمثيل اللون</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <h4>1) رقمنة الصور</h4>
-  <div class="box def"><span class="lbl">البكسل</span>
-    <span class="term">البكسل <span class="en">(Pixel)</span></span>: أصغر وحدة بتكوّن الصورة، والصورة الرقمية بتتمثل بترتيب البكسلات جنب بعض.
+<div class="lesson-head">
+<div class="eyebrow">الدرس 6 من 8</div>
+<div class="bar"><span style="width:75.0%"></span></div>
+<span class="sticker">8-6</span>
+<h2>رقمنة الصور</h2>
+<p class="sub">البكسل · خطوات الرقمنة · حجم بيانات الصورة · تمثيل اللون</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 1 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 20 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<h4>1) رقمنة الصور</h4>
+<div class="box def"><span class="lbl">البكسل</span>
+<span class="term">البكسل <span class="en">(Pixel)</span></span>: أصغر وحدة بتكوّن الصورة، والصورة الرقمية بتتمثل بترتيب البكسلات جنب بعض.
   </div>
-  <p>الصور اللي بنلتقطها بالكاميرا الرقمية أو بالماسح الضوئي بتتحول لبيانات رقمية بالخطوات دي:</p>
-  <div class="box def"><span class="lbl">خطوات رقمنة الصورة (بالترتيب)</span>
-    <ol>
-      <li><span class="term">أخذ العينات <span class="en">(Sampling)</span></span>: بنقسم الصورة لبكسلات ونطلّع مستوى السطوع بتاع كل بكسل.
+<p>الصور اللي بنلتقطها بالكاميرا الرقمية أو بالماسح الضوئي بتتحول لبيانات رقمية بالخطوات دي:</p>
+<div class="box def"><span class="lbl">خطوات رقمنة الصورة (بالترتيب)</span>
+<ol>
+<li><span class="term">أخذ العينات <span class="en">(Sampling)</span></span>: بنقسم الصورة لبكسلات ونطلّع مستوى السطوع بتاع كل بكسل.
         <ul><li><span class="term">الدقة <span class="en">(Resolution)</span></span>: درجة دقة ووضوح البكسلات وقت أخذ العينات، ووحدتها <b class="n">dpi</b> <span class="en"><span class="en">(Dots Per Inch)</span></span> يعني عدد النقط في كل بوصة. وساعات بنكتبها كده: <span class="n">Pixels رأسي × Pixels أفقي</span>.</li></ul></li>
-      <li><span class="term">التقدير الرقمي / التحول الكمي <span class="en">(Quantization)</span></span>: بنحوّل سطوع كل بكسل لقيمة رقمية من مستويات متقسمة.
+<li><span class="term">التقدير الرقمي / التحول الكمي <span class="en">(Quantization)</span></span>: بنحوّل سطوع كل بكسل لقيمة رقمية من مستويات متقسمة.
         <ul><li><span class="term">التدرج <span class="en">(Gradation)</span></span>: عدد المستويات اللي بتمثل كثافة اللون في كل بكسل، وبيتحدد بعدد الـ bits المخصصة لكل بكسل. مثلًا <span class="n">8 bit</span> = <span class="n">2<sup>8</sup> = 256</span> مستوى (من 0 لحد 255).</li></ul></li>
-      <li><span class="term">الترميز <span class="en">(Encoding)</span></span>: بنكتب القيم الكمية بأرقام ثنائية (<span class="n">0</span> و<span class="n">1</span>).</li>
-    </ol>
-    <p style="text-align:center;font-weight:700">الصورة الأصلية ← أخذ العينات ← التحول الكمي ← الترميز</p>
-  </div>
-
-  <div class="box tip avoid"><span class="lbl">قانون حجم بيانات الصورة</span>
-    <p style="text-align:center;font-size:14pt;font-weight:700">حجم بيانات الصورة <span class="en">(bit)</span> = عدد البكسلات الرأسي × عدد البكسلات الأفقي × عدد bits معلومات اللون</p>
-    <p>وبعدين نقسم على 8 علشان نحوّله لـ Byte، وبعدين نحوّل لـ KB أو MB حسب المطلوب.</p>
-    <p>كل ما الدقة والتدرج زادوا، الصورة تبقى أنعم وجودتها أحسن، بس <b>حجم البيانات بيزيد</b>.</p>
-  </div>
-  <div class="box ex avoid"><span class="lbl">مثال محلول: صورة ملونة بالكامل 24 bit بدقة 1280 × 720 (افترض 1 KB = 1000 B و 1 MB = 1000 KB)</span>
-    <div class="calc">1280 × 720 × 24 = 22,118,400 bit
+<li><span class="term">الترميز <span class="en">(Encoding)</span></span>: بنكتب القيم الكمية بأرقام ثنائية (<span class="n">0</span> و<span class="n">1</span>).</li>
+</ol>
+<p style="text-align:center;font-weight:700">الصورة الأصلية ← أخذ العينات ← التحول الكمي ← الترميز</p>
+</div>
+<div class="box tip avoid"><span class="lbl">قانون حجم بيانات الصورة</span>
+<p style="text-align:center;font-size:14pt;font-weight:700">حجم بيانات الصورة <span class="en">(bit)</span> = عدد البكسلات الرأسي × عدد البكسلات الأفقي × عدد bits معلومات اللون</p>
+<p>وبعدين نقسم على 8 علشان نحوّله لـ Byte، وبعدين نحوّل لـ KB أو MB حسب المطلوب.</p>
+<p>كل ما الدقة والتدرج زادوا، الصورة تبقى أنعم وجودتها أحسن، بس <b>حجم البيانات بيزيد</b>.</p>
+</div>
+<div class="box ex avoid"><span class="lbl">مثال محلول: صورة ملونة بالكامل 24 bit بدقة 1280 × 720 (افترض 1 KB = 1000 B و 1 MB = 1000 KB)</span>
+<div class="calc">1280 × 720 × 24 = 22,118,400 bit
 22,118,400 ÷ 8 = 2,764,800 Byte
 2,764,800 ÷ 1000 ÷ 1000 ≈ 2.76 MB</div>
-  </div>
-
-  <h4>2) التنسيق النقطي والتنسيق المتجه</h4>
-  <table style="width:100%">
-    <tr><th></th><th>التنسيق النقطي <span class="en">(Raster)</span></th><th>تنسيق المتجهات <span class="en">(Vector)</span></th></tr>
-    <tr><td><b>الفكرة</b></td><td>بيمثل النصوص والأشكال بشبكة من النقاط (البكسلات)</td><td>بيخزن إحداثيات النقاط المكوّنة للصورة وزوايا وسُمك الخطوط اللي بتربطها</td></tr>
-    <tr><td><b>عند التكبير</b></td><td>الصورة تبان مسننة، وده اسمه <span class="term">التعرجات <span class="en">(Jaggies)</span></span></td><td>بتفضل ناعمة وواضحة</td></tr>
-    <tr><td><b>برنامج مثال</b></td><td>برنامج تلوين، زي Photoshop</td><td>برنامج رسم، زي Illustrator</td></tr>
-    <tr><td><b>مناسب لـ</b></td><td>الصور الفوتوغرافية</td><td>الشعارات والصور اللي ملامحها واضحة</td></tr>
-  </table>
-
-  <h4>3) تمثيل اللون</h4>
-  <table style="width:100%">
-    <tr><th></th><th>الألوان الأساسية للضوء</th><th>الألوان الأساسية للصبغة</th></tr>
-    <tr><td><b>الألوان</b></td><td>الأحمر، والأخضر، والأزرق <span class="en"><span class="en">(RGB)</span></span></td><td>السماوي، والأرجواني، والأصفر <span class="en"><span class="en">(CMY)</span></span></td></tr>
-    <tr><td><b>طريقة المزج</b></td><td><span class="term">مزج الألوان الجمعي <span class="en">(Additive)</span></span></td><td><span class="term">مزج الألوان الطرحي <span class="en">(Subtractive)</span></span></td></tr>
-    <tr><td><b>لما نمزجها</b></td><td>السطوع يزيد ويقرب من <b>الأبيض</b></td><td>اللون يغمق ويقرب من <b>الأسود</b></td></tr>
-    <tr><td><b>بتتستخدم في</b></td><td>شاشات التليفزيون والكمبيوتر</td><td>الطابعات الملونة</td></tr>
-  </table>
-  <div class="box def"><span class="lbl">الألوان الكاملة 24 bit (24-bit full color)</span>
+</div>
+<h4>2) التنسيق النقطي والتنسيق المتجه</h4>
+<table style="width:100%">
+<tr><th></th><th>التنسيق النقطي <span class="en">(Raster)</span></th><th>تنسيق المتجهات <span class="en">(Vector)</span></th></tr>
+<tr><td><b>الفكرة</b></td><td>بيمثل النصوص والأشكال بشبكة من النقاط (البكسلات)</td><td>بيخزن إحداثيات النقاط المكوّنة للصورة وزوايا وسُمك الخطوط اللي بتربطها</td></tr>
+<tr><td><b>عند التكبير</b></td><td>الصورة تبان مسننة، وده اسمه <span class="term">التعرجات <span class="en">(Jaggies)</span></span></td><td>بتفضل ناعمة وواضحة</td></tr>
+<tr><td><b>برنامج مثال</b></td><td>برنامج تلوين، زي Photoshop</td><td>برنامج رسم، زي Illustrator</td></tr>
+<tr><td><b>مناسب لـ</b></td><td>الصور الفوتوغرافية</td><td>الشعارات والصور اللي ملامحها واضحة</td></tr>
+</table>
+<h4>3) تمثيل اللون</h4>
+<table style="width:100%">
+<tr><th></th><th>الألوان الأساسية للضوء</th><th>الألوان الأساسية للصبغة</th></tr>
+<tr><td><b>الألوان</b></td><td>الأحمر، والأخضر، والأزرق <span class="en"><span class="en">(RGB)</span></span></td><td>السماوي، والأرجواني، والأصفر <span class="en"><span class="en">(CMY)</span></span></td></tr>
+<tr><td><b>طريقة المزج</b></td><td><span class="term">مزج الألوان الجمعي <span class="en">(Additive)</span></span></td><td><span class="term">مزج الألوان الطرحي <span class="en">(Subtractive)</span></span></td></tr>
+<tr><td><b>لما نمزجها</b></td><td>السطوع يزيد ويقرب من <b>الأبيض</b></td><td>اللون يغمق ويقرب من <b>الأسود</b></td></tr>
+<tr><td><b>بتتستخدم في</b></td><td>شاشات التليفزيون والكمبيوتر</td><td>الطابعات الملونة</td></tr>
+</table>
+<div class="box def"><span class="lbl">الألوان الكاملة 24 bit (24-bit full color)</span>
     كل لون من الأحمر والأخضر والأزرق بيتمثل بـ <span class="n">8 bit</span> (يعني 256 مستوى)، فيبقى المجموع <span class="n">3 × 8 = 24 bit</span>،
     وعدد الألوان الممكنة = <span class="n">2<sup>24</sup> = 16,777,216</span> لون.
   </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: رتّب ثم اختر</span>
-    <ol class="qs">
-      <li>رتّب خطوات تحويل الصورة لبيانات رقمية:
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">رتّب ثم اختر</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li>رتّب خطوات تحويل الصورة لبيانات رقمية:
         (أ) استبدال مستويات السطوع لكل منطقة بقيم صحيحة حسب قاعدة ثابتة.
         (ب) تقسيم الصورة لأقسام شبكية متساوية.
         (ج) تمثيل الأعداد الصحيحة بالنظام الثنائي.</li>
-      <li>الترتيب الصحيح لرقمنة صورة التقطتها بكاميرا رقمية:
+<li>الترتيب الصحيح لرقمنة صورة التقطتها بكاميرا رقمية:
         <div class="opts two"><span data-l="أ">التحول الكمي ← التشفير ← أخذ العينات</span><span data-l="ب">التحول الكمي ← أخذ العينات ← التشفير</span><span data-l="ج">التشفير ← التحول الكمي ← أخذ العينات</span><span data-l="د">أخذ العينات ← التحول الكمي ← التشفير</span></div></li>
-      <li>وحدة قياس الدقة:
+<li>وحدة قياس الدقة:
         <div class="opts"><span data-l="أ">fps</span><span data-l="ب">dpi</span><span data-l="ج">Hz</span><span data-l="د">bit</span></div></li>
-      <li>صورة كل بكسل فيها ممثل بـ <span class="n">4 bit</span>، عدد مستويات التدرج:
+<li>صورة كل بكسل فيها ممثل بـ <span class="n">4 bit</span>، عدد مستويات التدرج:
         <div class="opts"><span data-l="أ">4</span><span data-l="ب">8</span><span data-l="ج">16</span><span data-l="د">256</span></div></li>
-      <li>الطابعات الملونة بتستخدم:
+<li>الطابعات الملونة بتستخدم:
         <div class="opts two"><span data-l="أ">مزج الألوان الجمعي</span><span data-l="ب">مزج الألوان الطرحي</span><span data-l="ج">ألوان الضوء RGB</span><span data-l="د">التنسيق النقطي فقط</span></div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: ضع علامة (✓) أو (✗)</span>
-    <ol class="qs">
-      <li class="tf">التنسيق النقطي بيبان فيه حواف متعرجة لما نكبّر الصورة.</li>
-      <li class="tf">التنسيق النقطي مناسب للصور اللي ملامحها واضحة زي الشعارات.</li>
-      <li class="tf">كل ما قيم الدقة والتدرج قلّت، الصورة بتبقى أنعم.</li>
-      <li class="tf">لما نمزج ألوان الضوء الأساسية بنقرب من اللون الأبيض.</li>
-      <li class="tf">برنامج Illustrator بيستخدم لإنشاء رسومات متجهة.</li>
-      <li class="tf">عدد التدرجات بيعتمد على عدد البتات المخصصة لكل بكسل.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: أكمل</span>
-    <ol class="qs">
-      <li>الألوان الأساسية للضوء هي <span class="blank"></span> و<span class="blank"></span> و<span class="blank"></span>.</li>
-      <li>الألوان الأساسية للصبغة هي <span class="blank"></span> و<span class="blank"></span> و<span class="blank"></span>.</li>
-      <li>لما بنمثل لون واحد بـ <span class="n">8 bit</span> يبقى عندنا <span class="blank"></span> تدرج.</li>
-      <li>الصيغة اللي بتتعامل مع الصورة كمجموعة نقط صغيرة اسمها <span class="blank"></span>، والصيغة اللي بتستخدم معادلات رياضية لتمثيل النقط والخطوط اسمها <span class="blank"></span>.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: مسائل (افترض 1 KB = 1000 B و 1 MB = 1000 KB)</span>
-    <ol class="qs">
-      <li>إيه حجم بيانات صورة بدقة <span class="n">800 × 600</span> بكسل بالكيلوبايت، لو كل بكسل فيه <span class="n">8 bit</span>؟</li>
-      <li>إيه حجم بيانات صورة ملونة بالكامل (<span class="n">24 bit</span>) بدقة <span class="n">600 × 400</span> بالكيلوبايت؟</li>
-      <li>إيه حجم بيانات صورة ملونة بالكامل (<span class="n">24 bit</span>) بدقة <span class="n">1920 × 1080</span> بالميجابايت؟ (قرّب لمنزلتين عشريتين)</li>
-      <li>إيه حجم بيانات صورة بدقة <span class="n">1024 × 768</span> بكسل بالكيلوبايت، لو كل بكسل فيه <span class="n">8 bit</span>؟ (قرّب لأقرب عدد صحيح)</li>
-      <li>احسب عدد الألوان اللي تقدر تمثلها الألوان الكاملة 24 bit.</li>
-    </ol>
-  </div>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 6</span></div>
+<ol class="qs">
+<li class="tf">التنسيق النقطي بيبان فيه حواف متعرجة لما نكبّر الصورة.</li>
+<li class="tf">التنسيق النقطي مناسب للصور اللي ملامحها واضحة زي الشعارات.</li>
+<li class="tf">كل ما قيم الدقة والتدرج قلّت، الصورة بتبقى أنعم.</li>
+<li class="tf">لما نمزج ألوان الضوء الأساسية بنقرب من اللون الأبيض.</li>
+<li class="tf">برنامج Illustrator بيستخدم لإنشاء رسومات متجهة.</li>
+<li class="tf">عدد التدرجات بيعتمد على عدد البتات المخصصة لكل بكسل.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">أكمل</span><span class="cnt">0 / 4</span></div>
+<ol class="qs">
+<li>الألوان الأساسية للضوء هي <span class="blank"></span> و<span class="blank"></span> و<span class="blank"></span>.</li>
+<li>الألوان الأساسية للصبغة هي <span class="blank"></span> و<span class="blank"></span> و<span class="blank"></span>.</li>
+<li>لما بنمثل لون واحد بـ <span class="n">8 bit</span> يبقى عندنا <span class="blank"></span> تدرج.</li>
+<li>الصيغة اللي بتتعامل مع الصورة كمجموعة نقط صغيرة اسمها <span class="blank"></span>، والصيغة اللي بتستخدم معادلات رياضية لتمثيل النقط والخطوط اسمها <span class="blank"></span>.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">مسائل (افترض 1 KB = 1000 B و 1 MB = 1000 KB)</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li>إيه حجم بيانات صورة بدقة <span class="n">800 × 600</span> بكسل بالكيلوبايت، لو كل بكسل فيه <span class="n">8 bit</span>؟</li>
+<li>إيه حجم بيانات صورة ملونة بالكامل (<span class="n">24 bit</span>) بدقة <span class="n">600 × 400</span> بالكيلوبايت؟</li>
+<li>إيه حجم بيانات صورة ملونة بالكامل (<span class="n">24 bit</span>) بدقة <span class="n">1920 × 1080</span> بالميجابايت؟ (قرّب لمنزلتين عشريتين)</li>
+<li>إيه حجم بيانات صورة بدقة <span class="n">1024 × 768</span> بكسل بالكيلوبايت، لو كل بكسل فيه <span class="n">8 bit</span>؟ (قرّب لأقرب عدد صحيح)</li>
+<li>احسب عدد الألوان اللي تقدر تمثلها الألوان الكاملة 24 bit.</li>
+</ol>
+</div>
 </section>
-
 <!-- ================= LESSON 6-9 (compression) ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">9-6</span><div><h2>ضغط البيانات</h2><small>من درس «التمثيل الرقمي وضغط الفيديو» · جزء ضغط البيانات</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <div class="box def"><span class="lbl">التعريفات</span>
-    <ol>
-      <li><span class="term">الضغط <span class="en">(Compression)</span></span>: إننا نقلل حجم البيانات قد ما نقدر ونحافظ على محتواها.</li>
-      <li><span class="term">فك الضغط <span class="en">(Decompression)</span></span>: إننا نرجّع البيانات المضغوطة لحالتها الأصلية.</li>
-      <li><span class="term">نسبة الضغط <span class="en">(Compression ratio)</span></span>: بتوضح البيانات اتضغطت لحد فين.</li>
-    </ol>
-  </div>
-  <div class="box tip avoid"><span class="lbl">قانون نسبة الضغط</span>
-    <p style="text-align:center;font-size:14pt;font-weight:700">نسبة الضغط (%) = (حجم البيانات بعد الضغط ÷ حجم البيانات الأصلي) × 100</p>
-    <p>كل ما النسبة تصغر يبقى الضغط أقوى. مثال: فيديو حجمه 90 MB اتضغط وبقى 30 MB، يبقى النسبة = <span class="n">30 ÷ 90 × 100 ≈ 33%</span>.</p>
-  </div>
-
-  <h4>الضغط غير الفاقد والضغط الفاقد</h4>
-  <table style="width:100%">
-    <tr><th></th><th>الضغط غير الفاقد <span class="en">(Lossless)</span></th><th>الضغط مع فقدان البيانات <span class="en">(Lossy)</span></th></tr>
-    <tr><td><b>الفكرة</b></td><td>بيسمح إننا نرجّع البيانات الأصلية كاملة من البيانات المضغوطة</td><td>مانقدرش نرجّع البيانات الأصلية كاملة بعد الضغط</td></tr>
-    <tr><td><b>بيتستخدم مع</b></td><td>النصوص والبرامج</td><td>الصوت والصور والفيديو</td></tr>
-    <tr><td><b>ملاحظة</b></td><td>الملف بعد فك الضغط بيبقى هو هو الأصلي بالظبط</td><td>بيشيل حاجات الإنسان مابيلاحظهاش، فمش هتحس بفرق كبير</td></tr>
-  </table>
-
-  <h4>الأنواع الرئيسية للضغط بدون فقدان</h4>
-  <div class="box def"><span class="lbl">(1) ترميز طول التشغيل (Run-length encoding · RLE)</span>
+<div class="lesson-head">
+<div class="eyebrow">الدرس 7 من 8</div>
+<div class="bar"><span style="width:87.5%"></span></div>
+<span class="sticker">9-6</span>
+<h2>ضغط البيانات</h2>
+<p class="sub">من درس «التمثيل الرقمي وضغط الفيديو» · جزء ضغط البيانات</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 2 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 13 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<div class="box def"><span class="lbl">التعريفات</span>
+<ol>
+<li><span class="term">الضغط <span class="en">(Compression)</span></span>: إننا نقلل حجم البيانات قد ما نقدر ونحافظ على محتواها.</li>
+<li><span class="term">فك الضغط <span class="en">(Decompression)</span></span>: إننا نرجّع البيانات المضغوطة لحالتها الأصلية.</li>
+<li><span class="term">نسبة الضغط <span class="en">(Compression ratio)</span></span>: بتوضح البيانات اتضغطت لحد فين.</li>
+</ol>
+</div>
+<div class="box tip avoid"><span class="lbl">قانون نسبة الضغط</span>
+<p style="text-align:center;font-size:14pt;font-weight:700">نسبة الضغط (%) = (حجم البيانات بعد الضغط ÷ حجم البيانات الأصلي) × 100</p>
+<p>كل ما النسبة تصغر يبقى الضغط أقوى. مثال: فيديو حجمه 90 MB اتضغط وبقى 30 MB، يبقى النسبة = <span class="n">30 ÷ 90 × 100 ≈ 33%</span>.</p>
+</div>
+<h4>الضغط غير الفاقد والضغط الفاقد</h4>
+<table style="width:100%">
+<tr><th></th><th>الضغط غير الفاقد <span class="en">(Lossless)</span></th><th>الضغط مع فقدان البيانات <span class="en">(Lossy)</span></th></tr>
+<tr><td><b>الفكرة</b></td><td>بيسمح إننا نرجّع البيانات الأصلية كاملة من البيانات المضغوطة</td><td>مانقدرش نرجّع البيانات الأصلية كاملة بعد الضغط</td></tr>
+<tr><td><b>بيتستخدم مع</b></td><td>النصوص والبرامج</td><td>الصوت والصور والفيديو</td></tr>
+<tr><td><b>ملاحظة</b></td><td>الملف بعد فك الضغط بيبقى هو هو الأصلي بالظبط</td><td>بيشيل حاجات الإنسان مابيلاحظهاش، فمش هتحس بفرق كبير</td></tr>
+</table>
+<h4>الأنواع الرئيسية للضغط بدون فقدان</h4>
+<div class="box def"><span class="lbl">(1) ترميز طول التشغيل (Run-length encoding · RLE)</span>
     طريقة ضغط بتستبدل كل سلسلة رموز متكررة ورا بعض برمز واحد ورقم بيقول اتكرر كام مرة. بتنفع جدًا لما يكون فيه رموز كتير متكررة ورا بعض.
   </div>
-  <div class="box ex avoid"><span class="lbl">مثال من الكتاب</span>
-    <p>قبل الضغط: <span class="n">AAAAABBAAAABBBBBBBBAAAAAA</span> (25 حرف)</p>
-    <p>بعد الضغط: <b class="n">A5B2A4B8A6</b> (10 حروف)</p>
-    <p>نسبة الضغط = <span class="n">10 ÷ 25 × 100 = 40%</span></p>
-  </div>
-  <div class="box ex avoid"><span class="lbl">تطبيق على صورة أبيض وأسود (شبكة 5 × 5)</span>
-    <p>بنقرا البكسلات صف ورا صف من فوق على الشمال لليمين: البكسل الأسود نكتبه B، والأبيض نكتبه W. ولو حرف اتكرر n مرة (n ≥ 2) نكتبه Bn أو Wn، ولو جه مرة واحدة نكتب الحرف لوحده.</p>
-    <div style="display:flex;align-items:center;gap:16px;justify-content:center">
-      <div class="pix">
-        <i class="b"></i><i></i><i></i><i></i><i></i>
-        <i class="b"></i><i></i><i></i><i></i><i></i>
-        <i class="b"></i><i></i><i></i><i></i><i></i>
-        <i class="b"></i><i></i><i></i><i></i><i></i>
-        <i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i>
-      </div>
-      <div>الحرف <b>L</b> بيتضغط لـ: <b class="n">BW4BW4BW4BW4B5</b></div>
-    </div>
-  </div>
-  <div class="box def"><span class="lbl">(2) ترميز هوفمان <span class="en">(Huffman coding)</span></span>
+<div class="box ex avoid"><span class="lbl">مثال من الكتاب</span>
+<p>قبل الضغط: <span class="n">AAAAABBAAAABBBBBBBBAAAAAA</span> (25 حرف)</p>
+<p>بعد الضغط: <b class="n">A5B2A4B8A6</b> (10 حروف)</p>
+<p>نسبة الضغط = <span class="n">10 ÷ 25 × 100 = 40%</span></p>
+</div>
+<div class="box ex avoid"><span class="lbl">تطبيق على صورة أبيض وأسود (شبكة 5 × 5)</span>
+<p>بنقرا البكسلات صف ورا صف من فوق على الشمال لليمين: البكسل الأسود نكتبه B، والأبيض نكتبه W. ولو حرف اتكرر n مرة (n ≥ 2) نكتبه Bn أو Wn، ولو جه مرة واحدة نكتب الحرف لوحده.</p>
+<div style="display:flex;align-items:center;gap:16px;justify-content:center">
+<div class="pix">
+<i class="b"></i><i></i><i></i><i></i><i></i>
+<i class="b"></i><i></i><i></i><i></i><i></i>
+<i class="b"></i><i></i><i></i><i></i><i></i>
+<i class="b"></i><i></i><i></i><i></i><i></i>
+<i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+</div>
+<div>الحرف <b>L</b> بيتضغط لـ: <b class="n">BW4BW4BW4BW4B5</b></div>
+</div>
+</div>
+<div class="box def"><span class="lbl">(2) ترميز هوفمان <span class="en">(Huffman coding)</span></span>
     طريقة ضغط بتدي تسلسلات bit <b>أقصر</b> للأحرف اللي بتتكرر <b>أكتر</b>، وتسلسلات bit <b>أطول</b> للأحرف اللي بتتكرر <b>أقل</b>.
   </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: ضع علامة (✓) أو (✗)</span>
-    <ol class="qs">
-      <li class="tf">الضغط غير الفاقد طريقة بتحسّن كفاءة الضغط عن طريق إنها بتشيل حاجات الإنسان مابيلاحظهاش.</li>
-      <li class="tf">فك الضغط هو إننا نرجّع البيانات المضغوطة لحالتها الأصلية.</li>
-      <li class="tf">البيانات المضغوطة بالضغط الفاقد بترجع زي البيانات الأصلية بالظبط.</li>
-      <li class="tf">البيانات المضغوطة بالضغط غير الفاقد بترجع زي البيانات الأصلية بالظبط بعد فك ضغطها.</li>
-      <li class="tf">ترميز هوفمان بيدي الأحرف الأكتر تكرارًا تسلسلات bit أطول.</li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: اكتب نوع الضغط المناسب (فاقد أو غير فاقد)</span>
-    <table class="match"><tr><th>الملف</th><th>نوع الضغط</th></tr>
-      <tr><td>(1) ملف نصي فيه بحث</td><td></td></tr>
-      <tr><td>(2) برنامج كمبيوتر</td><td></td></tr>
-      <tr><td>(3) صورة فوتوغرافية</td><td></td></tr>
-      <tr><td>(4) أغنية</td><td></td></tr>
-    </table>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: مسائل</span>
-    <ol class="qs">
-      <li>ملف مضغوط حجمه <span class="n">21 MB</span>، ولما فكينا ضغطه بقى <span class="n">50 MB</span>. إيه نسبة الضغط؟</li>
-      <li>ملف حجمه <span class="n">80 MB</span> اتضغط وبقى <span class="n">20 MB</span>. احسب نسبة الضغط.</li>
-      <li>اضغط السلسلة دي بترميز طول التشغيل: <span class="n">AAAABBBCCCCCCDD</span>، وبعدين احسب نسبة الضغط (قرّب لأقرب عدد صحيح).</li>
-      <li>فك ضغط السلسلة: <span class="n">X3Y5Z2</span></li>
-      <li>إيه الحرف الإنجليزي اللي بتمثله البيانات المضغوطة دي في شبكة 5 × 5؟ ارسمه:
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li class="tf">الضغط غير الفاقد طريقة بتحسّن كفاءة الضغط عن طريق إنها بتشيل حاجات الإنسان مابيلاحظهاش.</li>
+<li class="tf">فك الضغط هو إننا نرجّع البيانات المضغوطة لحالتها الأصلية.</li>
+<li class="tf">البيانات المضغوطة بالضغط الفاقد بترجع زي البيانات الأصلية بالظبط.</li>
+<li class="tf">البيانات المضغوطة بالضغط غير الفاقد بترجع زي البيانات الأصلية بالظبط بعد فك ضغطها.</li>
+<li class="tf">ترميز هوفمان بيدي الأحرف الأكتر تكرارًا تسلسلات bit أطول.</li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">اكتب نوع الضغط المناسب (فاقد أو غير فاقد)</span></div>
+<table class="match"><tr><th>الملف</th><th>نوع الضغط</th></tr>
+<tr><td>(1) ملف نصي فيه بحث</td><td></td></tr>
+<tr><td>(2) برنامج كمبيوتر</td><td></td></tr>
+<tr><td>(3) صورة فوتوغرافية</td><td></td></tr>
+<tr><td>(4) أغنية</td><td></td></tr>
+</table>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">مسائل</span><span class="cnt">0 / 6</span></div>
+<ol class="qs">
+<li>ملف مضغوط حجمه <span class="n">21 MB</span>، ولما فكينا ضغطه بقى <span class="n">50 MB</span>. إيه نسبة الضغط؟</li>
+<li>ملف حجمه <span class="n">80 MB</span> اتضغط وبقى <span class="n">20 MB</span>. احسب نسبة الضغط.</li>
+<li>اضغط السلسلة دي بترميز طول التشغيل: <span class="n">AAAABBBCCCCCCDD</span>، وبعدين احسب نسبة الضغط (قرّب لأقرب عدد صحيح).</li>
+<li>فك ضغط السلسلة: <span class="n">X3Y5Z2</span></li>
+<li>إيه الحرف الإنجليزي اللي بتمثله البيانات المضغوطة دي في شبكة 5 × 5؟ ارسمه:
         <b class="n">B5W2BW4BW4BW4BW2</b>
-        <div class="pix" style="margin-top:6px">
-          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
-        </div></li>
-      <li>اضغط الشكل ده بترميز طول التشغيل:
+<div class="pix" style="margin-top:6px">
+<i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+</div></li>
+<li>اضغط الشكل ده بترميز طول التشغيل:
         <div class="pix">
-          <i class="b"></i><i></i><i></i><i></i><i class="b"></i>
-          <i class="b"></i><i></i><i></i><i></i><i class="b"></i>
-          <i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i>
-          <i class="b"></i><i></i><i></i><i></i><i class="b"></i>
-          <i class="b"></i><i></i><i></i><i></i><i class="b"></i>
-        </div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: اختر</span>
-    <p>المصطلح اللي بيطلق على طريقة ضغط بتمثل البيانات المتكررة بإنها تكتب البيانات وعدد مرات تكرارها ورا بعض:</p>
-    <div class="opts two"><span data-l="أ">ترميز هوفمان Huffman coding</span><span data-l="ب">برنامج ترميز <span class="en">(Codec)</span></span><span data-l="ج">ترميز طول التشغيل <span class="en">(Run-length encoding)</span></span><span data-l="د">ترميز LZ</span></div>
-  </div>
+<i class="b"></i><i></i><i></i><i></i><i class="b"></i>
+<i class="b"></i><i></i><i></i><i></i><i class="b"></i>
+<i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i><i class="b"></i>
+<i class="b"></i><i></i><i></i><i></i><i class="b"></i>
+<i class="b"></i><i></i><i></i><i></i><i class="b"></i>
+</div></li>
+</ol>
+</div>
+<div class="qblock avoid">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">اختر</span></div>
+<p>المصطلح اللي بيطلق على طريقة ضغط بتمثل البيانات المتكررة بإنها تكتب البيانات وعدد مرات تكرارها ورا بعض:</p>
+<div class="opts two"><span data-l="أ">ترميز هوفمان Huffman coding</span><span data-l="ب">برنامج ترميز <span class="en">(Codec)</span></span><span data-l="ج">ترميز طول التشغيل <span class="en">(Run-length encoding)</span></span><span data-l="د">ترميز LZ</span></div>
+</div>
 </section>
-
 <!-- ================= LESSON 6-10 ================= -->
 <section class="page-break">
-  <div class="lesson-head"><span class="num">10-6</span><div><h2>تصميم البيانات</h2><small>Information design · تقنيات التصميم لسهولة الفهم · مبدأ LATCH</small></div></div>
-
-  <h3 class="sec">أولًا: الشرح</h3>
-  <h4>1) تصميم البيانات</h4>
-  <div class="box def"><span class="lbl">التعريف</span>
-    <span class="term">تصميم البيانات <span class="en">(Information design)</span></span>: إننا ننظم البيانات ونعبّر عنها بطريقة إبداعية حسب الغرض منها، علشان الرسالة المقصودة توصل للجمهور المستهدف صح.
+<div class="lesson-head">
+<div class="eyebrow">الدرس 8 من 8</div>
+<div class="bar"><span style="width:100.0%"></span></div>
+<span class="sticker">10-6</span>
+<h2>تصميم البيانات</h2>
+<p class="sub">Information design · تقنيات التصميم لسهولة الفهم · مبدأ LATCH</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> شرح مبسط</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> 0 أمثلة محلولة</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 15 سؤال</span></div>
+</div>
+<h3 class="sec">أولًا: الشرح</h3>
+<h4>1) تصميم البيانات</h4>
+<div class="box def"><span class="lbl">التعريف</span>
+<span class="term">تصميم البيانات <span class="en">(Information design)</span></span>: إننا ننظم البيانات ونعبّر عنها بطريقة إبداعية حسب الغرض منها، علشان الرسالة المقصودة توصل للجمهور المستهدف صح.
   </div>
-  <h4>طرق تصميم البيانات</h4>
-  <table style="width:100%">
-    <tr><th>الطريقة</th><th>معناها</th><th>مثال</th></tr>
-    <tr><td><span class="term">التجريد <span class="en">(Abstraction)</span></span></td><td>نوصّل البيانات المقصودة ببساطة من وسط كمية كبيرة من البيانات</td><td>رسوم توضيحية لكل فصل علشان توجّه الناس جوه مبنى المدرسة</td></tr>
-    <tr><td><span class="term">الرسم التصويري <span class="en">(Pictogram)</span></span></td><td>رمز تصويري بيوصّل البيانات من غير كلام</td><td>علامة مخرج الطوارئ، وعلامات الحمامات في المحطات والمطارات</td></tr>
-    <tr><td><span class="term">الأيقونة <span class="en">(Icon)</span></span></td><td>بتمثل محتوى البرنامج على الكمبيوتر أو الموبايل بصور أو رسوم توضيحية</td><td>أيقونة البريد ✉ وأيقونة الصور</td></tr>
-    <tr><td><span class="term">التصوّر <span class="en">(Visualization)</span></span></td><td>نمثل البيانات بصريًا علشان تبقى أسهل في الفهم</td><td>الجداول والرسوم البيانية (زي تجميع نتايج استبيان في جدول ورسم بياني)</td></tr>
-    <tr><td><span class="term">الهيكلة <span class="en">(Structuring)</span></span></td><td>نرتب البيانات ونعبّر عنها بوضوح حسب العلاقات والمستويات والمراحل والترتيب</td><td>القوائم الهرمية في صفحات الويب، وخرايط المتاجر الكبيرة</td></tr>
-  </table>
-
-  <h4>2) تقنيات التصميم لسهولة الفهم</h4>
-  <div class="box def"><span class="lbl">المصطلحات</span>
-    <ol>
-      <li><span class="term">واجهة المستخدم <span class="en">(UI)</span></span>: نظام بينقل البيانات بين الإنسان والأجهزة، زي الإدخال بالصوت والشاشة اللمس ولوحة المفاتيح.
+<h4>طرق تصميم البيانات</h4>
+<table style="width:100%">
+<tr><th>الطريقة</th><th>معناها</th><th>مثال</th></tr>
+<tr><td><span class="term">التجريد <span class="en">(Abstraction)</span></span></td><td>نوصّل البيانات المقصودة ببساطة من وسط كمية كبيرة من البيانات</td><td>رسوم توضيحية لكل فصل علشان توجّه الناس جوه مبنى المدرسة</td></tr>
+<tr><td><span class="term">الرسم التصويري <span class="en">(Pictogram)</span></span></td><td>رمز تصويري بيوصّل البيانات من غير كلام</td><td>علامة مخرج الطوارئ، وعلامات الحمامات في المحطات والمطارات</td></tr>
+<tr><td><span class="term">الأيقونة <span class="en">(Icon)</span></span></td><td>بتمثل محتوى البرنامج على الكمبيوتر أو الموبايل بصور أو رسوم توضيحية</td><td>أيقونة البريد ✉ وأيقونة الصور</td></tr>
+<tr><td><span class="term">التصوّر <span class="en">(Visualization)</span></span></td><td>نمثل البيانات بصريًا علشان تبقى أسهل في الفهم</td><td>الجداول والرسوم البيانية (زي تجميع نتايج استبيان في جدول ورسم بياني)</td></tr>
+<tr><td><span class="term">الهيكلة <span class="en">(Structuring)</span></span></td><td>نرتب البيانات ونعبّر عنها بوضوح حسب العلاقات والمستويات والمراحل والترتيب</td><td>القوائم الهرمية في صفحات الويب، وخرايط المتاجر الكبيرة</td></tr>
+</table>
+<h4>2) تقنيات التصميم لسهولة الفهم</h4>
+<div class="box def"><span class="lbl">المصطلحات</span>
+<ol>
+<li><span class="term">واجهة المستخدم <span class="en">(UI)</span></span>: نظام بينقل البيانات بين الإنسان والأجهزة، زي الإدخال بالصوت والشاشة اللمس ولوحة المفاتيح.
         <ul>
-          <li><span class="term">واجهة سطر الأوامر <span class="en">(CUI)</span></span>: بنشغّل الجهاز بإننا نكتب أوامر بلوحة المفاتيح (زي أجهزة الكمبيوتر القديمة).</li>
-          <li><span class="term">واجهة المستخدم الرسومية <span class="en">(GUI)</span></span>: بتخلّي المستخدم يدي أوامر بسهولة وبشكل بديهي باستخدام الرموز والأزرار والماوس (زي الأجهزة الحالية).</li>
-        </ul></li>
-      <li><span class="term">تجربة المستخدم <span class="en">(UX)</span></span>: الخبرة أو التأثير العاطفي اللي بيكسبه المستخدم من تعامله مع منتج أو خدمة.</li>
-      <li><span class="term">الإمكانية <span class="en">(Affordance)</span></span>: الأفعال أو العمليات اللي ممكن تتعمل على حاجة معينة.</li>
-      <li><span class="term">الدلالة / الدال <span class="en">(Signifier)</span></span>: إشارات بتشجع المستخدم إنه يعمل حاجة معينة.</li>
-      <li><span class="term">قابلية الاستخدام <span class="en">(Usability)</span></span>: مقياس بيوضح الحاجة سهلة في الاستخدام والفهم قد إيه.</li>
-      <li><span class="term">إمكانية الوصول <span class="en">(Accessibility)</span></span>: سهولة إن عدد كبير من الناس يوصلوا للبيانات والخدمات، أيًّا كانت قدراتهم أو ظروفهم.</li>
-      <li><span class="term">التصميم الشامل <span class="en">(Universal design)</span></span>: تصميم متعمول بدراسة على أساس إن كل الناس يقدروا يستخدموه من غير صعوبة، بغض النظر عن السن أو اللغة أو الجنسية أو القدرة الجسدية.</li>
-    </ol>
-  </div>
-  <div class="box tip avoid"><span class="lbl">مبدأ LATCH لتنظيم وعرض البيانات</span>
-    <table style="width:100%">
-      <tr><th>الحرف</th><th>التصنيف</th><th>يعتمد على</th><th>مثال</th></tr>
-      <tr><td>L</td><td>الموقع <span class="en">(Location)</span></td><td>المكان الفعلي</td><td>خريطة المول ومحلاته</td></tr>
-      <tr><td>A</td><td>الأبجدية <span class="en">(Alphabet)</span></td><td>الترتيب الأبجدي أو البياني</td><td>القاموس ودليل التليفونات</td></tr>
-      <tr><td>T</td><td>الوقت <span class="en">(Time)</span></td><td>تسلسل الأحداث على حسب الوقت</td><td>جدول الحصص والخط الزمني التاريخي</td></tr>
-      <tr><td>C</td><td>الفئة <span class="en">(Category)</span></td><td>الفروق بين الأشياء لتمييز المجالات</td><td>أقسام السوبر ماركت</td></tr>
-      <tr><td>H</td><td>الهرمية <span class="en">(Hierarchy)</span></td><td>التغيرات الكمية زي الحجم والمستوى والدرجة</td><td>ترتيب المنتجات من الأرخص للأغلى</td></tr>
-    </table>
-  </div>
-
-  <h3 class="sec q">ثانيًا: الأسئلة</h3>
-  <div class="qblock">
-    <span class="qtitle">السؤال الأول: اكتب المصطلح العلمي</span>
-    <ol class="qs">
-      <li>رمز تصويري بيوصّل البيانات من غير ما نستخدم كلام. <span class="blank"></span></li>
-      <li>إننا نمثل البيانات بصريًا علشان تبقى أسهل في الفهم. <span class="blank"></span></li>
-      <li>نظام بينقل البيانات بين الإنسان والأجهزة. <span class="blank"></span></li>
-      <li>إشارات بتشجع المستخدم إنه يعمل حاجة معينة. <span class="blank"></span></li>
-      <li>الخبرة أو التأثير العاطفي اللي بيكسبه المستخدم من تعامله مع منتج أو خدمة. <span class="blank"></span></li>
-      <li>تصميم بيتعمل بدراسة علشان كل الناس يقدروا يستخدموه من غير صعوبة. <span class="blank"></span></li>
-      <li>إننا نوصّل البيانات المقصودة ببساطة من وسط كمية كبيرة من البيانات. <span class="blank"></span></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثاني: اختر الإجابة الصحيحة</span>
-    <ol class="qs">
-      <li>المثال الأنسب للتصوّر كطريقة في تصميم البيانات:
+<li><span class="term">واجهة سطر الأوامر <span class="en">(CUI)</span></span>: بنشغّل الجهاز بإننا نكتب أوامر بلوحة المفاتيح (زي أجهزة الكمبيوتر القديمة).</li>
+<li><span class="term">واجهة المستخدم الرسومية <span class="en">(GUI)</span></span>: بتخلّي المستخدم يدي أوامر بسهولة وبشكل بديهي باستخدام الرموز والأزرار والماوس (زي الأجهزة الحالية).</li>
+</ul></li>
+<li><span class="term">تجربة المستخدم <span class="en">(UX)</span></span>: الخبرة أو التأثير العاطفي اللي بيكسبه المستخدم من تعامله مع منتج أو خدمة.</li>
+<li><span class="term">الإمكانية <span class="en">(Affordance)</span></span>: الأفعال أو العمليات اللي ممكن تتعمل على حاجة معينة.</li>
+<li><span class="term">الدلالة / الدال <span class="en">(Signifier)</span></span>: إشارات بتشجع المستخدم إنه يعمل حاجة معينة.</li>
+<li><span class="term">قابلية الاستخدام <span class="en">(Usability)</span></span>: مقياس بيوضح الحاجة سهلة في الاستخدام والفهم قد إيه.</li>
+<li><span class="term">إمكانية الوصول <span class="en">(Accessibility)</span></span>: سهولة إن عدد كبير من الناس يوصلوا للبيانات والخدمات، أيًّا كانت قدراتهم أو ظروفهم.</li>
+<li><span class="term">التصميم الشامل <span class="en">(Universal design)</span></span>: تصميم متعمول بدراسة على أساس إن كل الناس يقدروا يستخدموه من غير صعوبة، بغض النظر عن السن أو اللغة أو الجنسية أو القدرة الجسدية.</li>
+</ol>
+</div>
+<div class="box tip avoid"><span class="lbl">مبدأ LATCH لتنظيم وعرض البيانات</span>
+<table style="width:100%">
+<tr><th>الحرف</th><th>التصنيف</th><th>يعتمد على</th><th>مثال</th></tr>
+<tr><td>L</td><td>الموقع <span class="en">(Location)</span></td><td>المكان الفعلي</td><td>خريطة المول ومحلاته</td></tr>
+<tr><td>A</td><td>الأبجدية <span class="en">(Alphabet)</span></td><td>الترتيب الأبجدي أو البياني</td><td>القاموس ودليل التليفونات</td></tr>
+<tr><td>T</td><td>الوقت <span class="en">(Time)</span></td><td>تسلسل الأحداث على حسب الوقت</td><td>جدول الحصص والخط الزمني التاريخي</td></tr>
+<tr><td>C</td><td>الفئة <span class="en">(Category)</span></td><td>الفروق بين الأشياء لتمييز المجالات</td><td>أقسام السوبر ماركت</td></tr>
+<tr><td>H</td><td>الهرمية <span class="en">(Hierarchy)</span></td><td>التغيرات الكمية زي الحجم والمستوى والدرجة</td><td>ترتيب المنتجات من الأرخص للأغلى</td></tr>
+</table>
+</div>
+<h3 class="sec q">ثانيًا: الأسئلة</h3>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اكتب المصطلح العلمي</span><span class="cnt">0 / 7</span></div>
+<ol class="qs">
+<li>رمز تصويري بيوصّل البيانات من غير ما نستخدم كلام. <span class="blank"></span></li>
+<li>إننا نمثل البيانات بصريًا علشان تبقى أسهل في الفهم. <span class="blank"></span></li>
+<li>نظام بينقل البيانات بين الإنسان والأجهزة. <span class="blank"></span></li>
+<li>إشارات بتشجع المستخدم إنه يعمل حاجة معينة. <span class="blank"></span></li>
+<li>الخبرة أو التأثير العاطفي اللي بيكسبه المستخدم من تعامله مع منتج أو خدمة. <span class="blank"></span></li>
+<li>تصميم بيتعمل بدراسة علشان كل الناس يقدروا يستخدموه من غير صعوبة. <span class="blank"></span></li>
+<li>إننا نوصّل البيانات المقصودة ببساطة من وسط كمية كبيرة من البيانات. <span class="blank"></span></li>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 5</span></div>
+<ol class="qs">
+<li>المثال الأنسب للتصوّر كطريقة في تصميم البيانات:
         <div class="opts two"><span data-l="أ">رسوم توضيحية لكل فصل لتوجيه الناس</span><span data-l="ب">صفحة ويب بقوائم هرمية</span><span data-l="ج">تجميع نتايج استبيان في جداول ورسوم بيانية</span><span data-l="د">نص بيلخص مسائل في نقط</span></div></li>
-      <li>الأجهزة القديمة كانت بتستخدم واجهة بتنقل الأوامر بإدخال حروف بلوحة المفاتيح، اسمها:
+<li>الأجهزة القديمة كانت بتستخدم واجهة بتنقل الأوامر بإدخال حروف بلوحة المفاتيح، اسمها:
         <div class="opts"><span data-l="أ">GUI</span><span data-l="ب">CUI</span><span data-l="ج">VUI</span><span data-l="د">NUI</span></div></li>
-      <li>علامة مخرج الطوارئ في المحطات والمطارات مثال على:
+<li>علامة مخرج الطوارئ في المحطات والمطارات مثال على:
         <div class="opts"><span data-l="أ">الأيقونة</span><span data-l="ب">الهيكلة</span><span data-l="ج">الرسم التصويري</span><span data-l="د">التصور</span></div></li>
-      <li>صفحة ويب للمدرسة متنظمة بقوائم في تسلسل هرمي مثال على:
+<li>صفحة ويب للمدرسة متنظمة بقوائم في تسلسل هرمي مثال على:
         <div class="opts"><span data-l="أ">الهيكلة</span><span data-l="ب">التجريد</span><span data-l="ج">التصور</span><span data-l="د">الإيحاء</span></div></li>
-      <li>الشرح الأنسب لمصطلح «الدال» <span class="en">(Signifier)</span>:
+<li>الشرح الأنسب لمصطلح «الدال» <span class="en">(Signifier)</span>:
         <div class="opts two"><span data-l="أ">مقياس لسهولة الاستخدام</span><span data-l="ب">تصميم للجميع بدون صعوبة</span><span data-l="ج">إمكانية الوصول لعدد كبير من الناس</span><span data-l="د">إشارات بتشجع على عمل حاجة</span></div></li>
-    </ol>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الثالث: صنّف حسب مبدأ LATCH</span>
-    <table class="match"><tr><th>المثال</th><th>نوع التصنيف</th></tr>
-      <tr><td>(1) ترتيب الكلمات في القاموس</td><td></td></tr>
-      <tr><td>(2) خريطة مترو الأنفاق والمحطات</td><td></td></tr>
-      <tr><td>(3) جدول مواعيد الامتحانات</td><td></td></tr>
-      <tr><td>(4) تقسيم مكتبة لكتب علمية وأدبية وتاريخية</td><td></td></tr>
-      <tr><td>(5) ترتيب الطلاب حسب درجاتهم</td><td></td></tr>
-    </table>
-  </div>
-  <div class="qblock">
-    <span class="qtitle">السؤال الرابع: قارن</span>
-    <ol class="qs">
-      <li>قارن بين واجهة سطر الأوامر <span class="en">(CUI)</span> وواجهة المستخدم الرسومية <span class="en">(GUI)</span>.</li>
-      <li>إيه الفرق بين قابلية الاستخدام وإمكانية الوصول؟</li>
-    </ol>
-    <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
-  </div>
+</ol>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">صنّف حسب مبدأ LATCH</span></div>
+<table class="match"><tr><th>المثال</th><th>نوع التصنيف</th></tr>
+<tr><td>(1) ترتيب الكلمات في القاموس</td><td></td></tr>
+<tr><td>(2) خريطة مترو الأنفاق والمحطات</td><td></td></tr>
+<tr><td>(3) جدول مواعيد الامتحانات</td><td></td></tr>
+<tr><td>(4) تقسيم مكتبة لكتب علمية وأدبية وتاريخية</td><td></td></tr>
+<tr><td>(5) ترتيب الطلاب حسب درجاتهم</td><td></td></tr>
+</table>
+</div>
+<div class="qblock">
+<div class="qhead"><span class="chip">السؤال الرابع</span><span class="qt">قارن</span><span class="cnt">0 / 2</span></div>
+<ol class="qs">
+<li>قارن بين واجهة سطر الأوامر <span class="en">(CUI)</span> وواجهة المستخدم الرسومية <span class="en">(GUI)</span>.</li>
+<li>إيه الفرق بين قابلية الاستخدام وإمكانية الوصول؟</li>
+</ol>
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+</div>
 </section>
-
 <!-- ================= GENERAL REVIEW ================= -->
 <section class="page-break">
-  <div class="lesson-head"><div><h2>مراجعة عامة على الوحدة</h2><small>أسئلة متنوعة على كل الدروس</small></div></div>
-  <ol class="qs">
-    <li>حوّل <span class="n">(45)<sub>10</sub></span> للنظام الثنائي، وبعدين للنظام السادس عشر.</li>
-    <li>حوّل <span class="n">(7E)<sub>16</sub></span> للنظام الثنائي، وبعدين للعشري.</li>
-    <li>اكتب رمز كلمة <span class="n">"Data"</span> بالنظام السادس عشر بجدول ASCII، واحسب حجمها بالـ bit.</li>
-    <li>احسب: <span class="n">1011<sub>(2)</sub> + 0101<sub>(2)</sub></span>.</li>
-    <li>استخدم المكملات لحساب: <span class="n">1010<sub>(2)</sub> − 0110<sub>(2)</sub></span>.</li>
-    <li>كام bit لازم لتمثيل 47 محافظة (أقل عدد)؟</li>
-    <li>صورة ملونة بالكامل (<span class="n">24 bit</span>) بدقة <span class="n">640 × 480</span>. احسب حجمها بالكيلوبايت (افترض 1 KB = 1000 B).</li>
-    <li>ملف حجمه <span class="n">200 KB</span> اتضغط بطريقة غير فاقدة وبقى <span class="n">50 KB</span>. احسب نسبة الضغط، ولما نفك الضغط هل الملف هيرجع زي الأصلي بالظبط؟</li>
-    <li>ليه الشاشات بتستخدم المزج الجمعي والطابعات بتستخدم المزج الطرحي؟</li>
-    <li>اذكر مثال لكل طريقة من طرق تصميم البيانات (التجريد، والرسم التصويري، والأيقونة، والتصور، والهيكلة).</li>
-  </ol>
-  <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
+<div class="lesson-head"><div class="eyebrow">اختبر نفسك</div><div class="bar"><span style="width:100%"></span></div>
+<span class="sticker">✦</span><h2>مراجعة عامة على الوحدة</h2><p class="sub">أسئلة متنوعة على كل الدروس</p>
+<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 10 سؤال</span></div></div>
+<ol class="qs">
+<li>حوّل <span class="n">(45)<sub>10</sub></span> للنظام الثنائي، وبعدين للنظام السادس عشر.</li>
+<li>حوّل <span class="n">(7E)<sub>16</sub></span> للنظام الثنائي، وبعدين للعشري.</li>
+<li>اكتب رمز كلمة <span class="n">"Data"</span> بالنظام السادس عشر بجدول ASCII، واحسب حجمها بالـ bit.</li>
+<li>احسب: <span class="n">1011<sub>(2)</sub> + 0101<sub>(2)</sub></span>.</li>
+<li>استخدم المكملات لحساب: <span class="n">1010<sub>(2)</sub> − 0110<sub>(2)</sub></span>.</li>
+<li>كام bit لازم لتمثيل 47 محافظة (أقل عدد)؟</li>
+<li>صورة ملونة بالكامل (<span class="n">24 bit</span>) بدقة <span class="n">640 × 480</span>. احسب حجمها بالكيلوبايت (افترض 1 KB = 1000 B).</li>
+<li>ملف حجمه <span class="n">200 KB</span> اتضغط بطريقة غير فاقدة وبقى <span class="n">50 KB</span>. احسب نسبة الضغط، ولما نفك الضغط هل الملف هيرجع زي الأصلي بالظبط؟</li>
+<li>ليه الشاشات بتستخدم المزج الجمعي والطابعات بتستخدم المزج الطرحي؟</li>
+<li>اذكر مثال لكل طريقة من طرق تصميم البيانات (التجريد، والرسم التصويري، والأيقونة، والتصور، والهيكلة).</li>
+</ol>
+<div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
 </section>
-
 <!-- ================= ANSWER KEY ================= -->
 <section class="page-break key">
-  <div class="lesson-head" style="background:var(--green)"><div><h2>نموذج الإجابة</h2><small>صحح لنفسك بعد ما تخلص الحل</small></div></div>
-
-  <h3>درس 2-6: النظام الثنائي وكمية البيانات</h3>
-  <h4>س1 اختر</h4>
-  <ol><li>(ب) bit</li><li>(ج) 32</li><li>(د) 256</li><li>(ب) 1024 MB</li><li>(ب) 5 لأن <span class="n">2<sup>5</sup> = 32 ≥ 26</span></li><li>(أ)</li><li>(ب) 10</li></ol>
-  <h4>س2 صح وخطأ</h4>
-  <ol><li>✓</li><li>✗ بيمثلوا 8 احتمالات</li><li>✗ بيستخدم 0 و1 بس</li><li>✗ من الأخير للأول</li><li>✓</li><li>✓ لأن <span class="n">32 ÷ 8 = 4</span></li></ol>
-  <h4>س3 أكمل</h4>
-  <ol><li>العشري، والثنائي</li><li><span class="n">2<sup>n</sup></span></li><li>3</li><li>1024</li></ol>
-  <h4>س4 التحويلات</h4>
-  <ol class="one">
-    <li>(1) أ = 13 &nbsp; ب = 38 &nbsp; ج = 63 &nbsp; د = 85</li>
-    <li>(2) أ = <span class="n">11001</span> &nbsp; ب = <span class="n">1000000</span> &nbsp; ج = <span class="n">1100100</span> &nbsp; د = <span class="n">11001000</span></li>
-  </ol>
-  <h4>س5 مسائل</h4>
-  <ol>
-    <li><span class="n">4 × 8 = 32 bit</span></li>
-    <li>الأيام: <span class="n">3 bit</span> (<span class="n">2<sup>3</sup> = 8</span>)، والشهور: <span class="n">4 bit</span> (<span class="n">2<sup>4</sup> = 16</span>)</li>
-    <li><span class="n">7 bit</span> (<span class="n">2<sup>7</sup> = 128 ≥ 100</span>)</li>
-    <li><span class="n">2<sup>7</sup> ÷ 2<sup>4</sup> = 128 ÷ 16 = 8</span> مرات</li>
-    <li><span class="n">2<sup>30</sup></span> Byte</li>
-    <li>3 bit (<span class="n">2 × 2 × 2 = 8</span> نتايج)</li>
-    <li><span class="n">16 × 1024 ÷ 3 ≈ 5461</span> ملف</li>
-  </ol>
-
-  <h3>درس 3-6: النظام السادس عشر</h3>
-  <h4>س1 اختر</h4>
-  <ol><li>(ج) 16</li><li>(ب) F</li><li>(ب) 4 bit</li><li>(ج) 16</li><li>(ب) B</li></ol>
-  <h4>س2 صح وخطأ</h4>
-  <ol><li>✓</li><li>✗ مجموعات من 4 أرقام</li><li>✓</li><li>✗ بنبدأ من اليمين (أقل bit)</li></ol>
-  <h4>س3 التحويلات</h4>
-  <ol class="one">
-    <li>(1) أ = F0 &nbsp; ب = BD &nbsp; ج = 73 &nbsp; د = DB</li>
-    <li>(2) أ = <span class="n">00111111</span> &nbsp; ب = <span class="n">10110111</span> &nbsp; ج = <span class="n">10011110</span></li>
-    <li>(3) أ = 42 &nbsp; ب = 255 &nbsp; ج = 128 &nbsp; د = 28 &nbsp; هـ = 165</li>
-  </ol>
-  <h4>س4 فكّر</h4>
-  <ol class="one">
-    <li>علشان أقصر وأسهل في القراءة والكتابة، وكل 4 bit بتتحول لرقم واحد بس، فاحتمال الغلط بيقل.</li>
-    <li><span class="n"><span class="en">(B)</span><sub>16</sub> = 11</span> ، <span class="n">(1100)<sub>2</sub> = 12</span> ، <span class="n">14</span>، فيبقى الترتيب: <span class="n">B<sub>16</sub> &lt; 1100<sub>2</sub> &lt; 14<sub>10</sub></span></li>
-  </ol>
-
-  <h3>درس 4-6: التمثيل الرقمي للأحرف</h3>
-  <h4>س1 المصطلح</h4>
-  <ol><li>رمز الحرف</li><li>يونيكود Unicode</li><li>التشفير Encoding</li><li>فساد الحرف</li><li>الخط Font</li><li>ASCII</li></ol>
-  <h4>س2 اختر</h4>
-  <ol><li>(ج) 256</li><li>(ب) Unicode</li><li>(ب) 5 Byte</li><li>(أ) UTF-8</li></ol>
-  <h4>س3 جدول ASCII</h4>
-  <ol>
-    <li><span class="n">01000001</span> ، <span class="n">41</span></li>
-    <li><span class="n">01100001</span></li>
-    <li><span class="n">7A</span></li>
-    <li><span class="n">43 41 54</span></li>
-    <li>M</li>
-    <li><span class="n">OK</span> ، و <span class="n">Hi</span></li>
-    <li><span class="n">Home</span></li>
-    <li>11 حرف = <span class="n">11 Byte = 88 bit</span></li>
-  </ol>
-  <h4>س4 مقالي</h4>
-  <ol class="one">
-    <li>ASCII: فيه حروف الإنجليزي الكبيرة والصغيرة والأرقام من 0 لـ 9 والرموز وأحرف التحكم، وكل حرف بياخد 1 Byte، ومابيدعمش اللغات التانية.</li>
-    <li>Unicode: معيار بيجمع حروف كل لغات العالم في نظام رموز واحد، وليه أكتر من صورة زي UTF-8 وUTF-16.</li>
-    <li>رمز الحرف <span class="en">(Character code)</span> والخط <span class="en">(Font)</span>.</li>
-  </ol>
-
-  <h3>درس 5-6: جمع وطرح الأرقام الثنائية</h3>
-  <h4>س1 أكمل</h4>
-  <ol><li><span class="n">10<sub>(2)</sub></span></li><li><span class="n">11<sub>(2)</sub></span></li><li><span class="n">1<sub>(2)</sub></span></li><li>ترحيل (حمل Carry)</li><li>استلاف <span class="en">(Borrow)</span></li></ol>
-  <h4>س2 الجمع</h4>
-  <ol><li><span class="n">1001</span> (6 + 3 = 9)</li><li><span class="n">10001</span> (11 + 6 = 17)</li><li><span class="n">1110</span> (7 + 7 = 14)</li><li><span class="n">10001</span> (12 + 5 = 17)</li><li><span class="n">1011</span> (5 + 6 = 11)</li></ol>
-  <h4>س3 الطرح</h4>
-  <ol><li><span class="n">0110</span> (9 − 3 = 6)</li><li><span class="n">0111</span> (14 − 7 = 7)</li><li><span class="n">0111</span> (8 − 1 = 7)</li><li><span class="n">0010</span> (13 − 11 = 2)</li><li><span class="n">0101</span> (11 − 6 = 5)</li></ol>
-  <h4>س4 اكتشف الخطأ</h4>
-  <ol class="one"><li>الطالب ماعملش الترحيل. الصح إن <span class="n">1 + 1 = 10</span>، فبنكتب 0 ونحمل 1 أكتر من مرة، والناتج يبقى <span class="n">1000<sub>(2)</sub></span> (7 + 1 = 8).</li></ol>
-
-  <h3>درس 6-6: المكملات</h3>
-  <h4>س1 اختر</h4>
-  <ol><li>(ب) 617</li><li>(ب) 53</li><li>(أ) 0011</li><li>(ب) 1101</li><li>(ب) الجمع مع المكملات</li></ol>
-  <h4>س2 المكمل الثنائي</h4>
-  <ol><li><span class="n">1010</span></li><li><span class="n">0111</span></li><li><span class="n">1100</span></li><li><span class="n">1000</span></li><li><span class="n">11010100</span></li></ol>
-  <h4>س3 الطرح بالمكملات</h4>
-  <ol class="one">
-    <li>(1) مكمل <span class="n">0100</span> هو <span class="n">1100</span> ← <span class="n">1101 + 1100 = 11001</span> ← <b class="n">1001</b> (13 − 4 = 9)</li>
-    <li>(2) مكمل <span class="n">0011</span> هو <span class="n">1101</span> ← <span class="n">1011 + 1101 = 11000</span> ← <b class="n">1000</b> (11 − 3 = 8)</li>
-    <li>(3) مكمل <span class="n">1001</span> هو <span class="n">0111</span> ← <span class="n">1110 + 0111 = 10101</span> ← <b class="n">0101</b> (14 − 9 = 5)</li>
-    <li>(4) مكمل <span class="n">0111</span> هو <span class="n">1001</span> ← <span class="n">1100 + 1001 = 10101</span> ← <b class="n">0101</b> (12 − 7 = 5)</li>
-    <li>(5) <span class="n">9 − 3</span>: متمم 3 = 7 ← <span class="n">9 + 7 = 16</span> ← <b>6</b>. &nbsp; و <span class="n">75 − 28</span>: متمم 28 = 72 ← <span class="n">75 + 72 = 147</span> ← <b>47</b></li>
-  </ol>
-  <h4>س4 علّل</h4>
-  <ol class="one">
-    <li>علشان يمثل الأرقام السالبة، ويحوّل الطرح لعملية جمع.</li>
-    <li>لأنه ترحيل زيادة طلع برّه عدد الخانات الأصلي، ومالوش علاقة بالناتج.</li>
-  </ol>
-
-  <h3>درس 8-6: رقمنة الصور</h3>
-  <h4>س1</h4>
-  <ol>
-    <li>(ب) ← (أ) ← (ج)</li>
-    <li>(د) أخذ العينات ← التحول الكمي ← التشفير</li>
-    <li>(ب) dpi</li>
-    <li>(ج) 16</li>
-    <li>(ب) مزج الألوان الطرحي</li>
-  </ol>
-  <h4>س2 صح وخطأ</h4>
-  <ol><li>✓</li><li>✗ المناسب ليها تنسيق المتجهات</li><li>✗ لما الدقة والتدرج يزيدوا</li><li>✓</li><li>✓</li><li>✓</li></ol>
-  <h4>س3 أكمل</h4>
-  <ol class="one"><li>الأحمر، والأخضر، والأزرق</li><li>السماوي، والأرجواني، والأصفر</li><li>256</li><li>التنسيق النقطي، وتنسيق المتجهات</li></ol>
-  <h4>س4 مسائل</h4>
-  <ol class="one">
-    <li><span class="n">800 × 600 × 8 = 3,840,000 bit ÷ 8 = 480,000 B = 480 KB</span></li>
-    <li><span class="n">600 × 400 × 24 ÷ 8 = 720,000 B = 720 KB</span></li>
-    <li><span class="n">1920 × 1080 × 24 ÷ 8 = 6,220,800 B ≈ 6.22 MB</span></li>
-    <li><span class="n">1024 × 768 × 8 ÷ 8 = 786,432 B ≈ 786 KB</span></li>
-    <li><span class="n">2<sup>24</sup> = 16,777,216</span> لون</li>
-  </ol>
-
-  <h3>درس 9-6: ضغط البيانات</h3>
-  <h4>س1 صح وخطأ</h4>
-  <ol><li>✗ ده تعريف الضغط الفاقد</li><li>✓</li><li>✗ مابترجعش زيها بالظبط</li><li>✓</li><li>✗ بيديها تسلسلات أقصر</li></ol>
-  <h4>س2</h4>
-  <ol><li>غير فاقد</li><li>غير فاقد</li><li>فاقد</li><li>فاقد</li></ol>
-  <h4>س3 مسائل</h4>
-  <ol class="one">
-    <li><span class="n">21 ÷ 50 × 100 = 42%</span></li>
-    <li><span class="n">20 ÷ 80 × 100 = 25%</span></li>
-    <li><b class="n">A4B3C6D2</b> (8 حروف بدل 15) ← النسبة = <span class="n">8 ÷ 15 × 100 ≈ 53%</span></li>
-    <li><span class="n">XXXYYYYYZZ</span></li>
-    <li>الحرف <b>T</b>: أول صف كله أسود، والعمود اللي في النص أسود في باقي الصفوف.</li>
-    <li><b class="n">BW3B2W3B7W3B2W3B</b> (ده الحرف H)</li>
-  </ol>
-  <h4>س4</h4>
-  <ol class="one"><li>(ج) ترميز طول التشغيل <span class="en">(Run-length encoding)</span></li></ol>
-
-  <h3>درس 10-6: تصميم البيانات</h3>
-  <h4>س1 المصطلح</h4>
-  <ol><li>الرسم التصويري <span class="en">(Pictogram)</span></li><li>التصوّر <span class="en">(Visualization)</span></li><li>واجهة المستخدم <span class="en">(UI)</span></li><li>الدلالة / الدال <span class="en">(Signifier)</span></li><li>تجربة المستخدم <span class="en">(UX)</span></li><li>التصميم الشامل <span class="en">(Universal design)</span></li><li>التجريد <span class="en">(Abstraction)</span></li></ol>
-  <h4>س2 اختر</h4>
-  <ol><li>(ج)</li><li>(ب) CUI</li><li>(ج) الرسم التصويري</li><li>(أ) الهيكلة</li><li>(د)</li></ol>
-  <h4>س3 LATCH</h4>
-  <ol><li>الأبجدية <span class="en">(A)</span></li><li>الموقع <span class="en">(L)</span></li><li>الوقت <span class="en">(T)</span></li><li>الفئة <span class="en">(C)</span></li><li>الهرمية <span class="en">(H)</span></li></ol>
-  <h4>س4 قارن</h4>
-  <ol class="one">
-    <li>CUI: بنشغّل الجهاز بكتابة أوامر نصية بلوحة المفاتيح، وكانت في الأجهزة القديمة. GUI: بنشغّل الجهاز بسهولة باستخدام الرموز والأزرار والماوس أو الصوابع، ودي اللي في الأجهزة الحالية.</li>
-    <li>قابلية الاستخدام: الحاجة سهلة في الاستخدام والفهم قد إيه للمستخدم. إمكانية الوصول: سهولة إن عدد كبير من الناس يوصلوا للبيانات والخدمات، بغض النظر عن قدراتهم أو ظروفهم.</li>
-  </ol>
-
-  <h3>المراجعة العامة</h3>
-  <ol class="one">
-    <li><span class="n">45 = 101101<sub>(2)</sub> = 0010 1101 = 2D<sub>(16)</sub></span></li>
-    <li><span class="n">7E = 0111 1110<sub>(2)</sub> = 7 × 16 + 14 = 126</span></li>
-    <li><span class="n">D=44 , a=61 , t=74 , a=61</span>، يعني <span class="n">44617461</span>. الحجم = <span class="n">4 Byte = 32 bit</span></li>
-    <li><span class="n">1011 + 0101 = 10000</span> (11 + 5 = 16)</li>
-    <li>مكمل <span class="n">0110</span> هو <span class="n">1010</span> ← <span class="n">1010 + 1010 = 10100</span> ← <b class="n">0100</b> (10 − 6 = 4)</li>
-    <li><span class="n">6 bit</span> (<span class="n">2<sup>6</sup> = 64 ≥ 47</span>)</li>
-    <li><span class="n">640 × 480 × 24 ÷ 8 = 921,600 B = 921.6 KB</span></li>
-    <li><span class="n">50 ÷ 200 × 100 = 25%</span>، وأيوه، هيرجع زي الأصلي بالظبط لأن الضغط غير فاقد.</li>
-    <li>الشاشة بتطلّع ضوء، فبتجمع ألوان الضوء <span class="en">(RGB)</span> ولما تمزجها تقرب من الأبيض. أما الطابعة فبتستخدم أحبار (صبغات) بتمتص الضوء، فبتمزج CMY ولما تمزجها تقرب من الأسود.</li>
-    <li>التجريد: رسوم توجيهية لفصول المدرسة. الرسم التصويري: علامة مخرج الطوارئ. الأيقونة: أيقونة البريد على الموبايل. التصور: رسم بياني لنتايج استبيان. الهيكلة: قوائم هرمية في موقع المدرسة.</li>
-  </ol>
+<div class="lesson-head green"><div class="eyebrow">صحّح لنفسك</div><div class="bar"><span style="width:100%"></span></div>
+<span class="sticker">✓</span><h2>نموذج الإجابة</h2><p class="sub">صحح لنفسك بعد ما تخلص الحل</p></div>
+<h3>درس 2-6: النظام الثنائي وكمية البيانات</h3>
+<h4>س1 اختر</h4>
+<ol><li>(ب) bit</li><li>(ج) 32</li><li>(د) 256</li><li>(ب) 1024 MB</li><li>(ب) 5 لأن <span class="n">2<sup>5</sup> = 32 ≥ 26</span></li><li>(أ)</li><li>(ب) 10</li></ol>
+<h4>س2 صح وخطأ</h4>
+<ol><li>✓</li><li>✗ بيمثلوا 8 احتمالات</li><li>✗ بيستخدم 0 و1 بس</li><li>✗ من الأخير للأول</li><li>✓</li><li>✓ لأن <span class="n">32 ÷ 8 = 4</span></li></ol>
+<h4>س3 أكمل</h4>
+<ol><li>العشري، والثنائي</li><li><span class="n">2<sup>n</sup></span></li><li>3</li><li>1024</li></ol>
+<h4>س4 التحويلات</h4>
+<ol class="one">
+<li>(1) أ = 13   ب = 38   ج = 63   د = 85</li>
+<li>(2) أ = <span class="n">11001</span>   ب = <span class="n">1000000</span>   ج = <span class="n">1100100</span>   د = <span class="n">11001000</span></li>
+</ol>
+<h4>س5 مسائل</h4>
+<ol>
+<li><span class="n">4 × 8 = 32 bit</span></li>
+<li>الأيام: <span class="n">3 bit</span> (<span class="n">2<sup>3</sup> = 8</span>)، والشهور: <span class="n">4 bit</span> (<span class="n">2<sup>4</sup> = 16</span>)</li>
+<li><span class="n">7 bit</span> (<span class="n">2<sup>7</sup> = 128 ≥ 100</span>)</li>
+<li><span class="n">2<sup>7</sup> ÷ 2<sup>4</sup> = 128 ÷ 16 = 8</span> مرات</li>
+<li><span class="n">2<sup>30</sup></span> Byte</li>
+<li>3 bit (<span class="n">2 × 2 × 2 = 8</span> نتايج)</li>
+<li><span class="n">16 × 1024 ÷ 3 ≈ 5461</span> ملف</li>
+</ol>
+<h3>درس 3-6: النظام السادس عشر</h3>
+<h4>س1 اختر</h4>
+<ol><li>(ج) 16</li><li>(ب) F</li><li>(ب) 4 bit</li><li>(ج) 16</li><li>(ب) B</li></ol>
+<h4>س2 صح وخطأ</h4>
+<ol><li>✓</li><li>✗ مجموعات من 4 أرقام</li><li>✓</li><li>✗ بنبدأ من اليمين (أقل bit)</li></ol>
+<h4>س3 التحويلات</h4>
+<ol class="one">
+<li>(1) أ = F0   ب = BD   ج = 73   د = DB</li>
+<li>(2) أ = <span class="n">00111111</span>   ب = <span class="n">10110111</span>   ج = <span class="n">10011110</span></li>
+<li>(3) أ = 42   ب = 255   ج = 128   د = 28   هـ = 165</li>
+</ol>
+<h4>س4 فكّر</h4>
+<ol class="one">
+<li>علشان أقصر وأسهل في القراءة والكتابة، وكل 4 bit بتتحول لرقم واحد بس، فاحتمال الغلط بيقل.</li>
+<li><span class="n"><span class="en">(B)</span><sub>16</sub> = 11</span> ، <span class="n">(1100)<sub>2</sub> = 12</span> ، <span class="n">14</span>، فيبقى الترتيب: <span class="n">B<sub>16</sub> &lt; 1100<sub>2</sub> &lt; 14<sub>10</sub></span></li>
+</ol>
+<h3>درس 4-6: التمثيل الرقمي للأحرف</h3>
+<h4>س1 المصطلح</h4>
+<ol><li>رمز الحرف</li><li>يونيكود Unicode</li><li>التشفير Encoding</li><li>فساد الحرف</li><li>الخط Font</li><li>ASCII</li></ol>
+<h4>س2 اختر</h4>
+<ol><li>(ج) 256</li><li>(ب) Unicode</li><li>(ب) 5 Byte</li><li>(أ) UTF-8</li></ol>
+<h4>س3 جدول ASCII</h4>
+<ol>
+<li><span class="n">01000001</span> ، <span class="n">41</span></li>
+<li><span class="n">01100001</span></li>
+<li><span class="n">7A</span></li>
+<li><span class="n">43 41 54</span></li>
+<li>M</li>
+<li><span class="n">OK</span> ، و <span class="n">Hi</span></li>
+<li><span class="n">Home</span></li>
+<li>11 حرف = <span class="n">11 Byte = 88 bit</span></li>
+</ol>
+<h4>س4 مقالي</h4>
+<ol class="one">
+<li>ASCII: فيه حروف الإنجليزي الكبيرة والصغيرة والأرقام من 0 لـ 9 والرموز وأحرف التحكم، وكل حرف بياخد 1 Byte، ومابيدعمش اللغات التانية.</li>
+<li>Unicode: معيار بيجمع حروف كل لغات العالم في نظام رموز واحد، وليه أكتر من صورة زي UTF-8 وUTF-16.</li>
+<li>رمز الحرف <span class="en">(Character code)</span> والخط <span class="en">(Font)</span>.</li>
+</ol>
+<h3>درس 5-6: جمع وطرح الأرقام الثنائية</h3>
+<h4>س1 أكمل</h4>
+<ol><li><span class="n">10<sub>(2)</sub></span></li><li><span class="n">11<sub>(2)</sub></span></li><li><span class="n">1<sub>(2)</sub></span></li><li>ترحيل (حمل Carry)</li><li>استلاف <span class="en">(Borrow)</span></li></ol>
+<h4>س2 الجمع</h4>
+<ol><li><span class="n">1001</span> (6 + 3 = 9)</li><li><span class="n">10001</span> (11 + 6 = 17)</li><li><span class="n">1110</span> (7 + 7 = 14)</li><li><span class="n">10001</span> (12 + 5 = 17)</li><li><span class="n">1011</span> (5 + 6 = 11)</li></ol>
+<h4>س3 الطرح</h4>
+<ol><li><span class="n">0110</span> (9 − 3 = 6)</li><li><span class="n">0111</span> (14 − 7 = 7)</li><li><span class="n">0111</span> (8 − 1 = 7)</li><li><span class="n">0010</span> (13 − 11 = 2)</li><li><span class="n">0101</span> (11 − 6 = 5)</li></ol>
+<h4>س4 اكتشف الخطأ</h4>
+<ol class="one"><li>الطالب ماعملش الترحيل. الصح إن <span class="n">1 + 1 = 10</span>، فبنكتب 0 ونحمل 1 أكتر من مرة، والناتج يبقى <span class="n">1000<sub>(2)</sub></span> (7 + 1 = 8).</li></ol>
+<h3>درس 6-6: المكملات</h3>
+<h4>س1 اختر</h4>
+<ol><li>(ب) 617</li><li>(ب) 53</li><li>(أ) 0011</li><li>(ب) 1101</li><li>(ب) الجمع مع المكملات</li></ol>
+<h4>س2 المكمل الثنائي</h4>
+<ol><li><span class="n">1010</span></li><li><span class="n">0111</span></li><li><span class="n">1100</span></li><li><span class="n">1000</span></li><li><span class="n">11010100</span></li></ol>
+<h4>س3 الطرح بالمكملات</h4>
+<ol class="one">
+<li>(1) مكمل <span class="n">0100</span> هو <span class="n">1100</span> ← <span class="n">1101 + 1100 = 11001</span> ← <b class="n">1001</b> (13 − 4 = 9)</li>
+<li>(2) مكمل <span class="n">0011</span> هو <span class="n">1101</span> ← <span class="n">1011 + 1101 = 11000</span> ← <b class="n">1000</b> (11 − 3 = 8)</li>
+<li>(3) مكمل <span class="n">1001</span> هو <span class="n">0111</span> ← <span class="n">1110 + 0111 = 10101</span> ← <b class="n">0101</b> (14 − 9 = 5)</li>
+<li>(4) مكمل <span class="n">0111</span> هو <span class="n">1001</span> ← <span class="n">1100 + 1001 = 10101</span> ← <b class="n">0101</b> (12 − 7 = 5)</li>
+<li>(5) <span class="n">9 − 3</span>: متمم 3 = 7 ← <span class="n">9 + 7 = 16</span> ← <b>6</b>.   و <span class="n">75 − 28</span>: متمم 28 = 72 ← <span class="n">75 + 72 = 147</span> ← <b>47</b></li>
+</ol>
+<h4>س4 علّل</h4>
+<ol class="one">
+<li>علشان يمثل الأرقام السالبة، ويحوّل الطرح لعملية جمع.</li>
+<li>لأنه ترحيل زيادة طلع برّه عدد الخانات الأصلي، ومالوش علاقة بالناتج.</li>
+</ol>
+<h3>درس 8-6: رقمنة الصور</h3>
+<h4>س1</h4>
+<ol>
+<li>(ب) ← (أ) ← (ج)</li>
+<li>(د) أخذ العينات ← التحول الكمي ← التشفير</li>
+<li>(ب) dpi</li>
+<li>(ج) 16</li>
+<li>(ب) مزج الألوان الطرحي</li>
+</ol>
+<h4>س2 صح وخطأ</h4>
+<ol><li>✓</li><li>✗ المناسب ليها تنسيق المتجهات</li><li>✗ لما الدقة والتدرج يزيدوا</li><li>✓</li><li>✓</li><li>✓</li></ol>
+<h4>س3 أكمل</h4>
+<ol class="one"><li>الأحمر، والأخضر، والأزرق</li><li>السماوي، والأرجواني، والأصفر</li><li>256</li><li>التنسيق النقطي، وتنسيق المتجهات</li></ol>
+<h4>س4 مسائل</h4>
+<ol class="one">
+<li><span class="n">800 × 600 × 8 = 3,840,000 bit ÷ 8 = 480,000 B = 480 KB</span></li>
+<li><span class="n">600 × 400 × 24 ÷ 8 = 720,000 B = 720 KB</span></li>
+<li><span class="n">1920 × 1080 × 24 ÷ 8 = 6,220,800 B ≈ 6.22 MB</span></li>
+<li><span class="n">1024 × 768 × 8 ÷ 8 = 786,432 B ≈ 786 KB</span></li>
+<li><span class="n">2<sup>24</sup> = 16,777,216</span> لون</li>
+</ol>
+<h3>درس 9-6: ضغط البيانات</h3>
+<h4>س1 صح وخطأ</h4>
+<ol><li>✗ ده تعريف الضغط الفاقد</li><li>✓</li><li>✗ مابترجعش زيها بالظبط</li><li>✓</li><li>✗ بيديها تسلسلات أقصر</li></ol>
+<h4>س2</h4>
+<ol><li>غير فاقد</li><li>غير فاقد</li><li>فاقد</li><li>فاقد</li></ol>
+<h4>س3 مسائل</h4>
+<ol class="one">
+<li><span class="n">21 ÷ 50 × 100 = 42%</span></li>
+<li><span class="n">20 ÷ 80 × 100 = 25%</span></li>
+<li><b class="n">A4B3C6D2</b> (8 حروف بدل 15) ← النسبة = <span class="n">8 ÷ 15 × 100 ≈ 53%</span></li>
+<li><span class="n">XXXYYYYYZZ</span></li>
+<li>الحرف <b>T</b>: أول صف كله أسود، والعمود اللي في النص أسود في باقي الصفوف.</li>
+<li><b class="n">BW3B2W3B7W3B2W3B</b> (ده الحرف H)</li>
+</ol>
+<h4>س4</h4>
+<ol class="one"><li>(ج) ترميز طول التشغيل <span class="en">(Run-length encoding)</span></li></ol>
+<h3>درس 10-6: تصميم البيانات</h3>
+<h4>س1 المصطلح</h4>
+<ol><li>الرسم التصويري <span class="en">(Pictogram)</span></li><li>التصوّر <span class="en">(Visualization)</span></li><li>واجهة المستخدم <span class="en">(UI)</span></li><li>الدلالة / الدال <span class="en">(Signifier)</span></li><li>تجربة المستخدم <span class="en">(UX)</span></li><li>التصميم الشامل <span class="en">(Universal design)</span></li><li>التجريد <span class="en">(Abstraction)</span></li></ol>
+<h4>س2 اختر</h4>
+<ol><li>(ج)</li><li>(ب) CUI</li><li>(ج) الرسم التصويري</li><li>(أ) الهيكلة</li><li>(د)</li></ol>
+<h4>س3 LATCH</h4>
+<ol><li>الأبجدية <span class="en">(A)</span></li><li>الموقع <span class="en">(L)</span></li><li>الوقت <span class="en">(T)</span></li><li>الفئة <span class="en">(C)</span></li><li>الهرمية <span class="en">(H)</span></li></ol>
+<h4>س4 قارن</h4>
+<ol class="one">
+<li>CUI: بنشغّل الجهاز بكتابة أوامر نصية بلوحة المفاتيح، وكانت في الأجهزة القديمة. GUI: بنشغّل الجهاز بسهولة باستخدام الرموز والأزرار والماوس أو الصوابع، ودي اللي في الأجهزة الحالية.</li>
+<li>قابلية الاستخدام: الحاجة سهلة في الاستخدام والفهم قد إيه للمستخدم. إمكانية الوصول: سهولة إن عدد كبير من الناس يوصلوا للبيانات والخدمات، بغض النظر عن قدراتهم أو ظروفهم.</li>
+</ol>
+<h3>المراجعة العامة</h3>
+<ol class="one">
+<li><span class="n">45 = 101101<sub>(2)</sub> = 0010 1101 = 2D<sub>(16)</sub></span></li>
+<li><span class="n">7E = 0111 1110<sub>(2)</sub> = 7 × 16 + 14 = 126</span></li>
+<li><span class="n">D=44 , a=61 , t=74 , a=61</span>، يعني <span class="n">44617461</span>. الحجم = <span class="n">4 Byte = 32 bit</span></li>
+<li><span class="n">1011 + 0101 = 10000</span> (11 + 5 = 16)</li>
+<li>مكمل <span class="n">0110</span> هو <span class="n">1010</span> ← <span class="n">1010 + 1010 = 10100</span> ← <b class="n">0100</b> (10 − 6 = 4)</li>
+<li><span class="n">6 bit</span> (<span class="n">2<sup>6</sup> = 64 ≥ 47</span>)</li>
+<li><span class="n">640 × 480 × 24 ÷ 8 = 921,600 B = 921.6 KB</span></li>
+<li><span class="n">50 ÷ 200 × 100 = 25%</span>، وأيوه، هيرجع زي الأصلي بالظبط لأن الضغط غير فاقد.</li>
+<li>الشاشة بتطلّع ضوء، فبتجمع ألوان الضوء <span class="en">(RGB)</span> ولما تمزجها تقرب من الأبيض. أما الطابعة فبتستخدم أحبار (صبغات) بتمتص الضوء، فبتمزج CMY ولما تمزجها تقرب من الأسود.</li>
+<li>التجريد: رسوم توجيهية لفصول المدرسة. الرسم التصويري: علامة مخرج الطوارئ. الأيقونة: أيقونة البريد على الموبايل. التصور: رسم بياني لنتايج استبيان. الهيكلة: قوائم هرمية في موقع المدرسة.</li>
+</ol>
 </section>
-
 </body>
 </html>
