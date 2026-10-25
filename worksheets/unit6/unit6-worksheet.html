@@ -98,13 +98,13 @@
   .warn .lbl{ background:var(--coral); color:#fff; }
 
   /* ---------- Tables ---------- */
-  table{ border-collapse:separate; border-spacing:0; margin:10px auto; break-inside:avoid; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
-  th,td{ padding:5px 12px; text-align:center; border-top:1px solid var(--line); }
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin:10px 0; break-inside:avoid; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td{ padding:5px 12px; text-align:center; border-top:1px solid var(--line); unicode-bidi:plaintext; }
   tr:first-child th, tr:first-child td{ border-top:0; }
   th{ background:var(--surface); color:var(--ink); font-weight:800; }
   td + td, th + th, td + th, th + td{ border-right:1px solid var(--line); }
   .tables-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
-  .tables-row > .box{ flex:1 1 0; min-width:0; }
+  .tables-row > .box, .tables-row > table{ flex:1 1 0; min-width:0; }
   table.ascii td, table.ascii th{ padding:1px 8px; font-size:10.5pt; direction:ltr; }
   table.ascii td.h{ background:var(--accent-soft); color:var(--accent); font-weight:800; }
 
