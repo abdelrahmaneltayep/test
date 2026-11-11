@@ -143,52 +143,52 @@
   .key ol.one{ columns:1; }
   .key li{ break-inside:avoid; }
   .key li::marker{ color:var(--green); font-weight:800; }
+
+  @page{ size:A4; margin:11mm 12mm 13mm 12mm; }
+  body{ font-size:11pt; line-height:1.7; }
+  .doc-head{ border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:4px; }
+  .doc-head h1{ font-size:24pt; font-weight:800; margin:2px 0; }
+  .doc-head .sub{ color:var(--muted); font-size:10.5pt; }
+  .units table td{ white-space:nowrap; font-weight:700; color:var(--ink); }
+  .units p{ font-size:10pt; }
+  .flow .lesson-head{ margin:20px 0 10px; padding-bottom:8px; break-after:avoid; }
+  .flow .lesson-head h2{ font-size:20pt; }
+  .flow .lesson-head .sub{ font-size:11pt; margin:0 0 4px; }
+  .flow .lesson-head .sticker{ font-size:26pt; }
+  .flow .lesson-head .bar{ margin:4px 0 8px; }
+  h3.sec{ margin:12px 0 6px; font-size:14pt; }
+  h4{ margin:10px 0 4px; }
+  .box{ padding:8px 14px; margin:8px 0; }
+  .qblock{ padding:8px 14px 6px; margin:8px 0; }
+  .qhead{ padding:5px 12px; margin-bottom:4px; }
+  ol.qs > li{ margin:4px 0; }
+  .ansline{ height:24px; }
+  table{ margin:6px 0; }
+  .key h3{ margin:10px 0 4px; padding:4px 12px; }
+  .key h4{ margin:6px 0 2px; }
+  .key li{ margin:1px 0; }
+  .key{ font-size:10pt; line-height:1.45; }
+  .box, .avoid{ break-inside:auto; }
+  .tables-row{ break-inside:avoid; }
+  .calc, .pix, .box .lbl, tr{ break-inside:avoid; }
+  table{ break-inside:auto; }
+  .tables-row .calc{ font-size:10.5pt; padding:6px 10px; }
+  .box .lbl{ break-after:avoid; }
 </style>
 </head>
 <body>
 <!-- ================= COVER ================= -->
-<section class="cover">
-<div class="topbar"><span class="brand"><i></i>ملزمة تكنولوجيا المعلومات والاتصالات</span><span>الصف الأول الثانوي · الترم الأول</span></div>
-<div class="bar"><span></span></div>
-<div class="cover-main" style="position:relative">
-<span class="sticker" style="font-size:46pt;top:10px">0101</span>
-<div class="eyebrow">الوحدة السادسة · ملزمة شاملة</div>
-<h1>دراسة<br/><em>المعلومات</em></h1>
-<p class="sub">شرح مبسط وأمثلة محلولة وأسئلة متنوعة على كل درس، ونموذج الإجابة في آخر الملزمة.</p>
-<div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"></path><path d="M4 19V5"></path></svg> 8 دروس</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 133 سؤال</span><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg> نموذج إجابة كامل</span></div>
-<div class="cta"><span>ابدأ المذاكرة</span><small>الدرس 2-6 ←</small></div>
-<div class="bits"><span class="one">1</span><span class="zero">0</span><span class="one">1</span><span class="one">1</span><span class="y">=</span><span class="zero" style="width:auto;padding:0 10px">11</span></div>
-</div>
-<div class="name"><span>اسم الطالب</span><span style="flex:.5">الفصل</span></div>
-</section>
 <!-- ================= TOC ================= -->
-<section class="page-break">
-<div class="lesson-head"><div class="eyebrow">المحتوى</div><h2 style="max-width:100%">دروس الملزمة</h2><p class="sub">ذاكر الدروس بالترتيب، لأن كل درس بيعتمد على اللي قبله.</p></div>
-<div class="curr"><div class="grp"><span>الجزء الأول: الأنظمة العددية وتمثيل البيانات</span><small>3 دروس</small></div><div class="row"><span class="no">2-6</span><span class="t">النظام الثنائي وكمية البيانات</span><span class="c">25 سؤال</span></div><div class="row"><span class="no">3-6</span><span class="t">النظام السادس عشر</span><span class="c">12 سؤال</span></div><div class="row"><span class="no">4-6</span><span class="t">التمثيل الرقمي للأحرف</span><span class="c">21 سؤال</span></div><div class="grp"><span>الجزء الثاني: العمليات الحسابية</span><small>2 دروس</small></div><div class="row"><span class="no">5-6</span><span class="t">العمليات الحسابية العددية [1]</span><span class="c">8 سؤال</span></div><div class="row"><span class="no">6-6</span><span class="t">العمليات الحسابية العددية [2]</span><span class="c">9 سؤال</span></div><div class="grp"><span>الجزء الثالث: الوسائط وتصميم البيانات</span><small>3 دروس</small></div><div class="row"><span class="no">8-6</span><span class="t">رقمنة الصور</span><span class="c">20 سؤال</span></div><div class="row"><span class="no">9-6</span><span class="t">ضغط البيانات</span><span class="c">13 سؤال</span></div><div class="row"><span class="no">10-6</span><span class="t">تصميم البيانات</span><span class="c">15 سؤال</span></div><div class="grp"><span>الختام</span><small>10 سؤال</small></div><div class="row"><span class="no">✦</span><span class="t">مراجعة عامة على الوحدة</span><span class="c">10 سؤال</span></div><div class="row"><span class="no">✓</span><span class="t">نموذج الإجابة</span><span class="c">كل الدروس</span></div></div>
-<div class="box warn"><span class="lbl">ملحوظة</span>
-    الملزمة مش شاملة الدروس دي: التناظري والرقمي، ورقمنة الصوت <span class="n">(7-6)</span>، وجزء آلية الفيديو وحساب حجم بياناته من درس <span class="n">9-6</span>.
-  </div>
-<div class="box tip"><span class="lbl">طريقة المذاكرة</span>
-<ol>
-<li>اقرأ الشرح، وركّز على الكلمات المظللة بالأصفر وبطاقات «التعريفات».</li>
-<li>حل الأمثلة (البطاقات الرمادية) بنفسك قبل ما تبص على الحل.</li>
-<li>حل أسئلة الدرس في الملزمة، وبعدها صحح من نموذج الإجابة اللي في الآخر.</li>
-</ol>
-</div>
-<div class="box def"><span class="lbl">جدول الوحدات اللي هتحتاجه طول الوحدة</span>
-<table>
-<tr><th>الوحدة</th><th>تساوي</th></tr>
-<tr><td>1 Byte <span class="en">(B)</span></td><td>8 bit</td></tr>
-<tr><td>1 KB</td><td>1024 B</td></tr>
-<tr><td>1 MB</td><td>1024 KB</td></tr>
-<tr><td>1 GB</td><td>1024 MB</td></tr>
-<tr><td>1 TB</td><td>1024 GB</td></tr>
-</table>
+<section class="flow">
+<div class="doc-head"><div class="eyebrow">تكنولوجيا المعلومات والاتصالات · الصف الأول الثانوي</div><h1>الوحدة السادسة: دراسة المعلومات</h1>
+<p class="sub">شرح وأمثلة محلولة وأسئلة على كل درس، ونموذج الإجابة في آخر الملزمة. الملزمة مش شاملة التناظري والرقمي، ورقمنة الصوت <span class="n">(7-6)</span>، وجزء آلية الفيديو من درس <span class="n">9-6</span>.</p></div>
+<div class="box def units"><span class="lbl">جدول الوحدات اللي هتحتاجه طول الوحدة</span>
+<table dir="ltr"><tr><td>1 Byte = 8 bit</td><td>1 KB = 1024 B</td><td>1 MB = 1024 KB</td><td>1 GB = 1024 MB</td><td>1 TB = 1024 GB</td></tr></table>
 <p>⚠️ في المسائل اللي السؤال بيقول فيها «افترض أن <span class="n">1 KB = 1000 B</span>» استخدم <span class="n">1000</span> بدل <span class="n">1024</span>.</p>
 </div>
 </section>
 <!-- ================= LESSON 6-2 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 1 من 8</div>
 <div class="bar"><span style="width:12.5%"></span></div>
@@ -317,7 +317,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-3 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 2 من 8</div>
 <div class="bar"><span style="width:25.0%"></span></div>
@@ -410,7 +410,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-4 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 3 من 8</div>
 <div class="bar"><span style="width:37.5%"></span></div>
@@ -514,7 +514,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-5 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 4 من 8</div>
 <div class="bar"><span style="width:50.0%"></span></div>
@@ -530,15 +530,15 @@
 <div class="calc">0 + 0 = 0
 0 + 1 = 1
 1 + 0 = 1
-1 + 1 = 10   (اكتب 0 واحمل 1)
-1 + 1 + 1 = 11   (اكتب 1 واحمل 1)</div>
+1 + 1 = 10   <bdi dir="rtl">(اكتب 0 واحمل 1)</bdi>
+1 + 1 + 1 = 11   <bdi dir="rtl">(اكتب 1 واحمل 1)</bdi></div>
 <p>لما المجموع يوصل 2 بنرحّل (نحمل <span class="en">Carry</span>) 1 للخانة اللي بعدها.</p>
 </div>
 <div class="box def" style="flex:1"><span class="lbl">(2) قواعد الطرح الثنائي</span>
 <div class="calc">0 − 0 = 0
 1 − 0 = 1
 1 − 1 = 0
-10 − 1 = 1   (بعد الاستلاف)</div>
+10 − 1 = 1   <bdi dir="rtl">(بعد الاستلاف)</bdi></div>
 <p>لما المطروح منه مايكونش كفاية بنستلف (<span class="en">Borrow</span>) من الخانة الأعلى، فيبقى عندنا <span class="n">2</span> (يعني <span class="n">10<sub>(2)</sub></span>).</p>
 </div>
 </div>
@@ -602,7 +602,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-6 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 5 من 8</div>
 <div class="bar"><span style="width:62.5%"></span></div>
@@ -700,7 +700,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-8 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 6 من 8</div>
 <div class="bar"><span style="width:75.0%"></span></div>
@@ -805,7 +805,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-9 (compression) ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 7 من 8</div>
 <div class="bar"><span style="width:87.5%"></span></div>
@@ -907,7 +907,7 @@
 </div>
 </section>
 <!-- ================= LESSON 6-10 ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head">
 <div class="eyebrow">الدرس 8 من 8</div>
 <div class="bar"><span style="width:100.0%"></span></div>
@@ -1004,7 +1004,7 @@
 </div>
 </section>
 <!-- ================= GENERAL REVIEW ================= -->
-<section class="page-break">
+<section class="flow">
 <div class="lesson-head"><div class="eyebrow">اختبر نفسك</div><div class="bar"><span style="width:100%"></span></div>
 <span class="sticker">✦</span><h2>مراجعة عامة على الوحدة</h2><p class="sub">أسئلة متنوعة على كل الدروس</p>
 <div class="meta"><span><svg class="ico" fill="none" stroke="currentColor" stroke-width="2" viewbox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"></path></svg> 10 سؤال</span></div></div>
@@ -1023,7 +1023,7 @@
 <div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div><div class="ansline"></div>
 </section>
 <!-- ================= ANSWER KEY ================= -->
-<section class="page-break key">
+<section class="flow key">
 <div class="lesson-head green"><div class="eyebrow">صحّح لنفسك</div><div class="bar"><span style="width:100%"></span></div>
 <span class="sticker">✓</span><h2>نموذج الإجابة</h2><p class="sub">صحح لنفسك بعد ما تخلص الحل</p></div>
 <h3>درس 2-6: النظام الثنائي وكمية البيانات</h3>
