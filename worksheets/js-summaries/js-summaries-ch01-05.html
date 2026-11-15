@@ -1,0 +1,252 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>ملخصات الفصول 1–5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#121317; --ink-2:#3a3d46; --muted:#6c7080; --line:#e6e7ee; --surface:#f7f7fb;
+    --accent:#5a46f0; --accent-2:#7b6cf6; --accent-soft:#efedff;
+    --green:#14a37f; --green-soft:#e6f7f1; --yellow:#ffd23f; --yellow-soft:#fff7d6;
+    --coral:#ef4f63; --coral-soft:#fff0f2; --blue:#3b82f6; --blue-soft:#e9f1ff;
+  }
+  @page{ size:A4; margin:15mm 14mm 17mm 14mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Cairo',sans-serif; color:var(--ink-2); font-size:12pt; line-height:1.85; margin:0; background:#fff; }
+  .n{ direction:ltr; unicode-bidi:isolate; display:inline-block; }
+  .en{ direction:ltr; unicode-bidi:isolate; color:var(--muted); font-size:.85em; font-weight:500; }
+  sub{ font-size:.65em; }
+  h1,h2,h3,h4{ margin:0; line-height:1.35; color:var(--ink); }
+  b,strong{ color:var(--ink); }
+  p{ margin:4px 0; }
+  ul,ol{ margin:4px 0; padding-right:22px; }
+  li{ margin:3px 0; }
+  .page-break{ break-before:page; }
+  .avoid{ break-inside:avoid; }
+  .ico{ width:15px; height:15px; vertical-align:-3px; }
+
+  /* ---------- Cover (lesson-intro style) ---------- */
+  .cover{ height:262mm; display:flex; flex-direction:column; }
+  .cover .topbar{ display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-weight:700; font-size:10.5pt; }
+  .cover .brand{ display:flex; align-items:center; gap:8px; color:var(--ink); }
+  .cover .brand i{ width:26px; height:26px; border-radius:8px; background:var(--accent); display:inline-block; }
+  .cover .bar{ height:6px; border-radius:99px; background:var(--line); margin:14px 0 0; overflow:hidden; }
+  .cover .bar span{ display:block; height:100%; width:12%; background:var(--accent); border-radius:99px; }
+  .cover-main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .eyebrow{ font-size:10.5pt; font-weight:800; color:var(--muted); letter-spacing:.3px; }
+  .cover h1{ font-size:52pt; font-weight:800; line-height:1.15; margin:8px 0 10px; }
+  .cover h1 em{ font-style:normal; background:linear-gradient(transparent 62%, var(--yellow) 62%); }
+  .cover .sub{ font-size:15pt; color:var(--muted); max-width:150mm; }
+  .cover .meta{ margin-top:14px; }
+  .cover .cta{ margin-top:22px; display:flex; align-items:center; justify-content:space-between; background:var(--accent); color:#fff;
+               border-radius:14px; padding:12px 20px; font-weight:800; font-size:14pt; max-width:120mm; }
+  .cover .cta small{ font-weight:600; opacity:.85; font-size:10.5pt; }
+  .sticker{ position:absolute; left:0; top:-6px; font-size:40pt; font-weight:800; color:var(--accent); direction:ltr;
+            -webkit-text-stroke:2px var(--ink); paint-order:stroke fill; transform:rotate(-6deg); }
+  .bits{ display:flex; gap:6px; direction:ltr; margin-top:26px; }
+  .bits span{ width:34px; height:44px; border:2px solid var(--ink); border-radius:8px; display:grid; place-items:center; font-weight:800; font-size:15pt; color:var(--ink); }
+  .bits .one{ background:#c9c1ff; } .bits .zero{ background:#bcd6ff; } .bits .y{ background:#ffd7a8; }
+  .cover .name{ border-top:1px solid var(--line); padding-top:14px; display:flex; gap:24px; color:var(--muted); font-weight:700; }
+  .cover .name span{ flex:1; border-bottom:1.5px solid var(--line); padding-bottom:4px; }
+
+  /* ---------- Meta row ---------- */
+  .meta{ display:flex; flex-wrap:wrap; gap:18px; color:var(--muted); font-size:10.5pt; font-weight:700; }
+  .meta span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- Curriculum (TOC) ---------- */
+  .curr{ border:1px solid var(--line); border-radius:16px; overflow:hidden; margin-top:6px; }
+  .curr .grp{ display:flex; justify-content:space-between; background:var(--surface); padding:10px 18px; font-weight:800; color:var(--ink); border-top:1px solid var(--line); }
+  .curr .grp:first-child{ border-top:0; }
+  .curr .grp small{ color:var(--muted); font-weight:700; }
+  .curr .row{ display:flex; align-items:center; gap:14px; padding:8px 18px; border-top:1px solid var(--line); }
+  .curr .row .no{ width:44px; color:var(--muted); font-weight:700; direction:ltr; text-align:right; }
+  .curr .row .t{ flex:1; color:var(--ink); font-weight:600; }
+  .curr .row .c{ color:var(--muted); font-size:10.5pt; font-weight:700; }
+
+  /* ---------- Lesson header ---------- */
+  .lesson-head{ position:relative; padding-bottom:16px; margin-bottom:18px; border-bottom:1px solid var(--line); }
+  .lesson-head .bar{ height:6px; border-radius:99px; background:var(--line); margin:8px 0 16px; overflow:hidden; width:62%; }
+  .lesson-head .bar span{ display:block; height:100%; background:var(--accent); border-radius:99px; }
+  .lesson-head h2{ font-size:28pt; font-weight:800; max-width:72%; }
+  .lesson-head .sub{ font-size:13pt; color:var(--muted); margin:2px 0 10px; max-width:76%; }
+  .lesson-head .sticker{ top:0; font-size:34pt; }
+  .lesson-head.green .bar span{ background:var(--green); }
+  .lesson-head.green .sticker{ color:var(--green); }
+
+  /* ---------- Section titles ---------- */
+  h3.sec{ font-size:15pt; font-weight:800; margin:20px 0 10px; display:flex; align-items:center; gap:10px; break-after:avoid; }
+  h3.sec::before{ content:""; width:6px; height:20px; border-radius:4px; background:var(--accent); }
+  h3.sec.q::before{ background:var(--coral); }
+  h4{ font-size:13pt; font-weight:800; margin:16px 0 6px; break-after:avoid; }
+
+  .term{ color:var(--ink); font-weight:800; background:linear-gradient(transparent 64%, var(--yellow) 64%); padding:0 1px; }
+
+  /* ---------- Cards ---------- */
+  .box{ border-radius:16px; padding:12px 16px; margin:12px 0; break-inside:avoid; border:1px solid var(--line); background:#fff; }
+  .box .lbl{ display:table; font-weight:800; font-size:10pt; padding:1px 10px; border-radius:8px; margin-bottom:6px; }
+  .def .lbl{ background:var(--accent-soft); color:var(--accent); }
+  .ex{ background:var(--surface); border-color:transparent; }
+  .ex .lbl{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .tip{ background:var(--yellow-soft); border-color:transparent; }
+  .tip .lbl{ background:var(--yellow); color:var(--ink); }
+  .warn{ background:var(--coral-soft); border-color:transparent; }
+  .warn .lbl{ background:var(--coral); color:#fff; }
+
+  /* ---------- Tables ---------- */
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin:10px 0; break-inside:avoid; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td{ padding:5px 12px; text-align:center; border-top:1px solid var(--line); unicode-bidi:plaintext; }
+  tr:first-child th, tr:first-child td{ border-top:0; }
+  th{ background:var(--surface); color:var(--ink); font-weight:800; }
+  td + td, th + th, td + th, th + td{ border-right:1px solid var(--line); }
+  .tables-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .tables-row > .box, .tables-row > table{ flex:1 1 0; min-width:0; }
+  table.ascii td, table.ascii th{ padding:1px 8px; font-size:10.5pt; direction:ltr; }
+  table.ascii td.h{ background:var(--accent-soft); color:var(--accent); font-weight:800; }
+
+  .calc{ direction:ltr; font-family:'Courier New',monospace; font-size:12.5pt; line-height:1.55; display:inline-block; text-align:right;
+         background:#fff; border:2px solid var(--ink); border-radius:12px; box-shadow:3px 3px 0 var(--ink);
+         padding:8px 16px; margin:6px 8px 8px; white-space:pre; max-width:100%; color:var(--ink); }
+  .calc.mixed{ unicode-bidi:plaintext; text-align:right; font-family:'Cairo',sans-serif; font-size:12pt; }
+
+  /* ---------- Questions ---------- */
+  .qblock{ border:1px solid var(--line); border-radius:18px; padding:12px 16px 10px; margin:12px 0; }
+  .qhead{ display:flex; align-items:center; gap:10px; background:var(--accent-soft); border-radius:12px; padding:8px 12px; margin:0 0 8px; break-after:avoid; }
+  .qhead .chip{ border:1.5px solid var(--ink); border-radius:8px; padding:0 8px; font-weight:800; font-size:10pt; color:var(--ink); background:#fff; white-space:nowrap; }
+  .qhead .qt{ flex:1; font-weight:800; color:var(--ink); font-size:12.5pt; }
+  .qhead .cnt{ color:var(--muted); font-size:10pt; font-weight:700; white-space:nowrap; }
+  ol.qs > li{ margin:7px 0; break-inside:avoid; }
+  ol.qs > li::marker{ color:var(--accent); font-weight:800; }
+  .opts{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px 8px; margin-top:6px; }
+  .opts.two{ grid-template-columns:repeat(2,1fr); }
+  .opts > span{ display:block; border:1.5px solid var(--line); border-radius:12px; padding:3px 8px; background:#fff; color:var(--ink); font-weight:600; }
+  .opts > span::before{ content:attr(data-l); flex:none; width:22px; height:22px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+                      font-weight:800; font-size:9.5pt; display:inline-grid; place-items:center; line-height:1; vertical-align:middle; margin-left:8px; }
+  .blank{ display:inline-block; min-width:96px; border-bottom:1.5px solid #c9ccd6; }
+  .tf{ padding-left:56px; position:relative; }
+  .tf::after{ content:""; position:absolute; left:0; top:4px; width:42px; height:24px; border:1.5px solid #c9ccd6; border-radius:8px; }
+  .ansline{ border-bottom:1.5px solid var(--line); height:28px; }
+  .match{ width:100%; }
+  .match td{ text-align:right; height:30px; }
+
+  .pix{ display:inline-grid; grid-template-columns:repeat(5,18px); grid-auto-rows:18px; border:2px solid var(--ink); border-radius:6px; overflow:hidden; margin:4px 10px; vertical-align:middle; direction:ltr; }
+  .pix i{ border:1px solid #d4d6de; }
+  .pix i.b{ background:var(--ink); }
+
+  /* ---------- Answer key ---------- */
+  .key h3{ display:flex; align-items:center; gap:10px; font-size:13.5pt; font-weight:800; color:var(--green); background:var(--green-soft); padding:6px 14px; border-radius:12px; margin:16px 0 6px; break-after:avoid; }
+  .key h3::before{ content:"✓"; width:22px; height:22px; border-radius:50%; background:var(--green); color:#fff; display:grid; place-items:center; font-size:11pt; }
+  .key h4{ color:var(--ink); font-size:11.5pt; margin:10px 0 2px; }
+  .key ol{ columns:2; column-gap:26px; }
+  .key ol.one{ columns:1; }
+  .key li{ break-inside:avoid; }
+  .key li::marker{ color:var(--green); font-weight:800; }
+
+  @page{ size:A4; margin:11mm 12mm 13mm 12mm; }
+  body{ font-size:10.5pt; line-height:1.6; }
+  .cd{ direction:ltr; unicode-bidi:isolate; font-family:'JetBrains Mono','Courier New',monospace; font-size:.88em; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:0 4px; color:var(--ink); }
+  .doc-head{ border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:4px; }
+  .doc-head h1{ font-size:24pt; font-weight:800; margin:2px 0; }
+  .doc-head .sub{ color:var(--muted); font-size:10.5pt; }
+  .flow .lesson-head{ margin:16px 0 8px; padding-bottom:6px; break-after:avoid; }
+  .flow .lesson-head h2{ font-size:20pt; }
+  .flow .lesson-head .sticker{ font-size:30pt; }
+  h3.sec{ margin:10px 0 5px; font-size:13.5pt; break-after:avoid; }
+  h4{ margin:8px 0 3px; font-size:12pt; break-after:avoid; }
+  p{ margin:3px 0; }
+  p.note{ color:var(--muted); font-size:9.5pt; margin-top:-4px; }
+  ul.sl, ol.sl{ margin:3px 0; padding-right:20px; }
+  ul.sl li, ol.sl li{ margin:2px 0; break-inside:avoid; }
+  .box{ padding:7px 12px; margin:6px 0; }
+  table{ margin:5px 0; break-inside:auto; }
+  tr{ break-inside:avoid; }
+  td, th{ text-align:right; padding:3px 10px; }
+  .ccgrid{ display:grid; grid-template-columns:1fr 1fr; gap:6px 8px; margin:5px 0; direction:ltr; }
+  .ccgrid > .cc:only-child{ grid-column:1 / -1; }
+  .cc{ break-inside:avoid; border:1.5px solid var(--ink); border-radius:8px; overflow:hidden; background:#1f2230; box-shadow:2px 2px 0 var(--ink); }
+  .cc pre{ margin:0; font-family:'JetBrains Mono','Courier New',monospace; white-space:pre-wrap; word-break:break-word; text-align:left; }
+  .cc pre.src{ padding:5px 9px; font-size:9.3pt; line-height:1.45; color:#e8eaff; }
+  .cc .res{ display:flex; gap:8px; align-items:flex-start; background:#0f1117; padding:4px 9px; border-top:1px solid #34384f; }
+  .cc .res .tag{ font:700 7.5pt 'Cairo',sans-serif; color:#7fd6ad; white-space:nowrap; padding-top:2px; }
+  .cc .res pre{ font-size:9.3pt; line-height:1.45; color:#b9f6d6; }
+  .cc .res.err pre{ color:#ff8a8a; }
+  .code, .console{ flex:1 1 0; min-width:0; border-radius:9px; overflow:hidden; border:2px solid var(--ink); box-shadow:2px 2px 0 var(--ink); }
+  .code{ background:#1f2230; } .console{ background:#0f1117; flex:0 1 38%; }
+  .code-h{ display:flex; justify-content:space-between; font:700 8pt 'Cairo',sans-serif; color:#c9cdf9; background:#2b2f45; padding:1px 9px; }
+  .console .code-h{ background:#20232f; color:#9ee6c3; }
+  .pair pre{ margin:0; padding:6px 10px; font-family:'JetBrains Mono','Courier New',monospace; font-size:9.8pt; line-height:1.5; color:#e8eaff; white-space:pre-wrap; word-break:break-word; text-align:left; }
+  .console pre{ color:#b9f6d6; } .console.err pre{ color:#ff8a8a; }
+</style></head><body><div class="doc-head"><div class="eyebrow">كورس JavaScript · منصة QUREO · ملخصات الفصول</div><h1>ملخصات الفصول 1–5</h1><p class="sub">الدفعة الأولى: مقدمة · الحسابات والنصوص · المتغيرات · مراجعة الفهم · جملة if</p></div><section class="flow"><div class="lesson-head"><div class="eyebrow">الفصل 1 من 54 · 6 دروس + مراجعة</div><span class="sticker">1</span><h2>مقدمة</h2></div><h3 class="sec">الفكرة الأساسية</h3><p>تعريف الطالب بمعنى البرمجة وفائدتها في حياتنا، ثم كتابة أول برنامج JavaScript لعرض نص في وحدة التحكم باستخدام console.log، وتعلّم التعليقات.</p><h3 class="sec">الدروس</h3><h4>الدرس 1 — ما هي البرمجة؟ (١)</h4><p>قصة تمهيدية بين الشخصيات (كودي وريكي): البرمجة تتيح صنع ألعاب ومواقع وتطبيقات. لا يوجد كود في هذا الدرس.</p><p><b>النقطة الأساسية:</b> البرمجة تتيح لك إنشاء الألعاب والمواقع والتطبيقات وغيرها.</p><h4>الدرس 2 — ما هي البرمجة؟ (٢)</h4><ul class="sl" start="1"><li>البرمجة = إعطاء تعليمات للحاسوب، ومجموعة التعليمات تُسمى "برنامج".</li><li>البرامج تشغّل الحواسيب والأجهزة المنزلية والسيارات وغيرها حولنا.</li><li>يوجد أكثر من 100 لغة برمجة؛ في هذا الكورس نتعلم ثلاثًا: HTML و CSS و JavaScript.</li><li>سؤال تفاعلي داخل الدرس: كم عدد لغات البرمجة في العالم؟ → <b>أكثر من 100 نوع</b></li></ul><h4>الدرس 3 — كيفية استخدام المحرر</h4><p>المحرر (الشاشة السوداء) هو مكان كتابة البرنامج. الأحرف العادية وحدها لا يفهمها الحاسوب.</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Hello&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Hello</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Good morning&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Good morning</pre></div></div></div><h4>الدرس 4 — وحدة التحكم</h4><p>وحدة التحكم هي مكان ظهور النتيجة، وعرض شيء فيها يُسمى "إخراج".</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Good evening&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Good evening</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Good night&quot;)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Good night</pre></div></div></div><p>مثال خطأ مقصود (نسيان علامتي الاقتباس):</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(see you tomorrow);</pre><div class="res err" dir="ltr"><span class="tag">Console ▸</span><pre>Error</pre></div></div></div><p>التصحيح:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Good luck&quot;)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Good luck</pre></div></div></div><p><b>عن الفاصلة المنقوطة:</b> البرنامج يعمل بدون ; لكن القاعدة المتفق عليها وضعها في نهاية كل جملة، تمامًا مثل النقطة في نهاية الجملة.</p><h4>الدرس 5 — تعليق</h4><p>كتابة ملاحظة بلغة عادية داخل البرنامج تسبب خطأ:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">When executed, the text is output to the console.
+console.log(&quot;Hello&quot;);</pre><div class="res err" dir="ltr"><span class="tag">Console ▸</span><pre>Error</pre></div></div></div><p>الحل بإضافة <code class="cd" dir="ltr">//</code> في بداية السطر:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">//When executed, the text is output to the console.
+console.log(&quot;Hello&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Hello</pre></div></div></div><h4>الدرس 6 — التعليق خارج البرنامج</h4><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">//Greetings for the day.
+console.log(&quot;Good morning&quot;);
+console.log(&quot;Hello&quot;);
+console.log(&quot;Good evening&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Good morning
+Hello
+Good evening</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Eggs&quot;)
+//console.log(&quot;Apple&quot;);
+console.log(&quot;Milk&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Eggs
+Milk</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Lion&quot;);
+//console.log(&quot;Fish&quot;);
+console.log(&quot;Elephant&quot;);
+console.log(&quot;Giraffe&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Lion
+Elephant
+Giraffe</pre></div></div></div><p><b>الفكرة:</b> وضع <code class="cd" dir="ltr">//</code> قبل سطر كود يوقف تنفيذه مؤقتًا، وهذا يُسمى "التعليق خارج البرنامج".</p><h3 class="sec">المصطلحات الجديدة</h3><table><tr><th>العربي</th><th>الإنجليزي</th><th>التعريف</th></tr><tr><td>برنامج</td><td>Program</td><td>مجموعة التعليمات التي نعطيها للحاسوب</td></tr><tr><td>لغة برمجة</td><td>Programming language</td><td>لغة خاصة يفهمها الحاسوب</td></tr><tr><td>محرر نصوص</td><td>Text editor</td><td>المكان الذي نكتب فيه البرنامج</td></tr><tr><td>وحدة التحكم</td><td>Console</td><td>الشاشة التي تظهر فيها نتيجة تنفيذ البرنامج</td></tr><tr><td>إخراج</td><td>Output</td><td>عرض قيمة أو نص في وحدة التحكم</td></tr><tr><td>تعليق</td><td>Comment</td><td>ملاحظة داخل البرنامج تبدأ بـ <code class="cd" dir="ltr">//</code> ولا تُنفَّذ</td></tr><tr><td>خطأ</td><td>Error</td><td>رسالة تظهر عندما لا يفهم الحاسوب البرنامج</td></tr></table><h3 class="sec">أهم 3 أخطاء شائعة</h3><ol class="sl" start="1"><li>نسيان علامتي الاقتباس " " حول النص داخل console.log فيظهر خطأ.</li><li>كتابة ملاحظة داخل البرنامج بدون <code class="cd" dir="ltr">//</code> فتُعامَل ككود وتسبب خطأ.</li><li>أخطاء إملائية في console.log (مثل Console.log أو console.Log) — حالة الأحرف مهمة.</li></ol><h3 class="sec q">اختبار المراجعة في المنصة</h3><ul class="sl" start="1"><li><b>النطاق المعلن:</b> console.log — <b>عدد الأسئلة:</b> 6 — أقصى تقدير: 6 ألماسات.</li><li>محاور الأسئلة: كتابة console.log بشكل صحيح، تمييز النص عن غيره،</li></ul><p>استخدام <code class="cd" dir="ltr">//</code> للتعليق، وتحديد ناتج برنامج بسيط فيه أسطر معلّقة.</p><h3 class="sec q">5 أسئلة إضافية (مع الإجابات)</h3><ol class="sl" start="1"><li><b>(اختيار من متعدد)</b> أي الأوامر التالية يعرض كلمة Hello؟<br>أ) print("Hello");  ب) <code class="cd" dir="ltr">console.log("Hello");</code>  ج) console("Hello");  د) log("Hello");<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="2"><li><b>(اختيار من متعدد)</b> ما الرمز الذي يجعل السطر تعليقًا؟<br>أ) #  ب) --  ج) <code class="cd" dir="ltr">//</code>  د) **<br><b>الإجابة: ج</b></li></ol><ol class="sl" start="3"><li><b>(صح/خطأ)</b> إذا نسيت ; في نهاية السطر فسيظهر خطأ دائمًا.<br><b>الإجابة: خطأ</b> — البرنامج يعمل، لكن وضعها هو القاعدة المتفق عليها.</li></ol><ol class="sl" start="4"><li><b>(صح/خطأ)</b> <code class="cd" dir="ltr">console.log(Hello);</code> بدون علامات اقتباس يعرض Hello.<br><b>الإجابة: خطأ</b> — يظهر خطأ.</li></ol><ol class="sl" start="5"><li><b>(سؤال كود)</b> ما ناتج هذا البرنامج؟</li></ol><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;A&quot;);
+//console.log(&quot;B&quot;);
+console.log(&quot;C&quot;);</pre></div></div><p><b>الإجابة:</b> يظهر A ثم C فقط، لأن السطر الثاني معلّق.</p></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الفصل 2 من 54 · 4 دروس + مراجعة</div><span class="sticker">2</span><h2>الحسابات والنصوص</h2></div><h3 class="sec">الفكرة الأساسية</h3><p>استخدام console.log لإجراء العمليات الحسابية الأربع وعرض نتائجها، ثم ربط النصوص بالصيغ الحسابية في سطر واحد باستخدام "+".</p><h3 class="sec">الدروس</h3><h4>الدرس 1 — كيف نعرض في وحدة التحكم</h4><p>الحواسيب بارعة في الحساب، والحواسيب الفائقة تنجز في ثانية ما يستغرق الإنسان أيامًا.</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Let&#x27;s calculate.&quot;)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Let&#x27;s calculate.</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;1+1&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>1+1</pre></div></div></div><p class="note">← لأن علامتي الاقتباس تجعلها نصًا</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(1+1);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>2</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(1400+3600)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>5000</pre></div></div></div><p><b>القاعدة الذهبية:</b> الصيغ الحسابية والأرقام تُكتب بدون " " — أما النصوص والجمل فتُحاط بـ " ".</p><h4>الدرس 2 — طرق الحساب</h4><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(432+345)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>777</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(100-50)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>50</pre></div></div><div class="cc"><pre class="src" dir="ltr">// &quot;5x9&quot; is written as &quot;5*9&quot;!
+console.log(5*9)
+// &quot;10÷2&quot; is written as &quot;10/2&quot;!
+console.log(10/2)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>45
+5</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(5*6)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>30</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(10/5)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>2</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(10000000000*10000000000)</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>100000000000000000000</pre></div></div></div><p><b>معاملات الضرب والقسمة تختلف عن المعتاد:</b> نستخدم * بدل <code class="cd" dir="ltr">×</code> و / بدل <code class="cd" dir="ltr">÷</code>. الجمع والطرح والضرب والقسمة تُسمى معًا "العمليات الحسابية الأربع"، ورموزها تُسمى "المعاملات".</p><h4>الدرس 3 — التجميع (١)</h4><p>البرنامج الأول (كل عنصر في سطر منفصل) — قائمة مقهى:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Drink menu&quot;);
+console.log(&quot;Cup of coffee&quot;);
+console.log(250*1);
+console.log(&quot;codycoins&quot;);
+console.log(&quot;Set of 2 coffees&quot;);
+console.log(250*2);
+console.log(&quot;codycoins&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Drink menu
+Cup of coffee
+250
+codycoins
+Set of 2 coffees
+500
+codycoins</pre></div></div></div><p>الطريقة الأفضل — سطر واحد:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Set of 2 coffees &quot; + (250 * 2) + &quot; codycoins&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Set of 2 coffees 500 codycoins</pre></div></div></div><p><b>لماذا الأقواس؟</b> عند وضع نصوص وصيغة حسابية في سطر واحد، تُحاط الصيغة بأقواس ( ).</p><p>ويمكن ربط نص بنص، أو نص برقم:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Today&#x27;s recommendation is &quot; + &quot;soup.&quot;);
+console.log(&quot;Limited to &quot; + 30 + &quot; servings.&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Today&#x27;s recommendation is soup.
+Limited to 30 servings.</pre></div></div></div><h4>الدرس 4 — التجميع (٢)</h4><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Set of 3 coffees &quot; + (250 * 3) + &quot; codycoins&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Set of 3 coffees 750 codycoins</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;One muffin &quot; + (320 * 1) + &quot; codycoins&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>One muffin 320 codycoins</pre></div></div><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Two muffins &quot; + (320 * 2) + &quot; codycoins&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Two muffins 640 codycoins</pre></div></div></div><h3 class="sec">المصطلحات الجديدة</h3><table><tr><th>العربي</th><th>الإنجليزي</th><th>التعريف</th></tr><tr><td>العمليات الحسابية الأربع</td><td>Four arithmetic operations</td><td>الجمع والطرح والضرب والقسمة</td></tr><tr><td>معامل</td><td>Operator</td><td>رمز يؤدي عملية، مثل + و - و * و /</td></tr><tr><td>نص / سلسلة محارف</td><td>String</td><td>حروف أو جملة توضع بين " "</td></tr><tr><td>تجميع / ربط</td><td>Concatenation</td><td>وصل نصوص وصيغ معًا باستخدام +</td></tr></table><h3 class="sec">أهم 3 أخطاء شائعة</h3><ol class="sl" start="1"><li>وضع الصيغة الحسابية داخل " " فتُطبع كنص بدل أن تُحسب ("1+1" بدل 1+1).</li><li>استخدام <code class="cd" dir="ltr">×</code> و <code class="cd" dir="ltr">÷</code> بدل * و / فيظهر خطأ.</li><li>نسيان الأقواس حول الصيغة عند الربط، أو نسيان المسافة داخل النص<br>فتلتصق الكلمة بالرقم مثل: Set of 2 coffees500</li></ol><h3 class="sec q">اختبار المراجعة في المنصة</h3><ul class="sl" start="1"><li><b>النطاق المعلن:</b> Calculation, String — <b>عدد الأسئلة:</b> 7 — أقصى تقدير: 7 ألماسات.</li><li>محاور الأسئلة: اختيار المعامل الصحيح للضرب والقسمة، التمييز بين طباعة النص</li></ul><p>وحساب الصيغة، وتركيب جملة واحدة تربط نصًا بصيغة حسابية.</p><h3 class="sec q">5 أسئلة إضافية (مع الإجابات)</h3><ol class="sl" start="1"><li><b>(اختيار من متعدد)</b> ما ناتج <code class="cd" dir="ltr">console.log("3*4");</code> ؟<br>أ) 12  ب) 3*4  ج) خطأ  د) 34<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="2"><li><b>(اختيار من متعدد)</b> أي معامل يُستخدم للقسمة في JavaScript؟<br>أ) <code class="cd" dir="ltr">÷</code>  ب) :  ج) /  د) %<br><b>الإجابة: ج</b></li></ol><ol class="sl" start="3"><li><b>(صح/خطأ)</b> يجب إحاطة الصيغة الحسابية بأقواس عند ربطها بنص في سطر واحد.<br><b>الإجابة: صح</b></li></ol><ol class="sl" start="4"><li><b>(صح/خطأ)</b> <code class="cd" dir="ltr">console.log(100-50);</code> يعرض 100-50.<br><b>الإجابة: خطأ</b> — يعرض 50.</li></ol><ol class="sl" start="5"><li><b>(سؤال كود)</b> اكتب سطرًا يعرض: Three books 450 codycoins<br>بحيث يحسب الحاسوب 150 <code class="cd" dir="ltr">×</code> 3.</li></ol><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Three books &quot; + (150 * 3) + &quot; codycoins&quot;);</pre></div></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الفصل 3 من 54 · درسان + مراجعة</div><span class="sticker">3</span><h2>المتغيرات</h2></div><h3 class="sec">الفكرة الأساسية</h3><p>المتغيّر "صندوق" نضع فيه قيمة ونغيّرها، نعلنه بـ let ونُسند له القيم بـ = ونعرض محتواه بـ console.log بدون علامات اقتباس.</p><h3 class="sec">الدروس</h3><h4>الدرس 1 — الإعلانات والإسنادات</h4><p>مثال الصيد: الدلو فارغ (0)، ثم 3 أسماك صباحًا، ثم 7 بعد الظهر.</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let fish;
+fish = 0;
+fish = fish + 3;
+fish = fish + 7;
+console.log(fish);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>10</pre></div></div></div><ul class="sl" start="1"><li><code class="cd" dir="ltr">let fish;</code>  =  <b>إعلان</b> متغيّر جديد اسمه fish.</li><li>fish = 0;  =  <b>إسناد</b> قيمة له.</li><li>fish = fish + 3;  =  <b>إعادة إسناد</b>.</li><li>اسم المتغيّر تختاره أنت بما يعبّر عن محتواه.</li></ul><p>الفرق بين المتغيّر والنص:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;fish&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>fish</pre></div></div></div><p class="note">← النص نفسه، وليس قيمة المتغيّر.</p><h4>الدرس 2 — تدريب على المتغيّرات</h4><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let fish;
+fish = 0;
+fish = fish + 8;
+fish = fish + 12;
+console.log(fish);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>20</pre></div></div><div class="cc"><pre class="src" dir="ltr">let apple;
+apple = 0;
+apple = apple + 5;
+apple = apple + 8;
+console.log(apple);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>13</pre></div></div></div><p>تمرين المصروف — القيمة الابتدائية ليست بالضرورة 0:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let allowance;
+allowance = 700;
+allowance = allowance + 1500;
+console.log(allowance);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>2200</pre></div></div></div><div class="box tip"><span class="lbl">ملاحظة</span><b>ملاحظة للمعلّم:</b> نص التمرين في المنصة مختصر ("أسند 1500 إلى allowance")، لكن سياق القصة هو <b>إضافة</b> المصروف إلى الـ 700 الموجودة أصلًا. لو أُسندت 1500 مباشرة (allowance = 1500;) يصبح الناتج 1500. هذه فرصة ممتازة لتنبيه الطلاب للفرق بين الإسناد وإعادة الإسناد بالإضافة.</div><h3 class="sec">المصطلحات الجديدة</h3><table><tr><th>العربي</th><th>الإنجليزي</th><th>التعريف</th></tr><tr><td>متغيّر</td><td>Variable</td><td>اسم يحمل قيمة يمكن تغييرها</td></tr><tr><td>إعلان / تصريح</td><td>Declaration</td><td>إنشاء متغيّر جديد باستخدام let</td></tr><tr><td>إسناد</td><td>Assignment</td><td>وضع قيمة داخل المتغيّر بعلامة =</td></tr><tr><td>إعادة إسناد</td><td>Reassignment</td><td>تغيير قيمة المتغيّر بعد أول إسناد</td></tr><tr><td>اسم المتغيّر</td><td>Variable name</td><td>الاسم الذي نختاره للمتغيّر</td></tr></table><h3 class="sec">أهم 3 أخطاء شائعة</h3><ol class="sl" start="1"><li>كتابة <code class="cd" dir="ltr">console.log("fish");</code> بدل <code class="cd" dir="ltr">console.log(fish);</code> فيُطبع الاسم بدل القيمة.</li><li>استخدام المتغيّر قبل إعلانه بـ let فيظهر خطأ.</li><li>تكرار let لنفس المتغيّر عند كل تغيير بدل إعادة الإسناد مباشرة.</li></ol><h3 class="sec q">اختبار المراجعة في المنصة</h3><ul class="sl" start="1"><li><b>النطاق المعلن:</b> Variables — <b>عدد الأسئلة:</b> 6 — أقصى تقدير: 6 ألماسات.</li><li>محاور الأسئلة: دور let، الفرق بين طباعة المتغيّر وطباعة اسمه كنص،</li></ul><p>وتتبّع قيمة متغيّر بعد سلسلة من إعادة الإسناد.</p><h3 class="sec q">5 أسئلة إضافية (مع الإجابات)</h3><ol class="sl" start="1"><li><b>(اختيار من متعدد)</b> أي كلمة تُستخدم لإعلان متغيّر في هذه الدروس؟<br>أ) var  ب) let  ج) make  د) new<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="2"><li><b>(اختيار من متعدد)</b> ما ناتج <code class="cd" dir="ltr">console.log("apple");</code> إذا كان apple = 13; ؟<br>أ) 13  ب) apple  ج) خطأ  د) 0<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="3"><li><b>(صح/خطأ)</b> إعادة الإسناد تعني تغيير قيمة متغيّر موجود مسبقًا.<br><b>الإجابة: صح</b></li></ol><ol class="sl" start="4"><li><b>(صح/خطأ)</b> يجب أن تكون القيمة الأولى لأي متغيّر هي 0.<br><b>الإجابة: خطأ</b></li></ol><ol class="sl" start="5"><li><b>(سؤال كود)</b> ما ناتج هذا البرنامج؟</li></ol><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let num;
+num = 5;
+num = num + 5;
+num = num + 10;
+console.log(num);</pre></div></div><p><b>الإجابة: 20</b></p></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الفصل 4 من 54 · درس واحد + اختبار منتصف الطريق</div><span class="sticker">4</span><h2>مراجعة الفهم</h2></div><h3 class="sec">الفكرة الأساسية</h3><p>فصل تثبيت يجمع ما سبق (التعليقات، الإخراج، الحساب، الربط، المتغيّرات) في ثلاثة تمارين، ثم اختبار فهم من 8 أسئلة بدون تلميحات.</p><h3 class="sec">الدرس 1 — مراجعة من 1 إلى 3</h3><p><b>تمرين 1 — تعليق + إخراج</b></p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">//Write the program on the line below.
+console.log(&quot;Good evening&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Good evening</pre></div></div></div><p><b>تمرين 2 — ربط نص بصيغة حسابية</b></p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">console.log(&quot;Bread and coffee for &quot; + (200 + 150) + &quot; codycoins&quot;);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Bread and coffee for 350 codycoins</pre></div></div></div><p><b>تمرين 3 — متغيّر</b></p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let num;
+num =2;
+num =num +8;
+console.log (num);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>10</pre></div></div></div><p><b>تذكير بالمعاملات:</b> نستخدم * بدل <code class="cd" dir="ltr">×</code> و / بدل <code class="cd" dir="ltr">÷</code>.</p><h3 class="sec q">خريطة المفاهيم المطلوبة قبل الاختبار</h3><ul class="sl" start="1"><li>console.log("نص");  لإخراج النصوص.</li><li>console.log(صيغة);  بدون اقتباس لإخراج نتيجة الحساب.</li><li>console.log("نص " + (صيغة) + " نص");  للربط في سطر واحد.</li><li><code class="cd" dir="ltr">//</code>  للتعليق أو لتعطيل تنفيذ سطر.</li><li>let للإعلان، = للإسناد، واسم المتغيّر بدون اقتباس للطباعة.</li></ul><h3 class="sec">المصطلحات الجديدة</h3><p>لا توجد مصطلحات جديدة — الفصل مراجعة شاملة للفصول 1–3.</p><h3 class="sec">أهم 3 أخطاء شائعة</h3><ol class="sl" start="1"><li>الخلط بين console.log("num") و console.log(num).</li><li>نسيان الأقواس حول الصيغة عند الربط.</li><li>التسرّع في الاختبار دون مراجعة التعليقات والمعاملات، وهي أكثر ما يُفقد الدرجات.</li></ol><h3 class="sec q">اختبار منتصف الطريق في المنصة</h3><ul class="sl" start="1"><li><b>النطاق المعلن:</b> console, Variables — <b>عدد الأسئلة:</b> 8.</li><li><b>شرط الاجتياز:</b> 7 إجابات صحيحة أو أكثر.</li></ul><p>(8 من 8 = PERFECT، 7 = CLEAR، 6 أو أقل = RETRY)</p><ul class="sl" start="1"><li>لا توجد تلميحات، بخلاف اختبارات "مراجعة" العادية.</li></ul><h3 class="sec q">5 أسئلة إضافية (مع الإجابات)</h3><ol class="sl" start="1"><li><b>(اختيار من متعدد)</b> ما ناتج <code class="cd" dir="ltr">console.log(6*7);</code> ؟<br>أ) 6*7  ب) 42  ج) 13  د) خطأ<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="2"><li><b>(اختيار من متعدد)</b> أي سطر يعرض: Total 90 ؟<br>أ) <code class="cd" dir="ltr">console.log("Total " + (30*3));</code><br>ب) <code class="cd" dir="ltr">console.log("Total (30*3)");</code><br>ج) <code class="cd" dir="ltr">console.log("Total" + "30*3");</code><br><b>الإجابة: أ</b></li></ol><ol class="sl" start="3"><li><b>(صح/خطأ)</b> <code class="cd" dir="ltr">//</code> تُستخدم لتعطيل تنفيذ سطر مؤقتًا.<br><b>الإجابة: صح</b></li></ol><ol class="sl" start="4"><li><b>(صح/خطأ)</b> يمكن إعلان متغيّر وإسناد قيمته في جملتين منفصلتين.<br><b>الإجابة: صح</b></li></ol><ol class="sl" start="5"><li><b>(سؤال كود)</b> اكتب برنامجًا يعلن score بقيمة 40، ثم يضيف له 35، ثم يطبعه.</li></ol><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let score;
+score = 40;
+score = score + 35;
+console.log(score);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>75</pre></div></div></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الفصل 5 من 54 · 4 دروس + مراجعة</div><span class="sticker">5</span><h2>جملة if</h2></div><h3 class="sec">الفكرة الأساسية</h3><p>اختصار كتابة المتغيّرات في سطر واحد، ثم تعلّم التفرّع الشرطي if (شرط) { معالجة }، وفهم أن الشرط نفسه ينتج <code class="cd" dir="ltr">true</code> أو <code class="cd" dir="ltr">false</code>.</p><h3 class="sec">الدروس</h3><h4>الدرس 1 — كيفية كتابة المتغيّرات</h4><p>الطريقة السابقة (سطران):</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let fish;
+fish= 0;
+console.log(fish);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>0</pre></div></div></div><p>الاختصار (سطر واحد):</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let fish =0;
+console.log(fish);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>0</pre></div></div></div><p>مع إعادة الإسناد:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let fish = 0;
+fish = fish + 5;
+console.log(fish);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>5</pre></div></div></div><p>تمرين:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let apple = 0;
+apple = apple + 10;
+console.log(apple);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>10</pre></div></div></div><p><b>القاعدة:</b> الاختصار <code class="cd" dir="ltr">let variable = value;</code> يصلح للإسناد الأول فقط؛ إعادة الإسناد تُكتب بالطريقة المعتادة بدون let.</p><h4>الدرس 2 — جملة if</h4><p>التفرّع الشرطي يعني: "إذا تحقق كذا، فافعل كذا". مثال القصة: إذا حصل ريكي على 100 في العلوم يحصل على مصروف إضافي.</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let science = 100;
+if (science == 100){console.log(&quot;Increased allowance!&quot;);}</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Increased allowance!</pre></div></div></div><h4>الدرس 3 — تدريب على if statement</h4><ul class="sl" start="1"><li>جزء if (...) يُسمى <b>العبارة الشرطية</b> (conditional expression).</li><li>جزء { ... } يُسمى <b>المعالجة</b> (processing)، ويُحاط بأقواس معقوفة <code class="cd" dir="ltr">{ }</code> تُسمى curly brackets.</li><li>للمقارنة نستخدم <code class="cd" dir="ltr">==</code> (علامتا مساواة)، وللإسناد = (علامة واحدة). <b>الفرق جوهري.</b></li></ul><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let science = 100;
+if (science == 100){console.log(&quot;Increased allowance!&quot;);}</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Increased allowance!</pre></div></div></div><p>تمرين أخير:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let math= 100;
+if (math == 100){console.log(&quot;Get a reward&quot;);}</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>Get a reward</pre></div></div></div><h4>الدرس 4 — كيفية عمل if statements</h4><p>العبارة الشرطية وحدها تنتج قيمة، ويمكن طباعتها مباشرة. <b>(تم تشغيل هذين المثالين فعليًا في محرر المنصة والتحقق من الناتج)</b></p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let science = 100;
+console.log(science == 100);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>true</pre></div></div><div class="cc"><pre class="src" dir="ltr">let science = 80;
+console.log(science == 100);</pre><div class="res" dir="ltr"><span class="tag">Console ▸</span><pre>false</pre></div></div></div><p><b>الخلاصة:</b> إذا تحقق الشرط فالنتيجة <code class="cd" dir="ltr">true</code>، وإذا لم يتحقق فالنتيجة <code class="cd" dir="ltr">false</code>. وجملة if تنفّذ المعالجة فقط عندما تكون النتيجة <code class="cd" dir="ltr">true</code>.</p><p>سؤال تفاعلي في نهاية الدرس:</p><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let math = 80;
+console.log(math == 80);</pre></div></div><p>الإجابة الصحيحة: <b><code class="cd" dir="ltr">true</code></b></p><h3 class="sec">المصطلحات الجديدة</h3><table><tr><th>العربي</th><th>الإنجليزي</th><th>التعريف</th></tr><tr><td>تفرّع شرطي / جملة if</td><td>Conditional branch / if statement</td><td>تنفيذ أمر فقط عند تحقق شرط</td></tr><tr><td>عبارة شرطية</td><td>Conditional expression</td><td>الجزء داخل أقواس if الذي يُفحص</td></tr><tr><td>معالجة</td><td>Processing</td><td>الأوامر التي تُنفَّذ داخل <code class="cd" dir="ltr">{ }</code> عند تحقق الشرط</td></tr><tr><td>أقواس معقوفة</td><td>Curly brackets</td><td>الرمزان <code class="cd" dir="ltr">{ }</code> اللذان يحيطان بالمعالجة</td></tr><tr><td>معامل المساواة</td><td>Equality operator (<code class="cd" dir="ltr">==</code>)</td><td>يقارن قيمتين ويعطي <code class="cd" dir="ltr">true</code> أو <code class="cd" dir="ltr">false</code></td></tr><tr><td>صح / خطأ</td><td><code class="cd" dir="ltr">true</code> / <code class="cd" dir="ltr">false</code></td><td>القيمتان الناتجتان عن فحص الشرط</td></tr></table><h3 class="sec">أهم 3 أخطاء شائعة</h3><ol class="sl" start="1"><li>استخدام = بدل <code class="cd" dir="ltr">==</code> داخل الشرط (إسناد بدل مقارنة).</li><li>نسيان الأقواس المعقوفة <code class="cd" dir="ltr">{ }</code> حول جزء المعالجة.</li><li>استخدام الاختصار let مع إعادة الإسناد (كتابة let مرة ثانية لنفس المتغيّر).</li></ol><h3 class="sec q">اختبار المراجعة في المنصة</h3><ul class="sl" start="1"><li><b>النطاق المعلن:</b> if — <b>عدد الأسئلة:</b> 5 — أقصى تقدير: 5 ألماسات.</li><li>محاور الأسئلة: التمييز بين = و <code class="cd" dir="ltr">==</code>، تركيب جملة if صحيحة،</li></ul><p>وتوقّع ناتج عبارة شرطية (<code class="cd" dir="ltr">true</code> / <code class="cd" dir="ltr">false</code>).</p><h3 class="sec q">5 أسئلة إضافية (مع الإجابات)</h3><ol class="sl" start="1"><li><b>(اختيار من متعدد)</b> أي الرموز يُستخدم للمقارنة بين قيمتين؟<br>أ) =  ب) <code class="cd" dir="ltr">==</code>  ج) =&gt;  د) <code class="cd" dir="ltr">==</code><code class="cd" dir="ltr">==</code>=<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="2"><li><b>(اختيار من متعدد)</b> ما ناتج <code class="cd" dir="ltr">console.log(7 <code class="cd" dir="ltr">==</code> 9);</code> ؟<br>أ) <code class="cd" dir="ltr">true</code>  ب) <code class="cd" dir="ltr">false</code>  ج) 7  د) خطأ<br><b>الإجابة: ب</b></li></ol><ol class="sl" start="3"><li><b>(صح/خطأ)</b> جملة if تنفّذ المعالجة حتى لو كان الشرط غير متحقق.<br><b>الإجابة: خطأ</b></li></ol><ol class="sl" start="4"><li><b>(صح/خطأ)</b> يمكن كتابة الإعلان والإسناد الأول في سطر واحد: <code class="cd" dir="ltr">let x = 5;</code><br><b>الإجابة: صح</b></li></ol><ol class="sl" start="5"><li><b>(سؤال كود)</b> ما ناتج هذا البرنامج؟</li></ol><div class="ccgrid"><div class="cc"><pre class="src" dir="ltr">let english = 90;
+if (english == 100){console.log(&quot;Perfect!&quot;);}
+console.log(english == 90);</pre></div></div><p><b>الإجابة:</b> لا تُطبع Perfect! لأن الشرط غير متحقق، ثم يُطبع <code class="cd" dir="ltr">true</code>.</p></section></body></html>
