@@ -1,0 +1,179 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>مراجعة تانية ثانوي</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet"><style>
+  :root{
+    --ink:#121317; --ink-2:#3a3d46; --muted:#6c7080; --line:#e6e7ee; --surface:#f7f7fb;
+    --accent:#5a46f0; --accent-2:#7b6cf6; --accent-soft:#efedff;
+    --green:#14a37f; --green-soft:#e6f7f1; --yellow:#ffd23f; --yellow-soft:#fff7d6;
+    --coral:#ef4f63; --coral-soft:#fff0f2; --blue:#3b82f6; --blue-soft:#e9f1ff;
+  }
+  @page{ size:A4; margin:15mm 14mm 17mm 14mm; }
+  *{ box-sizing:border-box; }
+  body{ font-family:'Cairo',sans-serif; color:var(--ink-2); font-size:12pt; line-height:1.85; margin:0; background:#fff; }
+  .n{ direction:ltr; unicode-bidi:isolate; display:inline-block; }
+  .en{ direction:ltr; unicode-bidi:isolate; color:var(--muted); font-size:.85em; font-weight:500; }
+  sub{ font-size:.65em; }
+  h1,h2,h3,h4{ margin:0; line-height:1.35; color:var(--ink); }
+  b,strong{ color:var(--ink); }
+  p{ margin:4px 0; }
+  ul,ol{ margin:4px 0; padding-right:22px; }
+  li{ margin:3px 0; }
+  .page-break{ break-before:page; }
+  .avoid{ break-inside:avoid; }
+  .ico{ width:15px; height:15px; vertical-align:-3px; }
+
+  /* ---------- Cover (lesson-intro style) ---------- */
+  .cover{ height:262mm; display:flex; flex-direction:column; }
+  .cover .topbar{ display:flex; justify-content:space-between; align-items:center; color:var(--muted); font-weight:700; font-size:10.5pt; }
+  .cover .brand{ display:flex; align-items:center; gap:8px; color:var(--ink); }
+  .cover .brand i{ width:26px; height:26px; border-radius:8px; background:var(--accent); display:inline-block; }
+  .cover .bar{ height:6px; border-radius:99px; background:var(--line); margin:14px 0 0; overflow:hidden; }
+  .cover .bar span{ display:block; height:100%; width:12%; background:var(--accent); border-radius:99px; }
+  .cover-main{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .eyebrow{ font-size:10.5pt; font-weight:800; color:var(--muted); letter-spacing:.3px; }
+  .cover h1{ font-size:52pt; font-weight:800; line-height:1.15; margin:8px 0 10px; }
+  .cover h1 em{ font-style:normal; background:linear-gradient(transparent 62%, var(--yellow) 62%); }
+  .cover .sub{ font-size:15pt; color:var(--muted); max-width:150mm; }
+  .cover .meta{ margin-top:14px; }
+  .cover .cta{ margin-top:22px; display:flex; align-items:center; justify-content:space-between; background:var(--accent); color:#fff;
+               border-radius:14px; padding:12px 20px; font-weight:800; font-size:14pt; max-width:120mm; }
+  .cover .cta small{ font-weight:600; opacity:.85; font-size:10.5pt; }
+  .sticker{ position:absolute; left:0; top:-6px; font-size:40pt; font-weight:800; color:var(--accent); direction:ltr;
+            -webkit-text-stroke:2px var(--ink); paint-order:stroke fill; transform:rotate(-6deg); }
+  .bits{ display:flex; gap:6px; direction:ltr; margin-top:26px; }
+  .bits span{ width:34px; height:44px; border:2px solid var(--ink); border-radius:8px; display:grid; place-items:center; font-weight:800; font-size:15pt; color:var(--ink); }
+  .bits .one{ background:#c9c1ff; } .bits .zero{ background:#bcd6ff; } .bits .y{ background:#ffd7a8; }
+  .cover .name{ border-top:1px solid var(--line); padding-top:14px; display:flex; gap:24px; color:var(--muted); font-weight:700; }
+  .cover .name span{ flex:1; border-bottom:1.5px solid var(--line); padding-bottom:4px; }
+
+  /* ---------- Meta row ---------- */
+  .meta{ display:flex; flex-wrap:wrap; gap:18px; color:var(--muted); font-size:10.5pt; font-weight:700; }
+  .meta span{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* ---------- Curriculum (TOC) ---------- */
+  .curr{ border:1px solid var(--line); border-radius:16px; overflow:hidden; margin-top:6px; }
+  .curr .grp{ display:flex; justify-content:space-between; background:var(--surface); padding:10px 18px; font-weight:800; color:var(--ink); border-top:1px solid var(--line); }
+  .curr .grp:first-child{ border-top:0; }
+  .curr .grp small{ color:var(--muted); font-weight:700; }
+  .curr .row{ display:flex; align-items:center; gap:14px; padding:8px 18px; border-top:1px solid var(--line); }
+  .curr .row .no{ width:44px; color:var(--muted); font-weight:700; direction:ltr; text-align:right; }
+  .curr .row .t{ flex:1; color:var(--ink); font-weight:600; }
+  .curr .row .c{ color:var(--muted); font-size:10.5pt; font-weight:700; }
+
+  /* ---------- Lesson header ---------- */
+  .lesson-head{ position:relative; padding-bottom:16px; margin-bottom:18px; border-bottom:1px solid var(--line); }
+  .lesson-head .bar{ height:6px; border-radius:99px; background:var(--line); margin:8px 0 16px; overflow:hidden; width:62%; }
+  .lesson-head .bar span{ display:block; height:100%; background:var(--accent); border-radius:99px; }
+  .lesson-head h2{ font-size:28pt; font-weight:800; max-width:72%; }
+  .lesson-head .sub{ font-size:13pt; color:var(--muted); margin:2px 0 10px; max-width:76%; }
+  .lesson-head .sticker{ top:0; font-size:34pt; }
+  .lesson-head.green .bar span{ background:var(--green); }
+  .lesson-head.green .sticker{ color:var(--green); }
+
+  /* ---------- Section titles ---------- */
+  h3.sec{ font-size:15pt; font-weight:800; margin:20px 0 10px; display:flex; align-items:center; gap:10px; break-after:avoid; }
+  h3.sec::before{ content:""; width:6px; height:20px; border-radius:4px; background:var(--accent); }
+  h3.sec.q::before{ background:var(--coral); }
+  h4{ font-size:13pt; font-weight:800; margin:16px 0 6px; break-after:avoid; }
+
+  .term{ color:var(--ink); font-weight:800; background:linear-gradient(transparent 64%, var(--yellow) 64%); padding:0 1px; }
+
+  /* ---------- Cards ---------- */
+  .box{ border-radius:16px; padding:12px 16px; margin:12px 0; break-inside:avoid; border:1px solid var(--line); background:#fff; }
+  .box .lbl{ display:table; font-weight:800; font-size:10pt; padding:1px 10px; border-radius:8px; margin-bottom:6px; }
+  .def .lbl{ background:var(--accent-soft); color:var(--accent); }
+  .ex{ background:var(--surface); border-color:transparent; }
+  .ex .lbl{ background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .tip{ background:var(--yellow-soft); border-color:transparent; }
+  .tip .lbl{ background:var(--yellow); color:var(--ink); }
+  .warn{ background:var(--coral-soft); border-color:transparent; }
+  .warn .lbl{ background:var(--coral); color:#fff; }
+
+  /* ---------- Tables ---------- */
+  table{ width:100%; border-collapse:separate; border-spacing:0; margin:10px 0; break-inside:avoid; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  th,td{ padding:5px 12px; text-align:center; border-top:1px solid var(--line); unicode-bidi:plaintext; }
+  tr:first-child th, tr:first-child td{ border-top:0; }
+  th{ background:var(--surface); color:var(--ink); font-weight:800; }
+  td + td, th + th, td + th, th + td{ border-right:1px solid var(--line); }
+  .tables-row{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .tables-row > .box, .tables-row > table{ flex:1 1 0; min-width:0; }
+  table.ascii td, table.ascii th{ padding:1px 8px; font-size:10.5pt; direction:ltr; }
+  table.ascii td.h{ background:var(--accent-soft); color:var(--accent); font-weight:800; }
+
+  .calc{ direction:ltr; font-family:'Courier New',monospace; font-size:12.5pt; line-height:1.55; display:inline-block; text-align:right;
+         background:#fff; border:2px solid var(--ink); border-radius:12px; box-shadow:3px 3px 0 var(--ink);
+         padding:8px 16px; margin:6px 8px 8px; white-space:pre; max-width:100%; color:var(--ink); }
+  .calc.mixed{ unicode-bidi:plaintext; text-align:right; font-family:'Cairo',sans-serif; font-size:12pt; }
+
+  /* ---------- Questions ---------- */
+  .qblock{ border:1px solid var(--line); border-radius:18px; padding:12px 16px 10px; margin:12px 0; }
+  .qhead{ display:flex; align-items:center; gap:10px; background:var(--accent-soft); border-radius:12px; padding:8px 12px; margin:0 0 8px; break-after:avoid; }
+  .qhead .chip{ border:1.5px solid var(--ink); border-radius:8px; padding:0 8px; font-weight:800; font-size:10pt; color:var(--ink); background:#fff; white-space:nowrap; }
+  .qhead .qt{ flex:1; font-weight:800; color:var(--ink); font-size:12.5pt; }
+  .qhead .cnt{ color:var(--muted); font-size:10pt; font-weight:700; white-space:nowrap; }
+  ol.qs > li{ margin:7px 0; break-inside:avoid; }
+  ol.qs > li::marker{ color:var(--accent); font-weight:800; }
+  .opts{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px 8px; margin-top:6px; }
+  .opts.two{ grid-template-columns:repeat(2,1fr); }
+  .opts > span{ display:block; border:1.5px solid var(--line); border-radius:12px; padding:3px 8px; background:#fff; color:var(--ink); font-weight:600; }
+  .opts > span::before{ content:attr(data-l); flex:none; width:22px; height:22px; border-radius:50%; background:var(--accent-soft); color:var(--accent);
+                      font-weight:800; font-size:9.5pt; display:inline-grid; place-items:center; line-height:1; vertical-align:middle; margin-left:8px; }
+  .blank{ display:inline-block; min-width:96px; border-bottom:1.5px solid #c9ccd6; }
+  .tf{ padding-left:56px; position:relative; }
+  .tf::after{ content:""; position:absolute; left:0; top:4px; width:42px; height:24px; border:1.5px solid #c9ccd6; border-radius:8px; }
+  .ansline{ border-bottom:1.5px solid var(--line); height:28px; }
+  .match{ width:100%; }
+  .match td{ text-align:right; height:30px; }
+
+  .pix{ display:inline-grid; grid-template-columns:repeat(5,18px); grid-auto-rows:18px; border:2px solid var(--ink); border-radius:6px; overflow:hidden; margin:4px 10px; vertical-align:middle; direction:ltr; }
+  .pix i{ border:1px solid #d4d6de; }
+  .pix i.b{ background:var(--ink); }
+
+  /* ---------- Answer key ---------- */
+  .key h3{ display:flex; align-items:center; gap:10px; font-size:13.5pt; font-weight:800; color:var(--green); background:var(--green-soft); padding:6px 14px; border-radius:12px; margin:16px 0 6px; break-after:avoid; }
+  .key h3::before{ content:"✓"; width:22px; height:22px; border-radius:50%; background:var(--green); color:#fff; display:grid; place-items:center; font-size:11pt; }
+  .key h4{ color:var(--ink); font-size:11.5pt; margin:10px 0 2px; }
+  .key ol{ columns:2; column-gap:26px; }
+  .key ol.one{ columns:1; }
+  .key li{ break-inside:avoid; }
+  .key li::marker{ color:var(--green); font-weight:800; }
+
+  @page{ size:A4; margin:11mm 12mm 13mm 12mm; }
+  body{ font-size:11pt; line-height:1.7; }
+  .cd{ direction:ltr; unicode-bidi:isolate; font-family:'Courier New',monospace; font-size:.92em; background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:0 5px; }
+  .doc-head{ border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:4px; }
+  .doc-head h1{ font-size:22pt; font-weight:800; margin:2px 0; }
+  .doc-head .sub{ color:var(--muted); font-size:10.5pt; }
+  .flow .lesson-head{ margin:18px 0 10px; padding-bottom:8px; break-after:avoid; }
+  .flow .lesson-head h2{ font-size:20pt; max-width:80%; }
+  .flow .lesson-head .sub{ font-size:11pt; margin:0 0 4px; }
+  .flow .lesson-head .sticker{ font-size:26pt; }
+  .flow .lesson-head .bar{ margin:4px 0 8px; }
+  h3.sec{ margin:12px 0 6px; font-size:14pt; }
+  h4{ margin:10px 0 4px; }
+  .box{ padding:8px 14px; margin:8px 0; break-inside:auto; }
+  .box ol, .box ul{ margin:2px 0; }
+  .box .lbl{ break-after:avoid; }
+  .qblock{ padding:8px 14px 6px; margin:8px 0; }
+  .qhead{ padding:5px 12px; margin-bottom:4px; }
+  ol.qs > li{ margin:4px 0; }
+  .opts{ gap:2px 10px; margin-top:3px; }
+  .opts.one{ grid-template-columns:1fr; }
+  .opts > span{ border:0; padding:1px 2px; background:none; font-weight:500; border-radius:0; }
+  .opts > span::before{ width:20px; height:20px; font-size:9pt; }
+  .ansline{ height:24px; }
+  table{ margin:6px 0; break-inside:auto; }
+  tr{ break-inside:avoid; }
+  td{ text-align:right; }
+  th{ text-align:right; }
+  .tables-row{ break-inside:avoid; }
+  .key{ font-size:10pt; line-height:1.5; }
+  .key h3{ margin:10px 0 4px; padding:4px 12px; }
+  .key h4{ margin:6px 0 2px; }
+  .key ol.cols{ columns:2; column-gap:22px; }
+  .key ol.one{ columns:1; }
+  .key li{ margin:1px 0; break-inside:avoid; }
+
+  table{ width:100%; } td, th{ text-align:right; }
+  .box ul{ margin:2px 0; padding-right:20px; }
+  .flow .lesson-head h2{ font-size:19pt; }
+  .flow .lesson-head{ break-inside:avoid; break-after:avoid; }
+</style></head><body><section class="flow"><div class="doc-head"><div class="eyebrow">البرمجة والذكاء الاصطناعي · الصف الثاني الثانوي</div><h1>ملزمة المراجعة: منهج الامتحان</h1><p class="sub">من الوحدة الثانية الدرس <bdi dir="ltr">2-2</bdi> إلى الوحدة الرابعة الدرس <bdi dir="ltr">4-1</bdi>: ملخص مركّز وأسئلة على كل درس، والإجابات في آخر الملزمة.</p></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الدرس 1 من 6</div><div class="bar"><span style="width:16.7%"></span></div><span class="sticker">2-2</span><h2>تصميم أمان الشبكات</h2><p class="sub">Firewall · VPN · DMZ · الدفاع في العمق · Zero Trust</p></div><div class="box tip"><span class="lbl">الفكرة في سطر</span>وسيلة حماية واحدة لا تكفي؛ أمان الشبكات القوي = <b>تكديس الدفاعات</b> + <b>التحقق من كل وصول</b>.</div><table><tr><th>التقنية</th><th>التعريف</th><th>تحمي إيه؟</th></tr><tr><td>جدار الحماية (<bdi class="cd" dir="ltr">Firewall</bdi>)</td><td>يراقب حركة الشبكة ويطبق قواعد السماح (<bdi class="cd" dir="ltr">Allow</bdi>) والمنع (<bdi class="cd" dir="ltr">Deny</bdi>) حسب سياسات الأمان</td><td>مدخل الشبكة</td></tr><tr><td>الشبكة الافتراضية الخاصة (<bdi class="cd" dir="ltr">VPN</bdi>)</td><td>اتصال خاص مشفّر عبر شبكة عامة مثل الإنترنت</td><td>الاتصال عن بُعد وربط الفروع وتقليل التنصت</td></tr><tr><td>المنطقة المعزولة (<bdi class="cd" dir="ltr">DMZ</bdi>)</td><td>شبكة فرعية توضع فيها الخوادم المواجهة للجمهور (الويب، البريد) لعزلها عن الشبكة الداخلية</td><td>لو اختُرق خادم الويب لا يصل المخترق للبيانات الداخلية</td></tr><tr><td>الدفاع متعدد الطبقات (<bdi class="cd" dir="ltr">Defense in Depth</bdi>)</td><td>تكديس الإجراءات الأمنية عند مدخل الشبكة ومسار الاتصال</td><td>لو فشلت طبقة (كلمة المرور) تحمي طبقة أخرى (2FA)</td></tr><tr><td>انعدام الثقة (<bdi class="cd" dir="ltr">Zero Trust</bdi>)</td><td>لا ثقة تلقائية لأي مستخدم أو جهاز داخل الشبكة؛ التحقق من الهوية والصلاحيات والسياق عند كل طلب</td><td>التهديد الداخلي، والسحابة، والعمل عن بُعد</td></tr></table><div class="box ex"><span class="lbl">موقف تطبيقي مهم</span><ul><li>الموقع العام ← في <b>DMZ</b> وبياناته محمية بـ <b>HTTPS</b>.</li><li>الموظفون عن بُعد ← <b>VPN</b>.</li><li>قاعدة البيانات الداخلية ← في الشبكة الداخلية <b>خلف جدار الحماية</b> ولا تتصل بالإنترنت مباشرة.</li></ul></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 3</span></div><ol class="qs"><li>تقنية تنشئ اتصالًا خاصًا مشفرًا عبر شبكة عامة:<div class="opts "><span data-l="أ"><bdi class="cd" dir="ltr">DMZ</bdi></span><span data-l="ب"><bdi class="cd" dir="ltr">VPN</bdi></span><span data-l="ج"><bdi class="cd" dir="ltr">Firewall</bdi></span><span data-l="د"><bdi class="cd" dir="ltr">HTTP</bdi></span></div></li><li>توضع الخوادم المواجهة للجمهور في:<div class="opts two"><span data-l="أ">الشبكة الداخلية</span><span data-l="ب">المنطقة المعزولة <bdi class="cd" dir="ltr">DMZ</bdi></span><span data-l="ج">جهاز الموظف</span><span data-l="د">قاعدة البيانات</span></div></li><li>نهج يتحقق من الهوية والصلاحيات عند كل طلب وصول:<div class="opts two"><span data-l="أ">الدفاع في العمق</span><span data-l="ب">انعدام الثقة <bdi class="cd" dir="ltr">Zero Trust</bdi></span><span data-l="ج">جدار الحماية</span><span data-l="د">الشبكة الخاصة</span></div></li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 3</span></div><ol class="qs"><li class="tf">جدار الحماية يطبق قواعد السماح والمنع على حركة الشبكة.</li><li class="tf">نهج انعدام الثقة يثق تلقائيًا في أي مستخدم داخل الشبكة.</li><li class="tf">قاعدة البيانات الداخلية يجب أن تتصل بالإنترنت مباشرة.</li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">أجب</span><span class="cnt">0 / 1</span></div><ol class="qs"><li>قارن بين الدفاع متعدد الطبقات ونهج انعدام الثقة.<div class="ansline"></div><div class="ansline"></div></li></ol></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الدرس 2 من 6</div><div class="bar"><span style="width:33.3%"></span></div><span class="sticker">2-3</span><h2>الاستجابة للحوادث وإدارة المخاطر</h2><p class="sub">الحادث الأمني · CIA · المراحل الست · درجة الخطر</p></div><div class="box tip"><span class="lbl">الفكرة في سطر</span>مهما كانت الدفاعات قوية ممكن يحصل اختراق؛ فلازم <b>خطة استجابة من 6 مراحل بالترتيب</b> و<b>تقييم للمخاطر</b>.</div><div class="box def"><span class="lbl">الحادث الأمني</span>حدث يؤثر سلبًا أو يهدد بجدية <b>سرية</b> أو <b>سلامة</b> أو <b>توافر</b> المعلومات (مثلث <bdi class="cd" dir="ltr">CIA</bdi>)، مثل تسرب المعلومات، أو التلاعب بالبيانات، أو هجمات حجب الخدمة.</div><table><tr><th>عنصر CIA</th><th>معناه</th><th>مثال على اختراقه</th></tr><tr><td>السرية</td><td>منع وصول غير المصرح لهم</td><td>تسريب بيانات بطاقات الدفع</td></tr><tr><td>السلامة</td><td>صحة البيانات وعدم تعديلها بدون إذن</td><td>تعديل درجات الطلاب</td></tr><tr><td>التوافر</td><td>إتاحة الخدمة للمصرح لهم في أي وقت</td><td>انقطاع الخدمة بهجوم <bdi class="cd" dir="ltr">DDoS</bdi></td></tr></table><table><tr><th>المرحلة</th><th>ماذا نفعل؟</th></tr><tr><td>1. التحضير</td><td>تجهيز الإجراءات والأدوات وأدوار الفريق قبل أي حادث</td></tr><tr><td>2. الاكتشاف</td><td>ملاحظة نشاط غريب وتأكيد وقوع الحادث</td></tr><tr><td>3. الاحتواء</td><td>منع انتشار الضرر (فصل الجهاز المصاب عن الشبكة) — يسبق الاستئصال</td></tr><tr><td>4. الاستئصال</td><td>إزالة التهديد والسبب الجذري (حذف الفيروس وإغلاق الثغرة)</td></tr><tr><td>5. الاستعادة</td><td>إعادة تشغيل الأنظمة واسترجاع النسخ الاحتياطية — لا تسبق الاستئصال</td></tr><tr><td>6. الدروس المستفادة</td><td>تحليل الحادث وتحديث خطط الأمان لمنع تكراره</td></tr></table><div class="box ex"><span class="lbl">تقييم المخاطر</span><b>درجة الخطر = التأثير × الاحتمالية</b><br>التأثير: حجم الضرر المتوقع · الاحتمالية: مدى توقع الحدوث.<br>نبدأ دائمًا بالمخاطر ذات <b>التأثير الأعلى + الاحتمالية الأعلى</b>. مثال: تسرب بيانات (5 × 4 = 20) أولوية قبل تعطل طابعة (1 × 3 = 3).</div><div class="qblock"><div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 3</span></div><ol class="qs"><li>المرحلة التي يتم فيها فصل الجهاز المصاب عن الشبكة:<div class="opts "><span data-l="أ">الاستئصال</span><span data-l="ب">الاحتواء</span><span data-l="ج">الاستعادة</span><span data-l="د">التحضير</span></div></li><li>درجة الخطر تساوي:<div class="opts two"><span data-l="أ">التأثير + الاحتمالية</span><span data-l="ب">التأثير × الاحتمالية</span><span data-l="ج">التأثير − الاحتمالية</span><span data-l="د">الاحتمالية ÷ التأثير</span></div></li><li>تعديل درجات الطلاب بدون إذن يُعد اختراقًا لعنصر:<div class="opts "><span data-l="أ">السرية</span><span data-l="ب">السلامة</span><span data-l="ج">التوافر</span><span data-l="د">المصادقة</span></div></li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 3</span></div><ol class="qs"><li class="tf">مرحلة الاستعادة تسبق مرحلة الاستئصال.</li><li class="tf">مرحلة الدروس المستفادة تهدف لتحديث خطط الأمان.</li><li class="tf">هجوم حجب الخدمة يؤثر على التوافر.</li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثالث</span><span class="qt">مسألة</span><span class="cnt">0 / 1</span></div><p>خطر (أ): التأثير 3 والاحتمالية 5. خطر (ب): التأثير 4 والاحتمالية 2. احسب درجة كل خطر، وأيهما يُعالج أولًا؟</p><div class="ansline"></div><div class="ansline"></div></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الدرس 3 من 6</div><div class="bar"><span style="width:50.0%"></span></div><span class="sticker">3-1</span><h2>البنية العامة لتطبيقات الويب</h2><p class="sub">الطبقات الثلاث · تدفق الطلب · توزيع المهام</p></div><div class="box tip"><span class="lbl">الفكرة في سطر</span>تطبيق الويب = <b>3 طبقات</b>: الأمامية <b>تعرض وتجمع</b> ← الخلفية <b>تقرر وتعالج</b> ← قاعدة البيانات <b>تخزّن وتسترجع</b>.</div><table><tr><th>الطبقة</th><th>مكانها</th><th>دورها</th><th>مثال (متجر)</th></tr><tr><td>الواجهة الأمامية</td><td>المتصفح</td><td>تعرض المحتوى وتستقبل مدخلات المستخدم</td><td>صفحات المنتجات وسلة التسوق</td></tr><tr><td>الواجهة الخلفية</td><td>الخادم</td><td>تعالج الطلبات وتطبق قواعد التطبيق</td><td>التحقق من المخزون وطلبات الدفع</td></tr><tr><td>قاعدة البيانات</td><td>التخزين</td><td>تحفظ البيانات وتوفرها وتنظمها</td><td>معلومات المنتجات وسجل الطلبات</td></tr></table><div class="box ex"><span class="lbl">تدفق البحث عن منتج (رتّب)</span>1) الأمامية تستقبل كلمات البحث ← 2) ترسلها للخلفية ← 3) الخلفية تطلب المنتجات من قاعدة البيانات ← 4) قاعدة البيانات تعيد النتائج ← 5) الخلفية تجهزها ← 6) الأمامية تعرضها.<br><b>الأمامية لا تتعامل مباشرة مع قاعدة البيانات.</b></div><div class="box warn"><span class="lbl">قاعدة لأي سؤال توزيع</span>شاشة / عرض / نموذج إدخال ← <b>أمامية</b> · معالجة / تحقق / حساب / اختيار ← <b>خلفية</b> · تخزين / سجل / بيانات محفوظة ← <b>قاعدة البيانات</b>.</div><div class="qblock"><div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">وزّع المهام: (أ) أمامية (ب) خلفية (ج) قاعدة بيانات</span><span class="cnt">0 / 4</span></div><ol class="qs"><li>عرض شاشة سلة التسوق.</li><li>التحقق من تسجيل الدخول.</li><li>تخزين سجل الطلبات.</li><li>اختيار الفيديوهات الموصى بها.</li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 2</span></div><ol class="qs"><li class="tf">الواجهة الأمامية تتعامل مباشرة مع قاعدة البيانات.</li><li class="tf">الواجهة الخلفية تعمل على الخادم.</li></ol></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الدرس 4 من 6</div><div class="bar"><span style="width:66.7%"></span></div><span class="sticker">3-2</span><h2>طرق اتصال تطبيقات الويب</h2><p class="sub">العميل والخادم · HTTP/HTTPS · GET/POST · رموز الحالة · API وJSON</p></div><div class="box tip"><span class="lbl">الفكرة في سطر</span><b>العميل يطلب ← الخادم يستجيب</b>، عبر <bdi class="cd" dir="ltr">HTTP/HTTPS</bdi>، بطريقة <bdi class="cd" dir="ltr">GET</bdi> أو <bdi class="cd" dir="ltr">POST</bdi>، ومعه رمز حالة، وغالبًا <bdi class="cd" dir="ltr">API</bdi> تعيد البيانات بصيغة <bdi class="cd" dir="ltr">JSON</bdi>.</div><table><tr><th>المصطلح</th><th>المعنى</th></tr><tr><td>العميل</td><td>يطلب البيانات (المتصفح، تطبيق الهاتف)</td></tr><tr><td>الخادم</td><td>يستقبل الطلبات ويعالجها ويعيد الاستجابة</td></tr><tr><td><bdi class="cd" dir="ltr">HTTP</bdi></td><td>بروتوكول لتبادل الرسائل، غير مشفّر</td></tr><tr><td><bdi class="cd" dir="ltr">HTTPS</bdi></td><td><bdi class="cd" dir="ltr">HTTP</bdi> عبر <bdi class="cd" dir="ltr">TLS</bdi> آمن: سرية وسلامة ومصادقة الخادم</td></tr><tr><td><bdi class="cd" dir="ltr">GET</bdi></td><td>طلب/استرجاع بيانات (عرض صفحة، نتائج بحث)</td></tr><tr><td><bdi class="cd" dir="ltr">POST</bdi></td><td>إرسال بيانات ليعالجها الخادم (تسجيل دخول، نشر تعليق)</td></tr><tr><td><bdi class="cd" dir="ltr">200</bdi> / <bdi class="cd" dir="ltr">404</bdi> / <bdi class="cd" dir="ltr">500</bdi></td><td>نجاح / المورد غير موجود / خطأ داخلي في الخادم</td></tr><tr><td><bdi class="cd" dir="ltr">API</bdi></td><td>قواعد تسمح لبرنامج بطلب بيانات أو وظائف من برنامج آخر</td></tr><tr><td><bdi class="cd" dir="ltr">JSON</bdi></td><td>صيغة نصية للبيانات المهيكلة: مفتاح : قيمة</td></tr></table><div class="box ex"><span class="lbl">اقرأ JSON</span><bdi class="cd" dir="ltr">{&quot;city&quot;: &quot;Cairo&quot;, &quot;temperature&quot;: 31}</bdi> ← المفتاح <bdi class="cd" dir="ltr">city</bdi> قيمته <bdi class="cd" dir="ltr">&quot;Cairo&quot;</bdi> (نص بين علامتي تنصيص)، و<bdi class="cd" dir="ltr">temperature</bdi> قيمته <bdi class="cd" dir="ltr">31</bdi> (رقم بدون تنصيص).</div><div class="box warn"><span class="lbl">علّل</span>نرسل بيانات تسجيل الدخول بـ <bdi class="cd" dir="ltr">POST</bdi> وعبر <bdi class="cd" dir="ltr">HTTPS</bdi> لأن <bdi class="cd" dir="ltr">GET</bdi> يضع البيانات في العنوان فتظهر، و<bdi class="cd" dir="ltr">HTTP</bdi> غير مشفّر فيمكن سرقة كلمة المرور.</div><div class="qblock"><div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 2</span></div><ol class="qs"><li>طريقة الطلب المناسبة لاسترجاع نتائج البحث:<div class="opts "><span data-l="أ"><bdi class="cd" dir="ltr">GET</bdi></span><span data-l="ب"><bdi class="cd" dir="ltr">POST</bdi></span><span data-l="ج"><bdi class="cd" dir="ltr">TLS</bdi></span><span data-l="د"><bdi class="cd" dir="ltr">500</bdi></span></div></li><li>رمز الحالة <bdi class="cd" dir="ltr">500</bdi> يعني:<div class="opts two"><span data-l="أ">نجاح</span><span data-l="ب">المورد غير موجود</span><span data-l="ج">خطأ داخلي في الخادم</span><span data-l="د">اتصال آمن</span></div></li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">أجب</span><span class="cnt">0 / 1</span></div><ol class="qs"><li>في <bdi class="cd" dir="ltr">{&quot;name&quot;: &quot;Mona&quot;, &quot;age&quot;: 15}</bdi> استخرج المفاتيح، وحدد القيمة الرقمية.<div class="ansline"></div><div class="ansline"></div></li></ol></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الدرس 5 من 6</div><div class="bar"><span style="width:83.3%"></span></div><span class="sticker">3-3</span><h2>أساسيات تقنية الواجهة الأمامية</h2><p class="sub">HTML/CSS/JS · HTML الدلالية · التصميم المتجاوب · أطر العمل</p></div><div class="box tip"><span class="lbl">الفكرة في سطر</span><b>HTML يبني، CSS ينسّق، JavaScript يجعلها تفاعلية</b> + HTML الدلالية + التصميم المتجاوب + أطر العمل.</div><table><tr><th>التقنية</th><th>الدور</th><th>التشبيه</th></tr><tr><td><bdi class="cd" dir="ltr">HTML</bdi></td><td>البنية: العناوين والفقرات والصور والروابط</td><td>هيكل المبنى</td></tr><tr><td><bdi class="cd" dir="ltr">CSS</bdi></td><td>المظهر: الألوان والتخطيط والخطوط</td><td>الديكور</td></tr><tr><td><bdi class="cd" dir="ltr">JavaScript</bdi></td><td>السلوك والتفاعلية: الأزرار وتحديث جزء من الشاشة</td><td>الكهرباء والسباكة</td></tr></table><table><tr><th>العنصر الدلالي</th><th>مكانه</th></tr><tr><td><bdi class="cd" dir="ltr">&lt;header&gt;</bdi></td><td>رأس الصفحة</td></tr><tr><td><bdi class="cd" dir="ltr">&lt;nav&gt;</bdi></td><td>قائمة التنقل</td></tr><tr><td><bdi class="cd" dir="ltr">&lt;main&gt;</bdi></td><td>المحتوى الرئيسي</td></tr><tr><td><bdi class="cd" dir="ltr">&lt;footer&gt;</bdi></td><td>تذييل الصفحة</td></tr></table><div class="box def"><span class="lbl">مفاهيم</span><ul><li><b>فوائد HTML الدلالية:</b> تساعد قارئ الشاشة، وفهم محركات البحث (SEO) لكنها <b>لا تضمن</b> ترتيبًا أعلى، و<b>ليست</b> لتسريع الصفحة.</li><li><b>التصميم المتجاوب:</b> التخطيط يتكيف تلقائيًا مع حجم الشاشة (كمبيوتر 3 أعمدة، لوحي عمودان، هاتف عمود). و<b>الأولوية للجوال</b>: مراعاة الشاشات الصغيرة من البداية.</li><li><b>أطر العمل:</b> <bdi class="cd" dir="ltr">React</bdi> مكتبة JavaScript لواجهات من مكونات قابلة لإعادة الاستخدام · <bdi class="cd" dir="ltr">Vue</bdi> بناء تدريجي · <bdi class="cd" dir="ltr">Next.js</bdi> مبني على React ويوفر التوجيه.</li></ul></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">اختر الإجابة الصحيحة</span><span class="cnt">0 / 2</span></div><ol class="qs"><li>التقنية التي تحدّث جزءًا فقط من الشاشة عند الضغط على زر:<div class="opts "><span data-l="أ"><bdi class="cd" dir="ltr">HTML</bdi></span><span data-l="ب"><bdi class="cd" dir="ltr">CSS</bdi></span><span data-l="ج"><bdi class="cd" dir="ltr">JavaScript</bdi></span><span data-l="د"><bdi class="cd" dir="ltr">JSON</bdi></span></div></li><li>إطار عمل مبني على <bdi class="cd" dir="ltr">React</bdi>:<div class="opts "><span data-l="أ"><bdi class="cd" dir="ltr">Vue</bdi></span><span data-l="ب"><bdi class="cd" dir="ltr">Next.js</bdi></span><span data-l="ج"><bdi class="cd" dir="ltr">CSS</bdi></span><span data-l="د"><bdi class="cd" dir="ltr">HTTP</bdi></span></div></li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 2</span></div><ol class="qs"><li class="tf">HTML الدلالية تضمن ظهور الصفحة أولًا في البحث.</li><li class="tf">العنصر <bdi class="cd" dir="ltr">&lt;main&gt;</bdi> للمحتوى الرئيسي.</li></ol></div></section><section class="flow"><div class="lesson-head"><div class="eyebrow">الدرس 6 من 6</div><div class="bar"><span style="width:100.0%"></span></div><span class="sticker">4-1</span><h2>أنواع الوسائط وخصائصها</h2><p class="sub">خصائص الوسائط · القوة والقيود · اختيار الوسيلة</p></div><div class="box tip"><span class="lbl">الفكرة في سطر</span>لكل وسيلة نقاط قوة وقيود؛ نختار حسب <b>الغرض والجمهور</b>، وغالبًا نجمع بين أكثر من وسيلة.</div><table><tr><th>الوسيلة</th><th>المعلومات</th><th>أهم خاصية</th><th>الاتجاه</th></tr><tr><td>التلفزيون</td><td>فيديو + صوت</td><td>جمهور كبير في وقت واحد</td><td>واحد</td></tr><tr><td>الراديو</td><td>صوت</td><td>يُسمع أثناء التنقل</td><td>واحد</td></tr><tr><td>الصحيفة</td><td>نص + صور</td><td>تُقرأ دون إنترنت</td><td>واحد</td></tr><tr><td>الموقع الإلكتروني</td><td>نص + صور + فيديو + صوت</td><td>يُحدّث في أي وقت، معلومات تفصيلية</td><td>واحد أساسًا، وتفاعل عبر النماذج والتعليقات</td></tr><tr><td>وسائل التواصل</td><td>نص + صور + فيديو + صوت</td><td>نشر سريع ومشاركة</td><td>اتجاهين</td></tr></table><table><tr><th>الغرض</th><th>الوسيلة الأنسب</th></tr><tr><td>إعلام عدد كبير في آنٍ واحد</td><td>التلفزيون، الإعلانات، وسائل التواصل</td></tr><tr><td>معلومات تفصيلية</td><td>الموقع الإلكتروني</td></tr><tr><td>أشخاص محددون</td><td>البريد الإلكتروني، الرسائل المباشرة</td></tr><tr><td>التناقل الشفهي</td><td>وسائل التواصل الاجتماعي</td></tr></table><div class="box warn"><span class="lbl">قيود المواقع</span><ul><li>تحتاج معظم الوظائف إلى اتصال بالشبكة.</li><li>غالبًا يجب فتح الموقع لرؤية المحتوى ما لم تُستخدم إشعارات.</li><li>تختلف سرعة العرض حسب الجهاز والشبكة.</li></ul></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الأول</span><span class="qt">حدد الوسيلة: (أ) التلفزيون (ب) الموقع (ج) وسائل التواصل (د) البريد</span><span class="cnt">0 / 4</span></div><ol class="qs"><li>إتاحة المواصفات التفصيلية لمنتج في أي وقت.</li><li>جعل المستخدمين ينشرون المعلومات بالتناقل الشفهي.</li><li>فيديو لعدد كبير من الناس في آنٍ واحد.</li><li>حملة ترويجية مباشرة للعملاء الحاليين.</li></ol></div><div class="qblock"><div class="qhead"><span class="chip">السؤال الثاني</span><span class="qt">ضع علامة (✓) أو (✗)</span><span class="cnt">0 / 2</span></div><ol class="qs"><li class="tf">يمكن عادةً مشاهدة الموقع دون اتصال بالإنترنت.</li><li class="tf">لا توجد وسيلة واحدة هي الأفضل لكل الأغراض.</li></ol></div></section><section class="flow key"><div class="lesson-head green"><div class="eyebrow">صحّح لنفسك</div><div class="bar"><span style="width:100%"></span></div><span class="sticker">✓</span><h2>نموذج الإجابة</h2></div><h3>درس <bdi dir="ltr">2-2</bdi>: تصميم أمان الشبكات</h3><ol class="cols"><li>(ب)</li><li>(ب)</li><li>(ب)</li></ol><ol class="cols"><li>✓</li><li>✗ لا يمنح الثقة تلقائيًا.</li><li>✗ خلف جدار الحماية.</li></ol><ol class="one"><li>الدفاع متعدد الطبقات: تكديس إجراءات أمنية فإذا فشلت طبقة تحمي غيرها. انعدام الثقة: لا ثقة تلقائية لأي مستخدم أو جهاز، والتحقق من الهوية والصلاحيات والسياق عند كل طلب وصول.</li></ol><h3>درس <bdi dir="ltr">2-3</bdi>: الاستجابة للحوادث وإدارة المخاطر</h3><ol class="cols"><li>(ب)</li><li>(ب)</li><li>(ب)</li></ol><ol class="cols"><li>✗ الاستئصال أولًا ثم الاستعادة.</li><li>✓</li><li>✓</li></ol><ol class="one"><li>(أ) 3 × 5 = 15 · (ب) 4 × 2 = 8 ← يُعالج (أ) أولًا.</li></ol><h3>درس <bdi dir="ltr">3-1</bdi>: البنية العامة لتطبيقات الويب</h3><ol class="cols"><li>(أ)</li><li>(ب)</li><li>(ج)</li><li>(ب)</li></ol><ol class="cols"><li>✗ الخلفية هي الوسيط.</li><li>✓</li></ol><h3>درس <bdi dir="ltr">3-2</bdi>: طرق اتصال تطبيقات الويب</h3><ol class="cols"><li>(أ)</li><li>(ج)</li></ol><ol class="one"><li>المفاتيح: name وage. القيمة الرقمية: 15.</li></ol><h3>درس <bdi dir="ltr">3-3</bdi>: أساسيات تقنية الواجهة الأمامية</h3><ol class="cols"><li>(ج)</li><li>(ب)</li></ol><ol class="cols"><li>✗ قد تساعد لكنها لا تضمن.</li><li>✓</li></ol><h3>درس <bdi dir="ltr">4-1</bdi>: أنواع الوسائط وخصائصها</h3><ol class="cols"><li>(ب)</li><li>(ج)</li><li>(أ)</li><li>(د)</li></ol><ol class="cols"><li>✗ يحتاج غالبًا إلى اتصال.</li><li>✓</li></ol></section></body></html>
